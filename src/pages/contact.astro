@@ -327,18 +327,32 @@ const productOptions = [
   </section>
 </BaseLayout>
 
-<!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
 <script>
   // EmailJS Configuration
   const EMAILJS_PUBLIC_KEY = 'qZJl-FQP1CJJqGvNp';
   const EMAILJS_SERVICE_ID = 'service_8527rq8';
   const EMAILJS_TEMPLATE_ID = 'template_e1z7fdh';
 
-  // Initialize EmailJS
-  // @ts-ignore
-  emailjs.init(EMAILJS_PUBLIC_KEY);
+  // Dynamically load EmailJS SDK
+  function loadEmailJS(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if ((window as any).emailjs) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+      script.onload = () => {
+        (window as any).emailjs.init(EMAILJS_PUBLIC_KEY);
+        resolve();
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  // Initialize on page load
+  loadEmailJS().catch(console.error);
 
   const form = document.getElementById('contactForm') as HTMLFormElement;
   const formStatus = document.getElementById('formStatus');
@@ -422,8 +436,9 @@ const productOptions = [
     };
 
     try {
-      // @ts-ignore
-      const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+      // Ensure EmailJS is loaded
+      await loadEmailJS();
+      const response = await (window as any).emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
       
       if (response.status === 200) {
         showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
