@@ -27,33 +27,6 @@ const fullTitle = title === "Home" ? "BRITZMEDI | Aesthetic Medical Device Manuf
 <!DOCTYPE html>
 <html lang="en" class="">
 <head>
-  <!-- Google Consent Mode v2 - Default settings (must be before any Google tags) -->
-  <script is:inline>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    
-    // Check if localhost/development environment
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
-    // Set default consent (denied for production, granted for dev/testing)
-    gtag('consent', 'default', {
-      'ad_storage': isDev ? 'granted' : 'denied',
-      'ad_user_data': isDev ? 'granted' : 'denied',
-      'ad_personalization': isDev ? 'granted' : 'denied',
-      'analytics_storage': isDev ? 'granted' : 'denied',
-      'functionality_storage': isDev ? 'granted' : 'denied',
-      'personalization_storage': isDev ? 'granted' : 'denied',
-      'security_storage': 'granted',
-      'wait_for_update': 500
-    });
-
-    // Enable URL passthrough for conversion modeling
-    gtag('set', 'url_passthrough', true);
-    
-    // Enable ads data redaction when consent denied
-    gtag('set', 'ads_data_redaction', true);
-  </script>
-
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-0G1PVS4XCN"></script>
   <script is:inline>
@@ -62,9 +35,6 @@ const fullTitle = title === "Home" ? "BRITZMEDI | Aesthetic Medical Device Manuf
     gtag('js', new Date());
     gtag('config', 'G-0G1PVS4XCN');
   </script>
-
-  <!-- Consent Manager (GDPR/Cookie Consent Banner) -->
-  <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/be2c22fa62941.js" data-cmp-host="b.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
 
   <!-- Dark Mode Initialization (prevents flash) -->
   <script is:inline>
