@@ -37,8 +37,8 @@ export interface HeroSettings {
 export const heroSettings: HeroSettings = {
   backgroundType: 'gradient', // Options: 'gradient', 'image', 'video'
   
-  // Example image URL (replace with actual image)
-  backgroundImage: '/images/hero-bg.jpg',
+  // Background image URL (updated 2026-01-25)
+  backgroundImage: 'https://image2url.com/r2/default/images/1769272175884-5d54cc18-3101-4164-b160-71043b65d663.png',
   backgroundImageAlt: 'BRITZMEDI Medical Devices',
   
   // Example video URL (replace with actual video)

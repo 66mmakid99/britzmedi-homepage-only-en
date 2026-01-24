@@ -6,7 +6,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -20,5 +23,10 @@
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.3",
+    "@vitest/ui": "^3.2.3",
+    "happy-dom": "^18.0.1"
   }
 }
