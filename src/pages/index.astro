@@ -33,10 +33,11 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
     
     {heroSettings.backgroundType === 'image' && heroSettings.backgroundImage && (
       <div class="absolute inset-0 z-0">
+        {/* Desktop: show full model, Mobile: focus on face */}
         <img 
           src={heroSettings.backgroundImage}
           alt={heroSettings.backgroundImageAlt || 'Hero background'}
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
         />
       </div>
     )}
@@ -64,53 +65,60 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
     
     <!-- Content -->
     <div class="container relative z-20">
-      <div class="py-16 lg:py-28 xl:py-32">
-        <div class="max-w-3xl">
-          <!-- Premium Badge -->
-          <div class:list={[
-            "badge-premium mb-8 opacity-0 animate-fade-up",
-            heroSettings.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white"
-          ]}>
-            {heroSettings.badge}
-          </div>
-          
-          <!-- Heading -->
-          <h1 class:list={[
-            "heading-1 mb-6 opacity-0 animate-fade-up stagger-1",
-            heroSettings.backgroundType !== 'gradient' && "!text-white"
-          ]}>
-            {heroSettings.headline}<br />
-            <span class:list={[
-              heroSettings.backgroundType === 'gradient' 
-                ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
-                : "text-primary-400"
-            ]}>{heroSettings.highlightText}</span><br />
-            {heroSettings.subheadline}
-          </h1>
-          
-          <!-- Description -->
-          <p class:list={[
-            "body-large max-w-xl mb-10 opacity-0 animate-fade-up stagger-2",
-            heroSettings.backgroundType !== 'gradient' && "!text-slate-200"
-          ]}>
-            {heroSettings.description}
-          </p>
-          
-          <!-- CTAs -->
-          <div class="flex flex-wrap gap-4 opacity-0 animate-fade-up stagger-3">
-            <a href={heroSettings.primaryCTA.href} class="btn-primary group">
-              {heroSettings.primaryCTA.text}
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </a>
-            <a href={heroSettings.secondaryCTA.href} class:list={[
-              "btn-secondary",
-              heroSettings.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20"
+      <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
+        {/* Grid layout: Text left, Image space right on desktop */}
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Text Content - Left side */}
+          <div class="order-2 lg:order-1">
+            <!-- Premium Badge - Positioned to not overlap face on mobile -->
+            <div class:list={[
+              "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
+              heroSettings.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
             ]}>
-              {heroSettings.secondaryCTA.text}
-            </a>
+              {heroSettings.badge}
+            </div>
+            
+            <!-- Heading -->
+            <h1 class:list={[
+              "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
+              heroSettings.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
+            ]}>
+              {heroSettings.headline}<br />
+              <span class:list={[
+                heroSettings.backgroundType === 'gradient' 
+                  ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
+                  : "text-primary-400"
+              ]}>{heroSettings.highlightText}</span><br />
+              {heroSettings.subheadline}
+            </h1>
+            
+            <!-- Description -->
+            <p class:list={[
+              "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
+              heroSettings.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
+            ]}>
+              {heroSettings.description}
+            </p>
+            
+            <!-- CTAs -->
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
+              <a href={heroSettings.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
+                {heroSettings.primaryCTA.text}
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+              <a href={heroSettings.secondaryCTA.href} class:list={[
+                "btn-secondary justify-center sm:justify-start",
+                heroSettings.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
+              ]}>
+                {heroSettings.secondaryCTA.text}
+              </a>
+            </div>
           </div>
+          
+          {/* Spacer for image area on desktop */}
+          <div class="order-1 lg:order-2 hidden lg:block"></div>
         </div>
       </div>
     </div>
