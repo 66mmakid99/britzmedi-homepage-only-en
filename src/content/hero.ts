@@ -35,7 +35,7 @@ export interface HeroSettings {
 
 // Default hero settings (can be overridden by CMS)
 export const heroSettings: HeroSettings = {
-  backgroundType: 'gradient', // Options: 'gradient', 'image', 'video'
+  backgroundType: 'image', // Options: 'gradient', 'image', 'video'
   
   // Background image URL (updated 2026-01-25)
   backgroundImage: 'https://image2url.com/r2/default/images/1769272175884-5d54cc18-3101-4164-b160-71043b65d663.png',
@@ -46,7 +46,7 @@ export const heroSettings: HeroSettings = {
   backgroundVideoPoster: '/images/hero-poster.jpg',
   
   // Overlay
-  overlayOpacity: 60,
+  overlayOpacity: 50,
   overlayColor: 'dark',
   
   // Content
