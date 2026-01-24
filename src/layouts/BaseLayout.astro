@@ -32,14 +32,17 @@ const fullTitle = title === "Home" ? "BRITZMEDI | Aesthetic Medical Device Manuf
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     
-    // Set default consent to denied (GDPR compliant)
+    // Check if localhost/development environment
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // Set default consent (denied for production, granted for dev/testing)
     gtag('consent', 'default', {
-      'ad_storage': 'denied',
-      'ad_user_data': 'denied',
-      'ad_personalization': 'denied',
-      'analytics_storage': 'denied',
-      'functionality_storage': 'denied',
-      'personalization_storage': 'denied',
+      'ad_storage': isDev ? 'granted' : 'denied',
+      'ad_user_data': isDev ? 'granted' : 'denied',
+      'ad_personalization': isDev ? 'granted' : 'denied',
+      'analytics_storage': isDev ? 'granted' : 'denied',
+      'functionality_storage': isDev ? 'granted' : 'denied',
+      'personalization_storage': isDev ? 'granted' : 'denied',
       'security_storage': 'granted',
       'wait_for_update': 500
     });
