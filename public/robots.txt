@@ -1,0 +1,15 @@
+# Robots.txt for BRITZMEDI Global Website
+# https://britzmedi.com
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://britzmedi.com/sitemap.xml
+
+# Crawl-delay (optional, for polite crawling)
+Crawl-delay: 1
+
+# Disallow admin/private areas (if any)
+Disallow: /api/
+Disallow: /_astro/

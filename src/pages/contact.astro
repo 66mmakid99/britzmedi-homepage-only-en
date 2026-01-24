@@ -19,6 +19,30 @@ const productOptions = [
   { value: 'lumino-wave', label: 'LUMINO WAVE' },
   { value: 'multiple', label: 'Multiple Products' },
 ];
+
+// Country codes for phone number
+const countryCodes = [
+  { code: '+1', country: 'United States / Canada', format: '(XXX) XXX-XXXX' },
+  { code: '+44', country: 'United Kingdom', format: 'XXXX XXXXXX' },
+  { code: '+49', country: 'Germany', format: 'XXX XXXXXXXX' },
+  { code: '+33', country: 'France', format: 'X XX XX XX XX' },
+  { code: '+39', country: 'Italy', format: 'XXX XXX XXXX' },
+  { code: '+34', country: 'Spain', format: 'XXX XXX XXX' },
+  { code: '+81', country: 'Japan', format: 'XX-XXXX-XXXX' },
+  { code: '+82', country: 'South Korea', format: 'XX-XXXX-XXXX' },
+  { code: '+86', country: 'China', format: 'XXX XXXX XXXX' },
+  { code: '+852', country: 'Hong Kong', format: 'XXXX XXXX' },
+  { code: '+65', country: 'Singapore', format: 'XXXX XXXX' },
+  { code: '+61', country: 'Australia', format: 'XXX XXX XXX' },
+  { code: '+55', country: 'Brazil', format: 'XX XXXXX-XXXX' },
+  { code: '+52', country: 'Mexico', format: 'XX XXXX XXXX' },
+  { code: '+91', country: 'India', format: 'XXXXX XXXXX' },
+  { code: '+971', country: 'UAE', format: 'XX XXX XXXX' },
+  { code: '+966', country: 'Saudi Arabia', format: 'XX XXX XXXX' },
+  { code: '+7', country: 'Russia', format: 'XXX XXX-XX-XX' },
+  { code: '+27', country: 'South Africa', format: 'XX XXX XXXX' },
+  { code: '+90', country: 'Turkey', format: 'XXX XXX XXXX' },
+];
 ---
 
 <BaseLayout 
@@ -175,29 +199,56 @@ const productOptions = [
                 <!-- Email & Phone -->
                 <div class="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">
+                    <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                       Email Address <span class="text-red-500">*</span>
                     </label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      name="email" 
-                      required
-                      placeholder="you@company.com"
-                      class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                    />
+                    <div class="relative">
+                      <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required
+                        placeholder="you@company.com"
+                        class="w-full px-4 py-3.5 pr-12 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-shadow"
+                      />
+                      <div id="emailStatus" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
+                        <svg id="emailValid" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <svg id="emailInvalid" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <svg id="emailLoading" class="w-5 h-5 text-slate-400 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <p id="emailError" class="hidden mt-1.5 text-xs text-red-500"></p>
                   </div>
                   <div>
-                    <label for="phone" class="block text-sm font-semibold text-slate-700 mb-2">
+                    <label for="phone" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                       Phone Number
                     </label>
-                    <input 
-                      type="tel" 
-                      id="phone" 
-                      name="phone"
-                      placeholder="+1 (555) 000-0000"
-                      class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                    />
+                    <div class="flex gap-2">
+                      <select 
+                        id="countryCode" 
+                        name="countryCode"
+                        class="w-32 shrink-0 px-3 py-3.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm transition-shadow"
+                      >
+                        {countryCodes.map((cc) => (
+                          <option value={cc.code} title={cc.country}>{cc.code}</option>
+                        ))}
+                      </select>
+                      <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone"
+                        placeholder="Phone number"
+                        class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-shadow"
+                      />
+                    </div>
+                    <p id="phoneFormat" class="mt-1.5 text-xs text-slate-500">Format: (XXX) XXX-XXXX</p>
                   </div>
                 </div>
                 
@@ -335,6 +386,129 @@ const productOptions = [
   // Initialize on page load
   loadEmailJS().catch(console.error);
 
+  // Disposable email domains list (common ones)
+  const disposableEmailDomains = [
+    'tempmail.com', 'temp-mail.org', 'guerrillamail.com', 'mailinator.com',
+    'throwaway.email', '10minutemail.com', 'trashmail.com', 'fakeinbox.com',
+    'yopmail.com', 'maildrop.cc', 'dispostable.com', 'getnada.com',
+    'mohmal.com', 'tempail.com', 'tempmailaddress.com', 'burnermail.io',
+    'sharklasers.com', 'guerrillamailblock.com', 'tempinbox.com'
+  ];
+
+  // Email validation function
+  function validateEmail(email: string): { valid: boolean; message?: string } {
+    // Basic format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { valid: false, message: 'Please enter a valid email address.' };
+    }
+    
+    // Check for disposable email domains
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (disposableEmailDomains.includes(domain)) {
+      return { valid: false, message: 'Please use a business or personal email address. Temporary emails are not accepted.' };
+    }
+    
+    // Check for common typos in popular domains
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
+    const typoPatterns: Record<string, string[]> = {
+      'gmail.com': ['gmai.com', 'gmial.com', 'gamil.com', 'gmal.com', 'gmail.co', 'gmail.cm'],
+      'yahoo.com': ['yaho.com', 'yahooo.com', 'yahoo.co', 'yahoo.cm'],
+      'hotmail.com': ['hotmai.com', 'hotmal.com', 'hotmail.co', 'hotmail.cm'],
+      'outlook.com': ['outlok.com', 'outloo.com', 'outlook.co', 'outlook.cm'],
+    };
+    
+    for (const [correct, typos] of Object.entries(typoPatterns)) {
+      if (typos.includes(domain)) {
+        return { valid: false, message: `Did you mean ${email.split('@')[0]}@${correct}?` };
+      }
+    }
+    
+    return { valid: true };
+  }
+
+  // Email validation UI elements
+  const emailInput = document.getElementById('email') as HTMLInputElement;
+  const emailStatus = document.getElementById('emailStatus');
+  const emailValid = document.getElementById('emailValid');
+  const emailInvalid = document.getElementById('emailInvalid');
+  const emailLoading = document.getElementById('emailLoading');
+  const emailError = document.getElementById('emailError');
+
+  let emailValidationTimeout: number;
+  let isEmailValid = false;
+
+  emailInput?.addEventListener('input', () => {
+    clearTimeout(emailValidationTimeout);
+    const email = emailInput.value.trim();
+    
+    if (!email) {
+      emailStatus?.classList.add('hidden');
+      emailError?.classList.add('hidden');
+      isEmailValid = false;
+      return;
+    }
+    
+    emailValidationTimeout = window.setTimeout(() => {
+      emailStatus?.classList.remove('hidden');
+      emailLoading?.classList.remove('hidden');
+      emailValid?.classList.add('hidden');
+      emailInvalid?.classList.add('hidden');
+      
+      // Simulate brief loading for UX
+      setTimeout(() => {
+        emailLoading?.classList.add('hidden');
+        const result = validateEmail(email);
+        
+        if (result.valid) {
+          emailValid?.classList.remove('hidden');
+          emailError?.classList.add('hidden');
+          emailInput.classList.remove('border-red-500');
+          emailInput.classList.add('border-green-500');
+          isEmailValid = true;
+        } else {
+          emailInvalid?.classList.remove('hidden');
+          emailError?.classList.remove('hidden');
+          if (emailError) emailError.textContent = result.message || 'Invalid email';
+          emailInput.classList.remove('border-green-500');
+          emailInput.classList.add('border-red-500');
+          isEmailValid = false;
+        }
+      }, 300);
+    }, 500);
+  });
+
+  // Country code format update
+  const countryCodeSelect = document.getElementById('countryCode') as HTMLSelectElement;
+  const phoneFormatText = document.getElementById('phoneFormat');
+  const phoneFormats: Record<string, string> = {
+    '+1': '(XXX) XXX-XXXX',
+    '+44': 'XXXX XXXXXX',
+    '+49': 'XXX XXXXXXXX',
+    '+33': 'X XX XX XX XX',
+    '+39': 'XXX XXX XXXX',
+    '+34': 'XXX XXX XXX',
+    '+81': 'XX-XXXX-XXXX',
+    '+82': 'XX-XXXX-XXXX',
+    '+86': 'XXX XXXX XXXX',
+    '+852': 'XXXX XXXX',
+    '+65': 'XXXX XXXX',
+    '+61': 'XXX XXX XXX',
+    '+55': 'XX XXXXX-XXXX',
+    '+52': 'XX XXXX XXXX',
+    '+91': 'XXXXX XXXXX',
+    '+971': 'XX XXX XXXX',
+    '+966': 'XX XXX XXXX',
+    '+7': 'XXX XXX-XX-XX',
+    '+27': 'XX XXX XXXX',
+    '+90': 'XXX XXX XXXX',
+  };
+
+  countryCodeSelect?.addEventListener('change', () => {
+    const format = phoneFormats[countryCodeSelect.value] || 'Enter phone number';
+    if (phoneFormatText) phoneFormatText.textContent = `Format: ${format}`;
+  });
+
   const form = document.getElementById('contactForm') as HTMLFormElement;
   const formStatus = document.getElementById('formStatus');
   const submitBtn = document.getElementById('submitBtn');
@@ -397,6 +571,14 @@ const productOptions = [
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Validate email before submission
+    const emailValue = (document.getElementById('email') as HTMLInputElement)?.value?.trim();
+    const emailValidation = validateEmail(emailValue || '');
+    if (!emailValidation.valid) {
+      showStatus('error', emailValidation.message || 'Please enter a valid email address.');
+      return;
+    }
+    
     setLoading(true);
     
     const formData = new FormData(form);
@@ -404,13 +586,16 @@ const productOptions = [
     // Get select labels instead of values for better readability
     const inquiryTypeSelect = document.getElementById('inquiryType') as HTMLSelectElement;
     const productSelect = document.getElementById('product') as HTMLSelectElement;
+    const countryCodeVal = (document.getElementById('countryCode') as HTMLSelectElement)?.value || '';
+    const phoneVal = formData.get('phone') as string || '';
+    const fullPhone = phoneVal ? `${countryCodeVal} ${phoneVal}` : 'Not provided';
     
     const templateParams = {
       inquiry_type: inquiryTypeSelect.options[inquiryTypeSelect.selectedIndex]?.text || '',
       from_name: formData.get('name'),
       company: formData.get('company'),
       from_email: formData.get('email'),
-      phone: formData.get('phone') || 'Not provided',
+      phone: fullPhone,
       country: formData.get('country'),
       product_interest: productSelect.options[productSelect.selectedIndex]?.text || 'Not specified',
       message: formData.get('message'),

@@ -64,6 +64,27 @@
   --radius-2xl: 1.25rem;
 }
 
+/* Dark Mode Variables */
+:root {
+  --bg-primary: #fafbfc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --text-primary: var(--color-slate-900);
+  --text-secondary: var(--color-slate-600);
+  --text-tertiary: var(--color-slate-500);
+  --border-color: rgba(226, 232, 240, 0.8);
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --border-color: rgba(71, 85, 105, 0.5);
+}
+
 /* Base Styles */
 html {
   scroll-behavior: smooth;
@@ -71,11 +92,96 @@ html {
 
 body {
   font-family: var(--font-sans);
-  color: var(--color-slate-800);
-  background-color: #fafbfc;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Mode Overrides */
+.dark body {
+  background-color: var(--bg-primary);
+}
+
+.dark .heading-1,
+.dark .heading-2,
+.dark .heading-3 {
+  color: var(--text-primary);
+}
+
+.dark .body-large,
+.dark .body-base {
+  color: var(--text-secondary);
+}
+
+.dark .body-small {
+  color: var(--text-tertiary);
+}
+
+.dark .card-premium {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark .bg-white {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.dark .text-slate-900 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-slate-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .bg-gradient-hero {
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(12, 142, 230, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.dark .bg-gradient-section {
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-secondary) 100%);
+}
+
+.dark .glass {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.dark header .absolute {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(71, 85, 105, 0.5) !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--text-tertiary);
 }
 
 /* Premium Typography */

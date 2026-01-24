@@ -25,8 +25,18 @@ const fullTitle = title === "Home" ? "BRITZMEDI | Aesthetic Medical Device Manuf
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
+  <!-- Dark Mode Initialization (prevents flash) -->
+  <script is:inline>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
@@ -79,9 +89,10 @@ const fullTitle = title === "Home" ? "BRITZMEDI | Aesthetic Medical Device Manuf
     "foundingDate": "2017-10-23",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "1F, 2, Gisan-ro 87beon-gil",
-      "addressLocality": "Hwaseong-si",
+      "streetAddress": "1211, 388, Dunchon-daero, Jungwon-gu",
+      "addressLocality": "Seongnam-si",
       "addressRegion": "Gyeonggi-do",
+      "postalCode": "13403",
       "addressCountry": "KR"
     },
     "contactPoint": {

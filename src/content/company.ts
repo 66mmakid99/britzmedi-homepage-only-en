@@ -7,11 +7,11 @@ export const company = {
   establishment: "October 23, 2017",
   
   address: {
-    full: "1F, 2, Gisan-ro 87beon-gil, Hwaseong-si, Gyeonggi-do, Republic of Korea",
-    city: "Hwaseong-si",
+    full: "1211, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea",
+    city: "Seongnam-si",
     province: "Gyeonggi-do",
     country: "Republic of Korea",
-    postalCode: "",
+    postalCode: "13403",
   },
   
   contact: {

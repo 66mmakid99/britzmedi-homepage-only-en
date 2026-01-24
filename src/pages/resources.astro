@@ -1,0 +1,258 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { resources, resourceCategories, getResourcesByCategory } from '../content/resources';
+
+const pageDescription = "Download BRITZMEDI product brochures, technical documents, marketing materials, certificates, and videos. Access resources for TORR RF, ULBLANC, NEWCHAE SHOT, and more.";
+
+// Icon mapping for file types
+const typeIcons: Record<string, string> = {
+  pdf: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+  ppt: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+  video: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
+  image: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+  brochure: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+};
+
+const typeColors: Record<string, string> = {
+  pdf: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
+  ppt: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
+  video: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+  image: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+  brochure: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+};
+---
+
+<BaseLayout 
+  title="Resources"
+  description={pageDescription}
+  keywords={["BRITZMEDI downloads", "product brochures", "technical documents", "medical device resources", "TORR RF brochure"]}
+>
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-hero py-16 lg:py-24">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
+    <div class="container relative">
+      <div class="max-w-3xl">
+        <span class="label mb-4">Downloads</span>
+        <h1 class="heading-1 mb-6">
+          Resource<br />
+          <span class="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">Center</span>
+        </h1>
+        <p class="body-large">
+          Access product brochures, technical documents, marketing materials, 
+          certificates, and videos. All resources are available for download.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Filter -->
+  <section class="sticky top-16 lg:top-20 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200/50 dark:border-slate-700/50">
+    <div class="container">
+      <nav class="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
+        <button 
+          class="resource-filter-btn active shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+          data-filter="all"
+        >
+          All Resources
+        </button>
+        {resourceCategories.map((category) => (
+          <button 
+            class="resource-filter-btn shrink-0 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+            data-filter={category.id}
+          >
+            {category.name}
+          </button>
+        ))}
+      </nav>
+    </div>
+  </section>
+
+  <!-- Resources Grid -->
+  <section class="section bg-white dark:bg-slate-900">
+    <div class="container">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="resources-grid">
+        {resources.map((resource) => (
+          <div 
+            class="resource-card card-premium overflow-hidden group"
+            data-category={resource.category}
+          >
+            <!-- Thumbnail -->
+            <div class="aspect-video bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+              {resource.thumbnail ? (
+                <img 
+                  src={resource.thumbnail} 
+                  alt={resource.title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class={`w-16 h-16 rounded-2xl flex items-center justify-center ${typeColors[resource.type]}`}>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={typeIcons[resource.type]} />
+                    </svg>
+                  </div>
+                </div>
+              )}
+              
+              <!-- Type Badge -->
+              <div class="absolute top-3 left-3">
+                <span class={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold uppercase rounded-md ${typeColors[resource.type]}`}>
+                  {resource.type}
+                </span>
+              </div>
+              
+              <!-- Product Badge -->
+              {resource.product && (
+                <div class="absolute top-3 right-3">
+                  <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 rounded-md backdrop-blur-sm">
+                    {resource.product}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            <!-- Content -->
+            <div class="p-5">
+              <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                {resource.title}
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">
+                {resource.description}
+              </p>
+              
+              <!-- Meta -->
+              <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-500 mb-4">
+                {resource.fileSize && (
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                    </svg>
+                    {resource.fileSize}
+                  </span>
+                )}
+                {resource.language && (
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    {resource.language}
+                  </span>
+                )}
+              </div>
+              
+              <!-- Download Button -->
+              <a 
+                href={resource.driveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40 rounded-xl transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <!-- Empty State -->
+      <div id="no-resources" class="hidden py-16 text-center">
+        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">No resources found</h3>
+        <p class="text-slate-600 dark:text-slate-400">Try selecting a different category.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Request Resources CTA -->
+  <section class="section bg-gradient-section dark:bg-slate-800">
+    <div class="container">
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 class="heading-2 mb-4">Need Additional Materials?</h2>
+        <p class="body-large mb-8">
+          Looking for specific documents, custom presentations, or localized materials? 
+          Contact our team and we'll prepare the resources you need.
+        </p>
+        <a href="/contact" class="btn-primary">
+          Request Materials
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Resource filtering
+  const filterButtons = document.querySelectorAll('.resource-filter-btn');
+  const resourceCards = document.querySelectorAll('.resource-card');
+  const noResourcesMessage = document.getElementById('no-resources');
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const filter = button.getAttribute('data-filter');
+      
+      // Update active state
+      filterButtons.forEach(btn => {
+        btn.classList.remove('active', 'bg-primary-100', 'text-primary-700', 'dark:bg-primary-900/30', 'dark:text-primary-400');
+        btn.classList.add('text-slate-600', 'dark:text-slate-400');
+      });
+      button.classList.add('active', 'bg-primary-100', 'text-primary-700', 'dark:bg-primary-900/30', 'dark:text-primary-400');
+      button.classList.remove('text-slate-600', 'dark:text-slate-400');
+      
+      // Filter resources
+      let visibleCount = 0;
+      resourceCards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        if (filter === 'all' || category === filter) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+      
+      // Show/hide empty state
+      if (noResourcesMessage) {
+        if (visibleCount === 0) {
+          noResourcesMessage.classList.remove('hidden');
+        } else {
+          noResourcesMessage.classList.add('hidden');
+        }
+      }
+    });
+  });
+  
+  // Initialize first button as active
+  const firstButton = filterButtons[0] as HTMLElement;
+  if (firstButton) {
+    firstButton.classList.add('bg-primary-100', 'text-primary-700', 'dark:bg-primary-900/30', 'dark:text-primary-400');
+    firstButton.classList.remove('text-slate-600', 'dark:text-slate-400');
+  }
+</script>
+
+<style>
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { company, milestones, coreTechnologies } from '../content/company';
 import { products, getFeaturedProducts } from '../content/products';
 import { certifications, qualitySummary } from '../content/certifications';
+import { heroSettings } from '../content/hero';
 
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, 3);
 ---
@@ -12,46 +13,102 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
   description="BRITZMEDI is a leading Korean manufacturer of FDA-cleared aesthetic medical devices. Discover TORR RF and innovative skincare technology."
   keywords={["BRITZMEDI", "aesthetic medical device", "TORR RF", "FDA cleared", "Korean medical device", "RF technology", "skin tightening"]}
 >
-  <!-- Hero Section -->
-  <section class="relative overflow-hidden bg-gradient-hero">
-    <!-- Decorative Elements -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
-      <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
-    </div>
+  <!-- Hero Section with Video/Image/Gradient Background Support -->
+  <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+    <!-- Background Layer -->
+    {heroSettings.backgroundType === 'video' && heroSettings.backgroundVideo && (
+      <div class="absolute inset-0 z-0">
+        <video 
+          autoplay 
+          muted 
+          loop 
+          playsinline
+          poster={heroSettings.backgroundVideoPoster}
+          class="w-full h-full object-cover"
+        >
+          <source src={heroSettings.backgroundVideo} type="video/mp4" />
+        </video>
+      </div>
+    )}
     
-    <div class="container relative">
+    {heroSettings.backgroundType === 'image' && heroSettings.backgroundImage && (
+      <div class="absolute inset-0 z-0">
+        <img 
+          src={heroSettings.backgroundImage}
+          alt={heroSettings.backgroundImageAlt || 'Hero background'}
+          class="w-full h-full object-cover"
+        />
+      </div>
+    )}
+    
+    {heroSettings.backgroundType === 'gradient' && (
+      <div class="absolute inset-0 z-0 bg-gradient-hero">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
+      </div>
+    )}
+    
+    <!-- Overlay (for image/video backgrounds) -->
+    {heroSettings.backgroundType !== 'gradient' && (
+      <div 
+        class:list={[
+          "absolute inset-0 z-10",
+          heroSettings.overlayColor === 'dark' && "bg-slate-900",
+          heroSettings.overlayColor === 'light' && "bg-white",
+          heroSettings.overlayColor === 'primary' && "bg-primary-900"
+        ]}
+        style={`opacity: ${heroSettings.overlayOpacity / 100}`}
+      />
+    )}
+    
+    <!-- Content -->
+    <div class="container relative z-20">
       <div class="py-16 lg:py-28 xl:py-32">
         <div class="max-w-3xl">
           <!-- Premium Badge -->
-          <div class="badge-premium mb-8 opacity-0 animate-fade-up">
-            FDA 510(k) Cleared Medical Devices
+          <div class:list={[
+            "badge-premium mb-8 opacity-0 animate-fade-up",
+            heroSettings.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white"
+          ]}>
+            {heroSettings.badge}
           </div>
           
           <!-- Heading -->
-          <h1 class="heading-1 mb-6 opacity-0 animate-fade-up stagger-1">
-            Innovative Aesthetic<br />
-            <span class="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent">Medical Technology</span><br />
-            from Korea
+          <h1 class:list={[
+            "heading-1 mb-6 opacity-0 animate-fade-up stagger-1",
+            heroSettings.backgroundType !== 'gradient' && "!text-white"
+          ]}>
+            {heroSettings.headline}<br />
+            <span class:list={[
+              heroSettings.backgroundType === 'gradient' 
+                ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
+                : "text-primary-400"
+            ]}>{heroSettings.highlightText}</span><br />
+            {heroSettings.subheadline}
           </h1>
           
           <!-- Description -->
-          <p class="body-large max-w-xl mb-10 opacity-0 animate-fade-up stagger-2">
-            Since 2017, BRITZMEDI has been pioneering advanced RF technology and skincare solutions. 
-            Our FDA-cleared devices deliver safe, effective treatments trusted by clinics worldwide.
+          <p class:list={[
+            "body-large max-w-xl mb-10 opacity-0 animate-fade-up stagger-2",
+            heroSettings.backgroundType !== 'gradient' && "!text-slate-200"
+          ]}>
+            {heroSettings.description}
           </p>
           
           <!-- CTAs -->
           <div class="flex flex-wrap gap-4 opacity-0 animate-fade-up stagger-3">
-            <a href="/products" class="btn-primary group">
-              Explore Products
+            <a href={heroSettings.primaryCTA.href} class="btn-primary group">
+              {heroSettings.primaryCTA.text}
               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </a>
-            <a href="/contact" class="btn-secondary">
-              Contact Sales
+            <a href={heroSettings.secondaryCTA.href} class:list={[
+              "btn-secondary",
+              heroSettings.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20"
+            ]}>
+              {heroSettings.secondaryCTA.text}
             </a>
           </div>
         </div>
@@ -59,7 +116,10 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
     </div>
     
     <!-- Bottom gradient fade -->
-    <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
+    <div class:list={[
+      "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
+      heroSettings.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
+    ]}></div>
   </section>
 
   <!-- Trust Badges Section -->
