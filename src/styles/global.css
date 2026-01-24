@@ -1,0 +1,209 @@
+@import "tailwindcss";
+
+/* Custom Design Tokens for Medical Device Brand */
+@theme {
+  /* Brand Colors - Professional Medical Aesthetic */
+  --color-primary-50: #f0f7ff;
+  --color-primary-100: #e0effe;
+  --color-primary-200: #bae0fd;
+  --color-primary-300: #7cc8fb;
+  --color-primary-400: #36aaf5;
+  --color-primary-500: #0c8ee6;
+  --color-primary-600: #0070c4;
+  --color-primary-700: #015a9f;
+  --color-primary-800: #064c83;
+  --color-primary-900: #0b406d;
+  --color-primary-950: #072849;
+
+  /* Accent - Subtle Gold for Premium Feel */
+  --color-accent-50: #fdfaf3;
+  --color-accent-100: #f9f1de;
+  --color-accent-200: #f2e1bc;
+  --color-accent-300: #e9cb8f;
+  --color-accent-400: #deb05f;
+  --color-accent-500: #d49a42;
+  --color-accent-600: #c58235;
+  --color-accent-700: #a4662d;
+  --color-accent-800: #85522b;
+  --color-accent-900: #6d4426;
+  --color-accent-950: #3d2212;
+
+  /* Neutral - Clean Medical Gray Scale */
+  --color-slate-25: #fcfcfd;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Spacing */
+  --spacing-section: 6rem;
+  --spacing-section-lg: 8rem;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-slate-800);
+  background-color: white;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Utilities */
+.heading-1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-slate-900);
+}
+
+.heading-2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--color-slate-900);
+}
+
+.heading-3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-slate-900);
+}
+
+.body-large {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: var(--color-slate-600);
+}
+
+.body-base {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-slate-600);
+}
+
+.body-small {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-slate-500);
+}
+
+/* Label/Badge Style */
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-primary-600);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Section Spacing */
+.section {
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding-top: var(--spacing-section-lg);
+    padding-bottom: var(--spacing-section-lg);
+  }
+}
+
+/* Subtle Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+/* Focus Styles for Accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-slate-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-400);
+}
+
+/* Selection Color */
+::selection {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-900);
+}

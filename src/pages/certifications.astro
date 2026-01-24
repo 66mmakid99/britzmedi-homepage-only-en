@@ -1,0 +1,278 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { certifications, technicalStandards, regulatoryRoadmap, fdaDisclaimer, qualitySummary } from '../content/certifications';
+
+const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA 510(k) cleared, ISO 13485:2016 certified, GMP manufacturing. View our complete quality credentials.";
+---
+
+<BaseLayout 
+  title="Certifications"
+  description={pageDescription}
+  keywords={["BRITZMEDI certifications", "FDA 510k", "ISO 13485", "GMP", "medical device certification", "regulatory compliance"]}
+>
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
+    <div class="container">
+      <div class="max-w-3xl">
+        <span class="label mb-3 block">Quality & Compliance</span>
+        <h1 class="heading-1 mb-6">
+          Certifications &<br />
+          <span class="text-primary-600">Regulatory Status</span>
+        </h1>
+        <p class="body-large">
+          {qualitySummary.description}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quality Highlights -->
+  <section class="py-12 bg-white border-b border-slate-100">
+    <div class="container">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+        {qualitySummary.highlights.map((highlight) => (
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-slate-700">{highlight}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications Grid -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="max-w-2xl mb-12">
+        <h2 class="heading-2 mb-4">Quality & Regulatory Certifications</h2>
+        <p class="body-large">
+          Our comprehensive certifications demonstrate our commitment to quality and patient safety.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {certifications.map((cert) => (
+          <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-primary-200 hover:shadow-md transition-all">
+            <!-- Status Badge -->
+            <div class="flex items-center justify-between mb-4">
+              <span class:list={[
+                "inline-flex items-center px-3 py-1 text-xs font-medium rounded-full",
+                cert.status === 'certified' || cert.status === 'cleared'
+                  ? "bg-green-50 text-green-700"
+                  : cert.status === 'registered'
+                    ? "bg-blue-50 text-blue-700"
+                    : cert.status === 'in-preparation'
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-slate-100 text-slate-600"
+              ]}>
+                {cert.status === 'certified' && 'Certified'}
+                {cert.status === 'cleared' && 'Cleared'}
+                {cert.status === 'registered' && 'Registered'}
+                {cert.status === 'in-preparation' && 'In Preparation'}
+                {cert.status === 'planned' && 'Planned'}
+              </span>
+              <span class="text-xs text-slate-500">{cert.region}</span>
+            </div>
+            
+            <!-- Certification Name -->
+            <h3 class="text-xl font-semibold text-slate-900 mb-1">{cert.name}</h3>
+            <p class="text-sm text-slate-500 mb-4">{cert.fullName}</p>
+            
+            <!-- Description -->
+            <p class="body-small mb-4">{cert.description}</p>
+            
+            <!-- Details -->
+            <div class="space-y-2 pt-4 border-t border-slate-100">
+              {cert.certificateNo && (
+                <div class="flex justify-between text-sm">
+                  <span class="text-slate-500">Certificate No.</span>
+                  <span class="text-slate-900 font-medium">{cert.certificateNo}</span>
+                </div>
+              )}
+              {cert.validUntil && (
+                <div class="flex justify-between text-sm">
+                  <span class="text-slate-500">Valid Until</span>
+                  <span class="text-slate-900 font-medium">{cert.validUntil}</span>
+                </div>
+              )}
+              {cert.products && (
+                <div class="text-sm">
+                  <span class="text-slate-500 block mb-1">Products:</span>
+                  <div class="flex flex-wrap gap-1">
+                    {cert.products.map((p) => (
+                      <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">{p}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Standards -->
+  <section class="section bg-slate-50">
+    <div class="container">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div>
+          <span class="label mb-3 block">Compliance</span>
+          <h2 class="heading-2 mb-4">Technical Safety Standards</h2>
+          <p class="body-large mb-8">
+            Our devices are designed and tested to meet rigorous international safety standards, 
+            as verified during FDA 510(k) and MFDS review processes.
+          </p>
+          
+          <div class="bg-white rounded-xl p-6 border border-slate-100">
+            <h3 class="font-semibold text-slate-900 mb-4">Power Requirements</h3>
+            <div class="space-y-3 text-sm">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Voltage</span>
+                <span class="text-slate-900">100-240 VAC, 50/60 Hz (Universal)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Protection Class</span>
+                <span class="text-slate-900">Class I, Type BF Applied Part</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          {technicalStandards.map((standard) => (
+            <div class="bg-white rounded-xl p-6 border border-slate-100">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded">{standard.standard}</span>
+                    <h3 class="font-semibold text-slate-900">{standard.name}</h3>
+                  </div>
+                  <p class="body-small">{standard.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Global Regulatory Roadmap -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="label mb-3 block">Global Expansion</span>
+        <h2 class="heading-2 mb-4">Regulatory Roadmap</h2>
+        <p class="body-large">
+          Our ongoing efforts to bring BRITZMEDI products to markets worldwide.
+        </p>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="text-left p-4 font-semibold text-slate-900">Region / Agency</th>
+              <th class="text-left p-4 font-semibold text-slate-900">Product</th>
+              <th class="text-left p-4 font-semibold text-slate-900">Status</th>
+              <th class="text-left p-4 font-semibold text-slate-900">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {regulatoryRoadmap.flatMap((region) => 
+              region.products.map((product, idx) => (
+                <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                  {idx === 0 && (
+                    <td class="p-4 font-medium text-slate-900" rowspan={region.products.length}>
+                      {region.region}
+                    </td>
+                  )}
+                  <td class="p-4 text-slate-700">{product.name}</td>
+                  <td class="p-4">
+                    <span class:list={[
+                      "inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full",
+                      product.status.includes('Cleared') || product.status.includes('Approved')
+                        ? "bg-green-50 text-green-700"
+                        : product.status.includes('Review')
+                          ? "bg-amber-50 text-amber-700"
+                          : product.status.includes('Preparation')
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-slate-100 text-slate-600"
+                    ]}>
+                      {product.status}
+                    </span>
+                    {product.target && (
+                      <span class="text-xs text-slate-500 ml-2">Target: {product.target}</span>
+                    )}
+                  </td>
+                  {idx === 0 && (
+                    <td class="p-4 text-sm text-slate-500" rowspan={region.products.length}>
+                      {region.note || '-'}
+                    </td>
+                  )}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FDA Disclaimer -->
+  <section class="py-12 bg-slate-50">
+    <div class="container">
+      <div class="max-w-3xl mx-auto bg-white rounded-xl p-6 lg:p-8 border border-slate-200">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-2">Important Note on FDA Clearance</h3>
+            <p class="text-sm text-slate-600">{fdaDisclaimer}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section bg-primary-600">
+    <div class="container">
+      <div class="text-center max-w-2xl mx-auto">
+        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">
+          Need Certification Documents?
+        </h2>
+        <p class="text-lg text-primary-100 mb-8">
+          Contact us to request copies of certificates, test reports, or detailed regulatory information.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a 
+            href="/contact" 
+            class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-primary-600 bg-white hover:bg-primary-50 rounded-lg transition-colors"
+          >
+            Request Documents
+          </a>
+          <a 
+            href="/products" 
+            class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white border border-white/30 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            View Products
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
