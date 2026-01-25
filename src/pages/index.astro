@@ -186,10 +186,20 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
             href={`/products/${product.id}`}
             class="group card-premium p-6 lg:p-7"
           >
-            <!-- Product Image Placeholder -->
-            <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-xl mb-6 flex items-center justify-center relative overflow-hidden">
+            <!-- Product Image -->
+            <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-xl mb-6 relative overflow-hidden">
+              {product.images?.main ? (
+                <img 
+                  src={product.images.main} 
+                  alt={product.name}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div class="w-full h-full flex items-center justify-center">
+                  <span class="text-5xl font-light text-slate-300 group-hover:text-primary-300 transition-colors">{product.name.charAt(0)}</span>
+                </div>
+              )}
               <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span class="text-5xl font-light text-slate-300 group-hover:text-primary-300 transition-colors">{product.name.charAt(0)}</span>
             </div>
             
             <!-- Badge -->

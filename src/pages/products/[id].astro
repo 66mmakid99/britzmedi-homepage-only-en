@@ -39,8 +39,18 @@ const pageDescription = `${product.name} - ${product.tagline}. ${product.overvie
       
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
         <!-- Product Image -->
-        <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center relative">
-          <span class="text-8xl font-light text-slate-300">{product.name.charAt(0)}</span>
+        <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl relative overflow-hidden">
+          {product.images?.main ? (
+            <img 
+              src={product.images.main} 
+              alt={product.name}
+              class="w-full h-full object-cover"
+            />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center">
+              <span class="text-8xl font-light text-slate-300">{product.name.charAt(0)}</span>
+            </div>
+          )}
           
           <!-- Badges -->
           <div class="absolute top-6 left-6 flex flex-col gap-2">

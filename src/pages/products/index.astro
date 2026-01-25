@@ -67,9 +67,19 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
               href={`/products/${product.id}`}
               class="group block bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300"
             >
-              <!-- Product Image Placeholder -->
-              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative">
-                <span class="text-5xl font-light text-slate-300">{product.name.charAt(0)}</span>
+              <!-- Product Image -->
+              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                {product.images?.main ? (
+                  <img 
+                    src={product.images.main} 
+                    alt={product.name}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center">
+                    <span class="text-5xl font-light text-slate-300">{product.name.charAt(0)}</span>
+                  </div>
+                )}
                 
                 <!-- Status Badge -->
                 {product.status === 'coming-soon' && (
@@ -149,9 +159,19 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
               href={`/products/${product.id}`}
               class="group block bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300"
             >
-              <!-- Product Image Placeholder -->
-              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                <span class="text-5xl font-light text-slate-300">{product.name.charAt(0)}</span>
+              <!-- Product Image -->
+              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+                {product.images?.main ? (
+                  <img 
+                    src={product.images.main} 
+                    alt={product.name}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center">
+                    <span class="text-5xl font-light text-slate-300">{product.name.charAt(0)}</span>
+                  </div>
+                )}
               </div>
               
               <!-- Content -->
