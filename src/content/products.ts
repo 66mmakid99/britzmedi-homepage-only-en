@@ -244,12 +244,12 @@ export const products: Product[] = [
     description: "Combining RF tightening, EMS contouring, and ELP skin boosting technologies, NEWCHAE SHOT delivers clinical-grade results for home use.",
     
     images: {
-      main: '/images/products/newchae-shot/newchae-01-1.jpg',
+      main: '/images/products/newchae-shot/newchae-01-1.webp',
       gallery: [
-        '/images/products/newchae-shot/newchae-01-1.jpg',
-        '/images/products/newchae-shot/newchae-01-4.jpg',
-        '/images/products/newchae-shot/newchae-pack-1.jpg',
-        '/images/products/newchae-shot/newchae-pack-2.jpg',
+        '/images/products/newchae-shot/newchae-01-1.webp',
+        '/images/products/newchae-shot/newchae-01-4.webp',
+        '/images/products/newchae-shot/newchae-pack-1.webp',
+        '/images/products/newchae-shot/newchae-pack-2.webp',
       ]
     },
     
