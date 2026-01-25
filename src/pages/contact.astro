@@ -199,7 +199,7 @@ const countryCodes = [
                 <!-- Email & Phone -->
                 <div class="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">
                       Email Address <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
@@ -209,7 +209,7 @@ const countryCodes = [
                         name="email" 
                         required
                         placeholder="you@company.com"
-                        class="w-full px-4 py-3.5 pr-12 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-shadow"
+                        class="w-full px-4 py-3.5 pr-12 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
                       />
                       <div id="emailStatus" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
                         <svg id="emailValid" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,14 +227,14 @@ const countryCodes = [
                     <p id="emailError" class="hidden mt-1.5 text-xs text-red-500"></p>
                   </div>
                   <div>
-                    <label for="phone" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="phone" class="block text-sm font-semibold text-slate-700 mb-2">
                       Phone Number
                     </label>
                     <div class="flex gap-2">
                       <select 
                         id="countryCode" 
                         name="countryCode"
-                        class="w-32 shrink-0 px-3 py-3.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm transition-shadow"
+                        class="w-32 shrink-0 px-3 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 text-sm transition-shadow"
                       >
                         {countryCodes.map((cc) => (
                           <option value={cc.code} title={cc.country}>{cc.code}</option>
@@ -245,7 +245,7 @@ const countryCodes = [
                         id="phone" 
                         name="phone"
                         placeholder="Phone number"
-                        class="flex-1 px-4 py-3.5 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-shadow"
+                        class="flex-1 px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
                       />
                     </div>
                     <p id="phoneFormat" class="mt-1.5 text-xs text-slate-500">Format: (XXX) XXX-XXXX</p>
