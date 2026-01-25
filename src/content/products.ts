@@ -193,7 +193,7 @@ export const products: Product[] = [
     description: "The system allows for effective treatment without damaging the skin surface, featuring Dynamic Dual Wave technology for both superficial and deep tissue treatment.",
     
     images: {
-      main: '/images/products/ulblanc/ulblanc-01.webp',
+      main: '/images/products/ulblanc/ulblanc-02.webp',
       gallery: [
         '/images/products/ulblanc/ulblanc-01.webp',
         '/images/products/ulblanc/ulblanc-02.webp',

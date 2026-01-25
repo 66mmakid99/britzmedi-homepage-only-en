@@ -129,19 +129,19 @@ const pageDescription = `${product.name} - ${product.tagline}. ${product.overvie
   </section>
 
   <!-- Product Gallery Section -->
-  {product.images?.gallery && product.images.gallery.length > 0 && (
-    <section class="section bg-slate-50">
-      <div class="container">
-        <div class="max-w-2xl mb-12">
-          <span class="label mb-3 block">Gallery</span>
-          <h2 class="heading-2 mb-4">Product Images</h2>
-          <p class="body-large">
-            Detailed views of {product.name} and its components.
-          </p>
-        </div>
-        
+  <section class="section bg-slate-50">
+    <div class="container">
+      <div class="max-w-2xl mb-12">
+        <span class="label mb-3 block">Gallery</span>
+        <h2 class="heading-2 mb-4">Product Images</h2>
+        <p class="body-large">
+          Detailed views of {product.name} and its components.
+        </p>
+      </div>
+      
+      {product.images?.gallery && (
         <div class="grid md:grid-cols-3 gap-6">
-          {product.images.gallery.map((img) => (
+          {product.images.gallery.map((img: string) => (
             <div class="aspect-[4/3] rounded-xl overflow-hidden bg-white border border-slate-200 group cursor-pointer hover:shadow-xl transition-all duration-300">
               <img 
                 src={img} 
@@ -152,9 +152,9 @@ const pageDescription = `${product.name} - ${product.tagline}. ${product.overvie
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  )}
+      )}
+    </div>
+  </section>
 
   <!-- Key Technologies Section -->
   <section class="section bg-white">
