@@ -128,6 +128,34 @@ const pageDescription = `${product.name} - ${product.tagline}. ${product.overvie
     </div>
   </section>
 
+  <!-- Product Gallery Section -->
+  {product.images?.gallery && product.images.gallery.length > 0 && (
+    <section class="section bg-slate-50">
+      <div class="container">
+        <div class="max-w-2xl mb-12">
+          <span class="label mb-3 block">Gallery</span>
+          <h2 class="heading-2 mb-4">Product Images</h2>
+          <p class="body-large">
+            Detailed views of {product.name} and its components.
+          </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+          {product.images.gallery.map((img) => (
+            <div class="aspect-[4/3] rounded-xl overflow-hidden bg-white border border-slate-200 group cursor-pointer hover:shadow-xl transition-all duration-300">
+              <img 
+                src={img} 
+                alt={product.name}
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
   <!-- Key Technologies Section -->
   <section class="section bg-white">
     <div class="container">
@@ -243,27 +271,52 @@ const pageDescription = `${product.name} - ${product.tagline}. ${product.overvie
         </div>
         
         <div class="grid md:grid-cols-3 gap-6">
-          {product.handpieces.map((handpiece) => (
-            <div class="bg-white rounded-xl p-6 border border-slate-100">
-              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-4 flex items-center justify-center">
-                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-              </div>
-              <h3 class="font-semibold text-slate-900 mb-3">{handpiece.name}</h3>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-slate-500">Tip Size</span>
-                  <span class="text-slate-900 font-medium">{handpiece.tipSize}</span>
+          {product.handpieces.map((handpiece) => {
+            // Map handpiece name to image key
+            const nameToKey = {
+              'Body Handpiece - Deep': 'body-deep',
+              'Body Handpiece - Super': 'body-super',
+              'Body Handpiece - Vibe': 'body-vibe',
+              'Face Handpiece - Deep': 'face-deep',
+              'Face Handpiece - Super': 'face-super',
+              'Eye Handpiece': 'eye'
+            };
+            const imageKey = nameToKey[handpiece.name];
+            const imageSrc = imageKey && product.images?.handpieces?.[imageKey];
+            
+            return (
+              <div class="bg-white rounded-xl p-6 border border-slate-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 group">
+                <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-4 overflow-hidden">
+                  {imageSrc ? (
+                    <img 
+                      src={imageSrc} 
+                      alt={handpiece.name}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center">
+                      <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-slate-500">Depth</span>
-                  <span class="text-slate-900 font-medium">{handpiece.depth}</span>
+                <h3 class="font-semibold text-slate-900 mb-3">{handpiece.name}</h3>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Tip Size</span>
+                    <span class="text-slate-900 font-medium">{handpiece.tipSize}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Depth</span>
+                    <span class="text-slate-900 font-medium">{handpiece.depth}</span>
+                  </div>
                 </div>
+                <p class="body-small mt-4 pt-4 border-t border-slate-100">{handpiece.feature}</p>
               </div>
-              <p class="body-small mt-4 pt-4 border-t border-slate-100">{handpiece.feature}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
