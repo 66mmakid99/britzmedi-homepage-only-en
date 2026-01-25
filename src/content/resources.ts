@@ -25,12 +25,12 @@ export const resources: Resource[] = [
   // Product Brochures
   {
     id: 'torr-rf-brochure',
-    title: 'TORR RF Product Brochure',
+    title: 'TORR RF Product Brochure (Overseas)',
     description: 'Comprehensive product brochure for TORR RF Multi-Wave RF Workstation including specifications, features, and clinical applications.',
     type: 'pdf',
     category: 'product-brochure',
     thumbnail: '/images/resources/torr-rf-brochure-thumb.jpg',
-    driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    driveUrl: 'https://drive.google.com/file/d/1V_VFi5FcI_-jXsc4YsaryAaKWvqKEZNM/view',
     fileSize: '5.2 MB',
     language: 'English',
     product: 'TORR RF',
@@ -62,13 +62,13 @@ export const resources: Resource[] = [
   
   // Technical Documents
   {
-    id: 'torr-rf-user-manual',
-    title: 'TORR RF User Manual',
-    description: 'Complete user manual with operation instructions, safety guidelines, and maintenance procedures.',
+    id: 'torr-rf-cicm-lecture',
+    title: 'TORR RF 2025 CICM Lecture',
+    description: 'Academic presentation by Dr. Lee Sangsu at CICM 2025 conference covering clinical applications and research findings.',
     type: 'pdf',
     category: 'technical-docs',
     thumbnail: '/images/resources/torr-rf-manual-thumb.jpg',
-    driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    driveUrl: 'https://drive.google.com/file/d/19raj_kAzDGM1dXDe8Sff0KYOWHAdSoJC/view',
     fileSize: '8.1 MB',
     language: 'English',
     product: 'TORR RF',
@@ -86,6 +86,18 @@ export const resources: Resource[] = [
   },
   
   // Marketing Materials
+  {
+    id: 'torr-rf-strategic-proposal-pt',
+    title: 'TORR RF Strategic Proposal (Portuguese)',
+    description: 'Strategic business proposal for TORR RF in Portuguese market, including market analysis and partnership opportunities.',
+    type: 'pdf',
+    category: 'marketing',
+    thumbnail: '/images/resources/company-ppt-thumb.jpg',
+    driveUrl: 'https://drive.google.com/file/d/124CptgGV4GabNtJSU5TMSMMqYCkD0TU6/view',
+    fileSize: '12.5 MB',
+    language: 'Portuguese',
+    product: 'TORR RF',
+  },
   {
     id: 'company-presentation',
     title: 'BRITZMEDI Company Presentation',
