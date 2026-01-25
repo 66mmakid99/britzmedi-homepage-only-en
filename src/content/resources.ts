@@ -87,6 +87,18 @@ export const resources: Resource[] = [
   
   // Marketing Materials
   {
+    id: 'torr-rf-strategic-proposal-en',
+    title: 'TORR RF Strategic Proposal (English)',
+    description: 'Strategic business proposal for TORR RF including market analysis, competitive advantages, and partnership opportunities.',
+    type: 'pdf',
+    category: 'marketing',
+    thumbnail: '/images/resources/company-ppt-thumb.jpg',
+    driveUrl: 'https://drive.google.com/file/d/1u_NHLiTLjmMIHSbs80ghwZ-GunuSejcm/view',
+    fileSize: '12.5 MB',
+    language: 'English',
+    product: 'TORR RF',
+  },
+  {
     id: 'torr-rf-strategic-proposal-pt',
     title: 'TORR RF Strategic Proposal (Portuguese)',
     description: 'Strategic business proposal for TORR RF in Portuguese market, including market analysis and partnership opportunities.',
