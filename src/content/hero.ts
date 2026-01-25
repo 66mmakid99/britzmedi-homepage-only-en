@@ -38,12 +38,12 @@ export const heroSettings: HeroSettings = {
   backgroundType: 'image', // Options: 'gradient', 'image', 'video'
   
    // Background image URL (updated 2026-01-26)
-   backgroundImage: '/images/hero/herosection_torrrf_modelcut01.png',
+   backgroundImage: '/images/hero/herosection_torrrf_modelcut01.webp',
    backgroundImageAlt: 'BRITZMEDI Medical Devices',
    
    // Example video URL (replace with actual video)
    backgroundVideo: '/videos/hero-bg.mp4',
-   backgroundVideoPoster: '/images/hero/herosection_torrrf_modelcut02.png',
+   backgroundVideoPoster: '/images/hero/herosection_torrrf_modelcut02.webp',
   
   // Overlay
   overlayOpacity: 50,

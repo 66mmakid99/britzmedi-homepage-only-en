@@ -74,23 +74,23 @@ export const products: Product[] = [
     description: "The core clinical significance of TORR RF lies in its ability to deliver powerful yet safe energy uniformly to the desired depth using low power, preventing surface burns while maximizing deep tissue heating. FDA 510(k) cleared (K212561) and designed for skin tightening, body contouring, and pain relief.",
     
     images: {
-      main: '/images/products/torr-rf/torrrf.png',
+      main: '/images/products/torr-rf/torrrf.webp',
       logo: '/images/logos/torr-rf-logo.png',
       gallery: [
-        '/images/products/torr-rf/torrrf-01.png',
-        '/images/products/torr-rf/torrrf-body.png',
-        '/images/products/torr-rf/torrrf-handpiece-set.png',
+        '/images/products/torr-rf/torrrf-01.webp',
+        '/images/products/torr-rf/torrrf-body.webp',
+        '/images/products/torr-rf/torrrf-handpiece-set.webp',
       ],
       handpieces: {
-        'body-deep': '/images/products/torr-rf/body-handpiece-deep.png',
-        'body-super': '/images/products/torr-rf/body-handpiece-super.png',
-        'body-vibe': '/images/products/torr-rf/body-handpiece-vibe.png',
-        'face-deep': '/images/products/torr-rf/face-handpiece-deep.png',
-        'face-super': '/images/products/torr-rf/face-handpiece-super.png',
-        'eye': '/images/products/torr-rf/eye-handpiece.png',
-        'handpiece-01': '/images/products/torr-rf/torrrf-handpiece-01.png',
-        'handpiece-02': '/images/products/torr-rf/torrrf-handpiece-02.png',
-        'handpiece-03': '/images/products/torr-rf/torrrf-handpiece-03.png',
+        'body-deep': '/images/products/torr-rf/body-handpiece-deep.webp',
+        'body-super': '/images/products/torr-rf/body-handpiece-super.webp',
+        'body-vibe': '/images/products/torr-rf/body-handpiece-vibe.webp',
+        'face-deep': '/images/products/torr-rf/face-handpiece-deep.webp',
+        'face-super': '/images/products/torr-rf/face-handpiece-super.webp',
+        'eye': '/images/products/torr-rf/eye-handpiece.webp',
+        'handpiece-01': '/images/products/torr-rf/torrrf-handpiece-01.webp',
+        'handpiece-02': '/images/products/torr-rf/torrrf-handpiece-02.webp',
+        'handpiece-03': '/images/products/torr-rf/torrrf-handpiece-03.webp',
       }
     },
     
