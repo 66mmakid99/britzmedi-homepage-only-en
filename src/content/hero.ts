@@ -37,13 +37,13 @@ export interface HeroSettings {
 export const heroSettings: HeroSettings = {
   backgroundType: 'image', // Options: 'gradient', 'image', 'video'
   
-  // Background image URL (updated 2026-01-25)
-  backgroundImage: 'https://image2url.com/r2/default/images/1769272175884-5d54cc18-3101-4164-b160-71043b65d663.png',
-  backgroundImageAlt: 'BRITZMEDI Medical Devices',
-  
-  // Example video URL (replace with actual video)
-  backgroundVideo: '/videos/hero-bg.mp4',
-  backgroundVideoPoster: '/images/hero-poster.jpg',
+   // Background image URL (updated 2026-01-26)
+   backgroundImage: '/images/hero/herosection_torrrf_modelcut01.png',
+   backgroundImageAlt: 'BRITZMEDI Medical Devices',
+   
+   // Example video URL (replace with actual video)
+   backgroundVideo: '/videos/hero-bg.mp4',
+   backgroundVideoPoster: '/images/hero/herosection_torrrf_modelcut02.png',
   
   // Overlay
   overlayOpacity: 50,

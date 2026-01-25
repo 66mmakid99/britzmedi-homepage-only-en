@@ -25,6 +25,16 @@ export interface Product {
   overview: string;
   description: string;
   
+  // Product images
+  images?: {
+    main?: string;           // Main product image
+    logo?: string;           // Product logo
+    gallery?: string[];      // Gallery images
+    handpieces?: {           // Handpiece-specific images
+      [key: string]: string;
+    };
+  };
+  
   keyTechnologies: {
     name: string;
     description: string;
@@ -62,6 +72,27 @@ export const products: Product[] = [
     overview: "TORR RF is a non-invasive medical device utilizing specialized Multi-Wave Radiofrequency (RF) technology to deliver thermal energy into the dermal and subcutaneous layers.",
     
     description: "The core clinical significance of TORR RF lies in its ability to deliver powerful yet safe energy uniformly to the desired depth using low power, preventing surface burns while maximizing deep tissue heating. FDA 510(k) cleared (K212561) and designed for skin tightening, body contouring, and pain relief.",
+    
+    images: {
+      main: '/images/products/torr-rf/torrrf.png',
+      logo: '/images/logos/torr-rf-logo.png',
+      gallery: [
+        '/images/products/torr-rf/torrrf-01.png',
+        '/images/products/torr-rf/torrrf-body.png',
+        '/images/products/torr-rf/torrrf-handpiece-set.png',
+      ],
+      handpieces: {
+        'body-deep': '/images/products/torr-rf/body-handpiece-deep.png',
+        'body-super': '/images/products/torr-rf/body-handpiece-super.png',
+        'body-vibe': '/images/products/torr-rf/body-handpiece-vibe.png',
+        'face-deep': '/images/products/torr-rf/face-handpiece-deep.png',
+        'face-super': '/images/products/torr-rf/face-handpiece-super.png',
+        'eye': '/images/products/torr-rf/eye-handpiece.png',
+        'handpiece-01': '/images/products/torr-rf/torrrf-handpiece-01.png',
+        'handpiece-02': '/images/products/torr-rf/torrrf-handpiece-02.png',
+        'handpiece-03': '/images/products/torr-rf/torrrf-handpiece-03.png',
+      }
+    },
     
     keyTechnologies: [
       {
@@ -161,6 +192,10 @@ export const products: Product[] = [
     
     description: "The system allows for effective treatment without damaging the skin surface, featuring Dynamic Dual Wave technology for both superficial and deep tissue treatment.",
     
+    images: {
+      main: '/images/products/ulblanc/placeholder.png', // TODO: Add actual product image
+    },
+    
     keyTechnologies: [
       {
         name: "Sono-I (Dynamic Dual Wave™)",
@@ -207,6 +242,16 @@ export const products: Product[] = [
     overview: "NEWCHAE SHOT is a home-care beauty device integrating professional-grade medical technologies into a compact form factor with multi-channel energy delivery.",
     
     description: "Combining RF tightening, EMS contouring, and ELP skin boosting technologies, NEWCHAE SHOT delivers clinical-grade results for home use.",
+    
+    images: {
+      main: '/images/products/newchae-shot/newchae-01-1.jpg',
+      gallery: [
+        '/images/products/newchae-shot/newchae-01-1.jpg',
+        '/images/products/newchae-shot/newchae-01-4.jpg',
+        '/images/products/newchae-shot/newchae-pack-1.jpg',
+        '/images/products/newchae-shot/newchae-pack-2.jpg',
+      ]
+    },
     
     keyTechnologies: [
       {
