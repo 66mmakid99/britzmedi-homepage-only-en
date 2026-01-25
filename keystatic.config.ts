@@ -1,0 +1,307 @@
+// Keystatic Configuration for BRITZMEDI Global Website
+import { config, collection, fields } from '@keystatic/core';
+
+export default config({
+  storage: {
+    kind: 'local',
+  },
+  
+  collections: {
+    // Products Collection
+    products: collection({
+      label: 'Products',
+      slugField: 'name',
+      path: 'src/content/products/*',
+      format: { contentField: 'description' },
+      entryLayout: 'content',
+      schema: {
+        name: fields.slug({ 
+          name: { 
+            label: 'Product Name',
+            validation: { isRequired: true }
+          } 
+        }),
+        model: fields.text({ 
+          label: 'Model Number',
+          validation: { isRequired: true }
+        }),
+        tagline: fields.text({ 
+          label: 'Tagline',
+          validation: { isRequired: true }
+        }),
+        category: fields.select({
+          label: 'Category',
+          options: [
+            { label: 'Medical Device', value: 'medical-device' },
+            { label: 'Cosmetic', value: 'cosmetic' }
+          ],
+          defaultValue: 'medical-device'
+        }),
+        status: fields.select({
+          label: 'Status',
+          options: [
+            { label: 'Available', value: 'available' },
+            { label: 'Coming Soon', value: 'coming-soon' }
+          ],
+          defaultValue: 'available'
+        }),
+        featured: fields.checkbox({ 
+          label: 'Featured Product',
+          defaultValue: false
+        }),
+        overview: fields.text({ 
+          label: 'Overview',
+          multiline: true,
+          validation: { isRequired: true }
+        }),
+        description: fields.markdoc({ 
+          label: 'Detailed Description',
+          options: {
+            image: {
+              directory: 'public/images/products',
+              publicPath: '/images/products/',
+            }
+          }
+        }),
+        keyTechnologies: fields.array(
+          fields.object({
+            name: fields.text({ label: 'Technology Name' }),
+            description: fields.text({ label: 'Description', multiline: true })
+          }),
+          {
+            label: 'Key Technologies',
+            itemLabel: props => props.fields.name.value || 'Technology'
+          }
+        ),
+        indications: fields.array(
+          fields.text({ label: 'Indication' }),
+          {
+            label: 'Indications',
+            itemLabel: props => props.value || 'Indication'
+          }
+        ),
+        specifications: fields.array(
+          fields.object({
+            label: fields.text({ label: 'Specification Label' }),
+            value: fields.text({ label: 'Value' }),
+            note: fields.text({ label: 'Note (optional)' })
+          }),
+          {
+            label: 'Specifications',
+            itemLabel: props => props.fields.label.value || 'Spec'
+          }
+        ),
+        certifications: fields.array(
+          fields.object({
+            name: fields.text({ label: 'Certification Name' }),
+            status: fields.text({ label: 'Status' }),
+            detail: fields.text({ label: 'Detail (optional)' })
+          }),
+          {
+            label: 'Certifications',
+            itemLabel: props => props.fields.name.value || 'Certification'
+          }
+        ),
+        clinicalBenefits: fields.array(
+          fields.text({ label: 'Benefit' }),
+          {
+            label: 'Clinical Benefits',
+            itemLabel: props => props.value || 'Benefit'
+          }
+        ),
+      }
+    }),
+
+    // FAQ Collection
+    faq: collection({
+      label: 'FAQ',
+      slugField: 'question',
+      path: 'src/content/faq/*',
+      format: { contentField: 'answer' },
+      schema: {
+        question: fields.slug({ 
+          name: { 
+            label: 'Question',
+            validation: { isRequired: true }
+          } 
+        }),
+        answer: fields.markdoc({ 
+          label: 'Answer',
+        }),
+        category: fields.select({
+          label: 'Category',
+          options: [
+            { label: 'Products', value: 'products' },
+            { label: 'Company', value: 'company' },
+            { label: 'Ordering & Distribution', value: 'ordering' },
+            { label: 'Technical Support', value: 'technical' },
+            { label: 'Certifications', value: 'certifications' }
+          ],
+          defaultValue: 'products'
+        }),
+      }
+    }),
+
+    // Resources Collection
+    resources: collection({
+      label: 'Resources',
+      slugField: 'title',
+      path: 'src/content/resources/*',
+      schema: {
+        title: fields.slug({ 
+          name: { 
+            label: 'Resource Title',
+            validation: { isRequired: true }
+          } 
+        }),
+        description: fields.text({ 
+          label: 'Description',
+          multiline: true,
+          validation: { isRequired: true }
+        }),
+        type: fields.select({
+          label: 'File Type',
+          options: [
+            { label: 'PDF', value: 'pdf' },
+            { label: 'PowerPoint', value: 'ppt' },
+            { label: 'Video', value: 'video' },
+            { label: 'Image', value: 'image' },
+            { label: 'Brochure', value: 'brochure' }
+          ],
+          defaultValue: 'pdf'
+        }),
+        category: fields.select({
+          label: 'Category',
+          options: [
+            { label: 'Product Brochure', value: 'product-brochure' },
+            { label: 'Technical Documents', value: 'technical-docs' },
+            { label: 'Marketing Materials', value: 'marketing' },
+            { label: 'Certificates', value: 'certificates' },
+            { label: 'Videos', value: 'videos' }
+          ],
+          defaultValue: 'product-brochure'
+        }),
+        driveUrl: fields.url({ 
+          label: 'Google Drive URL',
+          validation: { isRequired: true }
+        }),
+        fileSize: fields.text({ 
+          label: 'File Size (e.g., 5.2 MB)',
+        }),
+        language: fields.text({ 
+          label: 'Language',
+          defaultValue: 'English'
+        }),
+        product: fields.text({ 
+          label: 'Related Product (optional)',
+          description: 'Enter product name if this resource is product-specific'
+        }),
+        thumbnail: fields.image({
+          label: 'Thumbnail Image (optional)',
+          directory: 'public/images/resources',
+          publicPath: '/images/resources/',
+        }),
+      }
+    }),
+
+    // Company Information (Singleton)
+    company: collection({
+      label: 'Company Info',
+      slugField: 'name',
+      path: 'src/content/company/*',
+      format: { contentField: 'description' },
+      schema: {
+        name: fields.slug({ 
+          name: { 
+            label: 'Company Name',
+            validation: { isRequired: true }
+          } 
+        }),
+        nameKo: fields.text({ label: 'Korean Name' }),
+        ceo: fields.text({ label: 'CEO Name' }),
+        establishment: fields.text({ label: 'Establishment Date' }),
+        description: fields.markdoc({ label: 'Company Description' }),
+        philosophy: fields.text({ 
+          label: 'Company Philosophy',
+          multiline: true
+        }),
+        address: fields.object({
+          full: fields.text({ label: 'Full Address' }),
+          city: fields.text({ label: 'City' }),
+          province: fields.text({ label: 'Province/State' }),
+          country: fields.text({ label: 'Country' }),
+          postalCode: fields.text({ label: 'Postal Code' }),
+        }),
+        contact: fields.object({
+          phone: fields.text({ label: 'Phone' }),
+          email: fields.text({ label: 'Email' }),
+          website: fields.text({ label: 'Website' }),
+        }),
+        milestones: fields.array(
+          fields.object({
+            year: fields.text({ label: 'Year' }),
+            title: fields.text({ label: 'Milestone Title' }),
+            description: fields.text({ label: 'Description', multiline: true }),
+            upcoming: fields.checkbox({ label: 'Upcoming Milestone' })
+          }),
+          {
+            label: 'Company Milestones',
+            itemLabel: props => `${props.fields.year.value} - ${props.fields.title.value}` || 'Milestone'
+          }
+        ),
+      }
+    }),
+
+    // Certifications Collection
+    certifications: collection({
+      label: 'Certifications',
+      slugField: 'name',
+      path: 'src/content/certifications/*',
+      schema: {
+        name: fields.slug({ 
+          name: { 
+            label: 'Certification Short Name',
+            validation: { isRequired: true }
+          } 
+        }),
+        fullName: fields.text({ 
+          label: 'Full Certification Name',
+          validation: { isRequired: true }
+        }),
+        status: fields.select({
+          label: 'Status',
+          options: [
+            { label: 'Certified', value: 'certified' },
+            { label: 'Cleared', value: 'cleared' },
+            { label: 'Registered', value: 'registered' },
+            { label: 'In Preparation', value: 'in-preparation' },
+            { label: 'Planned', value: 'planned' }
+          ],
+          defaultValue: 'certified'
+        }),
+        region: fields.text({ 
+          label: 'Region/Country',
+          validation: { isRequired: true }
+        }),
+        description: fields.text({ 
+          label: 'Description',
+          multiline: true,
+          validation: { isRequired: true }
+        }),
+        products: fields.array(
+          fields.text({ label: 'Product Name' }),
+          {
+            label: 'Applicable Products',
+            itemLabel: props => props.value || 'Product'
+          }
+        ),
+        certificateNo: fields.text({ 
+          label: 'Certificate Number (optional)'
+        }),
+        validUntil: fields.text({ 
+          label: 'Valid Until (optional)'
+        }),
+      }
+    }),
+  },
+});

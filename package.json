@@ -9,12 +9,22 @@
     "astro": "astro",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "publisher:check": "node scripts/publisher-agent/index.js",
+    "publisher:links": "node scripts/publisher-agent/check-links.js",
+    "publisher:menu": "node scripts/publisher-agent/validate-menu.js",
+    "publisher:a11y": "node scripts/publisher-agent/check-accessibility.js",
+    "publisher:perf": "node scripts/publisher-agent/analyze-performance.js"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/markdoc": "^0.15.10",
     "@astrojs/react": "^4.4.2",
+    "@keystatic/astro": "^5.0.6",
+    "@keystatic/core": "^0.5.48",
     "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
     "astro": "^5.16.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -25,8 +35,8 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
-    "vitest": "^3.2.3",
     "@vitest/ui": "^3.2.3",
-    "happy-dom": "^18.0.1"
+    "happy-dom": "^18.0.1",
+    "vitest": "^3.2.3"
   }
 }
