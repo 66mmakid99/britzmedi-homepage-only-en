@@ -42,9 +42,9 @@ export const resources: Resource[] = [
     type: 'pdf',
     category: 'product-brochure',
     thumbnail: '/images/resources/ulblanc-brochure-thumb.jpg',
-    driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    driveUrl: 'https://drive.google.com/file/d/1BerDEnrv9s0AS8f0a98VLBIRY-UaYNgv/view',
     fileSize: '4.8 MB',
-    language: 'English',
+    language: 'Korean',
     product: 'ULBLANC',
   },
   {
