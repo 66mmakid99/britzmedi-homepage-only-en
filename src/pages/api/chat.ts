@@ -23,6 +23,57 @@ interface ChatRequest {
     product?: string;
     page?: string;
   };
+  sessionId?: string;
+}
+
+// Simple in-memory store for spam detection (resets on server restart)
+const spamDetection = new Map<string, { messages: string[]; lastActivity: number }>();
+
+// Clean old sessions (older than 30 minutes)
+function cleanOldSessions() {
+  const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+  for (const [key, value] of spamDetection.entries()) {
+    if (value.lastActivity < thirtyMinutesAgo) {
+      spamDetection.delete(key);
+    }
+  }
+}
+
+// Normalize message for comparison (lowercase, trim, remove extra spaces)
+function normalizeMessage(msg: string): string {
+  return msg.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+// Check for repeated questions (3+ identical in a row)
+function checkRepeatedQuestions(sessionId: string, message: string): { blocked: boolean; count: number } {
+  cleanOldSessions();
+
+  const normalized = normalizeMessage(message);
+  const session = spamDetection.get(sessionId) || { messages: [], lastActivity: Date.now() };
+
+  // Count consecutive identical messages from the end
+  let consecutiveCount = 0;
+  for (let i = session.messages.length - 1; i >= 0; i--) {
+    if (session.messages[i] === normalized) {
+      consecutiveCount++;
+    } else {
+      break;
+    }
+  }
+
+  // Add current message
+  session.messages.push(normalized);
+  session.lastActivity = Date.now();
+
+  // Keep only last 10 messages
+  if (session.messages.length > 10) {
+    session.messages = session.messages.slice(-10);
+  }
+
+  spamDetection.set(sessionId, session);
+
+  // Block if 3 or more consecutive identical messages
+  return { blocked: consecutiveCount >= 2, count: consecutiveCount + 1 };
 }
 
 // Load knowledge base from markdown file
@@ -101,6 +152,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!body.message || body.message.trim().length === 0) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Generate session ID from request if not provided
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('cf-connecting-ip') || 'unknown';
+    const sessionId = body.sessionId || `${clientIP}-${request.headers.get('user-agent')?.slice(0, 50) || 'unknown'}`;
+
+    // Check for repeated questions (spam detection)
+    const repeatCheck = checkRepeatedQuestions(sessionId, body.message);
+    if (repeatCheck.blocked) {
+      console.warn(`[SPAM] Blocked repeated question from session: ${sessionId.slice(0, 20)}... (${repeatCheck.count} times)`);
+      return new Response(JSON.stringify({
+        message: "I noticed you've asked this same question a few times. If my previous answers didn't help, please try rephrasing your question or reach out directly at /contact for personalized assistance.",
+        blocked: true,
+        reason: 'repeated_question'
+      }), {
+        status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     }
