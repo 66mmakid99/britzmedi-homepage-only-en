@@ -88,7 +88,8 @@ ALWAYS do this:
 - Use plain text, minimal formatting
 - Only use formatting when genuinely needed (like technical specs)
 
-For pricing, partnerships, or detailed inquiries, naturally guide them to the Contact page.`;
+For pricing, partnerships, or detailed inquiries, guide them to the contact form at /contact page.
+When mentioning the contact form, say something like "You can reach us through our contact form at /contact" or "Feel free to submit an inquiry at /contact".`;
 
   return systemPrompt;
 }
@@ -212,11 +213,11 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   }
 
   if (lowerMessage.includes('distributor') || lowerMessage.includes('partnership') || lowerMessage.includes('dealer')) {
-    return "We're actively seeking distribution partners worldwide! Please visit our Contact page to submit your inquiry. Include your company details, region of interest, and current portfolio. Our team will respond within 24-48 hours.";
+    return "We're actively seeking distribution partners worldwide. Submit your inquiry at /contact with your company details, region of interest, and current portfolio - our team responds within 24-48 hours.";
   }
 
   if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('quote')) {
-    return "For pricing information and quotes, please contact our sales team through the Contact page. Pricing varies by region and order volume. We'll be happy to provide a customized quote based on your needs.";
+    return "Pricing varies by region and order volume. Reach out through our contact form at /contact and we'll put together a customized quote for you.";
   }
 
   // General greetings
@@ -225,5 +226,5 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   }
 
   // Default response
-  return "Thank you for your interest in BRITZMEDI! We specialize in innovative aesthetic medical devices including TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, and NEWCHAE SHOT home device. How can I help you today? For specific inquiries, please visit our Contact page.";
+  return "Thanks for reaching out! We specialize in aesthetic medical devices - TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, and NEWCHAE SHOT home device. What would you like to know? For quotes or partnerships, you can reach us at /contact.";
 }
