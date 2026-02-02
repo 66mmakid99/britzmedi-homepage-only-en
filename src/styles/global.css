@@ -75,6 +75,17 @@
   --border-color: rgba(226, 232, 240, 0.8);
 }
 
+/* Dark Mode Variables */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --border-color: rgba(51, 65, 85, 0.8);
+}
+
 /* Base Styles */
 html {
   scroll-behavior: smooth;
@@ -426,4 +437,129 @@ img.loaded {
 
 .link-underline:hover::after {
   width: 100%;
+}
+
+/* ===================== */
+/* Dark Mode Styles      */
+/* ===================== */
+
+.dark body {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+/* Dark Mode Typography */
+.dark .heading-1,
+.dark .heading-2,
+.dark .heading-3 {
+  color: var(--color-slate-100);
+}
+
+.dark .body-large,
+.dark .body-base {
+  color: var(--color-slate-300);
+}
+
+.dark .body-small {
+  color: var(--color-slate-400);
+}
+
+.dark .label {
+  color: var(--color-primary-400);
+}
+
+/* Dark Mode Cards */
+.dark .card-premium {
+  background: var(--color-slate-800);
+  border-color: rgba(51, 65, 85, 0.8);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card-premium:hover {
+  border-color: rgba(12, 142, 230, 0.4);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 12px 32px rgba(12, 142, 230, 0.15);
+}
+
+/* Dark Mode Buttons */
+.dark .btn-secondary {
+  background: var(--color-slate-800);
+  border-color: var(--color-slate-700);
+  color: var(--color-slate-200);
+}
+
+.dark .btn-secondary:hover {
+  background: var(--color-slate-700);
+  border-color: var(--color-slate-600);
+}
+
+/* Dark Mode Backgrounds */
+.dark .bg-gradient-subtle {
+  background: linear-gradient(180deg, var(--color-slate-900) 0%, var(--color-slate-800) 100%);
+}
+
+.dark .bg-gradient-hero {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(12, 142, 230, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, var(--color-slate-900) 0%, var(--color-slate-800) 100%);
+}
+
+.dark .bg-gradient-section {
+  background: linear-gradient(180deg, var(--color-slate-800) 0%, var(--color-slate-900) 50%, var(--color-slate-800) 100%);
+}
+
+/* Dark Mode Badge */
+.dark .badge-premium {
+  background: linear-gradient(135deg, rgba(12, 142, 230, 0.15) 0%, rgba(12, 142, 230, 0.08) 100%);
+  border-color: rgba(12, 142, 230, 0.3);
+  color: var(--color-primary-300);
+}
+
+/* Dark Mode Glass Effect */
+.dark .glass {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+/* Dark Mode Divider */
+.dark .divider-gradient {
+  background: linear-gradient(90deg, transparent, var(--color-slate-700), transparent);
+}
+
+/* Dark Mode Scrollbar */
+.dark::-webkit-scrollbar-thumb {
+  background: var(--color-slate-600);
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-500);
+}
+
+/* Dark Mode Selection */
+.dark ::selection {
+  background-color: var(--color-primary-800);
+  color: var(--color-primary-100);
+}
+
+/* Dark Mode Form Elements */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--color-slate-800);
+  border-color: var(--color-slate-700);
+  color: var(--color-slate-100);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--color-slate-500);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(12, 142, 230, 0.2);
 }

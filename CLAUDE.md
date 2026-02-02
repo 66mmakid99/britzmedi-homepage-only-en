@@ -1,189 +1,213 @@
-# CLAUDE.md - AI Assistant Context
+# BRITZMEDI Global Website Project
 
-This file provides context for Claude AI when working on this project.
+## 🎯 Project Vision
 
-## Project Overview
+**"정적 카탈로그 → AI 검색 시대의 24/7 글로벌 세일즈 플랫폼"**
 
-**BRITZMEDI Global Website** is a professional static website for a Korean medical device company targeting international distributors and buyers. The site is built with modern web technologies and deployed on Cloudflare Pages.
+### 전략
+1. BRITZMEDI 웹사이트로 성과 증명 (AEO/GEO 최적화)
+2. 성공사례 만들기 (6개월)
+3. SaaS 빌더로 확장 → 해외영업 기업에 판매
 
-### Business Context
-- **Company**: BRITZMEDI Co., Ltd. (Korean medical device manufacturer)
-- **Target Audience**: International distributors, healthcare professionals, B2B buyers
-- **Language**: English only (global market focused)
-- **Purpose**: Product showcase, lead generation, resource distribution
+### 32주 로드맵
+- P1 (1-4주): 기본 구축, CMS, 리드 폼 ✅
+- P2 (5-8주): AEO 콘텐츠, 블로그 ✅
+- P3 (9-12주): 리드 자동화, AI 조사 ✅
+- P4 (13-16주): AI 챗봇, SNS 연동 ✅
+- P5 (17-20주): 최적화, 대시보드 ✅
+- P6 (21-24주): 성과 검증
+- P7 (25-32주): SaaS 빌더 MVP
 
-## Tech Stack Quick Reference
-
-| Component | Technology | Key Files |
-|-----------|------------|-----------|
-| Framework | Astro 5.16 | `astro.config.mjs` |
-| UI Library | React 19 | Components in `.astro` files |
-| Styling | Tailwind CSS 4.1 | `src/styles/global.css` |
-| CMS | Keystatic | `keystatic.config.ts` |
-| Testing | Vitest | `vitest.config.ts` |
-| Hosting | Cloudflare Pages | Auto-deploy on push |
-
-## Directory Structure Guide
-
-```
-src/
-├── components/layout/     # Header.astro, Footer.astro
-├── content/               # ALL content data lives here (TypeScript)
-│   ├── products.ts        # Product catalog (4 products)
-│   ├── certifications.ts  # FDA, ISO, KFDA certs
-│   ├── faq.ts             # 18 Q&As
-│   ├── resources.ts       # Downloadable files
-│   ├── company.ts         # Company info
-│   └── hero.ts            # Homepage hero config
-├── layouts/               # BaseLayout.astro (SEO, meta tags)
-├── pages/                 # Routes (10 pages)
-└── utils/                 # Email validation utility
-```
-
-## Key Patterns & Conventions
-
-### 1. Content Management
-- All content is stored in TypeScript files under `src/content/`
-- Product data, FAQ, certifications are exported as typed arrays
-- Keystatic CMS is configured but content is primarily in TS files
-
-### 2. Styling
-- **Tailwind CSS 4.x** with utility classes
-- Custom design tokens in `global.css` using `@theme`
-- Color palette: Blue (primary/medical), Gold (accent/premium), Slate (neutral)
-- **NO dark mode** - light mode only (dark mode was removed)
-
-### 3. Components
-- Astro components (`.astro`) for static content
-- React used only where interactivity is needed
-- Lucide React for icons
-
-### 4. Forms
-- Contact form uses **EmailJS** (client-side)
-- Service ID: `service_nbk0net`
-- Template ID: `template_azmskha`
-- Public Key: `qZJl-FQP1CJJqGvNp`
-
-### 5. Resources/Downloads
-- All downloadable files hosted on **Google Drive**
-- Links stored in `src/content/resources.ts`
-
-## Common Tasks
-
-### Adding a New Product
-1. Edit `src/content/products.ts`
-2. Add product images to `public/images/products/` (WebP format preferred)
-3. Product will auto-appear on `/products` and get a detail page at `/products/[id]`
-
-### Adding FAQ Questions
-1. Edit `src/content/faq.ts`
-2. Add to appropriate category: Products, Company, Ordering, Technical, Certifications
-
-### Adding Downloadable Resources
-1. Upload file to Google Drive (set to "Anyone with link can view")
-2. Add entry to `src/content/resources.ts` with Google Drive URL
-
-### Modifying Navigation
-1. Edit `src/components/layout/Header.astro`
-2. Update both desktop and mobile navigation sections
-
-### Updating SEO
-1. Page-level: Edit individual `.astro` files (title, description props)
-2. Global: Edit `src/layouts/BaseLayout.astro`
-
-## Important Notes
-
-### DO
-- Use WebP format for images (optimized)
-- Keep content in TypeScript files for type safety
-- Run `npm run publisher:check` before deployment
-- Test email validation changes with `npm run test`
-
-### DON'T
-- Don't add dark mode (intentionally removed)
-- Don't commit `.env` files (no secrets currently needed)
-- Don't use external image URLs (keep in `public/images/`)
-
-## File Size Reference
-
-Largest files (may need refactoring if they grow):
-- `src/pages/contact.astro` (~32KB) - Complex form logic
-- `src/pages/index.astro` (~23KB) - Homepage with multiple sections
-- `src/pages/about.astro` (~18KB) - Company information
-
-## Testing
-
-```bash
-npm run test          # Run all tests
-npm run test:watch    # Watch mode
-npm run test:ui       # Visual UI
-```
-
-Current test coverage: Email validation only (`src/utils/email-validation.test.ts`)
-
-## Quality Checks (Publisher Agent)
-
-```bash
-npm run publisher:check   # All checks
-npm run publisher:links   # Broken links
-npm run publisher:menu    # Navigation consistency
-npm run publisher:a11y    # Accessibility
-npm run publisher:perf    # Performance
-```
-
-## Build & Deploy
-
-```bash
-npm run dev       # Local dev server (localhost:4321)
-npm run build     # Production build to ./dist
-npm run preview   # Preview production build
-
-# Manual deploy to Cloudflare
-npx wrangler pages deploy dist --project-name=britzmedi-homepage-only-en
-```
-
-## Products Summary
-
-| ID | Name | Status |
-|----|------|--------|
-| `torr-rf` | TORR RF (MTX-C1) | Available |
-| `ulblanc` | ULBLANC | Available |
-| `newchae-shot` | NEWCHAE SHOT | Available |
-| `lumino-wave` | LUMINO WAVE | Coming Soon (2026 H2) |
-
-## Pages Summary
-
-| Route | File | Purpose |
-|-------|------|---------|
-| `/` | `index.astro` | Homepage |
-| `/about` | `about.astro` | Company info |
-| `/products` | `products/index.astro` | Product listing |
-| `/products/[id]` | `products/[id].astro` | Product detail |
-| `/certifications` | `certifications.astro` | Certificates |
-| `/faq` | `faq.astro` | FAQ (18 Q&As) |
-| `/contact` | `contact.astro` | Contact form |
-| `/resources` | `resources.astro` | Downloads |
-| `/privacy` | `privacy.astro` | Privacy policy |
-| `/terms` | `terms.astro` | Terms of service |
-
-## External Dependencies
-
-| Service | Purpose | Status |
-|---------|---------|--------|
-| EmailJS | Contact form | Active |
-| Google Drive | File downloads | Active |
-| Cloudflare Pages | Hosting | Active |
-| Emailable API | Email verification | Optional |
-
-## Recent Changes (2026-01)
-
-- Removed dark mode functionality
-- Converted images to WebP format
-- Added all product images
-- Added FDA and KFDA certificates
-- Improved heading hierarchy for accessibility
-- Added Publisher Agent quality tools
+### 현재 Phase: P5 완료 (Week 17-20)
+- [x] Keystatic 스키마 + 블로그 컬렉션
+- [x] Admin 인증 시스템 (Basic Auth)
+- [x] 다국어 기본 구조 (8개 언어)
+- [x] 테마 시스템 (다크모드)
+- [x] 블로그 시스템 + TL;DR
+- [x] D1 리드 저장 + Lead Score
+- [x] Slack 알림
+- [x] AI 챗봇 (Claude API)
+- [x] Core Web Vitals 최적화
+- [x] SEO 메타태그 강화
 
 ---
 
-*Last updated: 2026-02-02*
+## 📋 리드 폼 필수 7개 필드
+
+| 필드 | 타입 | 검증 | AI 조사 활용 |
+|------|------|------|-------------|
+| Company Name | Text | Required | 웹검색 키워드 |
+| Company Website | URL | URL형식 + 접속확인 | 업종, 규모, 서비스 파악 |
+| Your Name | Text | Required | LinkedIn 검색 |
+| Job Title | Text | Required | 의사결정권 판단 |
+| Business Email | Email | 회사도메인 필수 | 도메인으로 회사 확인 |
+| Country | Dropdown | ISO 국가코드 | 시장/규제 파악 |
+| Interested In | Checkbox | 1개 이상 | 영업 방향 |
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+- **Framework**: Astro 5.x + React 19
+- **Styling**: Tailwind CSS 4.x
+- **CMS**: Keystatic (Git-based)
+- **Search**: Pagefind
+
+### Backend
+- **Hosting**: Cloudflare Pages
+- **API**: Cloudflare Workers
+- **Database**: Cloudflare D1 (SQLite)
+- **Cache**: Cloudflare KV
+
+### External APIs
+- **AI Chatbot**: Claude API (Haiku)
+- **Lead Enrichment**: Claude API + Web Search
+- **Translation**: DeepL API (8 languages)
+- **Email**: EmailJS / Resend
+
+---
+
+## 📁 Folder Structure
+
+```
+britzmedi-global/
+├── src/
+│   ├── pages/           # 페이지 라우팅
+│   │   ├── api/         # API 엔드포인트 (leads, chat)
+│   │   ├── admin/       # 관리자 페이지 (leads dashboard)
+│   │   └── blog/        # 블로그 페이지
+│   ├── components/      # 재사용 컴포넌트
+│   │   ├── layout/      # Header, Footer
+│   │   ├── ui/          # Button, Form, ThemeToggle, LanguageSwitcher
+│   │   ├── features/    # LeadForm, Chatbot
+│   │   └── seo/         # SEOHead, WebVitals
+│   ├── layouts/         # BaseLayout, BlogLayout
+│   ├── content/         # Keystatic 콘텐츠
+│   │   ├── products/    # 제품 데이터
+│   │   ├── blog/        # 블로그 포스트
+│   │   └── pages/       # 정적 페이지
+│   ├── i18n/            # 다국어 시스템 (8개 언어)
+│   ├── lib/             # 유틸리티 함수
+│   │   ├── db/          # D1 스키마
+│   │   ├── lead-score.ts
+│   │   └── slack.ts
+│   └── styles/          # global.css
+├── public/              # 정적 파일
+├── keystatic.config.ts  # CMS 설정
+├── astro.config.mjs     # Astro 설정
+└── CLAUDE.md            # 이 파일
+```
+
+---
+
+## 💻 Coding Standards
+
+### 파일 명명
+- Components: `PascalCase.astro` (예: `LeadForm.astro`)
+- Pages: `kebab-case.astro` (예: `about-us.astro`)
+- Utils: `camelCase.ts` (예: `formatDate.ts`)
+
+### 코드 스타일
+- 들여쓰기: 2칸
+- 세미콜론: 사용
+- 따옴표: 작은따옴표 (')
+- 언어: TypeScript 우선
+
+### 커밋 메시지
+```
+feat: 새 기능 추가
+fix: 버그 수정
+docs: 문서 수정
+style: 코드 포맷팅
+refactor: 코드 리팩토링
+test: 테스트 추가
+chore: 빌드, 설정 변경
+```
+
+---
+
+## 🎯 구현된 핵심 기능
+
+### 1. AEO/GEO 최적화 콘텐츠 ✅
+- FAQ Schema 적용
+- TL;DR 섹션
+- 구조화된 데이터 (JSON-LD)
+- AI가 인용하기 좋은 형식
+
+### 2. AI 챗봇 (Claude Haiku) ✅
+- 제품 문의 응대
+- 파트너십 안내
+- Fallback 응답 시스템
+- 제품별 컨텍스트 주입
+
+### 3. 리드 관리 시스템 ✅
+- D1 데이터베이스 스키마
+- Lead Score 알고리즘 (0-100, A/B/C/D 등급)
+- 리드 대시보드 (/admin/leads)
+- Slack 웹훅 알림
+
+### 4. 다국어 지원 ✅
+- 8개 언어: EN, KO, ZH, JA, ES, PT-BR, DE, AR
+- 언어 스위처 컴포넌트
+- hreflang 태그
+
+### 5. 성능 최적화 ✅
+- Core Web Vitals 모니터링
+- 이미지 최적화 컴포넌트
+- DNS prefetch, preconnect
+- Font loading 최적화
+
+---
+
+## 📊 성공 지표 (6개월)
+
+| 지표 | 현재 | 목표 |
+|------|------|------|
+| AI 검색 노출 | 0 | ChatGPT/Perplexity 언급 |
+| 월간 방문자 | 1,000 | 15,000 |
+| 월간 리드 | 5 | 100 |
+| 리드→미팅 전환 | 10% | 30% |
+
+---
+
+## 🚀 Commands
+
+```bash
+# 개발 서버
+npm run dev
+
+# 빌드
+npm run build
+
+# 프리뷰
+npm run preview
+
+# 테스트
+npm run test
+
+# Keystatic Admin
+# http://localhost:4321/keystatic
+```
+
+---
+
+## 📚 References
+
+- Masterplan: Claude.ai 대화 기록 참조
+- GitHub: 66mmakid99/britzmedi-homepage-only-en
+- Deploy: britzmedi-homepage-only-en.pages.dev
+- Keystatic: /keystatic
+
+---
+
+## ⚠️ Important Notes
+
+1. **빌더화 설계**: 모든 설정은 하드코딩 ❌ → config 파일로
+2. **Multi-tenant 준비**: tenant_id 고려
+3. **개인 이메일 차단**: gmail, yahoo 등 리드 폼에서 경고
+4. **API 키 관리**: 환경변수 사용 (.env)
+
+---
+
+*Last Updated: 2026-02-03*

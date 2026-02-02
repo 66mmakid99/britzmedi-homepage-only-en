@@ -1,0 +1,96 @@
+---
+import { languages, getLangFromUrl, addLanguageToPath, type Language } from '../../i18n/config';
+
+const currentLang = getLangFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+const currentLanguageInfo = languages[currentLang];
+---
+
+<div class="relative language-switcher">
+  <button
+    type="button"
+    class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-primary-600 dark:text-neutral-300 dark:hover:text-primary-400 transition-colors"
+    aria-expanded="false"
+    aria-haspopup="true"
+  >
+    <span class="text-base">{currentLanguageInfo.flag}</span>
+    <span class="hidden sm:inline">{currentLanguageInfo.name}</span>
+    <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  <div class="language-dropdown absolute right-0 top-full mt-2 w-48 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 py-2 opacity-0 invisible transform translate-y-2 transition-all duration-200 z-50">
+    {Object.entries(languages).map(([code, info]) => {
+      const isActive = code === currentLang;
+      const href = addLanguageToPath(currentPath, code as Language);
+
+      return (
+        <a
+          href={href}
+          class:list={[
+            'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
+            isActive
+              ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+              : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700'
+          ]}
+          hreflang={code}
+          lang={code}
+        >
+          <span class="text-base">{info.flag}</span>
+          <span>{info.name}</span>
+          {isActive && (
+            <svg class="w-4 h-4 ml-auto text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          )}
+        </a>
+      );
+    })}
+  </div>
+</div>
+
+<script>
+  // Toggle dropdown on button click
+  document.querySelectorAll('.language-switcher').forEach((switcher) => {
+    const button = switcher.querySelector('button');
+    const dropdown = switcher.querySelector('.language-dropdown');
+
+    if (!button || !dropdown) return;
+
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+      // Close all other dropdowns
+      document.querySelectorAll('.language-switcher').forEach((other) => {
+        const otherButton = other.querySelector('button');
+        const otherDropdown = other.querySelector('.language-dropdown');
+        if (otherButton && otherDropdown && other !== switcher) {
+          otherButton.setAttribute('aria-expanded', 'false');
+          otherDropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        }
+      });
+
+      // Toggle current dropdown
+      button.setAttribute('aria-expanded', String(!isExpanded));
+      if (isExpanded) {
+        dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+      } else {
+        dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+      }
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.language-switcher').forEach((switcher) => {
+      const button = switcher.querySelector('button');
+      const dropdown = switcher.querySelector('.language-dropdown');
+      if (button && dropdown) {
+        button.setAttribute('aria-expanded', 'false');
+        dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+      }
+    });
+  });
+</script>
