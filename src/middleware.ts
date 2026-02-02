@@ -1,11 +1,14 @@
 import type { MiddlewareHandler } from 'astro';
 
-// Admin authentication middleware for Keystatic
+// Admin authentication middleware for Keystatic and Admin routes
 export const onRequest: MiddlewareHandler = async (context, next) => {
   const url = new URL(context.request.url);
 
-  // Only protect /keystatic routes
-  if (!url.pathname.startsWith('/keystatic')) {
+  // Protected routes that require authentication
+  const protectedRoutes = ['/keystatic', '/admin'];
+  const isProtectedRoute = protectedRoutes.some(route => url.pathname.startsWith(route));
+
+  if (!isProtectedRoute) {
     return next();
   }
 

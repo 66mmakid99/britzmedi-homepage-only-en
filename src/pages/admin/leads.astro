@@ -1,0 +1,405 @@
+---
+// Server-side rendering for authentication
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// This page requires authentication via middleware
+---
+
+<BaseLayout
+  title="Lead Dashboard"
+  description="BRITZMEDI Lead Management Dashboard"
+  noIndex={true}
+>
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-16 lg:top-20 z-40">
+      <div class="container py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Lead Dashboard</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Manage and track incoming leads</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              id="refresh-btn"
+              class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+            >
+              <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </button>
+            <a
+              href="/contact"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+            >
+              Test Lead Form
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <section class="container py-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card-premium p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900 dark:text-slate-100" id="stat-total">0</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Total Leads</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-premium p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900 dark:text-slate-100" id="stat-hot">0</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Hot Leads (A)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-premium p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900 dark:text-slate-100" id="stat-new">0</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">New (Today)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-premium p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-slate-900 dark:text-slate-100" id="stat-avg-score">0</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Avg Score</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="container pb-6">
+      <div class="card-premium p-4">
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Grade:</label>
+            <select id="filter-grade" class="px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+              <option value="">All</option>
+              <option value="A">A - Hot</option>
+              <option value="B">B - Warm</option>
+              <option value="C">C - Cool</option>
+              <option value="D">D - Cold</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Status:</label>
+            <select id="filter-status" class="px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+              <option value="">All</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="qualified">Qualified</option>
+              <option value="proposal">Proposal</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+
+          <div class="flex-1"></div>
+
+          <div class="flex items-center gap-2">
+            <input
+              type="search"
+              id="search-input"
+              placeholder="Search leads..."
+              class="px-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-64"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leads Table -->
+    <section class="container pb-12">
+      <div class="card-premium overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lead</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Company</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Country</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Products</th>
+                <th class="text-center px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Score</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
+                <th class="text-center px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leads-table-body" class="divide-y divide-slate-200 dark:divide-slate-700">
+              <!-- Leads will be populated by JavaScript -->
+              <tr>
+                <td colspan="8" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                  <div class="flex flex-col items-center gap-3">
+                    <svg class="w-12 h-12 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <p class="font-medium">No leads yet</p>
+                    <p class="text-sm">Leads from the contact form will appear here</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  // Lead dashboard functionality
+  interface Lead {
+    id: number;
+    company_name: string;
+    company_website?: string;
+    contact_name: string;
+    job_title: string;
+    email: string;
+    country: string;
+    interested_products: string;
+    message?: string;
+    lead_score: number;
+    lead_grade: string;
+    status: string;
+    created_at: string;
+  }
+
+  // Sample data for demo (in production, this would come from the API)
+  const sampleLeads: Lead[] = [
+    {
+      id: 1,
+      company_name: 'Beauty Clinic NYC',
+      company_website: 'https://beautyclinicnyc.com',
+      contact_name: 'Dr. Sarah Johnson',
+      job_title: 'Medical Director',
+      email: 'sarah@beautyclinicnyc.com',
+      country: 'US',
+      interested_products: '["TORR RF", "ULBLANC"]',
+      message: 'Interested in becoming a distributor for the East Coast region.',
+      lead_score: 85,
+      lead_grade: 'A',
+      status: 'new',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      company_name: 'Derma Solutions GmbH',
+      company_website: 'https://derma-solutions.de',
+      contact_name: 'Klaus Mueller',
+      job_title: 'Procurement Manager',
+      email: 'k.mueller@derma-solutions.de',
+      country: 'DE',
+      interested_products: '["TORR RF"]',
+      message: 'Looking for RF devices for our clinic chain.',
+      lead_score: 68,
+      lead_grade: 'B',
+      status: 'contacted',
+      created_at: new Date(Date.now() - 86400000).toISOString()
+    },
+    {
+      id: 3,
+      company_name: 'Aesthetic Brazil',
+      contact_name: 'Ana Costa',
+      job_title: 'Owner',
+      email: 'ana@aesthetic-brazil.com.br',
+      country: 'BR',
+      interested_products: '["NEWCHAE SHOT"]',
+      lead_score: 52,
+      lead_grade: 'C',
+      status: 'new',
+      created_at: new Date(Date.now() - 172800000).toISOString()
+    }
+  ];
+
+  function renderLeads(leads: Lead[]) {
+    const tbody = document.getElementById('leads-table-body');
+    if (!tbody) return;
+
+    if (leads.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+            <p class="font-medium">No leads match your filters</p>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = leads.map(lead => {
+      const products = JSON.parse(lead.interested_products || '[]');
+      const gradeColors: Record<string, string> = {
+        A: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+        B: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        C: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        D: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-400'
+      };
+      const statusColors: Record<string, string> = {
+        new: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        contacted: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        qualified: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+        proposal: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+        won: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+        lost: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+      };
+
+      return `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+          <td class="px-6 py-4">
+            <div>
+              <p class="font-medium text-slate-900 dark:text-slate-100">${lead.contact_name}</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">${lead.job_title}</p>
+              <a href="mailto:${lead.email}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">${lead.email}</a>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <div>
+              <p class="font-medium text-slate-900 dark:text-slate-100">${lead.company_name}</p>
+              ${lead.company_website ? `<a href="${lead.company_website}" target="_blank" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">Website</a>` : ''}
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm font-medium">${lead.country}</span>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex flex-wrap gap-1">
+              ${products.map((p: string) => `<span class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 rounded">${p}</span>`).join('')}
+            </div>
+          </td>
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-semibold rounded-full ${gradeColors[lead.lead_grade] || gradeColors.D}">
+              ${lead.lead_score}
+              <span class="text-xs">(${lead.lead_grade})</span>
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="px-2.5 py-1 text-xs font-medium rounded-full capitalize ${statusColors[lead.status] || statusColors.new}">
+              ${lead.status}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+            ${new Date(lead.created_at).toLocaleDateString()}
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-center gap-1">
+              <button class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title="View Details">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <a href="mailto:${lead.email}" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title="Send Email">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function updateStats(leads: Lead[]) {
+    const total = leads.length;
+    const hot = leads.filter(l => l.lead_grade === 'A').length;
+    const today = leads.filter(l => {
+      const created = new Date(l.created_at);
+      const now = new Date();
+      return created.toDateString() === now.toDateString();
+    }).length;
+    const avgScore = total > 0 ? Math.round(leads.reduce((sum, l) => sum + l.lead_score, 0) / total) : 0;
+
+    const statTotal = document.getElementById('stat-total');
+    const statHot = document.getElementById('stat-hot');
+    const statNew = document.getElementById('stat-new');
+    const statAvg = document.getElementById('stat-avg-score');
+
+    if (statTotal) statTotal.textContent = total.toString();
+    if (statHot) statHot.textContent = hot.toString();
+    if (statNew) statNew.textContent = today.toString();
+    if (statAvg) statAvg.textContent = avgScore.toString();
+  }
+
+  // Initialize with sample data
+  let currentLeads = sampleLeads;
+  renderLeads(currentLeads);
+  updateStats(currentLeads);
+
+  // Filter handlers
+  const gradeFilter = document.getElementById('filter-grade') as HTMLSelectElement;
+  const statusFilter = document.getElementById('filter-status') as HTMLSelectElement;
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+
+  function applyFilters() {
+    let filtered = [...sampleLeads];
+
+    if (gradeFilter?.value) {
+      filtered = filtered.filter(l => l.lead_grade === gradeFilter.value);
+    }
+
+    if (statusFilter?.value) {
+      filtered = filtered.filter(l => l.status === statusFilter.value);
+    }
+
+    if (searchInput?.value) {
+      const search = searchInput.value.toLowerCase();
+      filtered = filtered.filter(l =>
+        l.company_name.toLowerCase().includes(search) ||
+        l.contact_name.toLowerCase().includes(search) ||
+        l.email.toLowerCase().includes(search)
+      );
+    }
+
+    currentLeads = filtered;
+    renderLeads(currentLeads);
+  }
+
+  gradeFilter?.addEventListener('change', applyFilters);
+  statusFilter?.addEventListener('change', applyFilters);
+  searchInput?.addEventListener('input', applyFilters);
+
+  // Refresh button
+  document.getElementById('refresh-btn')?.addEventListener('click', () => {
+    // In production, this would fetch from the API
+    renderLeads(sampleLeads);
+    updateStats(sampleLeads);
+  });
+</script>
