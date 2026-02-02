@@ -91,6 +91,27 @@ html {
   scroll-behavior: smooth;
 }
 
+/* CLS Prevention - Reserve space for common elements */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Aspect ratio boxes for images */
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+/* Font loading optimization */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+}
+
 body {
   font-family: var(--font-sans);
   color: var(--text-secondary);

@@ -1,0 +1,152 @@
+---
+// Web Vitals Reporting Component
+// Reports Core Web Vitals to analytics
+---
+
+<script>
+  // Web Vitals measurement and reporting
+  // Uses the web-vitals library approach for accurate measurements
+
+  interface Metric {
+    name: string;
+    value: number;
+    rating: 'good' | 'needs-improvement' | 'poor';
+    delta: number;
+    id: string;
+  }
+
+  function sendToAnalytics(metric: Metric) {
+    // Send to Google Analytics if available
+    if (typeof gtag === 'function') {
+      gtag('event', metric.name, {
+        event_category: 'Web Vitals',
+        value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+        event_label: metric.id,
+        non_interaction: true,
+        metric_rating: metric.rating,
+        metric_delta: metric.delta,
+      });
+    }
+
+    // Log in development
+    if (import.meta.env.DEV) {
+      console.log(`[Web Vital] ${metric.name}: ${metric.value.toFixed(2)} (${metric.rating})`);
+    }
+  }
+
+  // Observe Largest Contentful Paint (LCP)
+  function observeLCP() {
+    try {
+      const observer = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime: number };
+        const value = lastEntry.startTime;
+
+        sendToAnalytics({
+          name: 'LCP',
+          value,
+          rating: value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor',
+          delta: value,
+          id: `lcp-${Date.now()}`,
+        });
+      });
+      observer.observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch (e) {
+      // LCP observation not supported
+    }
+  }
+
+  // Observe First Input Delay (FID) / Interaction to Next Paint (INP)
+  function observeFID() {
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const fidEntry = entry as PerformanceEntry & { processingStart: number; startTime: number };
+          const value = fidEntry.processingStart - fidEntry.startTime;
+
+          sendToAnalytics({
+            name: 'FID',
+            value,
+            rating: value <= 100 ? 'good' : value <= 300 ? 'needs-improvement' : 'poor',
+            delta: value,
+            id: `fid-${Date.now()}`,
+          });
+        }
+      });
+      observer.observe({ type: 'first-input', buffered: true });
+    } catch (e) {
+      // FID observation not supported
+    }
+  }
+
+  // Observe Cumulative Layout Shift (CLS)
+  function observeCLS() {
+    try {
+      let clsValue = 0;
+      let clsEntries: PerformanceEntry[] = [];
+
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
+          if (!layoutShiftEntry.hadRecentInput) {
+            clsEntries.push(entry);
+            clsValue += layoutShiftEntry.value;
+          }
+        }
+      });
+
+      observer.observe({ type: 'layout-shift', buffered: true });
+
+      // Report CLS when page is hidden
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          sendToAnalytics({
+            name: 'CLS',
+            value: clsValue,
+            rating: clsValue <= 0.1 ? 'good' : clsValue <= 0.25 ? 'needs-improvement' : 'poor',
+            delta: clsValue,
+            id: `cls-${Date.now()}`,
+          });
+          observer.disconnect();
+        }
+      });
+    } catch (e) {
+      // CLS observation not supported
+    }
+  }
+
+  // Observe Time to First Byte (TTFB)
+  function observeTTFB() {
+    try {
+      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      if (navigation) {
+        const value = navigation.responseStart - navigation.requestStart;
+
+        sendToAnalytics({
+          name: 'TTFB',
+          value,
+          rating: value <= 800 ? 'good' : value <= 1800 ? 'needs-improvement' : 'poor',
+          delta: value,
+          id: `ttfb-${Date.now()}`,
+        });
+      }
+    } catch (e) {
+      // TTFB observation not supported
+    }
+  }
+
+  // Initialize observers when DOM is ready
+  if (document.readyState === 'complete') {
+    observeLCP();
+    observeFID();
+    observeCLS();
+    observeTTFB();
+  } else {
+    window.addEventListener('load', () => {
+      observeLCP();
+      observeFID();
+      observeCLS();
+      observeTTFB();
+    });
+  }
+</script>

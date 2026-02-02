@@ -1,0 +1,73 @@
+---
+// Optimized Image Component with lazy loading and WebP support
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  decoding?: 'async' | 'sync' | 'auto';
+  sizes?: string;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  class: className = '',
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  decoding = 'async',
+  sizes = '100vw'
+} = Astro.props;
+
+// Generate WebP version path (assumes WebP version exists)
+const webpSrc = src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+const isExternalUrl = src.startsWith('http');
+
+// For Cloudflare Images optimization (if available)
+const cfOptimizedUrl = (url: string, options: { width?: number; quality?: number } = {}) => {
+  if (isExternalUrl) return url;
+  const params = new URLSearchParams();
+  if (options.width) params.set('width', options.width.toString());
+  if (options.quality) params.set('quality', options.quality.toString());
+  params.set('format', 'auto');
+  return `/cdn-cgi/image/${params.toString()}${url}`;
+};
+---
+
+<picture class={className}>
+  {!isExternalUrl && (
+    <source
+      type="image/webp"
+      srcset={webpSrc}
+      sizes={sizes}
+    />
+  )}
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    decoding={decoding}
+    class:list={['transition-opacity duration-300', className]}
+    onload="this.classList.add('loaded')"
+  />
+</picture>
+
+<style>
+  img {
+    opacity: 0;
+  }
+  img.loaded {
+    opacity: 1;
+  }
+  img[loading="eager"] {
+    opacity: 1;
+  }
+</style>
