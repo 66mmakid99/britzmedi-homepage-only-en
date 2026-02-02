@@ -5,8 +5,83 @@ export default config({
   storage: {
     kind: 'local',
   },
-  
+
   collections: {
+    // Blog Collection
+    blog: collection({
+      label: 'Blog Posts',
+      slugField: 'title',
+      path: 'src/content/blog/*',
+      format: { contentField: 'content' },
+      entryLayout: 'content',
+      schema: {
+        title: fields.slug({
+          name: {
+            label: 'Title',
+            validation: { isRequired: true }
+          }
+        }),
+        description: fields.text({
+          label: 'Meta Description',
+          multiline: true,
+          validation: { isRequired: true }
+        }),
+        tldr: fields.text({
+          label: 'TL;DR Summary',
+          multiline: true,
+          description: 'A brief 2-3 sentence summary for AI and quick readers'
+        }),
+        author: fields.text({
+          label: 'Author',
+          defaultValue: 'BRITZMEDI Team'
+        }),
+        publishedAt: fields.date({
+          label: 'Published Date',
+          validation: { isRequired: true }
+        }),
+        updatedAt: fields.date({
+          label: 'Updated Date'
+        }),
+        category: fields.select({
+          label: 'Category',
+          options: [
+            { label: 'Industry News', value: 'industry-news' },
+            { label: 'Product Updates', value: 'product-updates' },
+            { label: 'Technology', value: 'technology' },
+            { label: 'Clinical Studies', value: 'clinical-studies' },
+            { label: 'Company News', value: 'company-news' },
+            { label: 'Education', value: 'education' }
+          ],
+          defaultValue: 'industry-news'
+        }),
+        tags: fields.array(
+          fields.text({ label: 'Tag' }),
+          {
+            label: 'Tags',
+            itemLabel: props => props.value || 'Tag'
+          }
+        ),
+        featuredImage: fields.image({
+          label: 'Featured Image',
+          directory: 'public/images/blog',
+          publicPath: '/images/blog/'
+        }),
+        featured: fields.checkbox({
+          label: 'Featured Post',
+          defaultValue: false
+        }),
+        content: fields.markdoc({
+          label: 'Content',
+          options: {
+            image: {
+              directory: 'public/images/blog',
+              publicPath: '/images/blog/'
+            }
+          }
+        })
+      }
+    }),
+
     // Products Collection
     products: collection({
       label: 'Products',

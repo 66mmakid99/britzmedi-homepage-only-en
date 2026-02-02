@@ -1,0 +1,56 @@
+---
+// TL;DR Summary Box Component for AEO optimization
+interface Props {
+  summary: string;
+  class?: string;
+}
+
+const { summary, class: className = '' } = Astro.props;
+---
+
+<aside
+  class:list={[
+    'tldr-box relative p-6 rounded-2xl border',
+    'bg-gradient-to-br from-primary-50 to-primary-50/50',
+    'dark:from-primary-950/30 dark:to-primary-900/20',
+    'border-primary-200/60 dark:border-primary-800/40',
+    className
+  ]}
+  aria-label="TL;DR Summary"
+>
+  <!-- Icon and Label -->
+  <div class="flex items-center gap-2 mb-3">
+    <div class="w-8 h-8 rounded-lg bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center">
+      <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    </div>
+    <span class="text-xs font-bold tracking-wider uppercase text-primary-700 dark:text-primary-300">
+      TL;DR
+    </span>
+  </div>
+
+  <!-- Summary Text -->
+  <p class="text-base leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
+    {summary}
+  </p>
+
+  <!-- Decorative Element -->
+  <div class="absolute top-0 right-0 w-24 h-24 opacity-5 pointer-events-none">
+    <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full text-primary-600">
+      <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  </div>
+</aside>
+
+<style>
+  .tldr-box {
+    /* Subtle animation on hover */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tldr-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 112, 196, 0.08);
+  }
+</style>
