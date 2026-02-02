@@ -114,7 +114,7 @@ const blogListSchema = {
               'px-4 py-2 rounded-full text-sm font-medium transition-all',
               cat.value === 'all'
                 ? 'bg-primary-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             ]}
           >
             {cat.label}
@@ -128,21 +128,21 @@ const blogListSchema = {
         <div class="grid md:grid-cols-2 gap-8">
           {blogPosts.filter(p => p.featured).map((post) => (
             <article class="card-premium overflow-hidden group">
-              <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 relative">
+              <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative">
                 <div class="absolute inset-0 flex items-center justify-center">
-                  <svg class="w-16 h-16 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <span class="absolute top-4 left-4 badge-premium">Featured</span>
               </div>
               <div class="p-6">
-                <div class="flex items-center gap-3 mb-3 text-sm text-slate-500 dark:text-slate-400">
+                <div class="flex items-center gap-3 mb-3 text-sm text-slate-500">
                   <span class="capitalize">{post.category.replace('-', ' ')}</span>
                   <span>•</span>
                   <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
                 </div>
-                <h3 class="heading-3 mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                <h3 class="heading-3 mb-3 group-hover:text-primary-600 transition-colors">
                   <a href={`/blog/${post.slug}`} class="hover:underline">
                     {post.title}
                   </a>
@@ -150,7 +150,7 @@ const blogListSchema = {
                 <p class="body-base mb-4 line-clamp-2">{post.description}</p>
                 <div class="flex flex-wrap gap-2">
                   {post.tags.slice(0, 3).map(tag => (
-                    <span class="text-xs px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-400">
+                    <span class="text-xs px-2.5 py-1 bg-slate-100 rounded-full text-slate-600">
                       {tag}
                     </span>
                   ))}
@@ -167,20 +167,20 @@ const blogListSchema = {
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogPosts.map((post) => (
             <article class="card-premium overflow-hidden group" data-category={post.category}>
-              <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 relative">
+              <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative">
                 <div class="absolute inset-0 flex items-center justify-center">
-                  <svg class="w-12 h-12 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
               </div>
               <div class="p-5">
-                <div class="flex items-center gap-3 mb-2 text-sm text-slate-500 dark:text-slate-400">
+                <div class="flex items-center gap-3 mb-2 text-sm text-slate-500">
                   <span class="capitalize">{post.category.replace('-', ' ')}</span>
                   <span>•</span>
                   <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</time>
                 </div>
-                <h3 class="text-lg font-semibold mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
+                <h3 class="text-lg font-semibold mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
                   <a href={`/blog/${post.slug}`} class="hover:underline">
                     {post.title}
                   </a>
@@ -188,7 +188,7 @@ const blogListSchema = {
                 <p class="body-small line-clamp-2 mb-3">{post.description}</p>
                 <a
                   href={`/blog/${post.slug}`}
-                  class="inline-flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+                  class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"
                 >
                   Read More
                   <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

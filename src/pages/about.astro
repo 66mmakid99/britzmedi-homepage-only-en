@@ -5,19 +5,19 @@ import { company, milestones, coreTechnologies } from '../content/company';
 const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical device manufacturer established in 2017. FDA 510(k) cleared products, ISO 13485 certified, with 11+ registered patents.";
 ---
 
-<BaseLayout 
+<BaseLayout
   title="About Us"
   description={pageDescription}
   keywords={["BRITZMEDI", "about", "company history", "medical device manufacturer", "Korea", "FDA cleared", "ISO 13485"]}
 >
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 py-16 lg:py-24">
+  <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
     <div class="container">
       <div class="max-w-3xl">
         <span class="label mb-3 block">About BRITZMEDI</span>
         <h1 class="heading-1 mb-6">
           Pioneering Aesthetic<br />
-          <span class="text-primary-600 dark:text-primary-400">Medical Innovation</span>
+          <span class="text-primary-600">Medical Innovation</span>
         </h1>
         <p class="body-large">
           {company.description.long}
@@ -27,7 +27,7 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
   </section>
 
   <!-- Company Overview Section -->
-  <section class="section bg-white dark:bg-slate-900">
+  <section class="section bg-white">
     <div class="container">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16">
         <!-- Company Info -->
@@ -35,98 +35,98 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
           <h2 class="heading-2 mb-8">Company Overview</h2>
 
           <div class="space-y-6">
-            <div class="flex gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
-              <div class="shrink-0 w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex gap-4 pb-6 border-b border-slate-100">
+              <div class="shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
               <div>
-                <span class="text-sm text-slate-500 dark:text-slate-400">Company Name</span>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{company.name}</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">{company.nameKo}</p>
+                <span class="text-sm text-slate-500">Company Name</span>
+                <p class="font-semibold text-slate-900">{company.name}</p>
+                <p class="text-sm text-slate-500">{company.nameKo}</p>
               </div>
             </div>
 
-            <div class="flex gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
-              <div class="shrink-0 w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex gap-4 pb-6 border-b border-slate-100">
+              <div class="shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div>
-                <span class="text-sm text-slate-500 dark:text-slate-400">CEO</span>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{company.ceo}</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Appointed {company.ceoAppointment}</p>
+                <span class="text-sm text-slate-500">CEO</span>
+                <p class="font-semibold text-slate-900">{company.ceo}</p>
+                <p class="text-sm text-slate-500">Appointed {company.ceoAppointment}</p>
               </div>
             </div>
 
-            <div class="flex gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
-              <div class="shrink-0 w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex gap-4 pb-6 border-b border-slate-100">
+              <div class="shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <span class="text-sm text-slate-500 dark:text-slate-400">Established</span>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{company.establishment}</p>
+                <span class="text-sm text-slate-500">Established</span>
+                <p class="font-semibold text-slate-900">{company.establishment}</p>
               </div>
             </div>
 
-            <div class="flex gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
-              <div class="shrink-0 w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex gap-4 pb-6 border-b border-slate-100">
+              <div class="shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               <div>
-                <span class="text-sm text-slate-500 dark:text-slate-400">Headquarters & Factory</span>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{company.address.full}</p>
+                <span class="text-sm text-slate-500">Headquarters & Factory</span>
+                <p class="font-semibold text-slate-900">{company.address.full}</p>
               </div>
             </div>
 
             <div class="flex gap-4">
-              <div class="shrink-0 w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <span class="text-sm text-slate-500 dark:text-slate-400">Business Type</span>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{company.businessType}</p>
+                <span class="text-sm text-slate-500">Business Type</span>
+                <p class="font-semibold text-slate-900">{company.businessType}</p>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Philosophy & IP -->
         <div class="space-y-8">
-          <div class="bg-primary-50 dark:bg-primary-900/30 rounded-2xl p-8">
-            <h3 class="heading-3 text-primary-900 dark:text-primary-100 mb-4">Our Philosophy</h3>
-            <p class="text-lg text-primary-800 dark:text-primary-200 leading-relaxed">
+          <div class="bg-primary-50 rounded-2xl p-8">
+            <h3 class="heading-3 text-primary-900 mb-4">Our Philosophy</h3>
+            <p class="text-lg text-primary-800 leading-relaxed">
               "{company.philosophy}"
             </p>
           </div>
 
-          <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-8">
+          <div class="bg-slate-50 rounded-2xl p-8">
             <h3 class="heading-3 mb-6">Intellectual Property</h3>
             <div class="grid grid-cols-2 gap-6">
-              <div class="text-center p-4 bg-white dark:bg-slate-900 rounded-xl">
-                <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">{company.intellectualProperty.registeredPatents}</div>
-                <div class="text-sm text-slate-600 dark:text-slate-400">Registered Patents</div>
+              <div class="text-center p-4 bg-white rounded-xl">
+                <div class="text-3xl font-bold text-primary-600 mb-1">{company.intellectualProperty.registeredPatents}</div>
+                <div class="text-sm text-slate-600">Registered Patents</div>
               </div>
-              <div class="text-center p-4 bg-white dark:bg-slate-900 rounded-xl">
-                <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">{company.intellectualProperty.trademarks}</div>
-                <div class="text-sm text-slate-600 dark:text-slate-400">Trademarks</div>
+              <div class="text-center p-4 bg-white rounded-xl">
+                <div class="text-3xl font-bold text-primary-600 mb-1">{company.intellectualProperty.trademarks}</div>
+                <div class="text-sm text-slate-600">Trademarks</div>
               </div>
-              <div class="text-center p-4 bg-white dark:bg-slate-900 rounded-xl">
-                <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">{company.intellectualProperty.domesticPatents}</div>
-                <div class="text-sm text-slate-600 dark:text-slate-400">Domestic Patents</div>
+              <div class="text-center p-4 bg-white rounded-xl">
+                <div class="text-3xl font-bold text-primary-600 mb-1">{company.intellectualProperty.domesticPatents}</div>
+                <div class="text-sm text-slate-600">Domestic Patents</div>
               </div>
-              <div class="text-center p-4 bg-white dark:bg-slate-900 rounded-xl">
-                <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">{company.intellectualProperty.internationalPatents}</div>
-                <div class="text-sm text-slate-600 dark:text-slate-400">International Patents</div>
+              <div class="text-center p-4 bg-white rounded-xl">
+                <div class="text-3xl font-bold text-primary-600 mb-1">{company.intellectualProperty.internationalPatents}</div>
+                <div class="text-sm text-slate-600">International Patents</div>
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
   </section>
 
   <!-- Company History Timeline -->
-  <section class="section bg-slate-50 dark:bg-slate-800">
+  <section class="section bg-slate-50">
     <div class="container">
       <div class="text-center max-w-2xl mx-auto mb-12">
         <span class="label mb-3 block">Our Journey</span>
@@ -152,26 +152,26 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
             <div class="relative pl-8 pb-12 last:pb-0">
               <!-- Timeline Line -->
               {index !== milestones.length - 1 && (
-                <div class="absolute left-[11px] top-6 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-600"></div>
+                <div class="absolute left-[11px] top-6 bottom-0 w-0.5 bg-slate-200"></div>
               )}
 
               <!-- Timeline Dot -->
               <div class:list={[
-                "absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white dark:border-slate-800 shadow-sm",
+                "absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm",
                 milestone.upcoming ? "bg-accent-500" : "bg-primary-600"
               ]}></div>
 
               <!-- Content -->
-              <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-100 dark:border-slate-700 ml-4">
+              <div class="bg-white rounded-xl p-6 border border-slate-100 ml-4">
                 <div class="flex items-center gap-3 mb-2">
-                  <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">{milestone.year}</span>
+                  <span class="text-2xl font-bold text-primary-600">{milestone.year}</span>
                   {milestone.upcoming && (
-                    <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 rounded-full">
+                    <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-accent-100 text-accent-700 rounded-full">
                       Upcoming
                     </span>
                   )}
                 </div>
-                <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-2">{milestone.title}</h3>
+                <h3 class="font-semibold text-slate-900 mb-2">{milestone.title}</h3>
                 <p class="body-small">{milestone.description}</p>
               </div>
             </div>
@@ -182,7 +182,7 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
   </section>
 
   <!-- R&D Capabilities Section -->
-  <section class="section bg-white dark:bg-slate-900" id="technology">
+  <section class="section bg-white" id="technology">
     <div class="container">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
         <div>
@@ -195,28 +195,28 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
 
           <div class="space-y-4">
             <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-primary-600 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">Company-affiliated Research Institute certified since 2017</span>
+              <span class="text-slate-700">Company-affiliated Research Institute certified since 2017</span>
             </div>
             <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-primary-600 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">Venture Enterprise certification (R&D Type) valid until June 2028</span>
+              <span class="text-slate-700">Venture Enterprise certification (R&D Type) valid until June 2028</span>
             </div>
             <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-primary-600 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">In-house development of patented convergence technologies</span>
+              <span class="text-slate-700">In-house development of patented convergence technologies</span>
             </div>
             <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-primary-600 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">Core inventors leading key patent applications for advanced technologies</span>
+              <span class="text-slate-700">Core inventors leading key patent applications for advanced technologies</span>
             </div>
           </div>
         </div>
@@ -225,17 +225,17 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
         <div class="space-y-6">
           <h3 class="heading-3">Core Technologies</h3>
           {coreTechnologies.map((tech) => (
-            <div class="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-6">
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-6">
               <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h4 class="font-semibold text-slate-900 dark:text-slate-100">{tech.name}</h4>
+                <h4 class="font-semibold text-slate-900">{tech.name}</h4>
               </div>
               <p class="body-small mb-3">{tech.description}</p>
-              <span class="inline-flex items-center text-xs font-medium text-primary-600 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 px-2.5 py-1 rounded-full">
+              <span class="inline-flex items-center text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">
                 Applied to: {tech.appliedTo}
               </span>
             </div>
@@ -246,7 +246,7 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
   </section>
 
   <!-- Manufacturing & OEM/ODM Section -->
-  <section class="section bg-slate-50 dark:bg-slate-800">
+  <section class="section bg-slate-50">
     <div class="container">
       <div class="text-center max-w-2xl mx-auto mb-12">
         <span class="label mb-3 block">Manufacturing</span>
@@ -258,9 +258,9 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
 
       <div class="grid md:grid-cols-2 gap-8">
         <!-- Manufacturing Infrastructure -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-100 dark:border-slate-700">
-          <div class="w-14 h-14 bg-primary-100 dark:bg-primary-900/50 rounded-xl flex items-center justify-center mb-6">
-            <svg class="w-7 h-7 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl p-8 border border-slate-100">
+          <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
           </div>
@@ -271,30 +271,30 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
           </p>
           <div class="space-y-3">
             <div class="flex items-center gap-2 text-sm">
-              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">MFDS License No. {company.manufacturing.license}</span>
+              <span class="text-slate-700">MFDS License No. {company.manufacturing.license}</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">GMP Certified Manufacturing</span>
+              <span class="text-slate-700">GMP Certified Manufacturing</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">ISO 13485:2016 Certified</span>
+              <span class="text-slate-700">ISO 13485:2016 Certified</span>
             </div>
           </div>
         </div>
 
         <!-- OEM/ODM Readiness -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-100 dark:border-slate-700">
-          <div class="w-14 h-14 bg-primary-100 dark:bg-primary-900/50 rounded-xl flex items-center justify-center mb-6">
-            <svg class="w-7 h-7 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl p-8 border border-slate-100">
+          <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
@@ -305,31 +305,31 @@ const pageDescription = "Learn about BRITZMEDI Co., Ltd., a Korean medical devic
           </p>
           <div class="space-y-3">
             <div class="flex items-center gap-2 text-sm">
-              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">FDA Registered Contract Manufacturer</span>
+              <span class="text-slate-700">FDA Registered Contract Manufacturer</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">Owner/Operator No. {company.manufacturing.fdaRegistration.ownerOperatorNumber}</span>
+              <span class="text-slate-700">Owner/Operator No. {company.manufacturing.fdaRegistration.ownerOperatorNumber}</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span class="text-slate-700 dark:text-slate-300">End-to-end product development support</span>
+              <span class="text-slate-700">End-to-end product development support</span>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- CTA -->
       <div class="mt-12 text-center">
-        <a 
-          href="/contact" 
+        <a
+          href="/contact"
           class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
         >
           Discuss Partnership Opportunities

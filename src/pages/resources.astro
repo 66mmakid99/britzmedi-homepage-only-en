@@ -22,7 +22,7 @@ const typeColors: Record<string, string> = {
 };
 ---
 
-<BaseLayout 
+<BaseLayout
   title="Resources"
   description={pageDescription}
   keywords={["BRITZMEDI downloads", "product brochures", "technical documents", "medical device resources", "TORR RF brochure"]}
@@ -38,7 +38,7 @@ const typeColors: Record<string, string> = {
           <span class="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">Center</span>
         </h1>
         <p class="body-large">
-          Access product brochures, technical documents, marketing materials, 
+          Access product brochures, technical documents, marketing materials,
           certificates, and videos. All resources are available for download.
         </p>
       </div>
@@ -49,14 +49,14 @@ const typeColors: Record<string, string> = {
   <section class="sticky top-16 lg:top-20 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200/50">
     <div class="container">
       <nav class="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
-        <button 
+        <button
           class="resource-filter-btn active shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
           data-filter="all"
         >
           All Resources
         </button>
         {resourceCategories.map((category) => (
-          <button 
+          <button
             class="resource-filter-btn shrink-0 px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
             data-filter={category.id}
           >
@@ -72,15 +72,15 @@ const typeColors: Record<string, string> = {
     <div class="container">
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="resources-grid">
         {resources.map((resource) => (
-          <div 
+          <div
             class="resource-card card-premium overflow-hidden group"
             data-category={resource.category}
           >
             <!-- Thumbnail -->
             <div class="aspect-video bg-slate-100 relative overflow-hidden">
               {resource.thumbnail ? (
-                <img 
-                  src={resource.thumbnail} 
+                <img
+                  src={resource.thumbnail}
                   alt={resource.title}
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
@@ -94,14 +94,14 @@ const typeColors: Record<string, string> = {
                   </div>
                 </div>
               )}
-              
+
               <!-- Type Badge -->
               <div class="absolute top-3 left-3">
                 <span class={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold uppercase rounded-md ${typeColors[resource.type]}`}>
                   {resource.type}
                 </span>
               </div>
-              
+
               <!-- Product Badge -->
               {resource.product && (
                 <div class="absolute top-3 right-3">
@@ -111,7 +111,7 @@ const typeColors: Record<string, string> = {
                 </div>
               )}
             </div>
-            
+
             <!-- Content -->
             <div class="p-5">
                <h2 class="font-semibold text-slate-900 mb-2 group-hover:text-primary-600 transition-colors">
@@ -120,7 +120,7 @@ const typeColors: Record<string, string> = {
               <p class="text-sm text-slate-600 mb-4 line-clamp-2">
                 {resource.description}
               </p>
-              
+
               <!-- Meta -->
               <div class="flex items-center justify-between text-xs text-slate-500 mb-4">
                 {resource.fileSize && (
@@ -140,9 +140,9 @@ const typeColors: Record<string, string> = {
                   </span>
                 )}
               </div>
-              
+
               <!-- Download Button -->
-              <a 
+              <a
                 href={resource.driveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -157,7 +157,7 @@ const typeColors: Record<string, string> = {
           </div>
         ))}
       </div>
-      
+
       <!-- Empty State -->
       <div id="no-resources" class="hidden py-16 text-center">
         <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -177,7 +177,7 @@ const typeColors: Record<string, string> = {
       <div class="max-w-3xl mx-auto text-center">
         <h2 class="heading-2 mb-4">Need Additional Materials?</h2>
         <p class="body-large mb-8">
-          Looking for specific documents, custom presentations, or localized materials? 
+          Looking for specific documents, custom presentations, or localized materials?
           Contact our team and we'll prepare the resources you need.
         </p>
         <a href="/contact" class="btn-primary">
@@ -200,15 +200,15 @@ const typeColors: Record<string, string> = {
   filterButtons.forEach(button => {
     button.addEventListener('click', () => {
       const filter = button.getAttribute('data-filter');
-      
+
       // Update active state
       filterButtons.forEach(btn => {
-        btn.classList.remove('active', 'bg-primary-100', 'text-primary-700', 'dark:bg-primary-900/30', 'dark:text-primary-400');
-        btn.classList.add('text-slate-600', 'dark:text-slate-400');
+        btn.classList.remove('active', 'bg-primary-100', 'text-primary-700');
+        btn.classList.add('text-slate-600');
       });
-      button.classList.add('active', 'bg-primary-100', 'text-primary-700', 'dark:bg-primary-900/30', 'dark:text-primary-400');
-      button.classList.remove('text-slate-600', 'dark:text-slate-400');
-      
+      button.classList.add('active', 'bg-primary-100', 'text-primary-700');
+      button.classList.remove('text-slate-600');
+
       // Filter resources
       let visibleCount = 0;
       resourceCards.forEach(card => {
@@ -220,7 +220,7 @@ const typeColors: Record<string, string> = {
           card.classList.add('hidden');
         }
       });
-      
+
       // Show/hide empty state
       if (noResourcesMessage) {
         if (visibleCount === 0) {
@@ -231,12 +231,12 @@ const typeColors: Record<string, string> = {
       }
     });
   });
-  
+
   // Initialize first button as active
   const firstButton = filterButtons[0] as HTMLElement;
   if (firstButton) {
-    firstButton.classList.add('bg-primary-100', 'text-primary-700', 'dark:bg-primary-900/30', 'dark:text-primary-400');
-    firstButton.classList.remove('text-slate-600', 'dark:text-slate-400');
+    firstButton.classList.add('bg-primary-100', 'text-primary-700');
+    firstButton.classList.remove('text-slate-600');
   }
 </script>
 
@@ -248,7 +248,7 @@ const typeColors: Record<string, string> = {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
