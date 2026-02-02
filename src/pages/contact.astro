@@ -1,51 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import LeadForm from '../components/features/LeadForm.astro';
 import { company } from '../content/company';
 
-const pageDescription = "Contact BRITZMEDI for sales inquiries, partnership opportunities, or technical support. Get in touch with our team in Korea.";
-
-const inquiryTypes = [
-  { value: 'sales', label: 'Sales Inquiry' },
-  { value: 'distributor', label: 'Distributor/Partnership' },
-  { value: 'oem', label: 'OEM/ODM Inquiry' },
-  { value: 'technical', label: 'Technical Support' },
-  { value: 'other', label: 'Other' },
-];
-
-const productOptions = [
-  { value: 'torr-rf', label: 'TORR RF' },
-  { value: 'ulblanc', label: 'ULBLANC' },
-  { value: 'newchae-shot', label: 'NEWCHAE SHOT' },
-  { value: 'lumino-wave', label: 'LUMINO WAVE' },
-  { value: 'multiple', label: 'Multiple Products' },
-];
-
-// Country codes for phone number
-const countryCodes = [
-  { code: '+1', country: 'United States / Canada', format: '(XXX) XXX-XXXX' },
-  { code: '+44', country: 'United Kingdom', format: 'XXXX XXXXXX' },
-  { code: '+49', country: 'Germany', format: 'XXX XXXXXXXX' },
-  { code: '+33', country: 'France', format: 'X XX XX XX XX' },
-  { code: '+39', country: 'Italy', format: 'XXX XXX XXXX' },
-  { code: '+34', country: 'Spain', format: 'XXX XXX XXX' },
-  { code: '+81', country: 'Japan', format: 'XX-XXXX-XXXX' },
-  { code: '+82', country: 'South Korea', format: 'XX-XXXX-XXXX' },
-  { code: '+86', country: 'China', format: 'XXX XXXX XXXX' },
-  { code: '+852', country: 'Hong Kong', format: 'XXXX XXXX' },
-  { code: '+65', country: 'Singapore', format: 'XXXX XXXX' },
-  { code: '+61', country: 'Australia', format: 'XXX XXX XXX' },
-  { code: '+55', country: 'Brazil', format: 'XX XXXXX-XXXX' },
-  { code: '+52', country: 'Mexico', format: 'XX XXXX XXXX' },
-  { code: '+91', country: 'India', format: 'XXXXX XXXXX' },
-  { code: '+971', country: 'UAE', format: 'XX XXX XXXX' },
-  { code: '+966', country: 'Saudi Arabia', format: 'XX XXX XXXX' },
-  { code: '+7', country: 'Russia', format: 'XXX XXX-XX-XX' },
-  { code: '+27', country: 'South Africa', format: 'XX XXX XXXX' },
-  { code: '+90', country: 'Turkey', format: 'XXX XXX XXXX' },
-];
+const pageDescription = "Contact BRITZMEDI for sales inquiries, partnership opportunities, or product information. Get in touch with our team.";
 ---
 
-<BaseLayout 
+<BaseLayout
   title="Contact"
   description={pageDescription}
   keywords={["BRITZMEDI contact", "sales inquiry", "distributor", "partnership", "medical device Korea"]}
@@ -61,7 +22,7 @@ const countryCodes = [
           <span class="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">Conversation</span>
         </h1>
         <p class="body-large">
-          Whether you're interested in our products, exploring partnership opportunities, 
+          Whether you're interested in our products, exploring partnership opportunities,
           or need technical support, our team is here to help.
         </p>
       </div>
@@ -69,612 +30,98 @@ const countryCodes = [
   </section>
 
   <!-- Contact Section -->
-  <section class="section bg-white">
+  <section class="section bg-white dark:bg-slate-900">
     <div class="container">
       <div class="grid lg:grid-cols-5 gap-12 lg:gap-16">
         <!-- Contact Info -->
         <div class="lg:col-span-2">
           <h2 class="heading-3 mb-8">Get in Touch</h2>
-          
+
           <div class="space-y-6 mb-8">
             <!-- Address -->
             <div class="flex gap-4 group">
-              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/50 dark:to-primary-800/50 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+                <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-slate-900 mb-1">Headquarters & Factory</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">{company.address.full}</p>
+                <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-1">Headquarters & Factory</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{company.address.full}</p>
               </div>
             </div>
-            
+
             <!-- Phone -->
             <div class="flex gap-4 group">
-              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/50 dark:to-primary-800/50 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+                <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-slate-900 mb-1">Phone</h3>
-                <a href={`tel:${company.contact.phone}`} class="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-1">Phone</h3>
+                <a href={`tel:${company.contact.phone}`} class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors">
                   {company.contact.phone}
                 </a>
               </div>
             </div>
-            
+
             <!-- Email -->
             <div class="flex gap-4 group">
-              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/50 dark:to-primary-800/50 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+                <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-slate-900 mb-1">Email</h3>
-                <a href={`mailto:${company.contact.email}`} class="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-1">Email</h3>
+                <a href={`mailto:${company.contact.email}`} class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors">
                   {company.contact.email}
                 </a>
               </div>
             </div>
-            
+
             <!-- Website -->
             <div class="flex gap-4 group">
-              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/50 dark:to-primary-800/50 rounded-2xl flex items-center justify-center shrink-0 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+                <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-slate-900 mb-1">Website</h3>
-                <a href={`https://${company.contact.website}`} target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-1">Website</h3>
+                <a href={`https://${company.contact.website}`} target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors">
                   {company.contact.website}
                 </a>
               </div>
             </div>
           </div>
-          
         </div>
-        
-        <!-- Contact Form -->
+
+        <!-- Lead Form -->
         <div class="lg:col-span-3">
-          <div class="relative">
-            <div class="absolute -inset-4 bg-gradient-to-br from-primary-500/5 to-accent-500/5 rounded-3xl blur-2xl"></div>
-            <div class="relative bg-white rounded-2xl border border-slate-200/80 p-6 lg:p-8 shadow-xl shadow-slate-200/50">
-              <h2 class="heading-3 mb-2">Send Us a Message</h2>
-              <p class="body-small mb-8">Fill out the form below and we'll get back to you within 1-2 business days.</p>
-              
-              <form id="contactForm" class="space-y-6">
-                <!-- Inquiry Type -->
-                <div>
-                  <label for="inquiryType" class="block text-sm font-semibold text-slate-700 mb-2">
-                    Inquiry Type <span class="text-red-500">*</span>
-                  </label>
-                  <select 
-                    id="inquiryType" 
-                    name="inquiryType" 
-                    required
-                    class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 transition-shadow"
-                  >
-                    <option value="">Select inquiry type</option>
-                    {inquiryTypes.map((type) => (
-                      <option value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <!-- Name & Company -->
-                <div class="grid md:grid-cols-2 gap-5">
-                  <div>
-                    <label for="name" class="block text-sm font-semibold text-slate-700 mb-2">
-                      Your Name <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      name="name" 
-                      required
-                      placeholder="John Doe"
-                      class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                    />
-                  </div>
-                  <div>
-                    <label for="company" class="block text-sm font-semibold text-slate-700 mb-2">
-                      Company / Organization <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      type="text" 
-                      id="company" 
-                      name="company" 
-                      required
-                      placeholder="Company Name"
-                      class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                    />
-                  </div>
-                </div>
-                
-                <!-- Email & Phone -->
-                <div class="grid md:grid-cols-2 gap-5">
-                  <div>
-                    <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">
-                      Email Address <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                      <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        required
-                        placeholder="you@company.com"
-                        class="w-full px-4 py-3.5 pr-12 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                      />
-                      <div id="emailStatus" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
-                        <svg id="emailValid" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <svg id="emailInvalid" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        <svg id="emailLoading" class="w-5 h-5 text-slate-400 animate-spin hidden" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      </div>
-                    </div>
-                    <p id="emailError" class="hidden mt-1.5 text-xs text-red-500"></p>
-                  </div>
-                  <div>
-                    <label for="phone" class="block text-sm font-semibold text-slate-700 mb-2">
-                      Phone Number
-                    </label>
-                    <div class="flex gap-2">
-                      <select 
-                        id="countryCode" 
-                        name="countryCode"
-                        class="w-32 shrink-0 px-3 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 text-sm transition-shadow"
-                      >
-                        {countryCodes.map((cc) => (
-                          <option value={cc.code} title={cc.country}>{cc.code}</option>
-                        ))}
-                      </select>
-                      <input 
-                        type="tel" 
-                        id="phone" 
-                        name="phone"
-                        placeholder="Phone number"
-                        class="flex-1 px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                      />
-                    </div>
-                    <p id="phoneFormat" class="mt-1.5 text-xs text-slate-500">Format: (XXX) XXX-XXXX</p>
-                  </div>
-                </div>
-                
-                <!-- Country & Product Interest -->
-                <div class="grid md:grid-cols-2 gap-5">
-                  <div>
-                    <label for="country" class="block text-sm font-semibold text-slate-700 mb-2">
-                      Country <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      type="text" 
-                      id="country" 
-                      name="country" 
-                      required
-                      placeholder="Your Country"
-                      class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
-                    />
-                  </div>
-                  <div>
-                    <label for="product" class="block text-sm font-semibold text-slate-700 mb-2">
-                      Product Interest
-                    </label>
-                    <select 
-                      id="product" 
-                      name="product"
-                      class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 transition-shadow"
-                    >
-                      <option value="">Select a product</option>
-                      {productOptions.map((product) => (
-                        <option value={product.value}>{product.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <!-- Message -->
-                <div>
-                  <label for="message" class="block text-sm font-semibold text-slate-700 mb-2">
-                    Message <span class="text-red-500">*</span>
-                  </label>
-                  <textarea 
-                    id="message" 
-                    name="message" 
-                    required
-                    rows="5"
-                    placeholder="Please describe your inquiry in detail..."
-                    class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 resize-y transition-shadow"
-                  ></textarea>
-                </div>
-                
-                <!-- Privacy Notice -->
-                <div class="flex items-start gap-3">
-                  <input 
-                    type="checkbox" 
-                    id="privacy" 
-                    name="privacy"
-                    required
-                    class="mt-1 w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
-                  />
-                  <label for="privacy" class="text-sm text-slate-600 leading-relaxed">
-                    I agree to the collection and use of my personal information for the purpose of responding to my inquiry. 
-                    <span class="text-red-500">*</span>
-                  </label>
-                </div>
-                
-                <!-- Submit Button -->
-                <button 
-                  type="submit"
-                  id="submitBtn"
-                  class="w-full btn-primary py-4 text-base"
-                >
-                  <span id="btnText">Send Message</span>
-                  <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                  <svg id="btnSpinner" class="hidden animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </button>
-              </form>
-              
-              <!-- Form Status Message -->
-              <div id="formStatus" class="hidden mt-6 p-5 rounded-xl"></div>
-            </div>
-          </div>
+          <LeadForm />
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Map Section (Placeholder) -->
+  <!-- Map Section -->
   <section class="py-12 bg-gradient-section">
     <div class="container">
-      <div class="aspect-[21/9] bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center relative overflow-hidden">
+      <div class="aspect-[21/9] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex items-center justify-center relative overflow-hidden">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%2394a3b8\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
         <div class="text-center relative">
-          <div class="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <p class="text-slate-600 font-medium">Hwaseong-si, Gyeonggi-do, Republic of Korea</p>
+          <p class="text-slate-600 dark:text-slate-300 font-medium">Hwaseong-si, Gyeonggi-do, Republic of Korea</p>
         </div>
       </div>
     </div>
   </section>
 </BaseLayout>
-
-<script>
-  // EmailJS Configuration
-  const EMAILJS_PUBLIC_KEY = 'qZJl-FQP1CJJqGvNp';
-  const EMAILJS_SERVICE_ID = 'service_nbk0net';
-  const EMAILJS_TEMPLATE_ID = 'template_azmskha';
-
-  // Emailable API Configuration (for server-side email verification)
-  const EMAILABLE_PUBLIC_KEY = 'live_ffc42efd002265fef603';
-
-  // Dynamically load EmailJS SDK
-  function loadEmailJS(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if ((window as any).emailjs) {
-        resolve();
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-      script.onload = () => {
-        (window as any).emailjs.init(EMAILJS_PUBLIC_KEY);
-        resolve();
-      };
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
-
-  // Initialize on page load
-  loadEmailJS().catch(console.error);
-
-  // Disposable email domains list (common ones)
-  const disposableEmailDomains = [
-    'tempmail.com', 'temp-mail.org', 'guerrillamail.com', 'mailinator.com',
-    'throwaway.email', '10minutemail.com', 'trashmail.com', 'fakeinbox.com',
-    'yopmail.com', 'maildrop.cc', 'dispostable.com', 'getnada.com',
-    'mohmal.com', 'tempail.com', 'tempmailaddress.com', 'burnermail.io',
-    'sharklasers.com', 'guerrillamailblock.com', 'tempinbox.com'
-  ];
-
-  // Email validation function
-  function validateEmail(email: string): { valid: boolean; message?: string } {
-    // Basic format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return { valid: false, message: 'Please enter a valid email address.' };
-    }
-    
-    // Check for disposable email domains
-    const domain = email.split('@')[1]?.toLowerCase();
-    if (disposableEmailDomains.includes(domain)) {
-      return { valid: false, message: 'Please use a business or personal email address. Temporary emails are not accepted.' };
-    }
-    
-    // Check for common typos in popular domains
-    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
-    const typoPatterns: Record<string, string[]> = {
-      'gmail.com': ['gmai.com', 'gmial.com', 'gamil.com', 'gmal.com', 'gmail.co', 'gmail.cm'],
-      'yahoo.com': ['yaho.com', 'yahooo.com', 'yahoo.co', 'yahoo.cm'],
-      'hotmail.com': ['hotmai.com', 'hotmal.com', 'hotmail.co', 'hotmail.cm'],
-      'outlook.com': ['outlok.com', 'outloo.com', 'outlook.co', 'outlook.cm'],
-    };
-    
-    for (const [correct, typos] of Object.entries(typoPatterns)) {
-      if (typos.includes(domain)) {
-        return { valid: false, message: `Did you mean ${email.split('@')[0]}@${correct}?` };
-      }
-    }
-    
-    return { valid: true };
-  }
-
-  // Emailable API verification (server-side validation with rate limit fallback)
-  async function verifyEmailWithEmailable(email: string): Promise<{ valid: boolean; message?: string }> {
-    try {
-      const response = await fetch(
-        `https://api.emailable.com/v1/verify?email=${encodeURIComponent(email)}&api_key=${EMAILABLE_PUBLIC_KEY}`
-      );
-      
-      // Rate limited (10/day/IP on free plan) - fall back to client-side validation
-      if (response.status === 429) {
-        console.log('Emailable rate limit reached, using client-side validation');
-        return validateEmail(email);
-      }
-      
-      // Other errors - fall back to client-side validation
-      if (!response.ok) {
-        console.warn('Emailable API error, using client-side validation');
-        return validateEmail(email);
-      }
-      
-      const data = await response.json();
-      
-      // Check Emailable response states
-      // state: 'deliverable', 'undeliverable', 'risky', 'unknown', 'catch-all'
-      if (data.state === 'deliverable') {
-        return { valid: true };
-      }
-      
-      if (data.state === 'undeliverable') {
-        return { valid: false, message: 'This email address appears to be invalid. Please check and try again.' };
-      }
-      
-      if (data.state === 'risky') {
-        // Accept risky emails but they passed basic validation
-        return { valid: true };
-      }
-      
-      // For 'unknown' or 'catch-all', accept if client-side validation passes
-      return validateEmail(email);
-      
-    } catch (error) {
-      console.warn('Emailable verification failed, using client-side validation:', error);
-      return validateEmail(email);
-    }
-  }
-
-  // Email validation UI elements
-  const emailInput = document.getElementById('email') as HTMLInputElement;
-  const emailStatus = document.getElementById('emailStatus');
-  const emailValid = document.getElementById('emailValid');
-  const emailInvalid = document.getElementById('emailInvalid');
-  const emailLoading = document.getElementById('emailLoading');
-  const emailError = document.getElementById('emailError');
-
-  let emailValidationTimeout: number;
-  let isEmailValid = false;
-
-  emailInput?.addEventListener('input', () => {
-    clearTimeout(emailValidationTimeout);
-    const email = emailInput.value.trim();
-    
-    if (!email) {
-      emailStatus?.classList.add('hidden');
-      emailError?.classList.add('hidden');
-      isEmailValid = false;
-      return;
-    }
-    
-    emailValidationTimeout = window.setTimeout(() => {
-      emailStatus?.classList.remove('hidden');
-      emailLoading?.classList.remove('hidden');
-      emailValid?.classList.add('hidden');
-      emailInvalid?.classList.add('hidden');
-      
-      // Simulate brief loading for UX
-      setTimeout(() => {
-        emailLoading?.classList.add('hidden');
-        const result = validateEmail(email);
-        
-        if (result.valid) {
-          emailValid?.classList.remove('hidden');
-          emailError?.classList.add('hidden');
-          emailInput.classList.remove('border-red-500');
-          emailInput.classList.add('border-green-500');
-          isEmailValid = true;
-        } else {
-          emailInvalid?.classList.remove('hidden');
-          emailError?.classList.remove('hidden');
-          if (emailError) emailError.textContent = result.message || 'Invalid email';
-          emailInput.classList.remove('border-green-500');
-          emailInput.classList.add('border-red-500');
-          isEmailValid = false;
-        }
-      }, 300);
-    }, 500);
-  });
-
-  // Country code format update
-  const countryCodeSelect = document.getElementById('countryCode') as HTMLSelectElement;
-  const phoneFormatText = document.getElementById('phoneFormat');
-  const phoneFormats: Record<string, string> = {
-    '+1': '(XXX) XXX-XXXX',
-    '+44': 'XXXX XXXXXX',
-    '+49': 'XXX XXXXXXXX',
-    '+33': 'X XX XX XX XX',
-    '+39': 'XXX XXX XXXX',
-    '+34': 'XXX XXX XXX',
-    '+81': 'XX-XXXX-XXXX',
-    '+82': 'XX-XXXX-XXXX',
-    '+86': 'XXX XXXX XXXX',
-    '+852': 'XXXX XXXX',
-    '+65': 'XXXX XXXX',
-    '+61': 'XXX XXX XXX',
-    '+55': 'XX XXXXX-XXXX',
-    '+52': 'XX XXXX XXXX',
-    '+91': 'XXXXX XXXXX',
-    '+971': 'XX XXX XXXX',
-    '+966': 'XX XXX XXXX',
-    '+7': 'XXX XXX-XX-XX',
-    '+27': 'XX XXX XXXX',
-    '+90': 'XXX XXX XXXX',
-  };
-
-  countryCodeSelect?.addEventListener('change', () => {
-    const format = phoneFormats[countryCodeSelect.value] || 'Enter phone number';
-    if (phoneFormatText) phoneFormatText.textContent = `Format: ${format}`;
-  });
-
-  const form = document.getElementById('contactForm') as HTMLFormElement;
-  const formStatus = document.getElementById('formStatus');
-  const submitBtn = document.getElementById('submitBtn');
-  const btnText = document.getElementById('btnText');
-  const btnIcon = document.getElementById('btnIcon');
-  const btnSpinner = document.getElementById('btnSpinner');
-
-  function setLoading(loading: boolean) {
-    if (!submitBtn || !btnText || !btnIcon || !btnSpinner) return;
-    
-    if (loading) {
-      submitBtn.setAttribute('disabled', 'true');
-      submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-      btnText.textContent = 'Sending...';
-      btnIcon.classList.add('hidden');
-      btnSpinner.classList.remove('hidden');
-    } else {
-      submitBtn.removeAttribute('disabled');
-      submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-      btnText.textContent = 'Send Message';
-      btnIcon.classList.remove('hidden');
-      btnSpinner.classList.add('hidden');
-    }
-  }
-
-  function showStatus(type: 'success' | 'error', message: string) {
-    if (!formStatus) return;
-    
-    formStatus.classList.remove('hidden', 'bg-green-50', 'text-green-800', 'bg-red-50', 'text-red-800');
-    
-    if (type === 'success') {
-      formStatus.classList.add('bg-green-50', 'text-green-800');
-      formStatus.innerHTML = `
-        <div class="flex items-start gap-3">
-          <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          <div>
-            <p class="font-semibold">Message sent successfully!</p>
-            <p class="text-sm mt-1">${message}</p>
-          </div>
-        </div>
-      `;
-    } else {
-      formStatus.classList.add('bg-red-50', 'text-red-800');
-      formStatus.innerHTML = `
-        <div class="flex items-start gap-3">
-          <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          <div>
-            <p class="font-semibold">Failed to send message</p>
-            <p class="text-sm mt-1">${message}</p>
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // Validate email before submission (client-side first, then Emailable API)
-    const emailValue = (document.getElementById('email') as HTMLInputElement)?.value?.trim();
-    
-    // Quick client-side validation first
-    const clientValidation = validateEmail(emailValue || '');
-    if (!clientValidation.valid) {
-      showStatus('error', clientValidation.message || 'Please enter a valid email address.');
-      return;
-    }
-    
-    setLoading(true);
-    
-    // Server-side verification via Emailable API (with graceful fallback)
-    const emailableValidation = await verifyEmailWithEmailable(emailValue || '');
-    if (!emailableValidation.valid) {
-      showStatus('error', emailableValidation.message || 'Please enter a valid email address.');
-      setLoading(false);
-      return;
-    }
-    
-    const formData = new FormData(form);
-    
-    // Get select labels instead of values for better readability
-    const inquiryTypeSelect = document.getElementById('inquiryType') as HTMLSelectElement;
-    const productSelect = document.getElementById('product') as HTMLSelectElement;
-    const countryCodeVal = (document.getElementById('countryCode') as HTMLSelectElement)?.value || '';
-    const phoneVal = formData.get('phone') as string || '';
-    const fullPhone = phoneVal ? `${countryCodeVal} ${phoneVal}` : 'Not provided';
-    
-    const templateParams = {
-      inquiry_type: inquiryTypeSelect.options[inquiryTypeSelect.selectedIndex]?.text || '',
-      from_name: formData.get('name'),
-      company: formData.get('company'),
-      from_email: formData.get('email'),
-      phone: fullPhone,
-      country: formData.get('country'),
-      product_interest: productSelect.options[productSelect.selectedIndex]?.text || 'Not specified',
-      message: formData.get('message'),
-    };
-
-    try {
-      // Ensure EmailJS is loaded
-      await loadEmailJS();
-      const response = await (window as any).emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-      
-      if (response.status === 200) {
-        showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
-        form.reset();
-      } else {
-        throw new Error('Failed to send');
-      }
-    } catch (error) {
-      console.error('EmailJS Error:', error);
-      showStatus('error', 'Please try again later or contact us directly via email.');
-    } finally {
-      setLoading(false);
-    }
-  });
-</script>
