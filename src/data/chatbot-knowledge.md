@@ -1,0 +1,319 @@
+# BRITZMEDI Chatbot Knowledge Base
+
+> ⚠️ **STRICT RULES FOR AI CHATBOT**
+> 1. Use ONLY information provided in this document
+> 2. If information is not available, respond: "I don't have that specific information. Please contact us directly for details."
+> 3. NEVER fabricate facts, numbers, or specifications
+> 4. NEVER reference external sources or training data
+> 5. This document is the ONLY source of truth
+
+---
+
+## 1. Company Information
+
+### Basic Info
+- **Company Name:** BRITZMEDI Co., Ltd. (주)브리츠메디
+- **CEO:** Shin Jae Lee (이신재) - Appointed December 2, 2025
+- **Established:** October 23, 2017
+- **Headquarters:** 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea
+- **Business Type:** Manufacturer of Medical Devices, R&D, Wholesale & Retail
+- **Website:** www.britzmedi.com
+- **TEL:** +82-70-4348-7244
+
+### Certifications & Quality
+- **ISO 13485:2016** - Certified (Certificate No. MK000197)
+- **GMP** - Certified by Korea MFDS
+- **FDA Contract Manufacturer** - Registered (Owner/Operator Number: 10088936)
+- **Venture Enterprise** - Certified (R&D Type, valid until June 2028)
+
+### Company History
+| Year | Milestone |
+|------|-----------|
+| 2017 | Established BRITZMEDI, Certified as Company-Affiliated Research Institute |
+| 2021 | Obtained GMP Certification |
+| 2022 | FDA 510(k) clearance for TORR RF (K212561), ISO 13485:2016, Acquired i-BOOSTER |
+| 2025 | KC Registration for LSR-10, Venture Enterprise re-designation, New CEO appointed |
+
+### R&D Team (Key Personnel)
+- **Kim Dong Hoo** (김동후)
+- **Kim Jung Rack** (김정락)
+- **Kim Hyoung Moon** (김형문)
+- **Hwang Je Wan** (황제완)
+
+### Intellectual Property
+- 11 registered patents (10 Domestic, 1 International)
+- 5 trademarks
+- Additional patents pending
+
+---
+
+## 2. Product Information
+
+### 2.1 TORR RF (Model: MTX-C1)
+**Category:** Non-invasive Multi-Wave RF Medical Device
+
+#### Overview
+TORR RF delivers thermal energy into dermal and subcutaneous layers using Multi-Wave Radiofrequency technology. FDA 510(k) Cleared (K212561).
+
+#### Key Technologies
+| Technology | Description |
+|------------|-------------|
+| **Auto Circular Motion Head** | Patented rotating head (68 rpm) creates uniform "Toroidal" thermal field |
+| **Real-Time Temperature Control** | Sensors monitor skin temp (30°C-50°C), auto-cutoff prevents burns |
+| **Vibro-Comfort Mode** | 3D vibration minimizes heat sensation for patient comfort |
+
+#### Specifications
+| Parameter | Value |
+|-----------|-------|
+| Frequency | 1 MHz ± 10% |
+| Max Power | 55W (Medium/Large), 7.5W (Small) |
+| Modes | Single / Pulse / Repeat |
+| Depth | Low / Deep Mode (1.5mm ~ 10mm) |
+| Temp Range | 30°C ~ 50°C |
+| Display | 10.1 inch TFT LCD Touch Screen |
+| Dimensions | 338.1mm (W) × 643mm (D) × 857.5mm (H) |
+| Weight | 36 kg |
+| Power | 100-240 VAC, 50/60 Hz |
+
+#### Handpieces
+| Type | Tip Size | Depth | Use |
+|------|----------|-------|-----|
+| Large (Body) | Ø 50mm | 3.5-10mm | Body contouring, Auto-rotation |
+| Small (Face) | Ø 40mm | 2.5-6mm | Facial tightening |
+| Micro (Eye) | Ø 20mm | 1.5-2mm | Periorbital area, delicate zones |
+
+#### FDA Cleared Indications
+- Relief of minor muscle aches and pains
+- Temporary improvement of local blood circulation
+- Temporary reduction in the appearance of cellulite
+
+#### Consumables
+- **No cartridges required** - Non-consumable handpieces
+- Only standard RF conductive cream/gel needed
+
+#### Regulatory Status
+| Region | Status | Reference |
+|--------|--------|-----------|
+| Korea MFDS | Certified | License No. 22-156 |
+| US FDA | 510(k) Cleared | K212561 |
+
+---
+
+### 2.2 ULBLANC
+**Category:** Multi-Frequency Ultrasound Workstation
+
+#### Overview
+Comprehensive skincare workstation combining dual-frequency ultrasound for tightening with acoustic cavitation for transdermal drug delivery.
+
+#### Key Technologies & Handpieces
+
+**1. Sono-I (Dynamic Dual Wave™)**
+| Mode | Frequency | Target | Effect |
+|------|-----------|--------|--------|
+| Deep | 1/3 MHz | Dermis | Tightening, Firming |
+| Surface | 3/10 MHz | Epidermis | Soothing, Texture improvement |
+
+**2. i-Booster (Sonophoresis)**
+- Frequency: 28kHz
+- Mechanism: Acoustic cavitation (micro-jet effect)
+- Function: Opens micro-pathways in stratum corneum for deep ingredient delivery
+
+#### Clinical Benefits
+- No downtime
+- Pain-free, infection-free
+- Suitable for daily use
+- Treats: ACNE, Flushing, Lifting, Wrinkle reduction
+
+#### Regulatory Status
+| Region | Status | Reference |
+|--------|--------|-----------|
+| Korea MFDS | Certified | No. 21-4685 |
+
+---
+
+### 2.3 NEWCHAE SHOT
+**Category:** 3-in-1 Personal Beauty Device (Home-care)
+
+#### Operating Modes
+| Mode | Technology | Function |
+|------|------------|----------|
+| RF Mode | Multi-Channel RF Stack | Deep dermal heating, collagen regeneration |
+| EMS Mode | Electrical Muscle Stimulation | V-Line facial contouring |
+| ELP Mode | Electroporation | Enhanced skincare absorption |
+
+#### Clinical Efficacy (2-Week Study)
+*Source: Korea Institute of Dermatological Sciences (KIDS-BCK087-BRZ)*
+| Metric | Improvement |
+|--------|-------------|
+| Skin Density | +128.48% |
+| Pore Size | -26.74% |
+| Additional | Elasticity, Radiance, Sagging improvement |
+
+#### Key Features
+- Automated Shot System for precise energy delivery
+- 3D Vibration (10,000 times/min)
+
+---
+
+### 2.4 LUMINO WAVE (Model: LSR-10)
+**Category:** Next-Generation Convergence Device
+
+#### Status
+- **Current:** Under MFDS Review
+- **KC Registration:** April 2025 (R-R-bzm-LSR-10)
+- **Expected Launch:** H2 2026
+
+#### Core Technology (Patent Pending)
+- **Mechanism:** Ultrasound + Laser convergence therapy
+- **How it works:** Ultrasound-induced microbubbles minimize light scattering, allowing laser to penetrate deeper
+- **Benefit:** Lower power achieves better results with less irritation
+
+---
+
+## 3. Regulatory & Certifications Summary
+
+### Quality Management
+| Standard | Status | Scope |
+|----------|--------|-------|
+| ISO 13485:2016 | Certified | Design, development, manufacture, sales of medical devices |
+| GMP | Certified | Korea MFDS |
+
+### Product Certifications
+| Product | Region | Status | Reference |
+|---------|--------|--------|-----------|
+| TORR RF | USA | FDA 510(k) Cleared | K212561 |
+| TORR RF | Korea | MFDS Approved | No. 22-156 |
+| ULBLANC | Korea | MFDS Approved | No. 21-4685 |
+| LSR-10 | Korea | KC Registered | R-R-bzm-LSR-10 |
+
+### Technical Standards Compliance
+- **IEC 60601-1** - Electrical Safety
+- **IEC 60601-1-2** - EMC
+- **IEC 60601-2-2** - RF Safety
+- **ISO 10993-1** - Biocompatibility
+
+### Global Roadmap
+| Market | Status |
+|--------|--------|
+| CE MDR (Europe) | In Preparation |
+| ANVISA (Brazil) | Planned (after FDA stabilization) |
+| NMPA (China) | Planned (after CE stabilization) |
+
+---
+
+## 4. OEM/ODM Capabilities
+
+- **FDA Registered Contract Manufacturer** (Owner/Operator Number: 10088936)
+- Full-cycle manufacturing: Design → Development → Mass production
+- End-to-end support for clients lacking R&D infrastructure
+
+---
+
+## 5. FAQ (Frequently Asked Questions)
+
+### General
+**Q: Where is BRITZMEDI located?**
+A: Our headquarters is at 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea. 
+
+**Q: How can I contact BRITZMEDI?**
+A: You can reach us at +82-70-4348-7244 or visit our website at www.britzmedi.com.
+
+**Q: Is BRITZMEDI FDA registered?**
+A: Yes, we are registered as an FDA Contract Manufacturer (Owner/Operator Number: 10088936), and our TORR RF device is FDA 510(k) cleared (K212561).
+
+### TORR RF
+**Q: Does TORR RF require consumable cartridges?**
+A: No, TORR RF uses non-consumable handpieces. Only standard RF conductive gel is needed, ensuring low running costs.
+
+**Q: What is the treatment depth of TORR RF?**
+A: Depending on the handpiece - Large: 3.5-10mm (body), Small: 2.5-6mm (face), Micro: 1.5-2mm (eye area).
+
+**Q: Is TORR RF safe?**
+A: Yes. It features real-time temperature monitoring with automatic cutoff (30-50°C range) to prevent burns. It complies with IEC 60601-1 safety standards.
+
+### Distribution
+**Q: Do you offer distribution partnerships?**
+A: Yes, we welcome distribution partnerships. Please contact us through the inquiry form for details.
+
+**Q: Do you provide OEM/ODM services?**
+A: Yes, we are an FDA-registered contract manufacturer and offer end-to-end development services from design to mass production.
+
+### Pricing
+**Q: What are the product prices?**
+A: Pricing varies by region and order volume. Please contact our sales team for a customized quote.
+
+---
+
+## 6. Prohibited Topics & Guidelines
+
+### DO NOT Mention
+- Specific pricing (direct inquiries only)
+- Unverified clinical claims
+- Competitor product comparisons with negative statements
+- Any medical efficacy claims beyond FDA-cleared indications
+- Employee count or company revenue
+- Internal business strategies
+
+### Medical Claims Caution
+- "FDA Cleared" ≠ "FDA Approved" (Approval is for Class III devices only)
+- Do not claim TORR RF treats pigmentation (not indicated)
+- Do not claim TORR RF removes vascular lesions (not indicated)
+
+---
+
+## 7. Response Guidelines
+
+### Tone & Style
+- Professional yet friendly
+- Confident but not pushy
+- Technical accuracy is priority
+
+### Lead Capture Triggers
+When user asks about:
+- Pricing → "For detailed pricing, please fill out our contact form"
+- Distribution → "We'd love to discuss partnership. Please submit an inquiry"
+- Bulk orders → "Let me connect you with our sales team"
+
+### Meeting Request
+"Would you like to schedule a meeting with our sales team? Please leave your contact details through our inquiry form."
+
+---
+
+## 8. Name Display Rules (Multi-language)
+
+### Rule
+Display names according to each language's naming convention:
+
+| Language | Format | Example |
+|----------|--------|---------|
+| English | First Last | Jae-Lee Shin, Dong-Hoo Kim |
+| Korean | 성+이름 | 이신재, 김동후 |
+| Japanese | 姓+名 | シン・ジェリー (カタカナ) |
+| Chinese (Simplified) | 姓+名 | 李信宰 |
+| Chinese (Traditional) | 姓+名 | 李信宰 |
+| Spanish | Nombre Apellido | Jae-Lee Shin |
+| German | Vorname Nachname | Jae-Lee Shin |
+| Arabic | الاسم الأول + اسم العائلة | جاي لي شين |
+
+### Key Personnel Names
+| English | Korean | Notes |
+|---------|--------|-------|
+| Shin Jae Lee | 이신재 | CEO |
+| Kim Dong Hoo | 김동후 | R&D |
+| Kim Jung Rack | 김정락 | R&D |
+| Kim Hyoung Moon | 김형문 | R&D |
+| Hwang Je Wan | 황제완 | R&D |
+
+---
+
+## 9. Contact Information
+
+- **Website:** www.britzmedi.com
+- **TEL:** +82-70-4348-7244
+- **Headquarters:** 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea
+- **Inquiry:** Use the contact form on the website
+
+---
+
+*Last Updated: December 2025*
+*Version: 1.1*

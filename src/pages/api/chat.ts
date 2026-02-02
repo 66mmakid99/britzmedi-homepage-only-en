@@ -4,6 +4,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import fs from 'fs';
+import path from 'path';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
@@ -23,262 +25,58 @@ interface ChatRequest {
   };
 }
 
-// Product knowledge base for context injection - Detailed product data
-const PRODUCT_KNOWLEDGE = {
-  'torr-rf': {
-    name: 'TORR RF (MTX-C1)',
-    category: 'Medical Device - Flagship Product',
-    tagline: 'Innovative Multi-Wave RF Workstation',
-    description: 'TORR RF is a non-invasive medical device utilizing specialized Multi-Wave Radiofrequency (RF) technology to deliver thermal energy into the dermal and subcutaneous layers. The core clinical significance lies in its ability to deliver powerful yet safe energy uniformly to the desired depth using low power, preventing surface burns while maximizing deep tissue heating.',
-    technologies: [
-      'Auto Circular Motion Head (Patented) - The handpiece automatically rotates at 68 rpm, creating a "Toroidal" thermal field ensuring RF energy is distributed uniformly without hot spots',
-      'Real-Time Temperature Control - Integrated sensors monitor skin temperature continuously (30°C-50°C adjustable), auto-cutoff prevents burns',
-      'Vibro-Comfort Mode - 3D vibration technology (10,000 times/min) mitigates heat sensation through neurological distraction (Gate Control Theory)'
-    ],
-    indications: [
-      'Lifting & Skin Tightening - Delivers thermal energy to deep dermis for collagen remodeling',
-      'Body Contouring & Cellulite - FDA-cleared for temporary reduction in cellulite appearance',
-      'Vascular (Circulation) - Cleared for temporary improvement of local blood circulation',
-      'Pain Management - Relief of minor muscle aches, pains, and spasms'
-    ],
-    specifications: {
-      frequency: '1 MHz ± 10%',
-      maxPower: '55W (Medium/Large), 7.5W (Small)',
-      modes: 'Single / Pulse / Repeat',
-      treatmentDepth: '1.5mm ~ 10mm (adjustable Low/Deep Mode)',
-      temperatureControl: '30°C ~ 50°C with real-time monitoring',
-      display: '10.1" TFT LCD Touch Screen',
-      dimensions: '338.1mm (W) × 643mm (D) × 857.5mm (H)',
-      weight: '36 kg',
-      safetyClass: 'Class I, Type BF Applied Part'
-    },
-    handpieces: [
-      'Large Handpiece (Body) - Ø50mm, 3.5-10mm depth, Auto-Circular Motion for large area contouring',
-      'Small Handpiece (Face) - Ø40mm, 2.5-6mm depth, for facial tightening and cheek contouring',
-      'Micro Handpiece (Eye/Delicate) - Ø20mm, 1.5-2mm depth, precision care for periorbital areas'
-    ],
-    certifications: ['FDA 510(k) Cleared (K212561)', 'Korea MFDS Approved (License No. 22-156)', 'ISO 13485:2016 Certified', 'GMP Certified'],
-    differentiators: [
-      'Auto-Motion Technology - Unlike traditional stationary applicators, rotating head ensures uniform energy distribution',
-      'Lower Power, Higher Efficacy - Achieves effective heating with 55W vs competitors requiring up to 150W',
-      'Non-Consumable Handpieces - Durable handpieces without expensive cartridge replacements (low running costs)'
-    ],
-    clinicalBenefits: ['Pain-Free treatments with Vibro-Comfort Mode', 'Uniform energy delivery preventing operator fatigue', 'Real-time safety monitoring preventing burns', 'No consumable cartridges - low running costs']
-  },
-  'ulblanc': {
-    name: 'ULBLANC (i-Booster)',
-    category: 'Medical Device',
-    tagline: 'Multi-Frequency Ultrasound Workstation',
-    description: 'ULBLANC is a comprehensive skincare workstation combining dual-frequency ultrasound for tightening with acoustic cavitation for transdermal drug delivery. The system allows effective treatment without damaging the skin surface.',
-    technologies: [
-      'Sono-I (Dynamic Dual Wave™) - Alternates between frequencies: 1/3 MHz for deep dermal tightening, 3/10 MHz for epidermal soothing',
-      'i-Booster (Sonophoresis) - Uses 28kHz ultrasound to generate acoustic cavitation (micro-jet effect), opening micro-pathways for deep transdermal delivery of active ingredients'
-    ],
-    indications: ['Skin firming and tightening', 'Wrinkle reduction', 'Enhanced absorption of active ingredients', 'Skin soothing (suitable for ACNE/Flushing)'],
-    specifications: {
-      sonoIFrequency: '1/3 MHz, 3/10 MHz (dual frequency modes)',
-      iBoosterFrequency: '28 kHz (for sonophoresis)'
-    },
-    certifications: ['Korea MFDS Certified (No. 21-4685)'],
-    clinicalBenefits: ['No downtime - Pain-free, infection-free', 'Suitable for daily use', 'Versatile treatment range from soothing to lifting', 'Enhanced product absorption efficiency']
-  },
-  'newchae-shot': {
-    name: 'NEWCHAE SHOT',
-    category: 'Medical Cosmetic Device (Home-Care)',
-    tagline: '3-in-1 Personal Beauty Device',
-    description: 'NEWCHAE SHOT is a home-care beauty device integrating professional-grade medical technologies into a compact form factor with multi-channel energy delivery. Combining RF tightening, EMS contouring, and ELP skin boosting technologies for clinical-grade results at home.',
-    technologies: [
-      'RF Mode (Tightening) - Multi-Channel RF Stack technology delivers heat deep into dermis, promoting collagen regeneration',
-      'EMS Mode (V-Line) - Electrical Muscle Stimulation for facial contouring and toning',
-      'ELP Mode (Skin Boost) - Electroporation technology enhances absorption of skincare products',
-      '3D Vibration - 10,000 times/min to assist energy penetration',
-      'Automated Shot System - Concentrates energy output for precise delivery'
-    ],
-    clinicalResults: {
-      skinDensity: '+128.48% improvement',
-      poreSize: '-26.74% reduction',
-      elasticity: 'Improved surface and deep elasticity',
-      radiance: 'Enhanced skin radiance'
-    },
-    differentiators: ['Professional-grade technology in compact home device', 'Three treatment modes in one device', 'Clinical study backed results']
-  },
-  'lumino-wave': {
-    name: 'LUMINO WAVE (LSR-10)',
-    category: 'Medical Device',
-    tagline: 'Next-Generation Convergence Device',
-    status: 'Coming Soon - H2 2026',
-    description: 'LUMINO WAVE is an advanced aesthetic device designed to maximize treatment efficacy by combining Ultrasound and Laser energies. Utilizing ultrasound-induced microbubbles to enhance the penetration depth of laser into the skin.',
-    technologies: [
-      'Ultrasound + Laser Convergence - Simultaneous ultrasound vibration and laser irradiation. Light scattering is minimized by ultrasound effects, allowing laser to reach deeper layers more efficiently'
-    ],
-    certifications: ['KC (EMC) Registered (R-R-bzm-LSR-10, April 2025)', 'Korea MFDS Under Review (Target: H2 2026)'],
-    clinicalBenefits: ['Achieves therapeutic results with lower power/energy', 'Minimized skin irritation and side effects', 'Maximized lifting and regeneration effects', 'Enhanced laser penetration to dermal layers']
+// Load knowledge base from markdown file
+function loadKnowledgeBase(): string {
+  try {
+    const knowledgePath = path.join(process.cwd(), 'src', 'data', 'chatbot-knowledge.md');
+    return fs.readFileSync(knowledgePath, 'utf-8');
+  } catch (error) {
+    console.error('Failed to load knowledge base:', error);
+    return '';
   }
-};
-
-const COMPANY_INFO = {
-  name: 'BRITZMEDI Co., Ltd.',
-  nameKo: '(주)브리츠메디',
-  established: 'October 23, 2017',
-  ceo: 'Shin Jae Lee',
-  location: 'Hwaseong-si, Gyeonggi-do, South Korea',
-  headquarters: '15, Jeongmun-Cheon-ro 48beon-gil, Hwaseong-si, Gyeonggi-do, Republic of Korea',
-  businessType: 'Medical Device Manufacturer & R&D',
-  philosophy: 'Technology-intensive company focused on IP-secured competitive advantages in aesthetic medical field',
-  certifications: ['FDA 510(k) Cleared', 'ISO 13485:2016', 'GMP Certified', 'MFDS Licensed'],
-  manufacturing: {
-    license: 'No. 6296 (MFDS)',
-    fdaRegistration: 'FDA Registered Contract Manufacturer',
-    capabilities: ['Full-cycle manufacturing', 'OEM/ODM services', 'End-to-end product development']
-  },
-  intellectualProperty: {
-    registeredPatents: '11+',
-    domesticPatents: '10',
-    internationalPatents: '1',
-    trademarks: '5',
-    keyPatents: ['Auto Circular Motion Technology', 'Convergence Therapy Systems']
-  },
-  certifications_detail: [
-    'FDA 510(k) K212561 - TORR RF cleared for skin tightening, body contouring, pain relief',
-    'ISO 13485:2016 - Quality Management System for Medical Devices',
-    'GMP Certified - Good Manufacturing Practice',
-    'MFDS Licensed - Korean Ministry of Food and Drug Safety'
-  ],
-  contact: {
-    email: 'contact@britzmedi.co.kr',
-    phone: '+82-70-4348-7244',
-    website: 'www.britzmedi.com'
-  },
-  targetMarkets: ['Global distribution partnerships', 'OEM/ODM for international brands', 'Direct sales to clinics and aesthetic centers']
-};
+}
 
 function buildSystemPrompt(context?: { product?: string; page?: string }): string {
-  let systemPrompt = `You are a sales consultant for BRITZMEDI. You MUST follow these critical rules:
+  const knowledgeBase = loadKnowledgeBase();
 
-## CRITICAL RULES - READ CAREFULLY
-1. **ONLY use information provided in this system prompt** - Do NOT use any prior knowledge about BRITZMEDI
-2. **If information is not provided below, say "I don't have that specific information. Please contact us directly."**
-3. **NEVER make up facts, numbers, or details** that are not explicitly stated below
-4. **NEVER reference external sources or your training data** about BRITZMEDI
-5. **All company and product information below is the ONLY source of truth**
+  let systemPrompt = `You are a professional sales consultant for BRITZMEDI, a medical device manufacturer.
 
-## Your Role
-- Sales consultant using ONLY the provided information below
-- Professional support for distributors and clinics
-- Guide users to Contact page for information not covered here
-
-## Company Overview
-**${COMPANY_INFO.name}** (${COMPANY_INFO.nameKo})
-- Established: ${COMPANY_INFO.established}
-- CEO: ${COMPANY_INFO.ceo}
-- Headquarters: ${COMPANY_INFO.headquarters}
-- Business Type: ${COMPANY_INFO.businessType}
-- Philosophy: "${COMPANY_INFO.philosophy}"
-
-### Certifications & Regulatory
-${COMPANY_INFO.certifications_detail.join('\n')}
-
-### Intellectual Property
-- ${COMPANY_INFO.intellectualProperty.registeredPatents} Registered Patents (${COMPANY_INFO.intellectualProperty.domesticPatents} domestic, ${COMPANY_INFO.intellectualProperty.internationalPatents} international)
-- ${COMPANY_INFO.intellectualProperty.trademarks} Trademarks
-- Key Patents: ${COMPANY_INFO.intellectualProperty.keyPatents.join(', ')}
-
-### Manufacturing Capabilities
-- ${COMPANY_INFO.manufacturing.license}
-- ${COMPANY_INFO.manufacturing.fdaRegistration}
-- Capabilities: ${COMPANY_INFO.manufacturing.capabilities.join(', ')}
-
-### Contact
-- Email: ${COMPANY_INFO.contact.email}
-- Phone: ${COMPANY_INFO.contact.phone}
-- Website: ${COMPANY_INFO.contact.website}
+## YOUR KNOWLEDGE BASE
+The following document contains ALL information you are allowed to use. Read it carefully and follow its rules strictly.
 
 ---
-
-## Product Portfolio (Detailed)
-`;
-
-  // Add comprehensive product information
-  for (const [id, product] of Object.entries(PRODUCT_KNOWLEDGE)) {
-    const p = product as any;
-    systemPrompt += `
-### ${p.name}
-**Category:** ${p.category}
-**Tagline:** ${p.tagline || 'N/A'}
-${p.status ? `**Status:** ${p.status}` : ''}
-
-**Description:**
-${p.description}
-
-**Key Technologies:**
-${p.technologies ? p.technologies.map((t: string) => `• ${t}`).join('\n') : 'N/A'}
-
-${p.indications ? `**Indications:**\n${p.indications.map((i: string) => `• ${i}`).join('\n')}` : ''}
-
-${p.specifications ? `**Technical Specifications:**
-• Frequency: ${p.specifications.frequency || p.specifications.sonoIFrequency || 'N/A'}
-• Max Power: ${p.specifications.maxPower || 'N/A'}
-• Treatment Depth: ${p.specifications.treatmentDepth || 'N/A'}
-• Temperature Control: ${p.specifications.temperatureControl || 'N/A'}` : ''}
-
-${p.handpieces ? `**Handpieces:**\n${p.handpieces.map((h: string) => `• ${h}`).join('\n')}` : ''}
-
-${p.certifications ? `**Certifications:** ${p.certifications.join(', ')}` : ''}
-
-${p.clinicalBenefits ? `**Clinical Benefits:**\n${p.clinicalBenefits.map((b: string) => `• ${b}`).join('\n')}` : ''}
-
-${p.clinicalResults ? `**Clinical Study Results:**
-• Skin Density: ${p.clinicalResults.skinDensity}
-• Pore Size: ${p.clinicalResults.poreSize}` : ''}
-
-${p.differentiators ? `**Key Differentiators:**\n${(Array.isArray(p.differentiators) ? p.differentiators : []).map((d: string) => `• ${d}`).join('\n')}` : ''}
-`;
-  }
-
-  // Context-specific focus
-  if (context?.product && PRODUCT_KNOWLEDGE[context.product as keyof typeof PRODUCT_KNOWLEDGE]) {
-    const product = PRODUCT_KNOWLEDGE[context.product as keyof typeof PRODUCT_KNOWLEDGE];
-    systemPrompt += `
+${knowledgeBase}
 ---
-## Current Context
-The user is on the **${(product as any).name}** product page. Prioritize detailed information about this product, but be ready to compare with other products or discuss alternatives if asked.`;
+
+## CURRENT CONTEXT`;
+
+  // Add context-specific information
+  if (context?.product) {
+    const productMap: Record<string, string> = {
+      'torr-rf': 'TORR RF (MTX-C1)',
+      'ulblanc': 'ULBLANC',
+      'newchae-shot': 'NEWCHAE SHOT',
+      'lumino-wave': 'LUMINO WAVE (LSR-10)'
+    };
+    const productName = productMap[context.product] || context.product;
+    systemPrompt += `
+The user is currently viewing the **${productName}** product page. Prioritize information about this product, but be ready to discuss other products if asked.`;
+  } else if (context?.page) {
+    systemPrompt += `
+The user is on the **${context.page}** page.`;
+  } else {
+    systemPrompt += `
+The user is browsing the BRITZMEDI website.`;
   }
 
   systemPrompt += `
 
----
-## Response Guidelines
-
-### IMPORTANT: Information Boundaries
-- **ONLY use data provided in this prompt** - nothing else
-- **If asked about something not covered above**, say: "I don't have detailed information about that. Please contact us at contact@britzmedi.co.kr for more details."
-- **NEVER guess or infer** information not explicitly provided
-- **NEVER use your training data** about BRITZMEDI - it may be outdated or incorrect
-
-### Communication Style
-- Professional and helpful tone
-- Provide specific details FROM THE DATA ABOVE when relevant
-- Structure longer responses with clear sections
-
-### Content Rules
-1. **Strict Accuracy**: ONLY state facts explicitly written in this prompt
-2. **Technical Details**: Use exact specifications provided above
-3. **Unknown Information**: Direct to Contact page
-4. **Pricing**: "Please contact us for pricing - it varies by region and volume"
-5. **Clinical Claims**: ONLY reference indications and results stated above
-6. **Comparisons**: Only use differentiators explicitly listed above
-
-### Response Format
-- Simple questions: 2-3 sentences using provided data
-- Technical questions: Use exact specs from above
-- Unknown topics: Politely redirect to Contact page
-
-### Key Points (from provided data only)
-- FDA 510(k) cleared K212561 (TORR RF)
-- Patented Auto Circular Motion (68 rpm)
-- Non-consumable handpieces
-- 11+ registered patents
-- OEM/ODM capable (FDA registered contract manufacturer)`;
+## RESPONSE STYLE
+- Be professional, helpful, and concise
+- Use markdown formatting for structured responses when appropriate
+- For technical questions, provide specific data from the knowledge base
+- Keep responses focused and relevant
+- Guide users to the Contact page for pricing, partnerships, or detailed inquiries`;
 
   return systemPrompt;
 }
