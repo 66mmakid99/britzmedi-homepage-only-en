@@ -35,6 +35,83 @@ const spamDetection = new Map<string, {
   verified: boolean;
 }>();
 
+// API usage tracking for cost monitoring
+interface UsageStats {
+  inputTokens: number;
+  outputTokens: number;
+  requestCount: number;
+  month: string; // YYYY-MM format
+}
+
+const usageStats: UsageStats = {
+  inputTokens: 0,
+  outputTokens: 0,
+  requestCount: 0,
+  month: new Date().toISOString().slice(0, 7) // Current month
+};
+
+// Claude Sonnet pricing (as of 2024)
+const PRICING = {
+  inputPerMillion: 3.00,  // $3 per 1M input tokens
+  outputPerMillion: 15.00 // $15 per 1M output tokens
+};
+
+function getCurrentMonth(): string {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function resetUsageIfNewMonth() {
+  const currentMonth = getCurrentMonth();
+  if (usageStats.month !== currentMonth) {
+    // Log final stats for previous month
+    logMonthlyUsage();
+    // Reset for new month
+    usageStats.inputTokens = 0;
+    usageStats.outputTokens = 0;
+    usageStats.requestCount = 0;
+    usageStats.month = currentMonth;
+  }
+}
+
+function updateUsage(inputTokens: number, outputTokens: number) {
+  resetUsageIfNewMonth();
+  usageStats.inputTokens += inputTokens;
+  usageStats.outputTokens += outputTokens;
+  usageStats.requestCount += 1;
+}
+
+function calculateCost(): { inputCost: number; outputCost: number; totalCost: number } {
+  const inputCost = (usageStats.inputTokens / 1_000_000) * PRICING.inputPerMillion;
+  const outputCost = (usageStats.outputTokens / 1_000_000) * PRICING.outputPerMillion;
+  return {
+    inputCost: Math.round(inputCost * 100) / 100,
+    outputCost: Math.round(outputCost * 100) / 100,
+    totalCost: Math.round((inputCost + outputCost) * 100) / 100
+  };
+}
+
+function logMonthlyUsage() {
+  const cost = calculateCost();
+  console.log(`[API USAGE] Month: ${usageStats.month}`);
+  console.log(`[API USAGE] Requests: ${usageStats.requestCount}`);
+  console.log(`[API USAGE] Input tokens: ${usageStats.inputTokens.toLocaleString()} ($${cost.inputCost})`);
+  console.log(`[API USAGE] Output tokens: ${usageStats.outputTokens.toLocaleString()} ($${cost.outputCost})`);
+  console.log(`[API USAGE] Total estimated cost: $${cost.totalCost}`);
+}
+
+function logRequestUsage(inputTokens: number, outputTokens: number) {
+  updateUsage(inputTokens, outputTokens);
+  const cost = calculateCost();
+
+  // Log every request with running totals
+  console.log(`[API] Request #${usageStats.requestCount} | This: ${inputTokens}in/${outputTokens}out | Month total: ${usageStats.inputTokens.toLocaleString()}in/${usageStats.outputTokens.toLocaleString()}out | Est. cost: $${cost.totalCost}`);
+
+  // Alert if approaching cost thresholds
+  if (cost.totalCost >= 50 && usageStats.requestCount % 10 === 0) {
+    console.warn(`[API COST WARNING] Monthly cost has reached $${cost.totalCost}!`);
+  }
+}
+
 // Clean old sessions (older than 30 minutes)
 function cleanOldSessions() {
   const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
@@ -312,6 +389,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const data = await response.json();
     const assistantMessage = data.content?.[0]?.text || 'I apologize, but I encountered an issue. Please try again.';
+
+    // Log API usage for cost monitoring
+    if (data.usage) {
+      const inputTokens = data.usage.input_tokens || 0;
+      const outputTokens = data.usage.output_tokens || 0;
+      logRequestUsage(inputTokens, outputTokens);
+    }
 
     return new Response(JSON.stringify({
       message: assistantMessage,
