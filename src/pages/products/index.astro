@@ -11,16 +11,16 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
   keywords={["BRITZMEDI products", "TORR RF", "ULBLANC", "NEWCHAE SHOT", "LUMINO WAVE", "aesthetic medical device", "RF technology"]}
 >
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
+  <section class="relative bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 py-16 lg:py-24">
     <div class="container">
       <div class="max-w-3xl">
         <span class="label mb-3 block">Our Products</span>
         <h1 class="heading-1 mb-6">
           Medical Device<br />
-          <span class="text-primary-600">Excellence</span>
+          <span class="text-primary-600 dark:text-primary-400">Excellence</span>
         </h1>
         <p class="body-large">
-          From our flagship FDA-cleared TORR RF to next-generation convergence technology, 
+          From our flagship FDA-cleared TORR RF to next-generation convergence technology,
           discover innovative solutions designed for superior clinical outcomes.
         </p>
       </div>
@@ -28,31 +28,31 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
   </section>
 
   <!-- Products Overview -->
-  <section class="py-12 bg-white border-b border-slate-100">
+  <section class="py-12 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
     <div class="container">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div class="text-center">
-          <div class="text-3xl font-bold text-primary-600 mb-1">{products.length}</div>
-          <div class="text-sm text-slate-500">Product Lines</div>
+          <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">{products.length}</div>
+          <div class="text-sm text-slate-500 dark:text-slate-400">Product Lines</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-primary-600 mb-1">FDA</div>
-          <div class="text-sm text-slate-500">510(k) Cleared</div>
+          <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">FDA</div>
+          <div class="text-sm text-slate-500 dark:text-slate-400">510(k) Cleared</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-primary-600 mb-1">MFDS</div>
-          <div class="text-sm text-slate-500">Certified</div>
+          <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">MFDS</div>
+          <div class="text-sm text-slate-500 dark:text-slate-400">Certified</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-primary-600 mb-1">11+</div>
-          <div class="text-sm text-slate-500">Patents</div>
+          <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">11+</div>
+          <div class="text-sm text-slate-500 dark:text-slate-400">Patents</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Product Categories -->
-  <section class="section bg-white">
+  <section class="section bg-white dark:bg-slate-900">
     <div class="container">
       <!-- Medical Devices -->
       <div class="mb-16">
@@ -60,20 +60,20 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
           <h2 class="heading-2 mb-2">Medical Devices</h2>
           <p class="body-large">Professional aesthetic medical devices for clinical use</p>
         </div>
-        
+
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {products.filter(p => p.category === 'medical-device').map((product) => (
-            <a 
+            <a
               href={`/products/${product.id}`}
-              class="group block bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300"
+              class="group block bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg transition-all duration-300"
             >
               <!-- Product Image -->
-              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 relative overflow-hidden">
                 {product.images?.main ? (
                   <img 
                     src={product.images.main} 
                     alt={product.name}
-                    class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <div class="w-full h-full flex items-center justify-center">
@@ -98,42 +98,42 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
               <div class="p-6">
                 <div class="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <h3 class="text-xl font-semibold text-slate-900 group-hover:text-primary-600 transition-colors">
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                       {product.name}
                     </h3>
-                    <p class="text-sm text-slate-500">Model: {product.model}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Model: {product.model}</p>
                   </div>
-                  <svg class="w-5 h-5 text-slate-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
-                
-                <p class="text-sm text-primary-600 font-medium mb-3">{product.tagline}</p>
-                
+
+                <p class="text-sm text-primary-600 dark:text-primary-400 font-medium mb-3">{product.tagline}</p>
+
                 <p class="body-small line-clamp-2 mb-4">{product.overview}</p>
-                
+
                 <!-- Key Technologies Preview -->
                 {product.keyTechnologies && product.keyTechnologies.length > 0 && (
                   <div class="flex flex-wrap gap-2 mb-4">
                     {product.keyTechnologies.slice(0, 2).map((tech) => (
-                      <span class="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded">
+                      <span class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
                         {tech.name.split(' ')[0]}
                       </span>
                     ))}
                   </div>
                 )}
-                
+
                 <!-- Certifications -->
                 {product.certifications && product.certifications.length > 0 && (
-                  <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-100">
+                  <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-100 dark:border-slate-700">
                     {product.certifications.map((cert) => (
                       <span class:list={[
                         "text-xs font-medium px-2 py-1 rounded",
                         cert.status === 'Cleared' || cert.status === 'Approved' || cert.status === 'Certified'
-                          ? "bg-green-50 text-green-700"
+                          ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           : cert.status === 'Under Review'
-                            ? "bg-amber-50 text-amber-700"
-                            : "bg-slate-100 text-slate-600"
+                            ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+                            : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                       ]}>
                         {cert.name}
                       </span>
@@ -152,51 +152,51 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
           <h2 class="heading-2 mb-2">Medical Cosmetics</h2>
           <p class="body-large">Professional-grade home beauty devices</p>
         </div>
-        
+
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {products.filter(p => p.category === 'cosmetic').map((product) => (
-            <a 
+            <a
               href={`/products/${product.id}`}
-              class="group block bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300"
+              class="group block bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg transition-all duration-300"
             >
               <!-- Product Image -->
-              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 relative overflow-hidden">
                 {product.images?.main ? (
-                  <img 
-                    src={product.images.main} 
+                  <img
+                    src={product.images.main}
                     alt={product.name}
-                    class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <div class="w-full h-full flex items-center justify-center">
-                    <span class="text-5xl font-light text-slate-300">{product.name.charAt(0)}</span>
+                    <span class="text-5xl font-light text-slate-300 dark:text-slate-500">{product.name.charAt(0)}</span>
                   </div>
                 )}
               </div>
-              
+
               <!-- Content -->
               <div class="p-6">
                 <div class="flex items-start justify-between gap-4 mb-3">
                   <div>
-                    <h3 class="text-xl font-semibold text-slate-900 group-hover:text-primary-600 transition-colors">
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                       {product.name}
                     </h3>
                   </div>
-                  <svg class="w-5 h-5 text-slate-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:translate-x-1 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
-                
-                <p class="text-sm text-primary-600 font-medium mb-3">{product.tagline}</p>
-                
+
+                <p class="text-sm text-primary-600 dark:text-primary-400 font-medium mb-3">{product.tagline}</p>
+
                 <p class="body-small line-clamp-2 mb-4">{product.overview}</p>
-                
+
                 <!-- Clinical Benefits Preview -->
                 {product.clinicalBenefits && product.clinicalBenefits.length > 0 && (
-                  <div class="space-y-2 pt-4 border-t border-slate-100">
+                  <div class="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-700">
                     {product.clinicalBenefits.slice(0, 2).map((benefit) => (
-                      <div class="flex items-center gap-2 text-xs text-slate-600">
-                        <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                        <svg class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         <span>{benefit}</span>
@@ -213,7 +213,7 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
   </section>
 
   <!-- Comparison Overview -->
-  <section class="section bg-slate-50">
+  <section class="section bg-slate-50 dark:bg-slate-800">
     <div class="container">
       <div class="text-center max-w-2xl mx-auto mb-12">
         <span class="label mb-3 block">Product Comparison</span>
@@ -222,31 +222,31 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
           Compare our product lineup to find the best fit for your clinical needs.
         </p>
       </div>
-      
+
       <div class="overflow-x-auto">
-        <table class="w-full bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <table class="w-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="text-left p-4 font-semibold text-slate-900">Product</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Technology</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Primary Use</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Certifications</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Status</th>
+            <tr class="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+              <th class="text-left p-4 font-semibold text-slate-900 dark:text-slate-100">Product</th>
+              <th class="text-left p-4 font-semibold text-slate-900 dark:text-slate-100">Technology</th>
+              <th class="text-left p-4 font-semibold text-slate-900 dark:text-slate-100">Primary Use</th>
+              <th class="text-left p-4 font-semibold text-slate-900 dark:text-slate-100">Certifications</th>
+              <th class="text-left p-4 font-semibold text-slate-900 dark:text-slate-100">Status</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+              <tr class="border-b border-slate-100 dark:border-slate-700 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800">
                 <td class="p-4">
-                  <a href={`/products/${product.id}`} class="font-semibold text-primary-600 hover:text-primary-700">
+                  <a href={`/products/${product.id}`} class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
                     {product.name}
                   </a>
-                  <p class="text-xs text-slate-500">{product.model}</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">{product.model}</p>
                 </td>
-                <td class="p-4 text-sm text-slate-600">
+                <td class="p-4 text-sm text-slate-600 dark:text-slate-300">
                   {product.keyTechnologies?.[0]?.name.split(' ').slice(0, 3).join(' ') || '-'}
                 </td>
-                <td class="p-4 text-sm text-slate-600">
+                <td class="p-4 text-sm text-slate-600 dark:text-slate-300">
                   {product.indications?.[0]?.split(' - ')[0] || product.tagline}
                 </td>
                 <td class="p-4">
@@ -255,20 +255,20 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
                       <span class:list={[
                         "text-xs font-medium px-2 py-0.5 rounded",
                         cert.status === 'Cleared' || cert.status === 'Approved' || cert.status === 'Certified'
-                          ? "bg-green-50 text-green-700"
-                          : "bg-slate-100 text-slate-600"
+                          ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                       ]}>
                         {cert.name}
                       </span>
-                    )) || <span class="text-xs text-slate-400">-</span>}
+                    )) || <span class="text-xs text-slate-400 dark:text-slate-500">-</span>}
                   </div>
                 </td>
                 <td class="p-4">
                   <span class:list={[
                     "inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full",
-                    product.status === 'available' 
-                      ? "bg-green-50 text-green-700"
-                      : "bg-amber-50 text-amber-700"
+                    product.status === 'available'
+                      ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                      : "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
                   ]}>
                     {product.status === 'available' ? 'Available' : 'Coming Soon'}
                   </span>
