@@ -6,6 +6,7 @@ import ThemeToggle from '../ui/ThemeToggle.astro';
 const navigation = [
   { name: "Products", href: "/products" },
   { name: "About", href: "/about" },
+  { name: "Blog", href: "/blog" },
   { name: "Certifications", href: "/certifications" },
   { name: "Resources", href: "/resources" },
   { name: "FAQ", href: "/faq" },
@@ -16,7 +17,7 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header class="fixed top-0 left-0 right-0 z-[100] transition-all duration-300" id="header">
-  <div class="absolute inset-0 bg-white/80 backdrop-blur-xl border-b border-slate-200/50"></div>
+  <div class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50"></div>
   <div class="container relative">
     <nav class="flex items-center justify-between h-16 lg:h-20">
       <!-- Logo -->
@@ -24,7 +25,7 @@ const currentPath = Astro.url.pathname;
         <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
           <span class="text-white font-bold text-lg">B</span>
         </div>
-        <span class="text-xl lg:text-2xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+        <span class="text-xl lg:text-2xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
           BRITZMEDI
         </span>
       </a>
@@ -34,13 +35,13 @@ const currentPath = Astro.url.pathname;
         {navigation.map((item) => {
           const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
           return (
-            <a 
+            <a
               href={item.href}
               class:list={[
                 "relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                isActive 
-                  ? "text-primary-600 bg-primary-50" 
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                isActive
+                  ? "text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
               ]}
             >
               {item.name}
@@ -67,13 +68,13 @@ const currentPath = Astro.url.pathname;
       <!-- Mobile Menu Button -->
       <div class="lg:hidden flex items-center gap-2">
         <!-- Mobile Menu Button -->
-        <button 
-          type="button" 
-          class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+        <button
+          type="button"
+          class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
           id="mobile-menu-button"
           aria-label="Open menu"
         >
-          <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-slate-700 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
@@ -85,58 +86,58 @@ const currentPath = Astro.url.pathname;
 <!-- Mobile Menu - Separate from header to avoid z-index issues -->
 <div class="lg:hidden fixed inset-0 z-[200] pointer-events-none" id="mobile-menu" aria-hidden="true">
   <!-- Backdrop -->
-  <div 
-    class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-none" 
+  <div
+    class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-none"
     id="mobile-menu-overlay"
   ></div>
-  
+
   <!-- Panel -->
-  <div 
-    class="absolute top-0 right-0 bottom-0 w-full max-w-[320px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-out pointer-events-none"
+  <div
+    class="absolute top-0 right-0 bottom-0 w-full max-w-[320px] bg-white dark:bg-slate-900 shadow-2xl transform translate-x-full transition-transform duration-300 ease-out pointer-events-none"
     id="mobile-menu-panel"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between h-16 px-5 border-b border-slate-100">
-      <span class="text-lg font-bold text-slate-900">Menu</span>
-      <button 
-        type="button" 
-        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+    <div class="flex items-center justify-between h-16 px-5 border-b border-slate-100 dark:border-slate-800">
+      <span class="text-lg font-bold text-slate-900 dark:text-slate-100">Menu</span>
+      <button
+        type="button"
+        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
         id="mobile-menu-close"
         aria-label="Close menu"
       >
-        <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-slate-700 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
-    
+
     <!-- Navigation -->
     <nav class="p-5 space-y-2">
       {navigation.map((item) => {
         const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
         return (
-          <a 
+          <a
             href={item.href}
             class:list={[
               "flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200",
-              isActive 
-                ? "bg-primary-50 text-primary-600" 
-                : "text-slate-700 hover:bg-slate-50"
+              isActive
+                ? "bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400"
+                : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
             ]}
           >
             {item.name}
-            <svg class="w-4 h-4 ml-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 ml-auto text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </a>
         );
       })}
     </nav>
-    
+
     <!-- CTA -->
-    <div class="absolute bottom-0 left-0 right-0 p-5 border-t border-slate-100 bg-slate-50">
-      <a 
-        href="/contact" 
+    <div class="absolute bottom-0 left-0 right-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
+      <a
+        href="/contact"
         class="flex items-center justify-center gap-2 w-full px-6 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-xl shadow-lg transition-all duration-300"
       >
         Get in Touch
