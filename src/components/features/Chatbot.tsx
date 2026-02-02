@@ -24,6 +24,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [requireVerification, setRequireVerification] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -39,17 +41,20 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   }, [isOpen, isMinimized]);
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  const sendMessage = async (messageOverride?: string, verificationToken?: string) => {
+    const messageToSend = messageOverride || inputValue.trim();
+    if (!messageToSend || isLoading) return;
 
     const userMessage: Message = {
       role: 'user',
-      content: inputValue.trim(),
+      content: messageToSend,
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    if (!messageOverride) {
+      setMessages(prev => [...prev, userMessage]);
+      setInputValue('');
+    }
     setIsLoading(true);
 
     try {
@@ -62,11 +67,24 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
           context: {
             product: productContext,
             page: pageContext
-          }
+          },
+          verificationToken
         })
       });
 
       const data = await response.json();
+
+      // Handle verification requirement
+      if (data.requireVerification) {
+        setPendingMessage(userMessage.content);
+        setRequireVerification(true);
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data.message,
+          timestamp: new Date()
+        }]);
+        return;
+      }
 
       const assistantMessage: Message = {
         role: 'assistant',
@@ -83,6 +101,15 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       }]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerification = async () => {
+    setRequireVerification(false);
+    if (pendingMessage) {
+      // Re-send the pending message with verification token
+      await sendMessage(pendingMessage, 'human-verified');
+      setPendingMessage(null);
     }
   };
 
@@ -203,6 +230,23 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Verification Button */}
+            {requireVerification && !isLoading && (
+              <div className="flex justify-center">
+                <button
+                  onClick={handleVerification}
+                  className="flex items-center gap-2 px-4 py-3 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors"
+                >
+                  <svg className="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                    I'm not a robot
+                  </span>
+                </button>
               </div>
             )}
 

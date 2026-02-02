@@ -24,10 +24,16 @@ interface ChatRequest {
     page?: string;
   };
   sessionId?: string;
+  verificationToken?: string; // For "I'm not a robot" verification
 }
 
 // Simple in-memory store for spam detection (resets on server restart)
-const spamDetection = new Map<string, { messages: string[]; lastActivity: number }>();
+const spamDetection = new Map<string, {
+  messages: string[];
+  lastActivity: number;
+  messageCount: number;
+  verified: boolean;
+}>();
 
 // Clean old sessions (older than 30 minutes)
 function cleanOldSessions() {
@@ -44,12 +50,38 @@ function normalizeMessage(msg: string): string {
   return msg.toLowerCase().trim().replace(/\s+/g, ' ');
 }
 
+// Suspicious patterns that might indicate bot or abuse
+const SUSPICIOUS_PATTERNS = [
+  /(.)\1{10,}/i,                    // Same character repeated 10+ times
+  /^[a-z]{50,}$/i,                  // Very long string without spaces
+  /<script|javascript:|onclick/i,  // XSS attempts
+  /\b(hack|exploit|inject|sql)\b/i, // Potential attack keywords
+  /https?:\/\/[^\s]{100,}/i,       // Very long URLs
+];
+
+// Check for suspicious patterns
+function checkSuspiciousPatterns(message: string): { suspicious: boolean; reason?: string } {
+  // Check for suspicious regex patterns
+  for (const pattern of SUSPICIOUS_PATTERNS) {
+    if (pattern.test(message)) {
+      return { suspicious: true, reason: 'suspicious_content' };
+    }
+  }
+
+  // Check message length (too short or too long)
+  if (message.length > 2000) {
+    return { suspicious: true, reason: 'message_too_long' };
+  }
+
+  return { suspicious: false };
+}
+
 // Check for repeated questions (3+ identical in a row)
-function checkRepeatedQuestions(sessionId: string, message: string): { blocked: boolean; count: number } {
+function checkRepeatedQuestions(sessionId: string, message: string): { blocked: boolean; count: number; requireVerification: boolean } {
   cleanOldSessions();
 
   const normalized = normalizeMessage(message);
-  const session = spamDetection.get(sessionId) || { messages: [], lastActivity: Date.now() };
+  const session = spamDetection.get(sessionId) || { messages: [], lastActivity: Date.now(), messageCount: 0, verified: false };
 
   // Count consecutive identical messages from the end
   let consecutiveCount = 0;
@@ -63,6 +95,7 @@ function checkRepeatedQuestions(sessionId: string, message: string): { blocked: 
 
   // Add current message
   session.messages.push(normalized);
+  session.messageCount = (session.messageCount || 0) + 1;
   session.lastActivity = Date.now();
 
   // Keep only last 10 messages
@@ -72,8 +105,21 @@ function checkRepeatedQuestions(sessionId: string, message: string): { blocked: 
 
   spamDetection.set(sessionId, session);
 
+  // Require verification after 10 messages if not verified
+  const requireVerification = session.messageCount >= 10 && !session.verified;
+
   // Block if 3 or more consecutive identical messages
-  return { blocked: consecutiveCount >= 2, count: consecutiveCount + 1 };
+  return { blocked: consecutiveCount >= 2, count: consecutiveCount + 1, requireVerification };
+}
+
+// Mark session as verified
+function markSessionVerified(sessionId: string) {
+  const session = spamDetection.get(sessionId);
+  if (session) {
+    session.verified = true;
+    session.messageCount = 0; // Reset count after verification
+    spamDetection.set(sessionId, session);
+  }
 }
 
 // Load knowledge base from markdown file
@@ -160,6 +206,25 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('cf-connecting-ip') || 'unknown';
     const sessionId = body.sessionId || `${clientIP}-${request.headers.get('user-agent')?.slice(0, 50) || 'unknown'}`;
 
+    // Handle verification token (mark session as verified)
+    if (body.verificationToken === 'human-verified') {
+      markSessionVerified(sessionId);
+    }
+
+    // Check for suspicious patterns
+    const suspiciousCheck = checkSuspiciousPatterns(body.message);
+    if (suspiciousCheck.suspicious) {
+      console.warn(`[SUSPICIOUS] Blocked suspicious message from session: ${sessionId.slice(0, 20)}... (${suspiciousCheck.reason})`);
+      return new Response(JSON.stringify({
+        message: "I couldn't process that message. Please try rephrasing your question in plain language.",
+        blocked: true,
+        reason: suspiciousCheck.reason
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Check for repeated questions (spam detection)
     const repeatCheck = checkRepeatedQuestions(sessionId, body.message);
     if (repeatCheck.blocked) {
@@ -168,6 +233,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
         message: "I noticed you've asked this same question a few times. If my previous answers didn't help, please try rephrasing your question or reach out directly at /contact for personalized assistance.",
         blocked: true,
         reason: 'repeated_question'
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check if verification is required (10+ messages without verification)
+    if (repeatCheck.requireVerification) {
+      console.info(`[VERIFY] Requesting verification from session: ${sessionId.slice(0, 20)}...`);
+      return new Response(JSON.stringify({
+        message: "Before we continue, please confirm you're not a robot by clicking the button below.",
+        requireVerification: true,
+        reason: 'verification_required'
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
