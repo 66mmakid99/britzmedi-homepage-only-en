@@ -10,7 +10,7 @@ Professional medical device company website for international distributors and b
 
 ## Overview
 
-BRITZMEDI Global is a static website built for showcasing medical devices to international distributors and buyers. The site features product catalogs, certification information, FAQ, contact forms, and downloadable resources.
+BRITZMEDI Global is a static website built for showcasing medical devices to international distributors and buyers. The site features product catalogs, certification information, FAQ, contact forms, AI-powered chatbot, and downloadable resources.
 
 **Live Site**: [https://britzmedi.com](https://britzmedi.com)
 
@@ -20,17 +20,19 @@ BRITZMEDI Global is a static website built for showcasing medical devices to int
 |------------|---------|---------|
 | [Astro](https://astro.build) | 5.16.15 | Static Site Generator (SSG) |
 | [React](https://react.dev) | 19.2.3 | Interactive Components |
-| [Tailwind CSS](https://tailwindcss.com) | 4.1.18 | Utility-first Styling |
+| [Tailwind CSS](https://tailwindcss.com) | 4.1.18 | Utility-first Styling (Light mode only) |
 | [TypeScript](https://typescriptlang.org) | Latest | Type Safety |
 | [Keystatic](https://keystatic.com) | 5.0.6 | Content Management System |
+| [Claude API](https://anthropic.com) | Sonnet 4 | AI Chatbot |
 | [Cloudflare Pages](https://pages.cloudflare.com) | - | Hosting & CDN |
+| [Cloudflare D1](https://developers.cloudflare.com/d1/) | - | Database |
 | [EmailJS](https://emailjs.com) | - | Contact Form Email Service |
 | [Vitest](https://vitest.dev) | 3.2.3 | Unit Testing |
 
 ## Project Structure
 
 ```
-britzmedi-homepage-only-en/
+britzmedi-global/
 ├── public/
 │   ├── images/
 │   │   ├── hero/              # Hero section images
@@ -41,9 +43,10 @@ britzmedi-homepage-only-en/
 │
 ├── src/
 │   ├── components/
-│   │   └── layout/
-│   │       ├── Header.astro   # Navigation header
-│   │       └── Footer.astro   # Site footer
+│   │   ├── layout/            # Header, Footer
+│   │   ├── ui/                # Button, Form, LanguageSwitcher
+│   │   ├── features/          # LeadForm, Chatbot
+│   │   └── seo/               # SEOHead, WebVitals
 │   │
 │   ├── content/               # TypeScript content data
 │   │   ├── products.ts        # Product catalog
@@ -53,10 +56,19 @@ britzmedi-homepage-only-en/
 │   │   ├── company.ts         # Company information
 │   │   └── hero.ts            # Hero section config
 │   │
+│   ├── data/                  # Static data files
+│   │   ├── chatbot-knowledge.md  # AI Chatbot knowledge base
+│   │   └── countries.ts          # Country list
+│   │
 │   ├── layouts/
 │   │   └── BaseLayout.astro   # Base layout with SEO
 │   │
 │   ├── pages/
+│   │   ├── api/               # API endpoints
+│   │   │   ├── chat.ts        # AI chatbot endpoint
+│   │   │   └── leads.ts       # Lead submission
+│   │   ├── admin/             # Admin pages
+│   │   │   └── leads.astro    # Lead dashboard
 │   │   ├── index.astro        # Homepage
 │   │   ├── about.astro        # About company
 │   │   ├── contact.astro      # Contact form
@@ -72,26 +84,40 @@ britzmedi-homepage-only-en/
 │   ├── styles/
 │   │   └── global.css         # Tailwind & custom styles
 │   │
-│   └── utils/
-│       ├── email-validation.ts
-│       └── email-validation.test.ts
-│
-├── scripts/
-│   └── publisher-agent/       # Quality check tools
-│       ├── index.js
-│       ├── check-links.js
-│       ├── validate-menu.js
-│       ├── check-accessibility.js
-│       └── analyze-performance.js
+│   └── lib/                   # Utilities
+│       ├── db/                # D1 database schema
+│       ├── lead-score.ts      # Lead scoring algorithm
+│       └── slack.ts           # Slack notifications
 │
 ├── astro.config.mjs
 ├── keystatic.config.ts
 ├── tsconfig.json
 ├── vitest.config.ts
+├── CLAUDE.md                  # Development documentation
 └── package.json
 ```
 
-## Pages
+## Features
+
+### AI Chatbot (Claude Sonnet 4)
+- Natural conversational responses
+- External knowledge base (`src/data/chatbot-knowledge.md`)
+- Product context injection
+- Spam protection (3x repeated question blocking)
+- Security (XSS/injection pattern detection)
+- "I'm not a robot" verification after 10 messages
+- Monthly API cost monitoring logs
+- Automatic contact form link (`/contact`) suggestions
+
+### Lead Management
+- 7-field lead form with business email validation
+- Personal email blocking (Gmail, Yahoo, etc.)
+- Lead scoring algorithm (A/B/C/D grades, 0-100 score)
+- Admin dashboard (`/admin/leads`)
+- Slack webhook notifications
+- Cloudflare D1 database storage
+
+### Pages
 
 | Page | Route | Description |
 |------|-------|-------------|
@@ -101,12 +127,13 @@ britzmedi-homepage-only-en/
 | Product Detail | `/products/[id]` | Individual product information |
 | Certifications | `/certifications` | FDA, ISO, KFDA certificates |
 | FAQ | `/faq` | 18 Q&As in 5 categories |
-| Contact | `/contact` | EmailJS-powered contact form |
+| Contact | `/contact` | Lead form with validation |
 | Resources | `/resources` | Download center (Google Drive) |
 | Privacy | `/privacy` | Privacy policy |
 | Terms | `/terms` | Terms of service |
+| Admin Leads | `/admin/leads` | Lead management dashboard |
 
-## Products
+### Products
 
 | Product | Model | Status | Key Features |
 |---------|-------|--------|--------------|
@@ -131,6 +158,17 @@ cd britzmedi-homepage-only-en
 
 # Install dependencies
 npm install
+```
+
+### Environment Variables
+
+Create `.env` file:
+
+```env
+ANTHROPIC_API_KEY=sk-ant-...
+SLACK_WEBHOOK_URL=https://hooks.slack.com/...
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_password
 ```
 
 ### Development
@@ -159,17 +197,33 @@ npm run test:watch
 npm run test:ui
 ```
 
-### Publisher Agent (Quality Checks)
+## API Endpoints
 
-```bash
-# Run all quality checks
-npm run publisher:check
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/chat` | POST | AI chatbot (Claude Sonnet 4) |
+| `/api/leads` | POST | Lead form submission |
 
-# Individual checks
-npm run publisher:links    # Validate all links
-npm run publisher:menu     # Validate navigation
-npm run publisher:a11y     # Accessibility audit
-npm run publisher:perf     # Performance analysis
+### Chat API Request
+
+```json
+{
+  "message": "Tell me about TORR RF",
+  "history": [],
+  "context": {
+    "product": "torr-rf",
+    "page": "products"
+  }
+}
+```
+
+### Chat API Response
+
+```json
+{
+  "message": "TORR RF is our flagship...",
+  "fallback": false
+}
 ```
 
 ## Deployment
@@ -190,8 +244,8 @@ npx wrangler pages deploy dist --project-name=britzmedi-homepage-only-en
 ### Email Validation
 - RFC 5322 format validation
 - Disposable email blocking (19 domains)
-- Typo detection for major providers (Gmail, Yahoo, Hotmail, Outlook)
-- Optional server-side verification via Emailable API
+- Business email requirement (personal emails blocked)
+- Typo detection for major providers
 
 ### SEO Optimization
 - Meta tags (title, description, keywords)
@@ -200,33 +254,11 @@ npx wrangler pages deploy dist --project-name=britzmedi-homepage-only-en
 - FAQPage Schema for FAQ page
 - Sitemap.xml & robots.txt
 
-### Contact Form
-- EmailJS integration
-- Real-time email validation
-- Country code selection (20 countries)
-- Product interest selection
-
-### Resources/Downloads
-- Google Drive integration
-- Categorized resources (Brochures, Technical Docs, Certificates, Videos)
-- Multi-language support indicator
-
-## Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `astro.config.mjs` | Astro configuration with Cloudflare adapter |
-| `keystatic.config.ts` | CMS collections and fields |
-| `tsconfig.json` | TypeScript configuration |
-| `vitest.config.ts` | Test runner configuration |
-
-## External Services
-
-| Service | Purpose | Configuration |
-|---------|---------|---------------|
-| EmailJS | Contact form emails | Service ID: `service_nbk0net` |
-| Google Drive | Resource downloads | Public folder links |
-| Cloudflare Pages | Hosting & CDN | Auto-deploy on push |
+### Security
+- XSS pattern detection in chatbot
+- Input sanitization
+- Rate limiting via session tracking
+- Basic auth for admin pages
 
 ## Browser Support
 
@@ -234,6 +266,24 @@ npx wrangler pages deploy dist --project-name=britzmedi-homepage-only-en
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
+
+## Recent Updates (2026-02-03)
+
+### AI Chatbot Improvements
+- Upgraded from Claude Haiku to Claude Sonnet 4
+- External knowledge base file for easy maintenance
+- Natural conversational style (no excessive markdown)
+- Spam protection and security features
+- API cost monitoring
+
+### UI/UX Updates
+- Removed dark mode (light mode only)
+- Consistent design system
+- Mobile responsive improvements
+
+## Documentation
+
+See [CLAUDE.md](./CLAUDE.md) for detailed development documentation and history.
 
 ## License
 
@@ -243,3 +293,4 @@ Proprietary - BRITZMEDI Co., Ltd. All rights reserved.
 
 - **Website**: [https://britzmedi.com](https://britzmedi.com)
 - **Email**: contact@britzmedi.com
+- **Phone**: +82-70-4348-7244
