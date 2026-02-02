@@ -1,0 +1,19 @@
+---
+// Astro wrapper for React Chatbot component
+import Chatbot from './Chatbot';
+
+interface Props {
+  productContext?: string;
+  pageContext?: string;
+}
+
+const { productContext, pageContext } = Astro.props;
+---
+
+<div id="chatbot-container">
+  <Chatbot
+    client:load
+    productContext={productContext}
+    pageContext={pageContext}
+  />
+</div>
