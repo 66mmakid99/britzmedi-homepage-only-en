@@ -181,7 +181,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
-  // Lead dashboard functionality
+  // Lead dashboard functionality with API integration
   interface Lead {
     id: number;
     company_name: string;
@@ -198,52 +198,72 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     created_at: string;
   }
 
-  // Sample data for demo (in production, this would come from the API)
-  const sampleLeads: Lead[] = [
-    {
-      id: 1,
-      company_name: 'Beauty Clinic NYC',
-      company_website: 'https://beautyclinicnyc.com',
-      contact_name: 'Dr. Sarah Johnson',
-      job_title: 'Medical Director',
-      email: 'sarah@beautyclinicnyc.com',
-      country: 'US',
-      interested_products: '["TORR RF", "ULBLANC"]',
-      message: 'Interested in becoming a distributor for the East Coast region.',
-      lead_score: 85,
-      lead_grade: 'A',
-      status: 'new',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: 2,
-      company_name: 'Derma Solutions GmbH',
-      company_website: 'https://derma-solutions.de',
-      contact_name: 'Klaus Mueller',
-      job_title: 'Procurement Manager',
-      email: 'k.mueller@derma-solutions.de',
-      country: 'DE',
-      interested_products: '["TORR RF"]',
-      message: 'Looking for RF devices for our clinic chain.',
-      lead_score: 68,
-      lead_grade: 'B',
-      status: 'contacted',
-      created_at: new Date(Date.now() - 86400000).toISOString()
-    },
-    {
-      id: 3,
-      company_name: 'Aesthetic Brazil',
-      contact_name: 'Ana Costa',
-      job_title: 'Owner',
-      email: 'ana@aesthetic-brazil.com.br',
-      country: 'BR',
-      interested_products: '["NEWCHAE SHOT"]',
-      lead_score: 52,
-      lead_grade: 'C',
-      status: 'new',
-      created_at: new Date(Date.now() - 172800000).toISOString()
+  interface Stats {
+    total: number;
+    hot: number;
+    newToday: number;
+    avgScore: number;
+  }
+
+  let allLeads: Lead[] = [];
+  let isLoading = false;
+
+  // Fetch leads from API
+  async function fetchLeads(): Promise<Lead[]> {
+    try {
+      const params = new URLSearchParams();
+      const gradeFilter = document.getElementById('filter-grade') as HTMLSelectElement;
+      const statusFilter = document.getElementById('filter-status') as HTMLSelectElement;
+      const searchInput = document.getElementById('search-input') as HTMLInputElement;
+
+      if (gradeFilter?.value) params.set('grade', gradeFilter.value);
+      if (statusFilter?.value) params.set('status', statusFilter.value);
+      if (searchInput?.value) params.set('search', searchInput.value);
+
+      const response = await fetch(`/api/leads?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch leads');
+
+      const data = await response.json();
+      return data.leads || [];
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+      return [];
     }
-  ];
+  }
+
+  // Fetch stats from API
+  async function fetchStats(): Promise<Stats> {
+    try {
+      const response = await fetch('/api/leads/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+
+      const data = await response.json();
+      return {
+        total: data.total || 0,
+        hot: data.hot || 0,
+        newToday: data.newToday || 0,
+        avgScore: data.avgScore || 0,
+      };
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      return { total: 0, hot: 0, newToday: 0, avgScore: 0 };
+    }
+  }
+
+  // Update status via API
+  async function updateLeadStatus(leadId: number, newStatus: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      return false;
+    }
+  }
 
   function renderLeads(leads: Lead[]) {
     const tbody = document.getElementById('leads-table-body');
@@ -253,51 +273,63 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       tbody.innerHTML = `
         <tr>
           <td colspan="8" class="px-6 py-12 text-center text-slate-500">
-            <p class="font-medium">No leads match your filters</p>
+            <div class="flex flex-col items-center gap-3">
+              <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <p class="font-medium">No leads found</p>
+              <p class="text-sm">Leads from the contact form will appear here</p>
+            </div>
           </td>
         </tr>
       `;
       return;
     }
 
+    const gradeColors: Record<string, string> = {
+      A: 'bg-green-100 text-green-700',
+      B: 'bg-amber-100 text-amber-700',
+      C: 'bg-blue-100 text-blue-700',
+      D: 'bg-slate-100 text-slate-700'
+    };
+    const statusColors: Record<string, string> = {
+      new: 'bg-blue-100 text-blue-700',
+      contacted: 'bg-amber-100 text-amber-700',
+      qualified: 'bg-purple-100 text-purple-700',
+      proposal: 'bg-indigo-100 text-indigo-700',
+      won: 'bg-green-100 text-green-700',
+      lost: 'bg-red-100 text-red-700'
+    };
+
     tbody.innerHTML = leads.map(lead => {
-      const products = JSON.parse(lead.interested_products || '[]');
-      const gradeColors: Record<string, string> = {
-        A: 'bg-green-100 text-green-700',
-        B: 'bg-amber-100 text-amber-700',
-        C: 'bg-blue-100 text-blue-700',
-        D: 'bg-slate-100 text-slate-700'
-      };
-      const statusColors: Record<string, string> = {
-        new: 'bg-blue-100 text-blue-700',
-        contacted: 'bg-amber-100 text-amber-700',
-        qualified: 'bg-purple-100 text-purple-700',
-        proposal: 'bg-indigo-100 text-indigo-700',
-        won: 'bg-green-100 text-green-700',
-        lost: 'bg-red-100 text-red-700'
-      };
+      let products: string[] = [];
+      try {
+        products = typeof lead.interested_products === 'string'
+          ? JSON.parse(lead.interested_products)
+          : lead.interested_products || [];
+      } catch { products = []; }
 
       return `
-        <tr class="hover:bg-slate-50 transition-colors">
+        <tr class="hover:bg-slate-50 transition-colors" data-lead-id="${lead.id}">
           <td class="px-6 py-4">
             <div>
-              <p class="font-medium text-slate-900">${lead.contact_name}</p>
-              <p class="text-sm text-slate-500">${lead.job_title}</p>
-              <a href="mailto:${lead.email}" class="text-sm text-primary-600 hover:underline">${lead.email}</a>
+              <p class="font-medium text-slate-900">${escapeHtml(lead.contact_name)}</p>
+              <p class="text-sm text-slate-500">${escapeHtml(lead.job_title)}</p>
+              <a href="mailto:${escapeHtml(lead.email)}" class="text-sm text-primary-600 hover:underline">${escapeHtml(lead.email)}</a>
             </div>
           </td>
           <td class="px-6 py-4">
             <div>
-              <p class="font-medium text-slate-900">${lead.company_name}</p>
-              ${lead.company_website ? `<a href="${lead.company_website}" target="_blank" class="text-sm text-primary-600 hover:underline">Website</a>` : ''}
+              <p class="font-medium text-slate-900">${escapeHtml(lead.company_name)}</p>
+              ${lead.company_website ? `<a href="${escapeHtml(lead.company_website)}" target="_blank" rel="noopener" class="text-sm text-primary-600 hover:underline">Website</a>` : ''}
             </div>
           </td>
           <td class="px-6 py-4">
-            <span class="text-sm font-medium">${lead.country}</span>
+            <span class="text-sm font-medium">${escapeHtml(lead.country)}</span>
           </td>
           <td class="px-6 py-4">
             <div class="flex flex-wrap gap-1">
-              ${products.map((p: string) => `<span class="px-2 py-0.5 text-xs bg-slate-100 rounded">${p}</span>`).join('')}
+              ${products.map(p => `<span class="px-2 py-0.5 text-xs bg-slate-100 rounded">${escapeHtml(p)}</span>`).join('')}
             </div>
           </td>
           <td class="px-6 py-4 text-center">
@@ -307,96 +339,144 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </span>
           </td>
           <td class="px-6 py-4">
-            <span class="px-2.5 py-1 text-xs font-medium rounded-full capitalize ${statusColors[lead.status] || statusColors.new}">
-              ${lead.status}
-            </span>
+            <select
+              class="status-select px-2.5 py-1 text-xs font-medium rounded-full border-0 cursor-pointer ${statusColors[lead.status] || statusColors.new}"
+              data-lead-id="${lead.id}"
+              data-current-status="${lead.status}"
+            >
+              <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+              <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+              <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+              <option value="proposal" ${lead.status === 'proposal' ? 'selected' : ''}>Proposal</option>
+              <option value="won" ${lead.status === 'won' ? 'selected' : ''}>Won</option>
+              <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+            </select>
           </td>
           <td class="px-6 py-4 text-sm text-slate-500">
             ${new Date(lead.created_at).toLocaleDateString()}
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center justify-center gap-1">
-              <button class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="View Details">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-              <a href="mailto:${lead.email}" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Send Email">
+              <a href="mailto:${escapeHtml(lead.email)}" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Send Email">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </a>
+              ${lead.company_website ? `
+              <a href="${escapeHtml(lead.company_website)}" target="_blank" rel="noopener" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Visit Website">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>` : ''}
             </div>
           </td>
         </tr>
       `;
     }).join('');
+
+    // Add status change handlers
+    document.querySelectorAll('.status-select').forEach(select => {
+      select.addEventListener('change', async (e) => {
+        const target = e.target as HTMLSelectElement;
+        const leadId = parseInt(target.dataset.leadId || '0');
+        const newStatus = target.value;
+        const oldStatus = target.dataset.currentStatus || '';
+
+        target.disabled = true;
+        const success = await updateLeadStatus(leadId, newStatus);
+
+        if (success) {
+          target.dataset.currentStatus = newStatus;
+          // Update colors
+          const statusColors: Record<string, string> = {
+            new: 'bg-blue-100 text-blue-700',
+            contacted: 'bg-amber-100 text-amber-700',
+            qualified: 'bg-purple-100 text-purple-700',
+            proposal: 'bg-indigo-100 text-indigo-700',
+            won: 'bg-green-100 text-green-700',
+            lost: 'bg-red-100 text-red-700'
+          };
+          target.className = `status-select px-2.5 py-1 text-xs font-medium rounded-full border-0 cursor-pointer ${statusColors[newStatus]}`;
+        } else {
+          target.value = oldStatus;
+          alert('Failed to update status');
+        }
+        target.disabled = false;
+      });
+    });
   }
 
-  function updateStats(leads: Lead[]) {
-    const total = leads.length;
-    const hot = leads.filter(l => l.lead_grade === 'A').length;
-    const today = leads.filter(l => {
-      const created = new Date(l.created_at);
-      const now = new Date();
-      return created.toDateString() === now.toDateString();
-    }).length;
-    const avgScore = total > 0 ? Math.round(leads.reduce((sum, l) => sum + l.lead_score, 0) / total) : 0;
-
+  function updateStats(stats: Stats) {
     const statTotal = document.getElementById('stat-total');
     const statHot = document.getElementById('stat-hot');
     const statNew = document.getElementById('stat-new');
     const statAvg = document.getElementById('stat-avg-score');
 
-    if (statTotal) statTotal.textContent = total.toString();
-    if (statHot) statHot.textContent = hot.toString();
-    if (statNew) statNew.textContent = today.toString();
-    if (statAvg) statAvg.textContent = avgScore.toString();
+    if (statTotal) statTotal.textContent = stats.total.toString();
+    if (statHot) statHot.textContent = stats.hot.toString();
+    if (statNew) statNew.textContent = stats.newToday.toString();
+    if (statAvg) statAvg.textContent = stats.avgScore.toString();
   }
 
-  // Initialize with sample data
-  let currentLeads = sampleLeads;
-  renderLeads(currentLeads);
-  updateStats(currentLeads);
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+  }
 
-  // Filter handlers
+  function showLoading(show: boolean) {
+    const tbody = document.getElementById('leads-table-body');
+    if (!tbody) return;
+
+    if (show) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="px-6 py-12 text-center text-slate-500">
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Loading leads...</span>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  // Load data
+  async function loadData() {
+    if (isLoading) return;
+    isLoading = true;
+    showLoading(true);
+
+    const [leads, stats] = await Promise.all([fetchLeads(), fetchStats()]);
+    allLeads = leads;
+    renderLeads(leads);
+    updateStats(stats);
+
+    isLoading = false;
+  }
+
+  // Filter handlers with debounce
+  let filterTimeout: number;
+  function applyFilters() {
+    clearTimeout(filterTimeout);
+    filterTimeout = window.setTimeout(loadData, 300);
+  }
+
   const gradeFilter = document.getElementById('filter-grade') as HTMLSelectElement;
   const statusFilter = document.getElementById('filter-status') as HTMLSelectElement;
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
-
-  function applyFilters() {
-    let filtered = [...sampleLeads];
-
-    if (gradeFilter?.value) {
-      filtered = filtered.filter(l => l.lead_grade === gradeFilter.value);
-    }
-
-    if (statusFilter?.value) {
-      filtered = filtered.filter(l => l.status === statusFilter.value);
-    }
-
-    if (searchInput?.value) {
-      const search = searchInput.value.toLowerCase();
-      filtered = filtered.filter(l =>
-        l.company_name.toLowerCase().includes(search) ||
-        l.contact_name.toLowerCase().includes(search) ||
-        l.email.toLowerCase().includes(search)
-      );
-    }
-
-    currentLeads = filtered;
-    renderLeads(currentLeads);
-  }
 
   gradeFilter?.addEventListener('change', applyFilters);
   statusFilter?.addEventListener('change', applyFilters);
   searchInput?.addEventListener('input', applyFilters);
 
   // Refresh button
-  document.getElementById('refresh-btn')?.addEventListener('click', () => {
-    // In production, this would fetch from the API
-    renderLeads(sampleLeads);
-    updateStats(sampleLeads);
-  });
+  document.getElementById('refresh-btn')?.addEventListener('click', loadData);
+
+  // Initial load
+  loadData();
 </script>

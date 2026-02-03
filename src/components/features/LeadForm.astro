@@ -24,7 +24,7 @@ const additionalOptions = [
 <div class={`lead-form-wrapper ${className}`}>
   <div class="relative">
     <div class="absolute -inset-4 bg-gradient-to-br from-primary-500/5 to-accent-500/5 rounded-3xl blur-2xl"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 p-6 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50">
+    <div class="relative bg-white rounded-2xl border border-slate-200/80 p-6 lg:p-8 shadow-xl shadow-slate-200/50">
 
       <h2 class="heading-3 mb-2">Request Information</h2>
       <p class="body-small mb-8">Fill out the form below and we'll get back to you within 1-2 business days.</p>
@@ -34,7 +34,7 @@ const additionalOptions = [
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Company Name -->
           <div>
-            <label for="companyName" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            <label for="companyName" class="block text-sm font-semibold text-slate-700 mb-2">
               Company Name <span class="text-red-500">*</span>
             </label>
             <input
@@ -43,14 +43,14 @@ const additionalOptions = [
               name="companyName"
               required
               placeholder="Your Company Name"
-              class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-shadow"
+              class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="companyNameError" class="hidden mt-1.5 text-xs text-red-500"></p>
           </div>
 
           <!-- Company Website -->
           <div>
-            <label for="companyWebsite" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            <label for="companyWebsite" class="block text-sm font-semibold text-slate-700 mb-2">
               Company Website <span class="text-red-500">*</span>
             </label>
             <input
@@ -59,7 +59,7 @@ const additionalOptions = [
               name="companyWebsite"
               required
               placeholder="www.example.com"
-              class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-shadow"
+              class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="companyWebsiteError" class="hidden mt-1.5 text-xs text-red-500"></p>
           </div>
@@ -69,7 +69,7 @@ const additionalOptions = [
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Your Name -->
           <div>
-            <label for="yourName" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            <label for="yourName" class="block text-sm font-semibold text-slate-700 mb-2">
               Your Name <span class="text-red-500">*</span>
             </label>
             <input
@@ -78,14 +78,14 @@ const additionalOptions = [
               name="yourName"
               required
               placeholder="John Doe"
-              class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-shadow"
+              class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="yourNameError" class="hidden mt-1.5 text-xs text-red-500"></p>
           </div>
 
           <!-- Job Title -->
           <div>
-            <label for="jobTitle" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            <label for="jobTitle" class="block text-sm font-semibold text-slate-700 mb-2">
               Job Title <span class="text-red-500">*</span>
             </label>
             <input
@@ -94,7 +94,7 @@ const additionalOptions = [
               name="jobTitle"
               required
               placeholder="CEO / Director / Manager"
-              class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-shadow"
+              class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="jobTitleError" class="hidden mt-1.5 text-xs text-red-500"></p>
           </div>
@@ -104,7 +104,7 @@ const additionalOptions = [
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Business Email -->
           <div>
-            <label for="businessEmail" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            <label for="businessEmail" class="block text-sm font-semibold text-slate-700 mb-2">
               Business Email <span class="text-red-500">*</span>
             </label>
             <div class="relative">
@@ -114,7 +114,7 @@ const additionalOptions = [
                 name="businessEmail"
                 required
                 placeholder="you@company.com"
-                class="w-full px-4 py-3.5 pr-12 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-shadow"
+                class="w-full px-4 py-3.5 pr-12 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
               />
               <div id="emailStatus" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
                 <svg id="emailValid" class="w-5 h-5 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,26 +123,26 @@ const additionalOptions = [
                 <svg id="emailInvalid" class="w-5 h-5 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                <svg id="emailLoading" class="w-5 h-5 text-slate-400 dark:text-slate-500 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                <svg id="emailLoading" class="w-5 h-5 text-slate-400 animate-spin hidden" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               </div>
             </div>
             <p id="businessEmailError" class="hidden mt-1.5 text-xs text-red-500"></p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Please use your company email address</p>
+            <p class="mt-1 text-xs text-slate-500">Please use your company email address</p>
           </div>
 
           <!-- Country -->
           <div>
-            <label for="country" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+            <label for="country" class="block text-sm font-semibold text-slate-700 mb-2">
               Country <span class="text-red-500">*</span>
             </label>
             <select
               id="country"
               name="country"
               required
-              class="w-full px-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 transition-shadow"
+              class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 transition-shadow"
             >
               <option value="">Select your country</option>
               {countries.map((c) => (
@@ -155,31 +155,31 @@ const additionalOptions = [
 
         <!-- Interested In (Checkboxes) -->
         <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
+          <label class="block text-sm font-semibold text-slate-700 mb-3">
             Interested In <span class="text-red-500">*</span>
-            <span class="font-normal text-slate-500 dark:text-slate-400 ml-1">(Select at least one)</span>
+            <span class="font-normal text-slate-500 ml-1">(Select at least one)</span>
           </label>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {productOptions.map((option) => (
-              <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-900/30">
+              <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
                 <input
                   type="checkbox"
                   name="interestedIn"
                   value={option.value}
-                  class="w-5 h-5 text-primary-600 border-slate-300 dark:border-slate-500 rounded focus:ring-primary-500 dark:bg-slate-700"
+                  class="w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
                 />
-                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{option.label}</span>
+                <span class="text-sm font-medium text-slate-700">{option.label}</span>
               </label>
             ))}
             {additionalOptions.map((option) => (
-              <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50 dark:has-[:checked]:bg-primary-900/30">
+              <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
                 <input
                   type="checkbox"
                   name="interestedIn"
                   value={option.value}
-                  class="w-5 h-5 text-primary-600 border-slate-300 dark:border-slate-500 rounded focus:ring-primary-500 dark:bg-slate-700"
+                  class="w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
                 />
-                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{option.label}</span>
+                <span class="text-sm font-medium text-slate-700">{option.label}</span>
               </label>
             ))}
           </div>
@@ -193,9 +193,9 @@ const additionalOptions = [
             id="privacy"
             name="privacy"
             required
-            class="mt-1 w-5 h-5 text-primary-600 border-slate-300 dark:border-slate-500 rounded focus:ring-primary-500 dark:bg-slate-700"
+            class="mt-1 w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
           />
-          <label for="privacy" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <label for="privacy" class="text-sm text-slate-600 leading-relaxed">
             I agree to the collection and use of my personal information for the purpose of responding to my inquiry.
             <span class="text-red-500">*</span>
           </label>
@@ -564,20 +564,55 @@ const additionalOptions = [
     };
 
     try {
-      await loadEmailJS();
-      const response = await (window as any).emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+      // 1. Save lead to database via API
+      const leadData = {
+        company_name: companyName,
+        company_website: urlResult.normalizedUrl || companyWebsite,
+        contact_name: yourName,
+        job_title: jobTitle,
+        email: businessEmail,
+        country: country,
+        interested_products: interestedIn,
+        message: '', // Optional message field if added later
+        source: 'website',
+        utm_source: new URLSearchParams(window.location.search).get('utm_source') || undefined,
+        utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || undefined,
+        utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || undefined,
+      };
 
-      if (response.status === 200) {
+      const apiResponse = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leadData),
+      });
+
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json().catch(() => ({}));
+        if (apiResponse.status === 409) {
+          showStatus('error', 'An inquiry with this email has already been submitted. We will contact you soon.');
+          setLoading(false);
+          return;
+        }
+        console.error('API Error:', errorData);
+      } else {
+        console.log('Lead saved to database');
+      }
+
+      // 2. Send notification email via EmailJS
+      await loadEmailJS();
+      const emailResponse = await (window as any).emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+
+      if (emailResponse.status === 200) {
         showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
         form.reset();
         emailStatus?.classList.add('hidden');
         isEmailValid = false;
       } else {
-        throw new Error('Failed to send');
+        throw new Error('Failed to send email notification');
       }
     } catch (error) {
-      console.error('EmailJS Error:', error);
-      showStatus('error', 'Please try again later or contact us directly via email at sales@britzmedi.com');
+      console.error('Submission Error:', error);
+      showStatus('error', 'Please try again later or contact us directly via email at contact@britzmedi.co.kr');
     } finally {
       setLoading(false);
     }
