@@ -26,6 +26,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [requireVerification, setRequireVerification] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -86,10 +87,23 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       const data = await response.json();
       console.log('[Chatbot] Response data:', data);
 
+      // Handle rate limit (429)
+      if (response.status === 429) {
+        const retryAfter = data.retryAfter || 60;
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `${data.message} (Please wait ${retryAfter} seconds)`,
+          timestamp: new Date()
+        }]);
+        setSuggestions([]);
+        return;
+      }
+
       // Handle verification requirement
       if (data.requireVerification) {
         setPendingMessage(userMessage.content);
         setRequireVerification(true);
+        setSuggestions([]);
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: data.message,
@@ -105,6 +119,13 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Update suggestions from API response
+      if (data.suggestions && Array.isArray(data.suggestions)) {
+        setSuggestions(data.suggestions);
+      } else {
+        setSuggestions([]);
+      }
     } catch (error) {
       console.error('[Chatbot] Error:', error);
       setMessages(prev => [...prev, {
@@ -277,6 +298,27 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                     className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
                   >
                     {action.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Follow-up Suggestions (shown after assistant responses) */}
+          {suggestions.length > 0 && messages.length > 1 && !isLoading && !requireVerification && (
+            <div className="px-4 pb-2">
+              <p className="text-xs text-slate-500 mb-2">You might also ask:</p>
+              <div className="flex flex-col gap-1.5">
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setSuggestions([]);
+                      sendMessage(suggestion);
+                    }}
+                    className="px-3 py-2 text-xs text-left font-medium bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-colors border border-primary-100"
+                  >
+                    {suggestion}
                   </button>
                 ))}
               </div>

@@ -35,6 +35,101 @@ const spamDetection = new Map<string, {
   verified: boolean;
 }>();
 
+// Rate limiting store (IP-based)
+const rateLimitStore = new Map<string, {
+  requests: number[];  // timestamps of recent requests
+  blocked: boolean;
+  blockedUntil: number;
+}>();
+
+// Rate limit configuration
+const RATE_LIMIT = {
+  maxRequestsPerMinute: 10,   // Max 10 requests per minute per IP
+  maxRequestsPerHour: 60,     // Max 60 requests per hour per IP
+  blockDurationMs: 5 * 60 * 1000,  // 5 minute block after exceeding limits
+  maxConversationTurns: 50,   // Max 50 turns per session
+};
+
+// Check rate limit for IP
+function checkRateLimit(clientIP: string): { allowed: boolean; reason?: string; retryAfter?: number } {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60 * 1000;
+  const oneHourAgo = now - 60 * 60 * 1000;
+
+  let record = rateLimitStore.get(clientIP);
+
+  // Initialize if new IP
+  if (!record) {
+    record = { requests: [], blocked: false, blockedUntil: 0 };
+    rateLimitStore.set(clientIP, record);
+  }
+
+  // Check if currently blocked
+  if (record.blocked && now < record.blockedUntil) {
+    const retryAfter = Math.ceil((record.blockedUntil - now) / 1000);
+    return { allowed: false, reason: 'rate_limited', retryAfter };
+  }
+
+  // Unblock if block period has passed
+  if (record.blocked && now >= record.blockedUntil) {
+    record.blocked = false;
+    record.requests = [];
+  }
+
+  // Clean old requests
+  record.requests = record.requests.filter(ts => ts > oneHourAgo);
+
+  // Count recent requests
+  const requestsLastMinute = record.requests.filter(ts => ts > oneMinuteAgo).length;
+  const requestsLastHour = record.requests.length;
+
+  // Check limits
+  if (requestsLastMinute >= RATE_LIMIT.maxRequestsPerMinute) {
+    record.blocked = true;
+    record.blockedUntil = now + RATE_LIMIT.blockDurationMs;
+    rateLimitStore.set(clientIP, record);
+    console.warn(`[RATE LIMIT] IP ${clientIP.slice(0, 15)}... blocked: ${requestsLastMinute} req/min exceeded`);
+    return { allowed: false, reason: 'too_many_requests_minute', retryAfter: 60 };
+  }
+
+  if (requestsLastHour >= RATE_LIMIT.maxRequestsPerHour) {
+    record.blocked = true;
+    record.blockedUntil = now + RATE_LIMIT.blockDurationMs;
+    rateLimitStore.set(clientIP, record);
+    console.warn(`[RATE LIMIT] IP ${clientIP.slice(0, 15)}... blocked: ${requestsLastHour} req/hour exceeded`);
+    return { allowed: false, reason: 'too_many_requests_hour', retryAfter: 300 };
+  }
+
+  // Add current request timestamp
+  record.requests.push(now);
+  rateLimitStore.set(clientIP, record);
+
+  return { allowed: true };
+}
+
+// Check conversation turn limit
+function checkTurnLimit(sessionId: string): { allowed: boolean; turnCount: number } {
+  const session = spamDetection.get(sessionId);
+  const turnCount = session?.messageCount || 0;
+
+  if (turnCount >= RATE_LIMIT.maxConversationTurns) {
+    return { allowed: false, turnCount };
+  }
+
+  return { allowed: true, turnCount };
+}
+
+// Clean up old rate limit records periodically
+function cleanRateLimitStore() {
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+  for (const [ip, record] of rateLimitStore.entries()) {
+    // Remove records with no recent activity
+    if (record.requests.length === 0 || record.requests[record.requests.length - 1] < oneHourAgo) {
+      rateLimitStore.delete(ip);
+    }
+  }
+}
+
 // API usage tracking for cost monitoring
 interface UsageStats {
   inputTokens: number;
@@ -283,6 +378,43 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('cf-connecting-ip') || 'unknown';
     const sessionId = body.sessionId || `${clientIP}-${request.headers.get('user-agent')?.slice(0, 50) || 'unknown'}`;
 
+    // Clean up old rate limit records periodically (1% chance per request)
+    if (Math.random() < 0.01) {
+      cleanRateLimitStore();
+    }
+
+    // Check rate limit
+    const rateLimitCheck = checkRateLimit(clientIP);
+    if (!rateLimitCheck.allowed) {
+      console.warn(`[RATE LIMIT] Blocked request from ${clientIP.slice(0, 15)}... (${rateLimitCheck.reason})`);
+      return new Response(JSON.stringify({
+        message: "You're sending messages too quickly. Please wait a moment before trying again.",
+        blocked: true,
+        reason: rateLimitCheck.reason,
+        retryAfter: rateLimitCheck.retryAfter
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimitCheck.retryAfter || 60)
+        }
+      });
+    }
+
+    // Check conversation turn limit
+    const turnCheck = checkTurnLimit(sessionId);
+    if (!turnCheck.allowed) {
+      console.info(`[TURN LIMIT] Session ${sessionId.slice(0, 20)}... reached ${turnCheck.turnCount} turns`);
+      return new Response(JSON.stringify({
+        message: "We've had quite a conversation! For more detailed assistance, please reach out to our team directly at /contact. They'll be happy to help you further.",
+        blocked: true,
+        reason: 'conversation_limit_reached'
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Handle verification token (mark session as verified)
     if (body.verificationToken === 'human-verified') {
       markSessionVerified(sessionId);
@@ -336,8 +468,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (!apiKey) {
       // Return a fallback response when API key is not configured
+      const fallbackMessage = getFallbackResponse(body.message, body.context);
+      const suggestions = generateFollowUpSuggestions(body.message, fallbackMessage, body.context);
       return new Response(JSON.stringify({
-        message: getFallbackResponse(body.message, body.context),
+        message: fallbackMessage,
+        suggestions,
         fallback: true
       }), {
         status: 200,
@@ -378,8 +513,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       console.error('Claude API error:', error);
 
       // Return fallback on API error
+      const fallbackMessage = getFallbackResponse(body.message, body.context);
+      const suggestions = generateFollowUpSuggestions(body.message, fallbackMessage, body.context);
       return new Response(JSON.stringify({
-        message: getFallbackResponse(body.message, body.context),
+        message: fallbackMessage,
+        suggestions,
         fallback: true
       }), {
         status: 200,
@@ -397,8 +535,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
       logRequestUsage(inputTokens, outputTokens);
     }
 
+    // Generate context-aware follow-up suggestions
+    const suggestions = generateFollowUpSuggestions(body.message, assistantMessage, body.context);
+
     return new Response(JSON.stringify({
       message: assistantMessage,
+      suggestions,
       fallback: false
     }), {
       status: 200,
@@ -416,6 +558,75 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+// Generate context-aware follow-up suggestions based on conversation
+function generateFollowUpSuggestions(
+  userMessage: string,
+  assistantResponse: string,
+  context?: { product?: string; page?: string }
+): string[] {
+  const lowerMessage = userMessage.toLowerCase();
+  const lowerResponse = assistantResponse.toLowerCase();
+  const suggestions: string[] = [];
+
+  // Product-specific suggestions
+  if (lowerMessage.includes('torr') || lowerResponse.includes('torr rf')) {
+    suggestions.push('What are TORR RF specifications?');
+    suggestions.push('Is TORR RF FDA cleared?');
+    suggestions.push('What treatments can TORR RF perform?');
+  } else if (lowerMessage.includes('ulblanc') || lowerResponse.includes('ulblanc')) {
+    suggestions.push('How does dual-frequency ultrasound work?');
+    suggestions.push('What is i-Booster technology?');
+    suggestions.push('What certifications does ULBLANC have?');
+  } else if (lowerMessage.includes('newchae') || lowerResponse.includes('newchae')) {
+    suggestions.push('What clinical results does NEWCHAE SHOT have?');
+    suggestions.push('Is NEWCHAE SHOT safe for home use?');
+    suggestions.push('What technologies are in NEWCHAE SHOT?');
+  } else if (lowerMessage.includes('lumino') || lowerResponse.includes('lumino')) {
+    suggestions.push('When will LUMINO WAVE be released?');
+    suggestions.push('What makes LUMINO WAVE unique?');
+    suggestions.push('Can I get updates on LUMINO WAVE?');
+  }
+  // Topic-specific suggestions
+  else if (lowerMessage.includes('fda') || lowerMessage.includes('certification') || lowerResponse.includes('fda')) {
+    suggestions.push('Which products are FDA cleared?');
+    suggestions.push('Do you have ISO certification?');
+    suggestions.push('What markets can you export to?');
+  } else if (lowerMessage.includes('distributor') || lowerMessage.includes('partner') || lowerResponse.includes('distributor')) {
+    suggestions.push('What regions need distributors?');
+    suggestions.push('What support do you offer partners?');
+    suggestions.push('What are the partnership requirements?');
+  } else if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerResponse.includes('pricing')) {
+    suggestions.push('Do you offer volume discounts?');
+    suggestions.push('What payment terms are available?');
+    suggestions.push('Can I request a demo unit?');
+  } else if (lowerMessage.includes('oem') || lowerMessage.includes('odm') || lowerResponse.includes('oem')) {
+    suggestions.push('What OEM services do you offer?');
+    suggestions.push('What is the minimum order for OEM?');
+    suggestions.push('Can you customize device branding?');
+  }
+  // General conversation suggestions
+  else if (lowerMessage.includes('hello') || lowerMessage.includes('hi ') || lowerMessage.length < 20) {
+    suggestions.push('Tell me about your products');
+    suggestions.push('What certifications do you have?');
+    suggestions.push('How can I become a distributor?');
+  }
+  // Default suggestions based on context
+  else {
+    if (context?.product) {
+      suggestions.push(`What are the specifications?`);
+      suggestions.push(`Is this product FDA approved?`);
+      suggestions.push(`How can I order this product?`);
+    } else {
+      suggestions.push('Tell me about TORR RF');
+      suggestions.push('What certifications do you have?');
+      suggestions.push('How can I contact sales?');
+    }
+  }
+
+  // Return max 3 unique suggestions
+  return [...new Set(suggestions)].slice(0, 3);
+}
 
 // Fallback responses when API is not available
 function getFallbackResponse(message: string, context?: { product?: string }): string {
