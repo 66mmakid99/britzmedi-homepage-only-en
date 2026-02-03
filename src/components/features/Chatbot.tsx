@@ -60,18 +60,26 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     try {
       console.log('[Chatbot] Sending message:', userMessage.content);
 
+      // Ensure only serializable data is sent
+      const historyData = messages.slice(-10).map(m => ({
+        role: String(m.role),
+        content: String(m.content)
+      }));
+
+      const requestBody = {
+        message: String(userMessage.content),
+        history: historyData,
+        context: {
+          product: productContext ? String(productContext) : undefined,
+          page: pageContext ? String(pageContext) : undefined
+        },
+        verificationToken: verificationToken ? String(verificationToken) : undefined
+      };
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage.content,
-          history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
-          context: {
-            product: productContext,
-            page: pageContext
-          },
-          verificationToken
-        })
+        body: JSON.stringify(requestBody)
       });
 
       console.log('[Chatbot] Response status:', response.status);
