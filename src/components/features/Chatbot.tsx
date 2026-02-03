@@ -58,6 +58,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     setIsLoading(true);
 
     try {
+      console.log('[Chatbot] Sending message:', userMessage.content);
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,7 +74,9 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         })
       });
 
+      console.log('[Chatbot] Response status:', response.status);
       const data = await response.json();
+      console.log('[Chatbot] Response data:', data);
 
       // Handle verification requirement
       if (data.requireVerification) {
@@ -94,6 +98,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
+      console.error('[Chatbot] Error:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: "I'm having trouble connecting. Please try again or contact us at contact@britzmedi.co.kr",
@@ -151,13 +156,13 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[100] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300 ${
+      className={`fixed bottom-6 right-6 z-[100] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col transition-all duration-300 ${
         isMinimized ? 'w-80 h-16' : 'w-96 h-[32rem]'
       }`}
       style={{ maxHeight: 'calc(100vh - 6rem)' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-primary-600 to-primary-700 rounded-t-2xl">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 rounded-t-2xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +215,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                   className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                     message.role === 'user'
                       ? 'bg-primary-600 text-white rounded-br-md'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-md'
+                      : 'bg-slate-100 text-slate-800 rounded-bl-md'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -223,7 +228,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-slate-100 dark:bg-slate-700 rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -238,12 +243,12 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
               <div className="flex justify-center">
                 <button
                   onClick={handleVerification}
-                  className="flex items-center gap-2 px-4 py-3 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 transition-colors"
                 >
-                  <svg className="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                  <span className="text-sm font-medium text-primary-700">
                     I'm not a robot
                   </span>
                 </button>
@@ -256,13 +261,13 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
           {/* Quick Actions (shown when no messages from user yet) */}
           {messages.length === 1 && (
             <div className="px-4 pb-2">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Quick questions:</p>
+              <p className="text-xs text-slate-500 mb-2">Quick questions:</p>
               <div className="flex flex-wrap gap-2">
                 {quickActions.map((action, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickAction(action.message)}
-                    className="px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-full transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
                   >
                     {action.label}
                   </button>
@@ -272,7 +277,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
           )}
 
           {/* Input */}
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="p-4 border-t border-slate-200">
             <div className="flex items-center gap-2">
               <input
                 ref={inputRef}
@@ -282,7 +287,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
                 disabled={isLoading}
-                className="flex-1 px-4 py-2.5 text-sm bg-slate-100 dark:bg-slate-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-slate-800 dark:text-slate-200 placeholder-slate-400 disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 text-sm bg-slate-100 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-slate-800 placeholder-slate-400 disabled:opacity-50"
               />
               <button
                 onClick={sendMessage}
