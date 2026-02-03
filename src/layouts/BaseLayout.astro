@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer.astro';
 import ChatbotWrapper from '../components/features/ChatbotWrapper.astro';
 import SEOHead from '../components/seo/SEOHead.astro';
 import WebVitals from '../components/seo/WebVitals.astro';
+import { getLangFromUrl, isRTL } from '../i18n/config';
 
 interface Props {
   title: string;
@@ -31,10 +32,14 @@ const {
 } = Astro.props;
 
 const siteUrl = "https://britzmedi.com";
+
+// Detect language from URL
+const currentLang = getLangFromUrl(Astro.url);
+const isRtl = isRTL(currentLang);
 ---
 
 <!DOCTYPE html>
-<html lang="en" class="">
+<html lang={currentLang} dir={isRtl ? 'rtl' : 'ltr'} class="">
 <head>
   <!-- Google Consent Mode v2 - Default settings (must be before any Google tags) -->
   <script is:inline>

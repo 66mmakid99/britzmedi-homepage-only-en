@@ -1,0 +1,288 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { company, coreTechnologies } from '../../content/company';
+import { products } from '../../content/products';
+import { heroSettings } from '../../content/hero';
+import { supportedLanguages, languages, defaultLang, type Language } from '../../i18n/config';
+import { useTranslations } from '../../i18n';
+
+export function getStaticPaths() {
+  // Generate paths for all non-default languages
+  return supportedLanguages
+    .filter(lang => lang !== defaultLang)
+    .map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params as { lang: Language };
+const t = useTranslations(lang);
+const langInfo = languages[lang];
+const featuredProducts = products.filter(p => p.status === 'available').slice(0, 3);
+
+// SEO for this language
+const langSeoTitles: Record<string, string> = {
+  ko: '홈 | BRITZMEDI - FDA 승인 미용의료기기',
+  ja: 'ホーム | BRITZMEDI - FDA承認美容医療機器',
+  zh: '首页 | BRITZMEDI - FDA认证医美设备',
+  es: 'Inicio | BRITZMEDI - Dispositivos Médicos Estéticos',
+  de: 'Startseite | BRITZMEDI - FDA-zugelassene Medizingeräte',
+  ar: 'الرئيسية | BRITZMEDI - أجهزة طبية معتمدة من FDA',
+  'pt-br': 'Início | BRITZMEDI - Dispositivos Médicos Estéticos',
+};
+
+const langSeoDescriptions: Record<string, string> = {
+  ko: 'BRITZMEDI는 FDA 510(k) 승인 미용의료기기 제조사입니다. TORR RF와 혁신적인 스킨케어 기술을 만나보세요.',
+  ja: 'BRITZMEDIはFDA 510(k)承認の美容医療機器メーカーです。TORR RFと革新的なスキンケア技術をご覧ください。',
+  zh: 'BRITZMEDI是FDA 510(k)认证的医美设备制造商。探索TORR RF和创新护肤技术。',
+  es: 'BRITZMEDI es un fabricante líder de dispositivos médicos estéticos con certificación FDA 510(k). Descubra TORR RF.',
+  de: 'BRITZMEDI ist ein führender Hersteller von FDA 510(k) zugelassenen ästhetischen Medizingeräten. Entdecken Sie TORR RF.',
+  ar: 'BRITZMEDI هي شركة رائدة في تصنيع الأجهزة الطبية التجميلية المعتمدة من FDA 510(k). اكتشف TORR RF.',
+  'pt-br': 'BRITZMEDI é fabricante líder de dispositivos médicos estéticos com certificação FDA 510(k). Descubra o TORR RF.',
+};
+---
+
+<BaseLayout
+  title={langSeoTitles[lang] || 'Home'}
+  description={langSeoDescriptions[lang]}
+>
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+    <!-- Background Layer -->
+    {heroSettings.backgroundType === 'video' && heroSettings.backgroundVideo && (
+      <div class="absolute inset-0 z-0">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          poster={heroSettings.backgroundVideoPoster}
+          class="w-full h-full object-cover"
+        >
+          <source src={heroSettings.backgroundVideo} type="video/mp4" />
+        </video>
+      </div>
+    )}
+
+    {heroSettings.backgroundType === 'image' && heroSettings.backgroundImage && (
+      <div class="absolute inset-0 z-0">
+        <img
+          src={heroSettings.backgroundImage}
+          alt={heroSettings.backgroundImageAlt || 'Hero background'}
+          class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
+        />
+      </div>
+    )}
+
+    {heroSettings.backgroundType === 'gradient' && (
+      <div class="absolute inset-0 z-0 bg-gradient-hero">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
+      </div>
+    )}
+
+    <!-- Overlay -->
+    {heroSettings.backgroundType !== 'gradient' && (
+      <div
+        class:list={[
+          "absolute inset-0 z-10",
+          heroSettings.overlayColor === 'dark' && "bg-slate-900",
+          heroSettings.overlayColor === 'light' && "bg-white",
+          heroSettings.overlayColor === 'primary' && "bg-primary-900"
+        ]}
+        style={`opacity: ${heroSettings.overlayOpacity / 100}`}
+      />
+    )}
+
+    <!-- Content -->
+    <div class="container relative z-20">
+      <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div class="order-2 lg:order-1">
+            <div class:list={[
+              "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
+              heroSettings.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
+            ]}>
+              {heroSettings.badge}
+            </div>
+
+            <h1 class:list={[
+              "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
+              heroSettings.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
+            ]}>
+              {t('home.hero.title')}<br />
+              <span class:list={[
+                heroSettings.backgroundType === 'gradient'
+                  ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
+                  : "text-primary-400"
+              ]}>BRITZMEDI</span>
+            </h1>
+
+            <p class:list={[
+              "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
+              heroSettings.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
+            ]}>
+              {t('home.hero.subtitle')}
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
+              <a href={`/${lang}/products`} class="btn-primary group justify-center sm:justify-start">
+                {t('home.hero.cta')}
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+              <a href={`/${lang}/contact`} class:list={[
+                "btn-secondary justify-center sm:justify-start",
+                heroSettings.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
+              ]}>
+                {t('home.hero.ctaSecondary')}
+              </a>
+            </div>
+          </div>
+
+          <div class="order-1 lg:order-2 hidden lg:block"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class:list={[
+      "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
+      heroSettings.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
+    ]}></div>
+  </section>
+
+  <!-- Trust Badges Section -->
+  <section class="py-16 lg:py-20 bg-white relative">
+    <div class="container">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+        <div class="text-center group">
+          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">FDA</span>
+          </div>
+          <div class="text-sm font-medium text-slate-900">510(k) Cleared</div>
+          <div class="text-xs text-slate-500 mt-1">U.S. Regulatory</div>
+        </div>
+        <div class="text-center group">
+          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">ISO</span>
+          </div>
+          <div class="text-sm font-medium text-slate-900">13485:2016</div>
+          <div class="text-xs text-slate-500 mt-1">Quality Management</div>
+        </div>
+        <div class="text-center group">
+          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">GMP</span>
+          </div>
+          <div class="text-sm font-medium text-slate-900">Certified</div>
+          <div class="text-xs text-slate-500 mt-1">Manufacturing</div>
+        </div>
+        <div class="text-center group">
+          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">11+</span>
+          </div>
+          <div class="text-sm font-medium text-slate-900">Patents</div>
+          <div class="text-xs text-slate-500 mt-1">Registered</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section class="section bg-gradient-section">
+    <div class="container">
+      <div class="max-w-2xl mb-14">
+        <span class="label mb-4">{t('home.products.title')}</span>
+        <h2 class="heading-2 mb-5">{t('home.products.subtitle')}</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {featuredProducts.map((product) => (
+          <a
+            href={`/${lang}/products/${product.id}`}
+            class="group card-premium p-6 lg:p-7"
+          >
+            <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-xl mb-6 relative overflow-hidden">
+              {product.images?.main ? (
+                <img
+                  src={product.images.main}
+                  alt={product.name}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div class="w-full h-full flex items-center justify-center">
+                  <span class="text-5xl font-light text-slate-300 group-hover:text-primary-300 transition-colors">{product.name.charAt(0)}</span>
+                </div>
+              )}
+            </div>
+
+            {product.featured && (
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 mb-4 text-xs font-semibold bg-gradient-to-r from-primary-50 to-primary-100 text-primary-700 rounded-full border border-primary-200/50">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                Flagship
+              </span>
+            )}
+
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <h3 class="text-xl font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{product.name}</h3>
+                <p class="text-sm text-primary-600 font-medium mt-1">{product.tagline}</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-primary-100 flex items-center justify-center shrink-0 transition-colors">
+                <svg class="w-5 h-5 text-slate-400 group-hover:text-primary-600 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+
+            <p class="body-small line-clamp-2 mb-5">{product.overview}</p>
+          </a>
+        ))}
+      </div>
+
+      <div class="mt-12 text-center">
+        <a href={`/${lang}/products`} class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
+          {t('common.viewAll')}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800"></div>
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+
+    <div class="container relative">
+      <div class="text-center max-w-2xl mx-auto">
+        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-5">
+          {t('nav.contactUs')}
+        </h2>
+        <p class="text-lg text-primary-100 mb-10 leading-relaxed">
+          {t('contact.subtitle')}
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href={`/${lang}/contact`}
+            class="group inline-flex items-center gap-2 px-7 py-4 text-base font-semibold text-primary-700 bg-white hover:bg-primary-50 rounded-xl shadow-lg shadow-black/10 transition-all"
+          >
+            {t('common.contactSales')}
+            <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+          <a
+            href={`/${lang}/products`}
+            class="inline-flex items-center gap-2 px-7 py-4 text-base font-semibold text-white border-2 border-white/20 hover:bg-white/10 rounded-xl transition-all"
+          >
+            {t('nav.products')}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
