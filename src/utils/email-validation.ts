@@ -3,6 +3,33 @@
  * Extracted for testability and reusability
  */
 
+// Personal/Free email domains to block for B2B leads
+export const personalEmailDomains = [
+  // Google
+  'gmail.com', 'googlemail.com',
+  // Yahoo
+  'yahoo.com', 'yahoo.co.uk', 'yahoo.co.jp', 'yahoo.fr', 'yahoo.de', 'yahoo.co.kr',
+  // Microsoft
+  'hotmail.com', 'hotmail.co.uk', 'hotmail.fr', 'hotmail.de',
+  'outlook.com', 'outlook.co.uk', 'live.com', 'live.co.uk', 'msn.com',
+  // Apple
+  'icloud.com', 'me.com', 'mac.com',
+  // Other global providers
+  'protonmail.com', 'proton.me',
+  'aol.com',
+  'zoho.com',
+  'mail.com',
+  'gmx.com', 'gmx.net', 'gmx.de',
+  'yandex.com', 'yandex.ru',
+  // Asian providers
+  'qq.com', '163.com', '126.com',
+  'naver.com', 'hanmail.net', 'daum.net',
+  // Regional European
+  'web.de', 'freenet.de', 't-online.de',
+  'orange.fr', 'laposte.net', 'sfr.fr',
+  'libero.it', 'virgilio.it',
+];
+
 // Disposable email domains list (common ones)
 export const disposableEmailDomains = [
   'tempmail.com', 'temp-mail.org', 'guerrillamail.com', 'mailinator.com',
@@ -106,9 +133,33 @@ export async function verifyEmailWithEmailable(
     
     // For 'unknown' or 'catch-all', accept if client-side validation passes
     return validateEmail(email);
-    
+
   } catch (error) {
     console.warn('Emailable verification failed, using client-side validation:', error);
     return validateEmail(email);
   }
+}
+
+/**
+ * Validates business email address (blocks personal email domains)
+ * Used for B2B lead forms where business email is required
+ */
+export function validateBusinessEmail(email: string): ValidationResult {
+  // First run basic validation
+  const basicResult = validateEmail(email);
+  if (!basicResult.valid) {
+    return basicResult;
+  }
+
+  const domain = email.split('@')[1]?.toLowerCase();
+
+  // Check for personal email domains
+  if (personalEmailDomains.includes(domain)) {
+    return {
+      valid: false,
+      message: 'Please use your business email address. Personal email addresses (Gmail, Yahoo, etc.) are not accepted for business inquiries.'
+    };
+  }
+
+  return { valid: true };
 }

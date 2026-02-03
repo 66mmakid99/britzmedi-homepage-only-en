@@ -18,7 +18,7 @@
     {
       "binding": "DB",
       "database_name": "britzmedi-leads",
-      "database_id": "local"
+      "database_id": "b42c1b3d-bb23-4559-9a25-3d8811d975dc"
     }
   ],
   // KV for sessions (already configured for Astro sessions)

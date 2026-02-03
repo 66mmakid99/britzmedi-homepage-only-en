@@ -1,14 +1,37 @@
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 interface Env {
   DB: D1Database;
 }
 
 // GET /api/leads - List leads with filtering
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async (context) => {
+  const { request, locals } = context;
+
+  // Debug mode - return locals structure
+  const debugParam = new URL(request.url).searchParams.get('debug');
+  if (debugParam === '1') {
+    const runtime = (locals as any).runtime;
+    return new Response(JSON.stringify({
+      debug: true,
+      localsKeys: Object.keys(locals || {}),
+      runtimeKeys: runtime ? Object.keys(runtime) : null,
+      envKeys: runtime?.env ? Object.keys(runtime.env) : null,
+      hasDB: !!runtime?.env?.DB,
+    }, null, 2), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
-    const env = locals.runtime?.env as Env;
-    if (!env?.DB) {
+    // Access Cloudflare runtime
+    const runtime = (locals as any).runtime;
+    const env = runtime?.env as Env | undefined;
+    const db = env?.DB;
+
+    if (!db) {
       // Return sample data if DB not available (dev mode)
       return new Response(JSON.stringify({ leads: getSampleLeads(), total: 3 }), {
         headers: { 'Content-Type': 'application/json' },
@@ -44,7 +67,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
-    const result = await env.DB.prepare(query).bind(...params).all();
+    const result = await db.prepare(query).bind(...params).all();
 
     // Get total count
     let countQuery = 'SELECT COUNT(*) as total FROM leads WHERE 1=1';
@@ -64,7 +87,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       countParams.push(searchPattern, searchPattern, searchPattern);
     }
 
-    const countResult = await env.DB.prepare(countQuery).bind(...countParams).first<{ total: number }>();
+    const countResult = await db.prepare(countQuery).bind(...countParams).first<{ total: number }>();
 
     return new Response(JSON.stringify({
       leads: result.results,
@@ -72,9 +95,13 @@ export const GET: APIRoute = async ({ request, locals }) => {
     }), {
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Leads API] Error fetching leads:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch leads' }), {
+    return new Response(JSON.stringify({
+      error: 'Failed to fetch leads',
+      details: error?.message || String(error),
+      stack: error?.stack
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -100,8 +127,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Calculate lead score
     const { score, grade } = calculateLeadScore(data);
 
-    const env = locals.runtime?.env as Env;
-    if (!env?.DB) {
+    const runtime = (locals as any).runtime;
+    const env = runtime?.env as Env | undefined;
+    const db = env?.DB;
+    if (!db) {
       // Dev mode - just return success
       console.log('[Leads API] Would create lead:', { ...data, lead_score: score, lead_grade: grade });
       return new Response(JSON.stringify({
@@ -113,7 +142,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const result = await env.DB.prepare(`
+    const result = await db.prepare(`
       INSERT INTO leads (
         company_name, company_website, contact_name, job_title, email, country,
         interested_products, message, lead_score, lead_grade,
