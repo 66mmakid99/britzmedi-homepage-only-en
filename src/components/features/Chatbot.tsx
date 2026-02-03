@@ -142,8 +142,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   ];
 
   const handleQuickAction = (message: string) => {
-    setInputValue(message);
-    setTimeout(() => sendMessage(), 0);
+    sendMessage(message);
   };
 
   if (!isOpen) {
