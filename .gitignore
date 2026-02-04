@@ -20,5 +20,18 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# Windows-specific files
+desktop.ini
+Thumbs.db
+
 # jetbrains setting folder
 .idea/
+
+# Claude Code
+.claude/
+
+# Wrangler
+.wrangler/
+
+# Misc
+nul
