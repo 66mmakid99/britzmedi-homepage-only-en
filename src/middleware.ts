@@ -1,5 +1,16 @@
 import type { MiddlewareHandler } from 'astro';
 
+// Helper to get environment variable from Cloudflare runtime or import.meta.env
+function getEnv(context: any, key: string): string | undefined {
+  // Try Cloudflare runtime env first
+  const runtimeEnv = context.locals?.runtime?.env;
+  if (runtimeEnv && runtimeEnv[key]) {
+    return runtimeEnv[key];
+  }
+  // Fallback to import.meta.env for local dev
+  return (import.meta.env as any)[key];
+}
+
 // Admin authentication middleware
 export const onRequest: MiddlewareHandler = async (context, next) => {
   const url = new URL(context.request.url);
@@ -13,28 +24,16 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
   // Admin routes - use cookie session auth
   if (pathname.startsWith('/admin')) {
-    // Skip auth in development mode (optional - remove this block to require auth in dev)
-    if (import.meta.env.DEV) {
-      // Still check auth in dev for testing
-      const sessionToken = context.cookies.get('admin_session')?.value;
-      const validToken = import.meta.env.ADMIN_SESSION_SECRET;
+    const sessionToken = context.cookies.get('admin_session')?.value;
+    const validToken = getEnv(context, 'ADMIN_SESSION_SECRET');
 
-      if (!sessionToken || sessionToken !== validToken) {
-        return context.redirect('/admin/login');
-      }
-    } else {
-      // Production: require valid session
-      const sessionToken = context.cookies.get('admin_session')?.value;
-      const validToken = import.meta.env.ADMIN_SESSION_SECRET;
+    if (!validToken) {
+      console.error('[Admin Auth] ADMIN_SESSION_SECRET not configured');
+      return new Response('Admin access not configured', { status: 503 });
+    }
 
-      if (!validToken) {
-        console.error('[Admin Auth] ADMIN_SESSION_SECRET not configured');
-        return new Response('Admin access not configured', { status: 503 });
-      }
-
-      if (!sessionToken || sessionToken !== validToken) {
-        return context.redirect('/admin/login?error=expired');
-      }
+    if (!sessionToken || sessionToken !== validToken) {
+      return context.redirect('/admin/login?error=expired');
     }
 
     return next();
@@ -47,8 +46,8 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
       return next();
     }
 
-    const adminUser = import.meta.env.ADMIN_USERNAME || 'admin';
-    const adminPass = import.meta.env.ADMIN_PASSWORD;
+    const adminUser = getEnv(context, 'ADMIN_USERNAME') || 'admin';
+    const adminPass = getEnv(context, 'ADMIN_PASSWORD');
 
     if (!adminPass) {
       return new Response('Admin access not configured', { status: 503 });
