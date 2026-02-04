@@ -39,49 +39,47 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     return next();
   }
 
-  // Keystatic routes - use Basic Auth
+  // Keystatic routes - local mode only (development)
   if (pathname.startsWith('/keystatic') || pathname.startsWith('/api/keystatic')) {
-    // Skip auth in development mode
+    // Allow access in development mode only
     if (import.meta.env.DEV) {
       return next();
     }
 
-    const adminUser = getEnv(context, 'ADMIN_USERNAME') || 'admin';
-    const adminPass = getEnv(context, 'ADMIN_PASSWORD');
-
-    if (!adminPass) {
-      return new Response('Admin access not configured', { status: 503 });
-    }
-
-    const authHeader = context.request.headers.get('authorization');
-
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-      return new Response('Authentication required', {
-        status: 401,
-        headers: {
-          'WWW-Authenticate': 'Basic realm="BRITZMEDI Admin"',
-        },
-      });
-    }
-
-    try {
-      const base64Credentials = authHeader.slice(6);
-      const credentials = atob(base64Credentials);
-      const [username, password] = credentials.split(':');
-
-      if (username === adminUser && password === adminPass) {
-        return next();
+    // In production, Keystatic CMS is not available (local mode doesn't work on read-only filesystem)
+    return new Response(
+      `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS Not Available | BRITZMEDI</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 100px auto; padding: 20px; text-align: center; }
+    h1 { color: #1e293b; }
+    p { color: #64748b; line-height: 1.6; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <h1>CMS Not Available</h1>
+  <p>The Keystatic CMS is only available in the local development environment.</p>
+  <div class="box">
+    <p><strong>To edit content:</strong></p>
+    <p>1. Clone the repository locally<br>
+    2. Run <code>npm run dev</code><br>
+    3. Access <code>/keystatic</code> on localhost</p>
+  </div>
+  <p style="margin-top: 24px;"><a href="/">← Back to main site</a></p>
+</body>
+</html>`,
+      {
+        status: 503,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
       }
-    } catch {
-      // Invalid base64 encoding
-    }
-
-    return new Response('Invalid credentials', {
-      status: 401,
-      headers: {
-        'WWW-Authenticate': 'Basic realm="BRITZMEDI Admin"',
-      },
-    });
+    );
   }
 
   // All other routes - no auth needed
