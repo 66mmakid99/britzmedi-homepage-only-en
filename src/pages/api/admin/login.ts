@@ -1,6 +1,15 @@
 import type { APIRoute } from 'astro';
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+// Helper to get environment variable from Cloudflare runtime or import.meta.env
+function getEnv(locals: any, key: string): string | undefined {
+  const runtimeEnv = locals?.runtime?.env;
+  if (runtimeEnv && runtimeEnv[key]) {
+    return runtimeEnv[key];
+  }
+  return (import.meta.env as any)[key];
+}
+
+export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => {
   const formData = await request.formData();
   const password = formData.get('password')?.toString();
 
@@ -9,7 +18,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   // Get admin password from environment
-  const adminPassword = import.meta.env.ADMIN_PASSWORD;
+  const adminPassword = getEnv(locals, 'ADMIN_PASSWORD');
 
   if (!adminPassword) {
     console.error('[Admin Auth] ADMIN_PASSWORD not configured');
@@ -23,7 +32,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   // Generate session token (in production, use a proper random token)
-  const sessionSecret = import.meta.env.ADMIN_SESSION_SECRET;
+  const sessionSecret = getEnv(locals, 'ADMIN_SESSION_SECRET');
 
   if (!sessionSecret) {
     console.error('[Admin Auth] ADMIN_SESSION_SECRET not configured');
