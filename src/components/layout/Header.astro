@@ -1,18 +1,38 @@
 ---
-// Header Component - Premium Medical Device Brand Navigation
+// Header Component - Premium Medical Device Brand Navigation with i18n
 import LanguageSwitcher from '../ui/LanguageSwitcher.astro';
+import { getLangFromUrl, defaultLang, type Language } from '../../i18n/config';
+import { useTranslations } from '../../i18n';
 
+// Detect language from URL
+const currentLang = getLangFromUrl(Astro.url);
+const t = useTranslations(currentLang);
+
+// Helper to generate language-aware URLs
+const localizedUrl = (path: string) => {
+  if (currentLang === defaultLang) {
+    return path;
+  }
+  return `/${currentLang}${path}`;
+};
+
+// Navigation items with translation keys
 const navigation = [
-  { name: "Products", href: "/products" },
-  { name: "About", href: "/about" },
-  { name: "Blog", href: "/blog" },
-  { name: "Certifications", href: "/certifications" },
-  { name: "Resources", href: "/resources" },
-  { name: "FAQ", href: "/faq" },
-  { name: "Contact", href: "/contact" },
+  { key: 'nav.products', href: "/products" },
+  { key: 'nav.about', href: "/about" },
+  { key: 'nav.certifications', href: "/certifications" },
+  { key: 'nav.resources', href: "/resources" },
+  { key: 'nav.faq', href: "/faq" },
+  { key: 'nav.contact', href: "/contact" },
 ];
 
 const currentPath = Astro.url.pathname;
+
+// Check if path is active (considering language prefix)
+const isActivePath = (href: string) => {
+  const localizedHref = localizedUrl(href);
+  return currentPath === localizedHref || currentPath.startsWith(localizedHref + "/");
+};
 ---
 
 <header class="fixed top-0 left-0 right-0 z-[100] transition-all duration-300" id="header">
@@ -20,7 +40,7 @@ const currentPath = Astro.url.pathname;
   <div class="container relative">
     <nav class="flex items-center justify-between h-16 lg:h-20">
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-3 group">
+      <a href={localizedUrl("/")} class="flex items-center gap-3 group">
         <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
           <span class="text-white font-bold text-lg">B</span>
         </div>
@@ -32,10 +52,10 @@ const currentPath = Astro.url.pathname;
       <!-- Desktop Navigation -->
       <div class="hidden lg:flex items-center gap-1">
         {navigation.map((item) => {
-          const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
+          const isActive = isActivePath(item.href);
           return (
             <a
-              href={item.href}
+              href={localizedUrl(item.href)}
               class:list={[
                 "relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                 isActive
@@ -43,7 +63,7 @@ const currentPath = Astro.url.pathname;
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               ]}
             >
-              {item.name}
+              {t(item.key as any)}
             </a>
           );
         })}
@@ -53,10 +73,10 @@ const currentPath = Astro.url.pathname;
       <div class="hidden lg:flex items-center gap-2">
         <LanguageSwitcher />
         <a
-          href="/contact"
+          href={localizedUrl("/contact")}
           class="group inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all duration-300"
         >
-          Get in Touch
+          {t('nav.contactUs')}
           <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
@@ -95,7 +115,16 @@ const currentPath = Astro.url.pathname;
   >
     <!-- Header -->
     <div class="flex items-center justify-between h-16 px-5 border-b border-slate-100">
-      <span class="text-lg font-bold text-slate-900">Menu</span>
+      <span class="text-lg font-bold text-slate-900">
+        {currentLang === 'ko' ? '메뉴' :
+         currentLang === 'ja' ? 'メニュー' :
+         currentLang === 'zh' ? '菜单' :
+         currentLang === 'th' ? 'เมนู' :
+         currentLang === 'vi' ? 'Menu' :
+         currentLang === 'es' ? 'Menú' :
+         currentLang === 'ar' ? 'القائمة' :
+         'Menu'}
+      </span>
       <button
         type="button"
         class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
@@ -111,10 +140,10 @@ const currentPath = Astro.url.pathname;
     <!-- Navigation -->
     <nav class="p-5 space-y-2">
       {navigation.map((item) => {
-        const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
+        const isActive = isActivePath(item.href);
         return (
           <a
-            href={item.href}
+            href={localizedUrl(item.href)}
             class:list={[
               "flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200",
               isActive
@@ -122,7 +151,7 @@ const currentPath = Astro.url.pathname;
                 : "text-slate-700 hover:bg-slate-50"
             ]}
           >
-            {item.name}
+            {t(item.key as any)}
             <svg class="w-4 h-4 ml-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -131,13 +160,18 @@ const currentPath = Astro.url.pathname;
       })}
     </nav>
 
+    <!-- Language Switcher for Mobile -->
+    <div class="px-5 py-3 border-t border-slate-100">
+      <LanguageSwitcher />
+    </div>
+
     <!-- CTA -->
     <div class="absolute bottom-0 left-0 right-0 p-5 border-t border-slate-100 bg-slate-50">
       <a
-        href="/contact"
+        href={localizedUrl("/contact")}
         class="flex items-center justify-center gap-2 w-full px-6 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-xl shadow-lg transition-all duration-300"
       >
-        Get in Touch
+        {t('nav.contactUs')}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>
