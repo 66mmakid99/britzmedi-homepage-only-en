@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 // Helper to get environment variable from Cloudflare runtime or import.meta.env
 function getEnv(locals: any, key: string): string | undefined {
   const runtimeEnv = locals?.runtime?.env;
