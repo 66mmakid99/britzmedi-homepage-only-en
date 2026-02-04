@@ -3,8 +3,7 @@ import { config, collection, fields } from '@keystatic/core';
 
 export default config({
   storage: {
-    kind: 'github',
-    repo: '66mmakid99/britzmedi-homepage-only-en',
+    kind: 'local',
   },
 
   collections: {
