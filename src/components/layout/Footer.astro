@@ -1,39 +1,31 @@
 ---
-// Footer Component - Professional Medical Device Brand
+// Footer Component - Professional Medical Device Brand with i18n
 
 import { company } from '../../content/company';
+import { getLangFromUrl, defaultLang, type Language } from '../../i18n/config';
+import { useTranslations } from '../../i18n';
 
-const footerLinks = {
-  products: {
-    title: "Products",
-    links: [
-      { name: "TORR RF", href: "/products/torr-rf" },
-      { name: "ULBLANC", href: "/products/ulblanc" },
-      { name: "NEWCHAE SHOT", href: "/products/newchae-shot" },
-      { name: "LUMINO WAVE", href: "/products/lumino-wave" },
-    ],
-  },
-  company: {
-    title: "Company",
-    links: [
-      { name: "About Us", href: "/about" },
-      { name: "Certifications", href: "/certifications" },
-      { name: "FAQ", href: "/faq" },
-      { name: "Contact", href: "/contact" },
-    ],
-  },
-  resources: {
-    title: "Resources",
-    links: [
-      { name: "Resource Center", href: "/resources" },
-      { name: "Product Brochures", href: "/resources#product-brochure" },
-      { name: "Technical Documents", href: "/resources#technical-docs" },
-      { name: "Certificates", href: "/resources#certificates" },
-    ],
-  },
+// Detect language from URL
+const currentLang = getLangFromUrl(Astro.url);
+const t = useTranslations(currentLang);
+
+// Helper to generate language-aware URLs
+const localizedUrl = (path: string) => {
+  if (currentLang === defaultLang) {
+    return path;
+  }
+  return `/${currentLang}${path}`;
 };
 
 const currentYear = new Date().getFullYear();
+
+// Product links (product names stay in English as brand names)
+const productLinks = [
+  { name: "TORR RF", href: localizedUrl("/products/torr-rf") },
+  { name: "ULBLANC", href: localizedUrl("/products/ulblanc") },
+  { name: "NEWCHAE SHOT", href: localizedUrl("/products/newchae-shot") },
+  { name: "LUMINO WAVE", href: localizedUrl("/products/lumino-wave") },
+];
 ---
 
 <footer class="bg-slate-900 text-slate-300">
@@ -42,37 +34,37 @@ const currentYear = new Date().getFullYear();
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
       <!-- Brand Column -->
       <div class="lg:col-span-2">
-        <a href="/" class="inline-block">
+        <a href={localizedUrl("/")} class="inline-block">
           <span class="text-2xl font-semibold text-white">BRITZMEDI</span>
         </a>
         <p class="mt-4 text-sm leading-relaxed text-slate-400 max-w-sm">
-          {company.description.short}. Leading innovation in aesthetic medicine with FDA-cleared technology from Korea.
+          {t('footer.description')}
         </p>
-        
+
         <!-- Certifications Badges -->
         <div class="mt-6 flex flex-wrap gap-3">
           <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-slate-800 text-slate-300 rounded-full">
-            FDA 510(k) Cleared
+            {t('footer.badges.fdaCleared')}
           </span>
           <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-slate-800 text-slate-300 rounded-full">
-            ISO 13485
+            {t('footer.badges.iso')}
           </span>
           <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-slate-800 text-slate-300 rounded-full">
-            GMP Certified
+            {t('footer.badges.gmp')}
           </span>
         </div>
       </div>
-      
+
       <!-- Products Links -->
       <div>
         <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-          {footerLinks.products.title}
+          {t('footer.products')}
         </h3>
         <ul class="space-y-3">
-          {footerLinks.products.links.map((link) => (
+          {productLinks.map((link) => (
             <li>
-              <a 
-                href={link.href} 
+              <a
+                href={link.href}
                 class="text-sm text-slate-400 hover:text-white transition-colors"
               >
                 {link.name}
@@ -81,30 +73,52 @@ const currentYear = new Date().getFullYear();
           ))}
         </ul>
       </div>
-      
+
       <!-- Company Links -->
       <div>
         <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-          {footerLinks.company.title}
+          {t('footer.company')}
         </h3>
         <ul class="space-y-3">
-          {footerLinks.company.links.map((link) => (
-            <li>
-              <a 
-                href={link.href} 
-                class="text-sm text-slate-400 hover:text-white transition-colors"
-              >
-                {link.name}
-              </a>
-            </li>
-          ))}
+          <li>
+            <a
+              href={localizedUrl("/about")}
+              class="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              {t('footer.links.aboutUs')}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localizedUrl("/certifications")}
+              class="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              {t('footer.links.certifications')}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localizedUrl("/faq")}
+              class="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              {t('footer.links.faq')}
+            </a>
+          </li>
+          <li>
+            <a
+              href={localizedUrl("/contact")}
+              class="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              {t('footer.contact')}
+            </a>
+          </li>
         </ul>
       </div>
-      
+
       <!-- Contact Info -->
       <div>
         <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-          Contact
+          {t('footer.contact')}
         </h3>
         <ul class="space-y-3 text-sm text-slate-400">
           <li class="flex items-start gap-2">
@@ -134,20 +148,20 @@ const currentYear = new Date().getFullYear();
       </div>
     </div>
   </div>
-  
+
   <!-- Bottom Bar -->
   <div class="border-t border-slate-800">
     <div class="container py-6">
       <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <p class="text-sm text-slate-500">
-          © {currentYear} {company.name}. All rights reserved.
+          {t('footer.copyright').replace('{year}', currentYear.toString())}
         </p>
         <div class="flex items-center gap-6">
-          <a href="/privacy" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">
-            Privacy Policy
+          <a href={localizedUrl("/privacy")} class="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+            {t('footer.privacyPolicy')}
           </a>
-          <a href="/terms" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">
-            Terms of Service
+          <a href={localizedUrl("/terms")} class="text-sm text-slate-500 hover:text-slate-300 transition-colors">
+            {t('footer.termsOfService')}
           </a>
         </div>
       </div>
