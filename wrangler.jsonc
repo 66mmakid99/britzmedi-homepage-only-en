@@ -1,15 +1,11 @@
 {
-	"main": "dist/_worker.js/index.js",
-	"name": "britzmedi-global",
+	"name": "britzmedi-homepage-only-en",
+	"pages_build_output_dir": "./dist",
   "compatibility_date": "2026-01-24",
   "compatibility_flags": [
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./dist"
-	},
 	"observability": {
     "enabled": true
   },
@@ -21,11 +17,11 @@
       "database_id": "b42c1b3d-bb23-4559-9a25-3d8811d975dc"
     }
   ],
-  // KV for sessions (already configured for Astro sessions)
+  // KV for sessions (Astro sessions)
   "kv_namespaces": [
     {
       "binding": "SESSION",
-      "id": "local"
+      "id": "27c7cd159fc64df89f218371597e716c"
     }
   ]
 }
