@@ -1,22 +1,22 @@
 // Export all translations
 import { en } from './en';
 import { ko } from './ko';
-import { zh } from './zh';
 import { ja } from './ja';
+import { zh } from './zh';
+import { th } from './th';
+import { vi } from './vi';
 import { es } from './es';
-import { ptBr } from './pt-br';
-import { de } from './de';
 import { ar } from './ar';
 import type { Language } from '../config';
 
 export const translations = {
   en,
   ko,
-  zh,
   ja,
+  zh,
+  th,
+  vi,
   es,
-  'pt-br': ptBr,
-  de,
   ar,
 } as const;
 

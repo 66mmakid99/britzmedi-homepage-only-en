@@ -1,14 +1,14 @@
 // i18n Configuration for BRITZMEDI Global Website
-// Supports 8 languages: EN, KO, ZH, JA, ES, PT-BR, DE, AR
+// Supports 8 languages: EN, KO, JA, ZH, TH, VI, ES, AR
 
 export const languages = {
   en: { name: 'English', flag: '🇺🇸', dir: 'ltr' },
   ko: { name: '한국어', flag: '🇰🇷', dir: 'ltr' },
-  zh: { name: '中文', flag: '🇨🇳', dir: 'ltr' },
   ja: { name: '日本語', flag: '🇯🇵', dir: 'ltr' },
+  zh: { name: '中文', flag: '🇨🇳', dir: 'ltr' },
+  th: { name: 'ไทย', flag: '🇹🇭', dir: 'ltr' },
+  vi: { name: 'Tiếng Việt', flag: '🇻🇳', dir: 'ltr' },
   es: { name: 'Español', flag: '🇪🇸', dir: 'ltr' },
-  'pt-br': { name: 'Português', flag: '🇧🇷', dir: 'ltr' },
-  de: { name: 'Deutsch', flag: '🇩🇪', dir: 'ltr' },
   ar: { name: 'العربية', flag: '🇸🇦', dir: 'rtl' },
 } as const;
 
