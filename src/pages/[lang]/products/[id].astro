@@ -3,6 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { products, getProductById } from '../../../content/products';
 import { supportedLanguages, defaultLang, type Language } from '../../../i18n/config';
 import { useTranslations } from '../../../i18n';
+import { getProductTranslation } from '../../../i18n/product-translations';
 
 export function getStaticPaths() {
   const paths: { params: { lang: string; id: string } }[] = [];
@@ -26,28 +27,88 @@ const product = getProductById(id);
 if (!product) {
   return Astro.redirect(`/${lang}/products`);
 }
+
+// Get product-level translations (returns undefined for English → fallback to original)
+const pt = getProductTranslation(lang, id);
+
+// Helper: get translated product content with English fallback
+const tagline = pt?.tagline ?? product.tagline;
+const overview = pt?.overview ?? product.overview;
+const description = pt?.description ?? product.description;
+
+const keyTechnologies = product.keyTechnologies.map((tech, i) => ({
+  name: pt?.keyTechnologies?.[i]?.name ?? tech.name,
+  description: pt?.keyTechnologies?.[i]?.description ?? tech.description,
+}));
+
+const indications = pt?.indications ?? product.indications;
+
+const specifications = product.specifications?.map((spec) => ({
+  label: pt?.specLabels?.[spec.label] ?? spec.label,
+  value: spec.value, // keep numeric values as-is
+  note: spec.note ? (pt?.specNotes?.[spec.note] ?? spec.note) : undefined,
+}));
+
+// Map handpiece names to image keys for lookup
+const handpieceImageKeys: Record<string, string> = {
+  'Large Handpiece (Body)': 'body-super',
+  'Small Handpiece (Face)': 'face-super',
+  'Micro Handpiece (Eye/Delicate)': 'eye',
+  'Body Handpiece - Deep': 'body-deep',
+  'Body Handpiece - Super': 'body-super',
+  'Body Handpiece - Vibe': 'body-vibe',
+  'Face Handpiece - Deep': 'face-deep',
+  'Face Handpiece - Super': 'face-super',
+  'Eye Handpiece': 'eye',
+};
+
+const handpieces = product.handpieces?.map((hp, i) => {
+  const imageKey = handpieceImageKeys[hp.name];
+  return {
+    name: pt?.handpieces?.[i]?.name ?? hp.name,
+    tipSize: hp.tipSize,
+    depth: hp.depth,
+    feature: pt?.handpieces?.[i]?.feature ?? hp.feature,
+    imageSrc: imageKey ? product.images?.handpieces?.[imageKey] : undefined,
+  };
+});
+
+const clinicalBenefits = pt?.clinicalBenefits ?? product.clinicalBenefits;
+
+const differentiators = product.differentiators?.map((diff, i) => ({
+  feature: pt?.differentiators?.[i]?.feature ?? diff.feature,
+  description: pt?.differentiators?.[i]?.description ?? diff.description,
+}));
+
+const pageDescription = `${product.name} - ${tagline}. ${overview}`;
 ---
 
 <BaseLayout
   title={`${product.name} | ${t('products.title')}`}
-  description={product.overview}
+  description={pageDescription}
   ogType="product"
 >
   <!-- Hero Section -->
-  <section class="relative py-16 lg:py-24 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-primary-50/30"></div>
-    <div class="container relative">
-      <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8">
-        <a href={`/${lang}`} class="hover:text-primary-600">{lang === 'ko' ? '홈' : 'Home'}</a>
-        <span>/</span>
-        <a href={`/${lang}/products`} class="hover:text-primary-600">{t('products.title')}</a>
-        <span>/</span>
-        <span class="text-slate-900">{product.name}</span>
+  <section class="relative bg-gradient-to-br from-slate-50 to-white py-12 lg:py-20">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <nav class="mb-8">
+        <ol class="flex items-center gap-2 text-sm">
+          <li>
+            <a href={`/${lang}`} class="text-slate-500 hover:text-primary-600 transition-colors">{t('products.details.home')}</a>
+          </li>
+          <li class="text-slate-400">/</li>
+          <li>
+            <a href={`/${lang}/products`} class="text-slate-500 hover:text-primary-600 transition-colors">{t('products.title')}</a>
+          </li>
+          <li class="text-slate-400">/</li>
+          <li class="text-slate-900 font-medium">{product.name}</li>
+        </ol>
       </nav>
 
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
         <!-- Product Image -->
-        <div class="aspect-square bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-2xl overflow-hidden">
+        <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl relative overflow-hidden">
           {product.images?.main ? (
             <img
               src={product.images.main}
@@ -59,43 +120,76 @@ if (!product) {
               <span class="text-8xl font-light text-slate-300">{product.name.charAt(0)}</span>
             </div>
           )}
+
+          <!-- Badges -->
+          <div class="absolute top-6 left-6 flex flex-col gap-2">
+            {product.featured && (
+              <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-primary-600 text-white rounded-full">
+                {t('products.details.flagshipProduct')}
+              </span>
+            )}
+            {product.status === 'coming-soon' && (
+              <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-accent-500 text-white rounded-full">
+                {t('products.details.comingH22026')}
+              </span>
+            )}
+          </div>
         </div>
 
         <!-- Product Info -->
         <div>
-          {product.featured && (
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 mb-4 text-xs font-semibold bg-gradient-to-r from-primary-50 to-primary-100 text-primary-700 rounded-full">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              Flagship Product
-            </span>
-          )}
+          <!-- Category Badge -->
+          <span class="inline-flex items-center px-3 py-1 mb-4 text-xs font-medium bg-primary-50 text-primary-700 rounded-full uppercase tracking-wider">
+            {product.category === 'medical-device' ? t('products.details.medicalDevice') : t('products.details.medicalCosmetic')}
+          </span>
 
-          <h1 class="text-4xl lg:text-5xl font-bold text-slate-900 mb-2">{product.name}</h1>
-          {product.model && <p class="text-lg text-slate-500 mb-4">{product.model}</p>}
-          <p class="text-xl text-primary-600 font-medium mb-6">{product.tagline}</p>
-          <p class="body-large mb-8">{product.overview}</p>
+          <h1 class="heading-1 mb-2">{product.name}</h1>
+          <p class="text-lg text-slate-500 mb-4">{t('products.details.model')}: {product.model}</p>
 
+          <p class="text-xl text-primary-600 font-medium mb-6">{tagline}</p>
+
+          <p class="body-large mb-8">{description}</p>
+
+          <!-- Certifications -->
           {product.certifications && product.certifications.length > 0 && (
-            <div class="flex flex-wrap gap-3 mb-8">
-              {product.certifications.map((cert) => (
-                <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                  </svg>
-                  {cert.name}
-                </span>
-              ))}
+            <div class="mb-8">
+              <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-3">{t('products.details.certifications')}</h2>
+              <div class="flex flex-wrap gap-2">
+                {product.certifications.map((cert) => (
+                  <div class:list={[
+                    "inline-flex items-center gap-2 px-3 py-2 rounded-lg border",
+                    cert.status === 'Cleared' || cert.status === 'Approved' || cert.status === 'Certified'
+                      ? "bg-green-50 border-green-200 text-green-800"
+                      : cert.status === 'Under Review'
+                        ? "bg-amber-50 border-amber-200 text-amber-800"
+                        : "bg-slate-50 border-slate-200 text-slate-700"
+                  ]}>
+                    {(cert.status === 'Cleared' || cert.status === 'Approved' || cert.status === 'Certified') && (
+                      <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    <span class="text-sm font-medium">{cert.name}</span>
+                    {cert.detail && <span class="text-xs opacity-75">({cert.detail})</span>}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
+          <!-- CTA -->
           <div class="flex flex-wrap gap-4">
-            <a href={`/${lang}/contact`} class="btn-primary">
-              {t('common.getQuote')}
+            <a
+              href={`/${lang}/contact`}
+              class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+            >
+              {t('products.details.requestQuote')}
             </a>
-            <a href={`/${lang}/contact`} class="btn-secondary">
-              {t('common.contactSales')}
+            <a
+              href={`/${lang}/contact`}
+              class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-lg transition-colors"
+            >
+              {t('products.details.requestDemo')}
             </a>
           </div>
         </div>
@@ -103,16 +197,24 @@ if (!product) {
     </div>
   </section>
 
-  <!-- Key Technologies -->
-  {product.technologies && product.technologies.length > 0 && (
-    <section class="section bg-white">
+  <!-- Product Gallery Section -->
+  {product.images?.gallery && product.images.gallery.length > 0 && (
+    <section class="section bg-slate-50">
       <div class="container">
-        <h2 class="heading-2 mb-10">{t('products.details.keyTechnologies')}</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {product.technologies.map((tech) => (
-            <div class="card-premium p-6">
-              <h3 class="text-lg font-bold text-slate-900 mb-2">{tech.name}</h3>
-              <p class="body-small">{tech.description}</p>
+        <div class="max-w-2xl mb-12">
+          <span class="label mb-3 block">{t('products.details.gallery')}</span>
+          <h2 class="heading-2 mb-4">{t('products.details.productImages')}</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          {product.images.gallery.map((img: string) => (
+            <div class="aspect-[4/3] rounded-xl overflow-hidden bg-white border border-slate-200 group cursor-pointer hover:shadow-xl transition-all duration-300">
+              <img
+                src={img}
+                alt={product.name}
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>
@@ -120,18 +222,93 @@ if (!product) {
     </section>
   )}
 
-  <!-- Specifications -->
-  {product.specifications && Object.keys(product.specifications).length > 0 && (
-    <section class="section bg-gradient-section">
+  <!-- Key Technologies Section -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="max-w-2xl mb-12">
+        <span class="label mb-3 block">{t('products.details.technology')}</span>
+        <h2 class="heading-2 mb-4">{t('products.details.keyTechnologies')}</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {keyTechnologies.map((tech) => (
+          <div class="bg-slate-50 border border-slate-100 rounded-xl p-6">
+            <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-slate-900 mb-2">{tech.name}</h3>
+            <p class="body-small">{tech.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Indications Section -->
+  {indications && indications.length > 0 && (
+    <section class="section bg-slate-50">
       <div class="container">
-        <h2 class="heading-2 mb-10">{t('products.details.specifications')}</h2>
-        <div class="card-premium overflow-hidden">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          <div>
+            <span class="label mb-3 block">{t('products.details.clinicalUse')}</span>
+            <h2 class="heading-2 mb-4">{t('products.details.indications')}</h2>
+          </div>
+
+          <div class="space-y-4">
+            {indications.map((indication) => {
+              const [title, desc] = indication.includes(' - ')
+                ? indication.split(' - ')
+                : [indication, null];
+              return (
+                <div class="bg-white rounded-xl p-6 border border-slate-100">
+                  <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
+                      <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-slate-900">{title}</h3>
+                      {desc && <p class="body-small mt-1">{desc}</p>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Specifications Section -->
+  {specifications && specifications.length > 0 && (
+    <section class="section bg-white">
+      <div class="container">
+        <div class="max-w-2xl mb-12">
+          <span class="label mb-3 block">{t('products.details.technicalData')}</span>
+          <h2 class="heading-2 mb-4">{t('products.details.specifications')}</h2>
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
           <table class="w-full">
             <tbody>
-              {Object.entries(product.specifications).map(([key, value], index) => (
-                <tr class={index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                  <td class="px-6 py-4 font-medium text-slate-900 w-1/3">{key}</td>
-                  <td class="px-6 py-4 text-slate-600">{value}</td>
+              {specifications.map((spec, index) => (
+                <tr class:list={[
+                  "border-b border-slate-100 last:border-0",
+                  index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                ]}>
+                  <td class="p-4 lg:p-6 w-1/3">
+                    <span class="font-medium text-slate-900">{spec.label}</span>
+                  </td>
+                  <td class="p-4 lg:p-6">
+                    <span class="text-slate-700">{spec.value}</span>
+                    {spec.note && (
+                      <span class="block text-sm text-slate-500 mt-1">{spec.note}</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -141,18 +318,46 @@ if (!product) {
     </section>
   )}
 
-  <!-- Indications -->
-  {product.indications && product.indications.length > 0 && (
-    <section class="section bg-white">
+  <!-- Handpieces Section -->
+  {handpieces && handpieces.length > 0 && (
+    <section class="section bg-slate-50">
       <div class="container">
-        <h2 class="heading-2 mb-10">{t('products.details.indications')}</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {product.indications.map((indication) => (
-            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
-              <svg class="w-5 h-5 text-primary-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              <span class="text-slate-700">{indication}</span>
+        <div class="max-w-2xl mb-12">
+          <span class="label mb-3 block">{t('products.details.accessories')}</span>
+          <h2 class="heading-2 mb-4">{t('products.details.handpieceConfig')}</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          {handpieces.map((handpiece) => (
+            <div class="bg-white rounded-xl p-6 border border-slate-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300 group">
+              <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-4 overflow-hidden">
+                {handpiece.imageSrc ? (
+                  <img
+                    src={handpiece.imageSrc}
+                    alt={handpiece.name}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center">
+                    <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <h3 class="font-semibold text-slate-900 mb-3">{handpiece.name}</h3>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">{t('products.details.tipSize')}</span>
+                  <span class="text-slate-900 font-medium">{handpiece.tipSize}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">{t('products.details.depth')}</span>
+                  <span class="text-slate-900 font-medium">{handpiece.depth}</span>
+                </div>
+              </div>
+              <p class="body-small mt-4 pt-4 border-t border-slate-100">{handpiece.feature}</p>
             </div>
           ))}
         </div>
@@ -160,21 +365,93 @@ if (!product) {
     </section>
   )}
 
-  <!-- CTA -->
-  <section class="section bg-gradient-section">
+  <!-- Clinical Benefits + Differentiators Section -->
+  {clinicalBenefits && clinicalBenefits.length > 0 && (
+    <section class="section bg-white">
+      <div class="container">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div>
+            <span class="label mb-3 block">{t('products.details.benefits')}</span>
+            <h2 class="heading-2 mb-4">{t('products.details.clinicalBenefits')}</h2>
+
+            <div class="space-y-4">
+              {clinicalBenefits.map((benefit) => (
+                <div class="flex items-start gap-3">
+                  <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span class="text-slate-700">{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Differentiators -->
+          {differentiators && differentiators.length > 0 && (
+            <div class="space-y-4">
+              {differentiators.map((diff) => (
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-100">
+                  <h3 class="font-semibold text-slate-900 mb-2">{diff.feature}</h3>
+                  <p class="body-small">{diff.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Section -->
+  <section class="section bg-primary-600">
     <div class="container">
       <div class="text-center max-w-2xl mx-auto">
-        <h2 class="heading-2 mb-5">
-          {lang === 'ko' ? '이 제품에 관심이 있으신가요?' :
-           lang === 'ja' ? 'この製品にご興味がありますか？' :
-           lang === 'zh' ? '对这个产品感兴趣吗？' :
-           'Interested in this product?'}
+        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">
+          {t('products.details.interestedIn')}
         </h2>
-        <p class="body-large mb-8">{t('contact.subtitle')}</p>
-        <a href={`/${lang}/contact`} class="btn-primary">
-          {t('common.contactSales')}
-        </a>
+        <p class="text-lg text-primary-100 mb-8">
+          {t('products.details.contactCta')}
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href={`/${lang}/contact`}
+            class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-primary-600 bg-white hover:bg-primary-50 rounded-lg transition-colors"
+          >
+            {t('products.details.requestQuote')}
+          </a>
+          <a
+            href={`/${lang}/products`}
+            class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white border border-white/30 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            {t('products.details.viewAllProducts')}
+          </a>
+        </div>
       </div>
     </div>
   </section>
+
+<script>
+  // Handle lazy-loaded images fade-in
+  function handleImageLoad() {
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+
+    lazyImages.forEach((img) => {
+      if (img.complete) {
+        img.classList.add('loaded');
+      } else {
+        img.addEventListener('load', () => {
+          img.classList.add('loaded');
+        });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleImageLoad);
+  } else {
+    handleImageLoad();
+  }
+</script>
 </BaseLayout>

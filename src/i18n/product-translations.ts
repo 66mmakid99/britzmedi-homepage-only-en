@@ -1,0 +1,1170 @@
+// Product content translations for all non-English languages
+// English content comes directly from src/content/products.ts (source of truth)
+
+export interface ProductTranslation {
+  tagline: string;
+  overview: string;
+  description: string;
+  keyTechnologies: { name: string; description: string }[];
+  indications?: string[];
+  specLabels?: Record<string, string>;
+  specNotes?: Record<string, string>;
+  handpieces?: { name: string; feature: string }[];
+  clinicalBenefits?: string[];
+  differentiators?: { feature: string; description: string }[];
+}
+
+type ProductTranslations = Record<string, Record<string, ProductTranslation>>;
+
+const translations: ProductTranslations = {
+  // ═══════════════════════════════════════
+  // KOREAN (ko)
+  // ═══════════════════════════════════════
+  ko: {
+    'torr-rf': {
+      tagline: '혁신적인 멀티웨이브 RF 워크스테이션',
+      overview: 'TORR RF는 특수 멀티웨이브 고주파(RF) 기술을 활용하여 진피 및 피하 조직층에 열 에너지를 전달하는 비침습 의료기기입니다.',
+      description: 'TORR RF의 핵심 임상 의의는 낮은 출력으로 원하는 깊이까지 강력하면서도 안전한 에너지를 균일하게 전달하여 표면 화상을 방지하면서 심부 조직 가열을 극대화하는 능력에 있습니다. FDA 510(k) 승인(K212561)을 받았으며, 피부 타이트닝, 바디 컨투어링, 통증 완화를 위해 설계되었습니다.',
+      keyTechnologies: [
+        {
+          name: '자동 원형 모션 헤드 (특허)',
+          description: '핸드피스 헤드가 자동으로 회전(68rpm)하여 \'토로이달\' 열장을 형성, RF 에너지를 핫스팟 없이 균일하게 분배하고 시술자 피로를 줄여줍니다.',
+        },
+        {
+          name: '실시간 온도 제어',
+          description: '통합 센서가 피부 온도를 지속적으로 모니터링합니다. 설정된 안전 한계(30°C~50°C 조절 가능)를 초과하면 RF 출력을 자동 차단하여 화상을 방지합니다.',
+        },
+        {
+          name: '바이브로 컴포트 모드',
+          description: '3D 진동 기술(분당 10,000회)이 신경학적 분산 효과(게이트 컨트롤 이론)를 통해 열감을 완화하여 열에 민감한 환자도 편안하게 시술받을 수 있습니다.',
+        },
+      ],
+      indications: [
+        '리프팅 & 피부 타이트닝 - 깊은 진피층에 열 에너지를 전달하여 콜라겐 리모델링 촉진',
+        '바디 컨투어링 & 셀룰라이트 - 셀룰라이트 외관의 일시적 감소에 대해 FDA 승인',
+        '혈관(순환) - 국소 혈액 순환의 일시적 개선 승인',
+        '통증 관리 - 경미한 근육통, 통증 및 근육 경련 완화',
+      ],
+      specLabels: {
+        'Frequency': '주파수',
+        'Max Output Power': '최대 출력',
+        'Operation Modes': '작동 모드',
+        'Treatment Depth': '시술 깊이',
+        'Temperature Control': '온도 제어',
+        'User Interface': '사용자 인터페이스',
+        'Dimensions': '크기',
+        'Weight': '무게',
+        'Power': '전원',
+        'Safety Class': '안전 등급',
+      },
+      specNotes: {
+        'Stable deep heating frequency': '안정적인 심부 가열 주파수',
+        'Low power, high efficiency': '저출력, 고효율',
+        'Selectable via GUI': 'GUI를 통해 선택 가능',
+        'Adjustable Low/Deep Mode': 'Low/Deep 모드 조절 가능',
+        'Real-time monitoring & Auto-cut off': '실시간 모니터링 & 자동 차단',
+        'Intuitive GUI with Preset Memory': '프리셋 메모리 기능의 직관적 GUI',
+      },
+      handpieces: [
+        { name: '대형 핸드피스 (바디)', feature: '대면적 컨투어링을 위한 자동 원형 모션(68rpm)' },
+        { name: '소형 핸드피스 (페이스)', feature: '안면 타이트닝 및 볼 컨투어링에 최적화' },
+        { name: '마이크로 핸드피스 (아이/섬세)', feature: '눈가 및 주름 부위 정밀 관리' },
+      ],
+      clinicalBenefits: [
+        '바이브로 컴포트 모드로 무통 시술',
+        '균일한 에너지 전달로 시술자 피로 방지',
+        '실시간 안전 모니터링으로 화상 방지',
+        '소모성 카트리지 없음 - 낮은 운영 비용',
+      ],
+      differentiators: [
+        {
+          feature: '오토 모션 기술',
+          description: '기존 고정식 어플리케이터와 달리, 회전 헤드(68rpm)가 넓은 시술 부위에 균일한 에너지 분배를 보장합니다',
+        },
+        {
+          feature: '저출력, 고효율',
+          description: '경쟁 제품이 최대 150W를 필요로 하는 반면, 55W로 효과적인 가열을 달성하여 안전성을 높입니다',
+        },
+        {
+          feature: '비소모성 핸드피스',
+          description: '값비싼 카트리지 교체 없이 장기간 사용 가능하도록 설계된 내구성 핸드피스',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: '다중 주파수 초음파 워크스테이션',
+      overview: 'ULBLANC은 이중 주파수 초음파를 통한 타이트닝과 음향 캐비테이션을 통한 경피 약물 전달을 결합한 종합 스킨케어 워크스테이션입니다.',
+      description: '피부 표면을 손상시키지 않으면서 효과적인 시술이 가능하며, 표피와 심부 조직 시술을 위한 다이나믹 듀얼 웨이브 기술을 탑재하고 있습니다.',
+      keyTechnologies: [
+        {
+          name: 'Sono-I (다이나믹 듀얼 웨이브™)',
+          description: '서로 다른 초음파 주파수를 교대 사용하여 표피와 진피를 동시에 타겟. 1/3 MHz로 심부 진피 타이트닝, 3/10 MHz로 표피 진정.',
+        },
+        {
+          name: 'i-Booster (소노포레시스)',
+          description: '28kHz 초음파를 활용하여 음향 캐비테이션(마이크로 제트 효과)을 생성, 활성 성분의 깊은 경피 전달을 위한 마이크로 통로를 개방합니다.',
+        },
+      ],
+      indications: [
+        '피부 탄력 및 타이트닝',
+        '주름 감소',
+        '활성 성분 흡수 촉진',
+        '피부 진정 (여드름/홍조에 적합)',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'Sono-I 주파수',
+        'i-Booster Frequency': 'i-Booster 주파수',
+      },
+      specNotes: {
+        'Dual frequency modes': '이중 주파수 모드',
+        'For sonophoresis': '소노포레시스용',
+      },
+      clinicalBenefits: [
+        '다운타임 없음 - 무통, 무감염',
+        '매일 사용 가능',
+        '진정부터 리프팅까지 다양한 시술 범위',
+        '제품 흡수 효율 향상',
+      ],
+    },
+    'newchae-shot': {
+      tagline: '3-in-1 퍼스널 뷰티 디바이스',
+      overview: 'NEWCHAE SHOT은 전문 의료 기술을 컴팩트한 폼팩터에 통합한 홈케어 뷰티 디바이스로, 멀티 채널 에너지 전달 기능을 제공합니다.',
+      description: 'RF 타이트닝, EMS 컨투어링, ELP 스킨 부스팅 기술을 결합하여 NEWCHAE SHOT은 가정에서 클리닉 수준의 결과를 제공합니다.',
+      keyTechnologies: [
+        {
+          name: 'RF 모드 (타이트닝)',
+          description: '멀티 채널 RF 스택 기술이 진피 깊숙이 열을 전달하여 콜라겐 재생을 촉진합니다.',
+        },
+        {
+          name: 'EMS 모드 (V-라인)',
+          description: '전기 근육 자극을 통한 안면 컨투어링 및 토닝.',
+        },
+        {
+          name: 'ELP 모드 (스킨 부스트)',
+          description: '전기천공 기술로 스킨케어 제품의 흡수를 촉진합니다.',
+        },
+      ],
+      clinicalBenefits: [
+        '피부 밀도 128.48% 개선',
+        '모공 크기 26.74% 감소',
+        '표면 및 심부 탄력 향상',
+        '피부 광채 향상',
+      ],
+      differentiators: [
+        {
+          feature: '자동 샷 시스템',
+          description: '정밀한 전달을 위해 에너지 출력을 집중시킵니다',
+        },
+        {
+          feature: '3D 바이브레이션',
+          description: '분당 10,000회 진동으로 에너지 침투를 보조합니다',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: '차세대 융합 디바이스',
+      overview: 'LUMINO WAVE는 초음파와 레이저 에너지를 결합하여 시술 효과를 극대화하도록 설계된 첨단 미용 기기입니다.',
+      description: '초음파에 의한 마이크로 버블이 레이저의 피부 침투 깊이를 향상시키는 원리를 활용하여, LUMINO WAVE는 융합 치료의 차세대 진화를 대표합니다. 현재 MFDS 승인 진행 중이며 2026년 하반기 출시 예정입니다.',
+      keyTechnologies: [
+        {
+          name: '초음파 + 레이저 융합',
+          description: '초음파 진동과 레이저 조사가 동시에 이루어지는 융합 치료. 초음파 효과로 빛 산란이 최소화되어 레이저가 더 깊은 층까지 효율적으로 도달합니다.',
+        },
+      ],
+      clinicalBenefits: [
+        '더 낮은 출력/에너지로 치료 결과 달성',
+        '피부 자극 및 부작용 최소화',
+        '리프팅 및 재생 효과 극대화',
+        '진피층까지의 레이저 침투 향상',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
+  // JAPANESE (ja)
+  // ═══════════════════════════════════════
+  ja: {
+    'torr-rf': {
+      tagline: '革新的マルチウェーブRFワークステーション',
+      overview: 'TORR RFは、特殊なマルチウェーブ高周波(RF)技術を活用して、真皮および皮下組織層に熱エネルギーを伝達する非侵襲的医療機器です。',
+      description: 'TORR RFの核心的な臨床的意義は、低出力で目的の深さまで強力かつ安全なエネルギーを均一に伝達し、表面火傷を防止しながら深部組織の加熱を最大化する能力にあります。FDA 510(k)承認済み（K212561）。皮膚のタイトニング、ボディコントアリング、疼痛緩和向けに設計されています。',
+      keyTechnologies: [
+        {
+          name: '自動円形モーションヘッド（特許取得）',
+          description: 'ハンドピースのヘッドが自動回転（68rpm）し、「トロイダル」熱場を形成。RFエネルギーをホットスポットなく均一に分配し、施術者の疲労を軽減します。',
+        },
+        {
+          name: 'リアルタイム温度制御',
+          description: '内蔵センサーが皮膚温度を継続的にモニタリング。設定された安全限界値（30°C〜50°C調整可能）を超えるとRF出力を自動遮断し、火傷を防止します。',
+        },
+        {
+          name: 'バイブロコンフォートモード',
+          description: '3D振動技術（毎分10,000回）が神経学的分散効果（ゲートコントロール理論）により熱感を緩和。熱に敏感な患者様も快適に施術を受けられます。',
+        },
+      ],
+      indications: [
+        'リフティング＆スキンタイトニング - 真皮深層に熱エネルギーを伝達しコラーゲンリモデリングを促進',
+        'ボディコントアリング＆セルライト - セルライトの外観の一時的な軽減についてFDA承認済み',
+        '血管（循環） - 局所血液循環の一時的な改善について承認済み',
+        '疼痛管理 - 軽度の筋肉痛、痛み、筋痙攣の緩和',
+      ],
+      specLabels: {
+        'Frequency': '周波数',
+        'Max Output Power': '最大出力',
+        'Operation Modes': '動作モード',
+        'Treatment Depth': '施術深度',
+        'Temperature Control': '温度制御',
+        'User Interface': 'ユーザーインターフェース',
+        'Dimensions': '外形寸法',
+        'Weight': '重量',
+        'Power': '電源',
+        'Safety Class': '安全分類',
+      },
+      specNotes: {
+        'Stable deep heating frequency': '安定した深部加熱周波数',
+        'Low power, high efficiency': '低出力・高効率',
+        'Selectable via GUI': 'GUIで選択可能',
+        'Adjustable Low/Deep Mode': 'Low/Deepモード調整可能',
+        'Real-time monitoring & Auto-cut off': 'リアルタイムモニタリング＆自動遮断',
+        'Intuitive GUI with Preset Memory': 'プリセットメモリ機能付き直感的GUI',
+      },
+      handpieces: [
+        { name: 'ラージハンドピース（ボディ）', feature: '広範囲コントアリング用自動円形モーション（68rpm）' },
+        { name: 'スモールハンドピース（フェイス）', feature: 'フェイシャルタイトニングと頬のコントアリングに最適化' },
+        { name: 'マイクロハンドピース（アイ/デリケート）', feature: '眼周囲やシワ部位の精密ケア' },
+      ],
+      clinicalBenefits: [
+        'バイブロコンフォートモードによる無痛施術',
+        '均一なエネルギー伝達で施術者の疲労を防止',
+        'リアルタイム安全モニタリングで火傷を防止',
+        '消耗カートリッジ不要 - 低ランニングコスト',
+      ],
+      differentiators: [
+        {
+          feature: 'オートモーション技術',
+          description: '従来の固定式アプリケーターと異なり、回転ヘッド（68rpm）が広い施術範囲に均一なエネルギー分配を実現',
+        },
+        {
+          feature: '低出力・高効率',
+          description: '競合製品が最大150Wを必要とする中、55Wで効果的な加熱を実現し安全性を向上',
+        },
+        {
+          feature: '非消耗ハンドピース',
+          description: '高額なカートリッジ交換不要の長期使用設計',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: 'マルチ周波数超音波ワークステーション',
+      overview: 'ULBLANCは、デュアル周波数超音波によるタイトニングと音響キャビテーションによる経皮ドラッグデリバリーを統合した総合スキンケアワークステーションです。',
+      description: '皮膚表面を損傷することなく効果的な施術が可能で、表皮と深部組織の両方に対応するダイナミックデュアルウェーブ技術を搭載しています。',
+      keyTechnologies: [
+        {
+          name: 'Sono-I（ダイナミックデュアルウェーブ™）',
+          description: '異なる超音波周波数を交互に使用して表皮と真皮を同時にターゲット。1/3 MHzで真皮深部タイトニング、3/10 MHzで表皮鎮静。',
+        },
+        {
+          name: 'i-Booster（ソノフォレシス）',
+          description: '28kHz超音波を活用して音響キャビテーション（マイクロジェット効果）を生成し、活性成分の深部経皮伝達のためのマイクロ経路を開通。',
+        },
+      ],
+      indications: [
+        '肌の引き締め・タイトニング',
+        'シワ軽減',
+        '有効成分の吸収促進',
+        '肌の鎮静（アクネ/紅潮に適合）',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'Sono-I 周波数',
+        'i-Booster Frequency': 'i-Booster 周波数',
+      },
+      specNotes: {
+        'Dual frequency modes': 'デュアル周波数モード',
+        'For sonophoresis': 'ソノフォレシス用',
+      },
+      clinicalBenefits: [
+        'ダウンタイムなし - 無痛・無感染',
+        '毎日の使用が可能',
+        '鎮静からリフティングまで多彩な施術範囲',
+        '製品吸収効率の向上',
+      ],
+    },
+    'newchae-shot': {
+      tagline: '3-in-1パーソナルビューティーデバイス',
+      overview: 'NEWCHAE SHOTは、プロフェッショナルグレードの医療技術をコンパクトなフォームファクターに統合したホームケアビューティーデバイスです。',
+      description: 'RFタイトニング、EMSコントアリング、ELPスキンブースト技術を統合し、自宅でクリニックレベルの結果を提供します。',
+      keyTechnologies: [
+        {
+          name: 'RFモード（タイトニング）',
+          description: 'マルチチャネルRFスタック技術が真皮深部に熱を伝達し、コラーゲン再生を促進。',
+        },
+        {
+          name: 'EMSモード（Vライン）',
+          description: '電気筋肉刺激によるフェイシャルコントアリングとトーニング。',
+        },
+        {
+          name: 'ELPモード（スキンブースト）',
+          description: 'エレクトロポレーション技術でスキンケア製品の吸収を促進。',
+        },
+      ],
+      clinicalBenefits: [
+        '肌密度128.48%改善',
+        '毛穴サイズ26.74%縮小',
+        '表面および深部の弾力性向上',
+        '肌の輝き向上',
+      ],
+      differentiators: [
+        {
+          feature: 'オートショットシステム',
+          description: '精密な伝達のためにエネルギー出力を集中',
+        },
+        {
+          feature: '3Dバイブレーション',
+          description: '毎分10,000回の振動でエネルギー浸透を補助',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: '次世代コンバージェンスデバイス',
+      overview: 'LUMINO WAVEは、超音波とレーザーエネルギーを組み合わせて施術効果を最大化するよう設計された先進美容機器です。',
+      description: '超音波によるマイクロバブルがレーザーの皮膚浸透深度を向上させる原理を活用。LUMINO WAVEはコンバージェンス療法の次世代進化を代表します。現在MFDS承認審査中、2026年下半期発売予定。',
+      keyTechnologies: [
+        {
+          name: '超音波＋レーザーコンバージェンス',
+          description: '超音波振動とレーザー照射が同時に行われるコンバージェンス療法。超音波効果により光散乱が最小化され、レーザーがより深い層まで効率的に到達します。',
+        },
+      ],
+      clinicalBenefits: [
+        'より低い出力/エネルギーで治療効果を実現',
+        '皮膚刺激と副作用の最小化',
+        'リフティングと再生効果の最大化',
+        '真皮層までのレーザー浸透の向上',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
+  // CHINESE SIMPLIFIED (zh)
+  // ═══════════════════════════════════════
+  zh: {
+    'torr-rf': {
+      tagline: '创新多波段RF工作站',
+      overview: 'TORR RF是一款利用专利多波段射频(RF)技术将热能传递到真皮和皮下组织层的非侵入性医疗设备。',
+      description: 'TORR RF的核心临床意义在于能够以低功率将强大而安全的能量均匀传递到所需深度，在防止表面灼伤的同时最大化深层组织加热。已获FDA 510(k)批准（K212561），专为皮肤紧致、身体塑形和疼痛缓解而设计。',
+      keyTechnologies: [
+        {
+          name: '自动圆周运动头（专利）',
+          description: '手柄头部自动旋转（68rpm），形成"环形"热场，确保RF能量无热点均匀分布，减少操作者疲劳。',
+        },
+        {
+          name: '实时温度控制',
+          description: '集成传感器持续监测皮肤温度。当温度超过设定的安全限值（可调30°C-50°C）时，系统自动切断RF输出，防止灼伤。',
+        },
+        {
+          name: '振动舒适模式',
+          description: '3D振动技术（每分钟10,000次）通过神经学分散效应（闸门控制理论）减轻热感，让对热敏感的患者也能舒适接受治疗。',
+        },
+      ],
+      indications: [
+        '提升和皮肤紧致 - 向深层真皮传递热能以刺激胶原蛋白重塑',
+        '身体塑形和橘皮组织 - FDA批准用于暂时减少橘皮组织外观',
+        '血管（循环） - 批准用于暂时改善局部血液循环',
+        '疼痛管理 - 缓解轻微肌肉酸痛、疼痛和肌肉痉挛',
+      ],
+      specLabels: {
+        'Frequency': '频率',
+        'Max Output Power': '最大输出功率',
+        'Operation Modes': '工作模式',
+        'Treatment Depth': '治疗深度',
+        'Temperature Control': '温度控制',
+        'User Interface': '用户界面',
+        'Dimensions': '尺寸',
+        'Weight': '重量',
+        'Power': '电源',
+        'Safety Class': '安全等级',
+      },
+      specNotes: {
+        'Stable deep heating frequency': '稳定的深部加热频率',
+        'Low power, high efficiency': '低功率，高效率',
+        'Selectable via GUI': '通过GUI选择',
+        'Adjustable Low/Deep Mode': '可调Low/Deep模式',
+        'Real-time monitoring & Auto-cut off': '实时监测和自动切断',
+        'Intuitive GUI with Preset Memory': '带预设记忆的直观GUI',
+      },
+      handpieces: [
+        { name: '大型手柄（身体）', feature: '用于大面积塑形的自动圆周运动（68rpm）' },
+        { name: '小型手柄（面部）', feature: '专为面部紧致和面颊塑形设计' },
+        { name: '微型手柄（眼部/精细）', feature: '眼周区域和皱纹的精准护理' },
+      ],
+      clinicalBenefits: [
+        '振动舒适模式实现无痛治疗',
+        '均匀能量传递防止操作者疲劳',
+        '实时安全监测防止灼伤',
+        '无消耗品卡匣 - 低运行成本',
+      ],
+      differentiators: [
+        {
+          feature: '自动运动技术',
+          description: '与传统固定式探头不同，旋转头（68rpm）确保在大面积治疗区域均匀分配能量',
+        },
+        {
+          feature: '更低功率，更高效能',
+          description: '以55W实现有效加热，而竞品需要高达150W，安全性更高',
+        },
+        {
+          feature: '非消耗性手柄',
+          description: '耐用手柄设计用于长期使用，无需昂贵的卡匣更换',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: '多频超声工作站',
+      overview: 'ULBLANC是一款综合皮肤护理工作站，结合双频超声紧致和声学空化经皮药物递送技术。',
+      description: '该系统可在不损伤皮肤表面的情况下进行有效治疗，搭载动态双波技术用于表皮和深层组织治疗。',
+      keyTechnologies: [
+        {
+          name: 'Sono-I（动态双波™）',
+          description: '交替使用不同超声频率同时针对表皮和真皮。1/3 MHz用于深层真皮紧致，3/10 MHz用于表皮舒缓。',
+        },
+        {
+          name: 'i-Booster（超声导入）',
+          description: '利用28kHz超声产生声学空化（微射流效应），开辟微通道实现活性成分的深层经皮递送。',
+        },
+      ],
+      indications: [
+        '皮肤紧致和收紧',
+        '减少皱纹',
+        '促进活性成分吸收',
+        '皮肤舒缓（适用于痤疮/潮红）',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'Sono-I 频率',
+        'i-Booster Frequency': 'i-Booster 频率',
+      },
+      specNotes: {
+        'Dual frequency modes': '双频模式',
+        'For sonophoresis': '用于超声导入',
+      },
+      clinicalBenefits: [
+        '无恢复期 - 无痛、无感染',
+        '适合日常使用',
+        '从舒缓到提升的多功能治疗范围',
+        '提高产品吸收效率',
+      ],
+    },
+    'newchae-shot': {
+      tagline: '三合一个人美容仪',
+      overview: 'NEWCHAE SHOT是一款将专业级医疗技术整合到紧凑外形中的家用美容设备，具有多通道能量传递功能。',
+      description: '结合RF紧致、EMS塑形和ELP皮肤促进技术，NEWCHAE SHOT在家中即可实现专业级效果。',
+      keyTechnologies: [
+        {
+          name: 'RF模式（紧致）',
+          description: '多通道RF堆叠技术将热量传递到真皮深处，促进胶原蛋白再生。',
+        },
+        {
+          name: 'EMS模式（V-Line）',
+          description: '电肌肉刺激用于面部轮廓塑形和紧致。',
+        },
+        {
+          name: 'ELP模式（皮肤促进）',
+          description: '电穿孔技术增强护肤品吸收。',
+        },
+      ],
+      clinicalBenefits: [
+        '皮肤密度提升128.48%',
+        '毛孔大小减少26.74%',
+        '表面和深层弹性改善',
+        '皮肤光泽度提升',
+      ],
+      differentiators: [
+        {
+          feature: '自动射频系统',
+          description: '集中能量输出实现精准递送',
+        },
+        {
+          feature: '3D振动',
+          description: '每分钟10,000次振动辅助能量渗透',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: '下一代融合设备',
+      overview: 'LUMINO WAVE是一款先进美容设备，旨在通过结合超声波和激光能量来最大化治疗效果。',
+      description: '利用超声波产生的微气泡增强激光对皮肤的穿透深度，LUMINO WAVE代表了融合治疗的下一代进化。目前正在进行MFDS审批，计划于2026年下半年上市。',
+      keyTechnologies: [
+        {
+          name: '超声波+激光融合',
+          description: '超声振动和激光照射同时进行的融合疗法。超声效应使光散射最小化，激光能更有效地到达更深层。',
+        },
+      ],
+      clinicalBenefits: [
+        '以更低的功率/能量实现治疗效果',
+        '最大限度减少皮肤刺激和副作用',
+        '最大化提升和再生效果',
+        '增强激光对真皮层的穿透',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
+  // SPANISH (es)
+  // ═══════════════════════════════════════
+  es: {
+    'torr-rf': {
+      tagline: 'Estación de Trabajo RF Multi-Onda Innovadora',
+      overview: 'TORR RF es un dispositivo médico no invasivo que utiliza tecnología de radiofrecuencia (RF) multi-onda especializada para entregar energía térmica en las capas dérmicas y subcutáneas.',
+      description: 'La importancia clínica central de TORR RF radica en su capacidad para entregar energía potente pero segura de manera uniforme a la profundidad deseada usando baja potencia, previniendo quemaduras superficiales mientras maximiza el calentamiento profundo. Con aprobación FDA 510(k) (K212561), diseñado para tensado cutáneo, contorno corporal y alivio del dolor.',
+      keyTechnologies: [
+        {
+          name: 'Cabezal de Movimiento Circular Automático (Patentado)',
+          description: 'El cabezal del aplicador rota automáticamente (68 rpm), creando un campo térmico "toroidal" que asegura una distribución uniforme de la energía RF sin puntos calientes y reduce la fatiga del operador.',
+        },
+        {
+          name: 'Control de Temperatura en Tiempo Real',
+          description: 'Sensores integrados monitorizan la temperatura de la piel continuamente. El sistema corta automáticamente la salida RF si la temperatura supera el límite de seguridad (ajustable 30°C–50°C).',
+        },
+        {
+          name: 'Modo Vibro-Comfort',
+          description: 'La tecnología de vibración 3D (10.000 veces/min) mitiga la sensación de calor mediante distracción neurológica (Teoría del Control de Puerta), permitiendo tratamientos cómodos.',
+        },
+      ],
+      indications: [
+        'Lifting y Tensado Cutáneo - Entrega energía térmica a la dermis profunda para estimular la remodelación del colágeno',
+        'Contorno Corporal y Celulitis - Aprobado por FDA para reducción temporal de la apariencia de celulitis',
+        'Vascular (Circulación) - Aprobado para mejora temporal de la circulación sanguínea local',
+        'Manejo del Dolor - Alivio de dolores musculares menores y espasmos',
+      ],
+      specLabels: {
+        'Frequency': 'Frecuencia',
+        'Max Output Power': 'Potencia Máxima de Salida',
+        'Operation Modes': 'Modos de Operación',
+        'Treatment Depth': 'Profundidad de Tratamiento',
+        'Temperature Control': 'Control de Temperatura',
+        'User Interface': 'Interfaz de Usuario',
+        'Dimensions': 'Dimensiones',
+        'Weight': 'Peso',
+        'Power': 'Alimentación',
+        'Safety Class': 'Clase de Seguridad',
+      },
+      specNotes: {
+        'Stable deep heating frequency': 'Frecuencia estable de calentamiento profundo',
+        'Low power, high efficiency': 'Baja potencia, alta eficiencia',
+        'Selectable via GUI': 'Seleccionable vía GUI',
+        'Adjustable Low/Deep Mode': 'Modo Low/Deep ajustable',
+        'Real-time monitoring & Auto-cut off': 'Monitorización en tiempo real y corte automático',
+        'Intuitive GUI with Preset Memory': 'GUI intuitiva con memoria de preajustes',
+      },
+      handpieces: [
+        { name: 'Aplicador Grande (Cuerpo)', feature: 'Movimiento circular automático (68 rpm) para contorno de áreas grandes' },
+        { name: 'Aplicador Pequeño (Cara)', feature: 'Diseñado para tensado facial y contorno de mejillas' },
+        { name: 'Micro Aplicador (Ojos/Delicado)', feature: 'Cuidado de precisión para zonas perioculares y arrugas' },
+      ],
+      clinicalBenefits: [
+        'Tratamientos sin dolor con Modo Vibro-Comfort',
+        'Entrega uniforme de energía sin fatiga del operador',
+        'Monitorización de seguridad en tiempo real previniendo quemaduras',
+        'Sin cartuchos consumibles - bajos costos operativos',
+      ],
+      differentiators: [
+        {
+          feature: 'Tecnología Auto-Motion',
+          description: 'A diferencia de los aplicadores estacionarios tradicionales, el cabezal rotatorio (68 rpm) asegura distribución uniforme de energía en áreas amplias',
+        },
+        {
+          feature: 'Menor Potencia, Mayor Eficacia',
+          description: 'Logra calentamiento efectivo con 55W en comparación con competidores que requieren hasta 150W',
+        },
+        {
+          feature: 'Aplicadores No Consumibles',
+          description: 'Aplicadores duraderos diseñados para uso prolongado sin costosos reemplazos de cartuchos',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: 'Estación de Trabajo de Ultrasonido Multi-Frecuencia',
+      overview: 'ULBLANC es una estación integral de cuidado de la piel que combina ultrasonido de doble frecuencia para tensado con cavitación acústica para administración transdérmica.',
+      description: 'El sistema permite un tratamiento efectivo sin dañar la superficie cutánea, con tecnología Dynamic Dual Wave para tratamiento superficial y profundo.',
+      keyTechnologies: [
+        {
+          name: 'Sono-I (Dynamic Dual Wave™)',
+          description: 'Alterna entre diferentes frecuencias de ultrasonido para tratar tanto epidermis como dermis. 1/3 MHz para tensado dérmico profundo, 3/10 MHz para calmado epidérmico.',
+        },
+        {
+          name: 'i-Booster (Sonoforesis)',
+          description: 'Utiliza ultrasonido de 28kHz para generar cavitación acústica, abriendo micro-vías para la administración transdérmica profunda de ingredientes activos.',
+        },
+      ],
+      indications: [
+        'Firmeza y tensado de la piel',
+        'Reducción de arrugas',
+        'Mayor absorción de ingredientes activos',
+        'Calmado de la piel (apto para acné/enrojecimiento)',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'Frecuencia Sono-I',
+        'i-Booster Frequency': 'Frecuencia i-Booster',
+      },
+      specNotes: {
+        'Dual frequency modes': 'Modos de doble frecuencia',
+        'For sonophoresis': 'Para sonoforesis',
+      },
+      clinicalBenefits: [
+        'Sin tiempo de inactividad - Sin dolor, sin infección',
+        'Apto para uso diario',
+        'Rango versátil de tratamiento desde calmado hasta lifting',
+        'Mayor eficiencia en la absorción de productos',
+      ],
+    },
+    'newchae-shot': {
+      tagline: 'Dispositivo de Belleza Personal 3-en-1',
+      overview: 'NEWCHAE SHOT es un dispositivo de belleza para el hogar que integra tecnologías médicas de grado profesional en un formato compacto con entrega de energía multicanal.',
+      description: 'Combinando RF para tensado, EMS para contorno y tecnología ELP para potenciación cutánea, NEWCHAE SHOT ofrece resultados de nivel clínico para uso doméstico.',
+      keyTechnologies: [
+        {
+          name: 'Modo RF (Tensado)',
+          description: 'La tecnología Multi-Channel RF Stack entrega calor profundamente en la dermis, promoviendo la regeneración del colágeno.',
+        },
+        {
+          name: 'Modo EMS (V-Line)',
+          description: 'Estimulación eléctrica muscular para contorno y tonificación facial.',
+        },
+        {
+          name: 'Modo ELP (Skin Boost)',
+          description: 'Tecnología de electroporación que mejora la absorción de productos de cuidado de la piel.',
+        },
+      ],
+      clinicalBenefits: [
+        'Densidad de la piel mejorada en 128,48%',
+        'Tamaño de poros reducido en 26,74%',
+        'Mejora de la elasticidad superficial y profunda',
+        'Mayor luminosidad de la piel',
+      ],
+      differentiators: [
+        {
+          feature: 'Sistema de Disparo Automatizado',
+          description: 'Concentra la salida de energía para una entrega precisa',
+        },
+        {
+          feature: 'Vibración 3D',
+          description: 'Vibra 10.000 veces/min para asistir la penetración de energía',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: 'Dispositivo de Convergencia de Nueva Generación',
+      overview: 'LUMINO WAVE es un dispositivo estético avanzado diseñado para maximizar la eficacia del tratamiento combinando energías de ultrasonido y láser.',
+      description: 'Utilizando microburbujas inducidas por ultrasonido para mejorar la profundidad de penetración del láser en la piel, LUMINO WAVE representa la próxima evolución en terapia de convergencia. Actualmente en proceso de aprobación MFDS con lanzamiento programado para H2 2026.',
+      keyTechnologies: [
+        {
+          name: 'Convergencia Ultrasonido + Láser',
+          description: 'Terapia de convergencia donde la vibración ultrasónica y la irradiación láser ocurren simultáneamente. La dispersión de la luz se minimiza, permitiendo que el láser alcance capas más profundas.',
+        },
+      ],
+      clinicalBenefits: [
+        'Logra resultados terapéuticos con menor potencia/energía',
+        'Irritación y efectos secundarios minimizados',
+        'Efectos de lifting y regeneración maximizados',
+        'Mayor penetración del láser a capas dérmicas',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
+  // THAI (th)
+  // ═══════════════════════════════════════
+  th: {
+    'torr-rf': {
+      tagline: 'สถานีงาน RF แบบมัลติเวฟนวัตกรรม',
+      overview: 'TORR RF เป็นอุปกรณ์ทางการแพทย์แบบไม่รุกรานที่ใช้เทคโนโลยีคลื่นวิทยุ (RF) แบบมัลติเวฟเฉพาะทางเพื่อส่งพลังงานความร้อนไปยังชั้นหนังแท้และชั้นใต้ผิวหนัง',
+      description: 'ความสำคัญทางคลินิกหลักของ TORR RF คือความสามารถในการส่งพลังงานที่ทรงพลังแต่ปลอดภัยอย่างสม่ำเสมอไปยังความลึกที่ต้องการด้วยกำลังต่ำ ป้องกันการเผาไหม้ที่ผิวหนังขณะเพิ่มการให้ความร้อนเนื้อเยื่อลึกสูงสุด ผ่านการรับรอง FDA 510(k) (K212561)',
+      keyTechnologies: [
+        {
+          name: 'หัวเคลื่อนที่แบบวงกลมอัตโนมัติ (จดสิทธิบัตร)',
+          description: 'หัวแฮนด์พีชหมุนอัตโนมัติ (68 rpm) สร้างสนามความร้อนแบบ "Toroidal" ช่วยกระจายพลังงาน RF อย่างสม่ำเสมอโดยไม่มีจุดร้อนและลดความเมื่อยล้าของผู้ปฏิบัติงาน',
+        },
+        {
+          name: 'ควบคุมอุณหภูมิแบบเรียลไทม์',
+          description: 'เซนเซอร์ในตัวตรวจวัดอุณหภูมิผิวหนังอย่างต่อเนื่อง ระบบจะตัดเอาต์พุต RF โดยอัตโนมัติหากอุณหภูมิเกินขีดจำกัดความปลอดภัย (ปรับได้ 30°C–50°C)',
+        },
+        {
+          name: 'โหมด Vibro-Comfort',
+          description: 'เทคโนโลยีการสั่นสะเทือน 3D (10,000 ครั้ง/นาที) ลดความรู้สึกร้อนผ่านการรบกวนระบบประสาท (Gate Control Theory) ทำให้ผู้ป่วยรู้สึกสบายระหว่างการรักษา',
+        },
+      ],
+      indications: [
+        'ยกกระชับและกระชับผิว - ส่งพลังงานความร้อนไปยังชั้นหนังแท้ลึกเพื่อกระตุ้นการรีโมเดลลิ่งคอลลาเจน',
+        'ปรับรูปร่างและเซลลูไลท์ - ได้รับอนุมัติจาก FDA สำหรับการลดรอยเซลลูไลท์ชั่วคราว',
+        'หลอดเลือด (การไหลเวียน) - ได้รับอนุมัติสำหรับการปรับปรุงการไหลเวียนโลหิตชั่วคราว',
+        'การจัดการความเจ็บปวด - บรรเทาอาการปวดกล้ามเนื้อเล็กน้อยและอาการเกร็ง',
+      ],
+      specLabels: {
+        'Frequency': 'ความถี่',
+        'Max Output Power': 'กำลังขาออกสูงสุด',
+        'Operation Modes': 'โหมดการทำงาน',
+        'Treatment Depth': 'ความลึกการรักษา',
+        'Temperature Control': 'ควบคุมอุณหภูมิ',
+        'User Interface': 'อินเทอร์เฟซผู้ใช้',
+        'Dimensions': 'ขนาด',
+        'Weight': 'น้ำหนัก',
+        'Power': 'กำลังไฟ',
+        'Safety Class': 'ระดับความปลอดภัย',
+      },
+      specNotes: {
+        'Stable deep heating frequency': 'ความถี่ให้ความร้อนลึกที่เสถียร',
+        'Low power, high efficiency': 'กำลังต่ำ ประสิทธิภาพสูง',
+        'Selectable via GUI': 'เลือกได้ผ่าน GUI',
+        'Adjustable Low/Deep Mode': 'ปรับโหมด Low/Deep ได้',
+        'Real-time monitoring & Auto-cut off': 'ตรวจวัดเรียลไทม์ & ตัดอัตโนมัติ',
+        'Intuitive GUI with Preset Memory': 'GUI ที่ใช้งานง่ายพร้อมหน่วยความจำพรีเซ็ต',
+      },
+      handpieces: [
+        { name: 'แฮนด์พีชขนาดใหญ่ (ร่างกาย)', feature: 'เคลื่อนที่แบบวงกลมอัตโนมัติ (68 rpm) สำหรับการปรับรูปร่างพื้นที่กว้าง' },
+        { name: 'แฮนด์พีชขนาดเล็ก (ใบหน้า)', feature: 'ออกแบบสำหรับการกระชับใบหน้าและปรับรูปแก้ม' },
+        { name: 'ไมโครแฮนด์พีช (ตา/จุดบอบบาง)', feature: 'ดูแลอย่างแม่นยำสำหรับบริเวณรอบดวงตาและริ้วรอย' },
+      ],
+      clinicalBenefits: [
+        'การรักษาไม่เจ็บปวดด้วยโหมด Vibro-Comfort',
+        'ส่งพลังงานสม่ำเสมอป้องกันความเมื่อยล้าของผู้ปฏิบัติงาน',
+        'ตรวจวัดความปลอดภัยเรียลไทม์ป้องกันการเผาไหม้',
+        'ไม่มีตลับสิ้นเปลือง - ต้นทุนการดำเนินงานต่ำ',
+      ],
+      differentiators: [
+        {
+          feature: 'เทคโนโลยี Auto-Motion',
+          description: 'แตกต่างจากหัวเครื่องแบบคงที่ หัวหมุน (68 rpm) ช่วยกระจายพลังงานอย่างสม่ำเสมอในพื้นที่รักษากว้าง',
+        },
+        {
+          feature: 'กำลังต่ำกว่า ประสิทธิผลสูงกว่า',
+          description: 'ให้ความร้อนได้อย่างมีประสิทธิภาพด้วย 55W เมื่อเทียบกับคู่แข่งที่ต้องใช้ถึง 150W',
+        },
+        {
+          feature: 'แฮนด์พีชไม่สิ้นเปลือง',
+          description: 'แฮนด์พีชทนทานออกแบบมาเพื่อใช้งานระยะยาวโดยไม่ต้องเปลี่ยนตลับที่มีราคาแพง',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: 'สถานีงานอัลตราซาวด์หลายความถี่',
+      overview: 'ULBLANC เป็นสถานีดูแลผิวแบบครบวงจรที่ผสมผสานอัลตราซาวด์ความถี่คู่สำหรับการกระชับผิวกับอะคูสติกแควิเทชันสำหรับการนำส่งยาผ่านผิวหนัง',
+      description: 'ระบบช่วยให้การรักษาได้ผลโดยไม่ทำลายผิวหนัง ด้วยเทคโนโลยี Dynamic Dual Wave สำหรับการรักษาทั้งผิวชั้นนอกและเนื้อเยื่อลึก',
+      keyTechnologies: [
+        {
+          name: 'Sono-I (Dynamic Dual Wave™)',
+          description: 'สลับระหว่างความถี่อัลตราซาวด์ต่างกันเพื่อเข้าถึงทั้งหนังกำพร้าและหนังแท้ 1/3 MHz สำหรับกระชับหนังแท้ลึก, 3/10 MHz สำหรับผ่อนคลายหนังกำพร้า',
+        },
+        {
+          name: 'i-Booster (โซโนโฟเรซิส)',
+          description: 'ใช้อัลตราซาวด์ 28kHz เพื่อสร้างอะคูสติกแควิเทชัน เปิดทางเดินเล็กๆ สำหรับการนำส่งสารออกฤทธิ์ผ่านผิวหนังลึก',
+        },
+      ],
+      indications: [
+        'กระชับและเฟิร์มผิว',
+        'ลดริ้วรอย',
+        'เพิ่มการดูดซึมสารออกฤทธิ์',
+        'ผ่อนคลายผิว (เหมาะสำหรับสิว/หน้าแดง)',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'ความถี่ Sono-I',
+        'i-Booster Frequency': 'ความถี่ i-Booster',
+      },
+      specNotes: {
+        'Dual frequency modes': 'โหมดความถี่คู่',
+        'For sonophoresis': 'สำหรับโซโนโฟเรซิส',
+      },
+      clinicalBenefits: [
+        'ไม่มีดาวน์ไทม์ - ไม่เจ็บ ไม่ติดเชื้อ',
+        'เหมาะสำหรับใช้ทุกวัน',
+        'ช่วงการรักษาหลากหลายตั้งแต่ผ่อนคลายถึงยกกระชับ',
+        'เพิ่มประสิทธิภาพการดูดซึมผลิตภัณฑ์',
+      ],
+    },
+    'newchae-shot': {
+      tagline: 'อุปกรณ์ความงามส่วนบุคคล 3-in-1',
+      overview: 'NEWCHAE SHOT เป็นอุปกรณ์ความงามสำหรับใช้ที่บ้านที่รวมเทคโนโลยีทางการแพทย์ระดับมืออาชีพไว้ในรูปแบบกะทัดรัดพร้อมการส่งพลังงานหลายช่องสัญญาณ',
+      description: 'ผสมผสาน RF กระชับ, EMS ปรับรูปร่าง และเทคโนโลยี ELP เพิ่มประสิทธิภาพผิว NEWCHAE SHOT มอบผลลัพธ์ระดับคลินิกสำหรับการใช้งานที่บ้าน',
+      keyTechnologies: [
+        {
+          name: 'โหมด RF (กระชับ)',
+          description: 'เทคโนโลยี Multi-Channel RF Stack ส่งความร้อนลึกเข้าสู่ชั้นหนังแท้ กระตุ้นการสร้างคอลลาเจนใหม่',
+        },
+        {
+          name: 'โหมด EMS (V-Line)',
+          description: 'กระตุ้นกล้ามเนื้อด้วยไฟฟ้าสำหรับปรับรูปหน้าและกระชับ',
+        },
+        {
+          name: 'โหมด ELP (Skin Boost)',
+          description: 'เทคโนโลยีอิเล็กโตรโพเรชันเพิ่มการดูดซึมผลิตภัณฑ์ดูแลผิว',
+        },
+      ],
+      clinicalBenefits: [
+        'ความหนาแน่นผิวดีขึ้น 128.48%',
+        'ขนาดรูขุมขนลดลง 26.74%',
+        'ความยืดหยุ่นผิวชั้นนอกและชั้นลึกดีขึ้น',
+        'ผิวเปล่งประกายมากขึ้น',
+      ],
+      differentiators: [
+        {
+          feature: 'ระบบยิงอัตโนมัติ',
+          description: 'เข้มข้นเอาต์พุตพลังงานเพื่อการส่งมอบที่แม่นยำ',
+        },
+        {
+          feature: 'การสั่นสะเทือน 3D',
+          description: 'สั่น 10,000 ครั้ง/นาที เพื่อช่วยการซึมผ่านของพลังงาน',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: 'อุปกรณ์คอนเวอร์เจนซ์รุ่นถัดไป',
+      overview: 'LUMINO WAVE เป็นอุปกรณ์เสริมความงามขั้นสูงที่ออกแบบมาเพื่อเพิ่มประสิทธิภาพการรักษาสูงสุดโดยผสมผสานพลังงานอัลตราซาวด์และเลเซอร์',
+      description: 'ใช้ไมโครบับเบิ้ลที่เกิดจากอัลตราซาวด์เพื่อเพิ่มความลึกในการทะลุผ่านผิวหนังของเลเซอร์ LUMINO WAVE เป็นตัวแทนของวิวัฒนาการรุ่นถัดไปในการบำบัดแบบคอนเวอร์เจนซ์ กำลังอยู่ระหว่างการอนุมัติ MFDS วางแผนเปิดตัวครึ่งหลังปี 2026',
+      keyTechnologies: [
+        {
+          name: 'คอนเวอร์เจนซ์อัลตราซาวด์ + เลเซอร์',
+          description: 'การบำบัดแบบคอนเวอร์เจนซ์ที่การสั่นสะเทือนอัลตราซาวด์และการฉายเลเซอร์เกิดขึ้นพร้อมกัน การกระเจิงของแสงถูกลดให้น้อยที่สุดด้วยเอฟเฟกต์อัลตราซาวด์ ทำให้เลเซอร์เข้าถึงชั้นลึกได้อย่างมีประสิทธิภาพ',
+        },
+      ],
+      clinicalBenefits: [
+        'บรรลุผลการรักษาด้วยกำลัง/พลังงานที่ต่ำกว่า',
+        'ลดการระคายเคืองผิวหนังและผลข้างเคียง',
+        'เพิ่มผลลัพธ์การยกกระชับและการฟื้นฟูสูงสุด',
+        'เพิ่มการทะลุผ่านของเลเซอร์ไปยังชั้นหนังแท้',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
+  // VIETNAMESE (vi)
+  // ═══════════════════════════════════════
+  vi: {
+    'torr-rf': {
+      tagline: 'Trạm Làm Việc RF Đa Sóng Đổi Mới',
+      overview: 'TORR RF là thiết bị y tế không xâm lấn sử dụng công nghệ tần số vô tuyến (RF) đa sóng chuyên biệt để truyền năng lượng nhiệt vào các lớp hạ bì và dưới da.',
+      description: 'Ý nghĩa lâm sàng cốt lõi của TORR RF nằm ở khả năng truyền năng lượng mạnh mẽ nhưng an toàn một cách đồng đều đến độ sâu mong muốn với công suất thấp, ngăn ngừa bỏng bề mặt trong khi tối đa hóa sưởi ấm mô sâu. Đã được FDA 510(k) cấp phép (K212561), được thiết kế cho săn chắc da, tạo hình cơ thể và giảm đau.',
+      keyTechnologies: [
+        {
+          name: 'Đầu Chuyển Động Tròn Tự Động (Đã Cấp Bằng Sáng Chế)',
+          description: 'Đầu tay cầm tự động xoay (68 rpm), tạo trường nhiệt "Toroidal" đảm bảo năng lượng RF phân bố đồng đều không có điểm nóng và giảm mệt mỏi cho người vận hành.',
+        },
+        {
+          name: 'Kiểm Soát Nhiệt Độ Thời Gian Thực',
+          description: 'Cảm biến tích hợp giám sát nhiệt độ da liên tục. Hệ thống tự động ngắt đầu ra RF nếu nhiệt độ vượt quá giới hạn an toàn (điều chỉnh 30°C–50°C), ngăn ngừa bỏng.',
+        },
+        {
+          name: 'Chế Độ Vibro-Comfort',
+          description: 'Công nghệ rung 3D (10.000 lần/phút) giảm thiểu cảm giác nóng thông qua phân tán thần kinh (Lý thuyết Kiểm soát Cổng), mang lại sự thoải mái cho bệnh nhân nhạy cảm với nhiệt.',
+        },
+      ],
+      indications: [
+        'Nâng cơ & Săn chắc da - Truyền năng lượng nhiệt vào lớp hạ bì sâu để kích thích tái tạo collagen',
+        'Tạo hình cơ thể & Cellulite - FDA cấp phép cho giảm tạm thời biểu hiện cellulite',
+        'Mạch máu (Tuần hoàn) - Được cấp phép cho cải thiện tạm thời tuần hoàn máu cục bộ',
+        'Quản lý đau - Giảm đau cơ nhẹ, đau nhức và co thắt cơ',
+      ],
+      specLabels: {
+        'Frequency': 'Tần số',
+        'Max Output Power': 'Công suất đầu ra tối đa',
+        'Operation Modes': 'Chế độ hoạt động',
+        'Treatment Depth': 'Độ sâu điều trị',
+        'Temperature Control': 'Kiểm soát nhiệt độ',
+        'User Interface': 'Giao diện người dùng',
+        'Dimensions': 'Kích thước',
+        'Weight': 'Trọng lượng',
+        'Power': 'Nguồn điện',
+        'Safety Class': 'Cấp an toàn',
+      },
+      specNotes: {
+        'Stable deep heating frequency': 'Tần số sưởi ấm sâu ổn định',
+        'Low power, high efficiency': 'Công suất thấp, hiệu suất cao',
+        'Selectable via GUI': 'Chọn qua GUI',
+        'Adjustable Low/Deep Mode': 'Chế độ Low/Deep có thể điều chỉnh',
+        'Real-time monitoring & Auto-cut off': 'Giám sát thời gian thực & Tự động ngắt',
+        'Intuitive GUI with Preset Memory': 'GUI trực quan với bộ nhớ cài đặt sẵn',
+      },
+      handpieces: [
+        { name: 'Tay cầm lớn (Cơ thể)', feature: 'Chuyển động tròn tự động (68 rpm) cho tạo hình vùng rộng' },
+        { name: 'Tay cầm nhỏ (Mặt)', feature: 'Thiết kế cho săn chắc mặt và tạo hình má' },
+        { name: 'Tay cầm siêu nhỏ (Mắt/Tinh tế)', feature: 'Chăm sóc chính xác cho vùng quanh mắt và nếp nhăn' },
+      ],
+      clinicalBenefits: [
+        'Điều trị không đau với Chế độ Vibro-Comfort',
+        'Truyền năng lượng đồng đều ngăn mệt mỏi người vận hành',
+        'Giám sát an toàn thời gian thực ngăn bỏng',
+        'Không có hộp mực tiêu hao - chi phí vận hành thấp',
+      ],
+      differentiators: [
+        {
+          feature: 'Công nghệ Auto-Motion',
+          description: 'Khác với đầu dò cố định truyền thống, đầu xoay (68 rpm) đảm bảo phân bố năng lượng đồng đều trên vùng điều trị rộng',
+        },
+        {
+          feature: 'Công suất thấp hơn, Hiệu quả cao hơn',
+          description: 'Đạt được sưởi ấm hiệu quả với 55W so với đối thủ cạnh tranh cần đến 150W, tăng cường an toàn',
+        },
+        {
+          feature: 'Tay cầm không tiêu hao',
+          description: 'Tay cầm bền được thiết kế để sử dụng lâu dài mà không cần thay hộp mực đắt tiền',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: 'Trạm Làm Việc Siêu Âm Đa Tần Số',
+      overview: 'ULBLANC là trạm chăm sóc da toàn diện kết hợp siêu âm tần số kép để săn chắc với sóng âm xâm thực để dẫn thuốc qua da.',
+      description: 'Hệ thống cho phép điều trị hiệu quả mà không làm tổn thương bề mặt da, với công nghệ Dynamic Dual Wave cho điều trị cả lớp nông và sâu.',
+      keyTechnologies: [
+        {
+          name: 'Sono-I (Dynamic Dual Wave™)',
+          description: 'Xen kẽ giữa các tần số siêu âm khác nhau để nhắm mục tiêu cả biểu bì và hạ bì. 1/3 MHz cho săn chắc hạ bì sâu, 3/10 MHz cho làm dịu biểu bì.',
+        },
+        {
+          name: 'i-Booster (Siêu âm dẫn thuốc)',
+          description: 'Sử dụng siêu âm 28kHz tạo ra hiện tượng xâm thực âm thanh, mở các đường dẫn vi mô cho việc dẫn truyền hoạt chất sâu qua da.',
+        },
+      ],
+      indications: [
+        'Săn chắc và thắt chặt da',
+        'Giảm nếp nhăn',
+        'Tăng cường hấp thụ hoạt chất',
+        'Làm dịu da (phù hợp cho mụn/đỏ mặt)',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'Tần số Sono-I',
+        'i-Booster Frequency': 'Tần số i-Booster',
+      },
+      specNotes: {
+        'Dual frequency modes': 'Chế độ tần số kép',
+        'For sonophoresis': 'Cho siêu âm dẫn thuốc',
+      },
+      clinicalBenefits: [
+        'Không thời gian nghỉ - Không đau, không nhiễm trùng',
+        'Phù hợp sử dụng hàng ngày',
+        'Phạm vi điều trị đa dạng từ làm dịu đến nâng cơ',
+        'Tăng hiệu suất hấp thụ sản phẩm',
+      ],
+    },
+    'newchae-shot': {
+      tagline: 'Thiết Bị Làm Đẹp Cá Nhân 3-trong-1',
+      overview: 'NEWCHAE SHOT là thiết bị làm đẹp tại nhà tích hợp công nghệ y tế cấp chuyên nghiệp trong thiết kế nhỏ gọn với khả năng truyền năng lượng đa kênh.',
+      description: 'Kết hợp công nghệ RF săn chắc, EMS tạo hình và ELP tăng cường da, NEWCHAE SHOT mang đến kết quả cấp lâm sàng tại nhà.',
+      keyTechnologies: [
+        {
+          name: 'Chế độ RF (Săn chắc)',
+          description: 'Công nghệ Multi-Channel RF Stack truyền nhiệt sâu vào lớp hạ bì, thúc đẩy tái tạo collagen.',
+        },
+        {
+          name: 'Chế độ EMS (V-Line)',
+          description: 'Kích thích cơ bằng điện cho tạo hình và săn chắc khuôn mặt.',
+        },
+        {
+          name: 'Chế độ ELP (Skin Boost)',
+          description: 'Công nghệ điện chuyển nang tăng cường hấp thụ sản phẩm chăm sóc da.',
+        },
+      ],
+      clinicalBenefits: [
+        'Mật độ da cải thiện 128,48%',
+        'Kích thước lỗ chân lông giảm 26,74%',
+        'Cải thiện độ đàn hồi bề mặt và sâu',
+        'Tăng cường độ rạng rỡ của da',
+      ],
+      differentiators: [
+        {
+          feature: 'Hệ thống bắn tự động',
+          description: 'Tập trung đầu ra năng lượng để truyền chính xác',
+        },
+        {
+          feature: 'Rung 3D',
+          description: 'Rung 10.000 lần/phút hỗ trợ thẩm thấu năng lượng',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: 'Thiết Bị Hội Tụ Thế Hệ Mới',
+      overview: 'LUMINO WAVE là thiết bị thẩm mỹ tiên tiến được thiết kế để tối đa hóa hiệu quả điều trị bằng cách kết hợp năng lượng siêu âm và laser.',
+      description: 'Sử dụng vi bọt do siêu âm tạo ra để tăng cường độ sâu xâm nhập của laser vào da, LUMINO WAVE đại diện cho sự tiến hóa tiếp theo trong liệu pháp hội tụ. Đang trong quá trình phê duyệt MFDS, dự kiến ra mắt nửa cuối 2026.',
+      keyTechnologies: [
+        {
+          name: 'Hội tụ Siêu âm + Laser',
+          description: 'Liệu pháp hội tụ trong đó dao động siêu âm và chiếu laser xảy ra đồng thời. Tán xạ ánh sáng được giảm thiểu nhờ hiệu ứng siêu âm, cho phép laser đến các lớp sâu hơn hiệu quả hơn.',
+        },
+      ],
+      clinicalBenefits: [
+        'Đạt kết quả điều trị với công suất/năng lượng thấp hơn',
+        'Giảm thiểu kích ứng da và tác dụng phụ',
+        'Tối đa hóa hiệu ứng nâng cơ và tái tạo',
+        'Tăng cường xâm nhập laser đến các lớp hạ bì',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
+  // ARABIC (ar)
+  // ═══════════════════════════════════════
+  ar: {
+    'torr-rf': {
+      tagline: 'محطة عمل RF متعددة الموجات مبتكرة',
+      overview: 'TORR RF هو جهاز طبي غير جراحي يستخدم تقنية الترددات الراديوية (RF) متعددة الموجات المتخصصة لتوصيل الطاقة الحرارية إلى طبقات الأدمة وتحت الجلد.',
+      description: 'تكمن الأهمية السريرية الأساسية لـ TORR RF في قدرته على توصيل طاقة قوية وآمنة بشكل موحد إلى العمق المطلوب باستخدام طاقة منخفضة، مع منع حروق السطح وتعظيم تسخين الأنسجة العميقة. حاصل على تصريح FDA 510(k) (K212561)، مصمم لشد الجلد ونحت الجسم وتخفيف الألم.',
+      keyTechnologies: [
+        {
+          name: 'رأس الحركة الدائرية التلقائية (حاصل على براءة اختراع)',
+          description: 'يدور رأس القبضة تلقائياً (68 دورة/دقيقة)، مما يخلق حقلاً حرارياً "حلقياً" يضمن توزيع طاقة RF بشكل موحد بدون نقاط ساخنة ويقلل إرهاق المشغل.',
+        },
+        {
+          name: 'التحكم بدرجة الحرارة في الوقت الفعلي',
+          description: 'تراقب المستشعرات المدمجة درجة حرارة الجلد باستمرار. يقطع النظام تلقائياً خرج RF إذا تجاوزت درجة الحرارة حد الأمان (قابل للتعديل 30°C-50°C)، مما يمنع الحروق.',
+        },
+        {
+          name: 'وضع الراحة الاهتزازية',
+          description: 'تقنية الاهتزاز ثلاثي الأبعاد (10,000 مرة/دقيقة) تخفف الإحساس بالحرارة من خلال التشتيت العصبي (نظرية التحكم بالبوابة)، مما يجعل العلاجات مريحة للمرضى.',
+        },
+      ],
+      indications: [
+        'الرفع وشد الجلد - توصيل الطاقة الحرارية إلى الأدمة العميقة لتحفيز إعادة تشكيل الكولاجين',
+        'نحت الجسم والسيلوليت - معتمد من FDA للتقليل المؤقت لمظهر السيلوليت',
+        'الأوعية الدموية (الدورة الدموية) - معتمد للتحسين المؤقت للدورة الدموية المحلية',
+        'إدارة الألم - تخفيف آلام العضلات البسيطة والتشنجات',
+      ],
+      specLabels: {
+        'Frequency': 'التردد',
+        'Max Output Power': 'أقصى طاقة خرج',
+        'Operation Modes': 'أوضاع التشغيل',
+        'Treatment Depth': 'عمق العلاج',
+        'Temperature Control': 'التحكم بدرجة الحرارة',
+        'User Interface': 'واجهة المستخدم',
+        'Dimensions': 'الأبعاد',
+        'Weight': 'الوزن',
+        'Power': 'الطاقة',
+        'Safety Class': 'فئة الأمان',
+      },
+      specNotes: {
+        'Stable deep heating frequency': 'تردد تسخين عميق مستقر',
+        'Low power, high efficiency': 'طاقة منخفضة، كفاءة عالية',
+        'Selectable via GUI': 'قابل للاختيار عبر واجهة المستخدم',
+        'Adjustable Low/Deep Mode': 'وضع Low/Deep قابل للتعديل',
+        'Real-time monitoring & Auto-cut off': 'مراقبة فورية وقطع تلقائي',
+        'Intuitive GUI with Preset Memory': 'واجهة بديهية مع ذاكرة إعدادات مسبقة',
+      },
+      handpieces: [
+        { name: 'القبضة الكبيرة (الجسم)', feature: 'حركة دائرية تلقائية (68 دورة/دقيقة) لنحت المناطق الكبيرة' },
+        { name: 'القبضة الصغيرة (الوجه)', feature: 'مصممة لشد الوجه ونحت الخدين' },
+        { name: 'القبضة الدقيقة (العين/المناطق الحساسة)', feature: 'عناية دقيقة لمنطقة حول العين والتجاعيد' },
+      ],
+      clinicalBenefits: [
+        'علاجات بدون ألم مع وضع الراحة الاهتزازية',
+        'توصيل طاقة موحد يمنع إرهاق المشغل',
+        'مراقبة أمان فورية تمنع الحروق',
+        'بدون خراطيش استهلاكية - تكاليف تشغيل منخفضة',
+      ],
+      differentiators: [
+        {
+          feature: 'تقنية الحركة التلقائية',
+          description: 'على عكس المطبقات الثابتة التقليدية، يضمن الرأس الدوار (68 دورة/دقيقة) توزيع طاقة موحد عبر مناطق العلاج الواسعة',
+        },
+        {
+          feature: 'طاقة أقل، فعالية أعلى',
+          description: 'يحقق تسخيناً فعالاً بـ 55 واط مقارنة بالمنافسين الذين يحتاجون حتى 150 واط',
+        },
+        {
+          feature: 'قبضات غير استهلاكية',
+          description: 'قبضات متينة مصممة للاستخدام طويل المدى بدون استبدال خراطيش مكلفة',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: 'محطة عمل الموجات فوق الصوتية متعددة الترددات',
+      overview: 'ULBLANC هي محطة عمل شاملة للعناية بالبشرة تجمع بين الموجات فوق الصوتية ثنائية التردد للشد والتجويف الصوتي لتوصيل الأدوية عبر الجلد.',
+      description: 'يتيح النظام علاجاً فعالاً دون الإضرار بسطح الجلد، مع تقنية Dynamic Dual Wave لعلاج كل من البشرة السطحية والأنسجة العميقة.',
+      keyTechnologies: [
+        {
+          name: 'Sono-I (Dynamic Dual Wave™)',
+          description: 'يتناوب بين ترددات الموجات فوق الصوتية المختلفة لاستهداف كل من البشرة والأدمة. 1/3 MHz لشد الأدمة العميقة، 3/10 MHz لتهدئة البشرة.',
+        },
+        {
+          name: 'i-Booster (الإدخال بالموجات فوق الصوتية)',
+          description: 'يستخدم الموجات فوق الصوتية 28kHz لتوليد التجويف الصوتي، فتح ممرات دقيقة لتوصيل المكونات الفعالة عبر الجلد.',
+        },
+      ],
+      indications: [
+        'شد وتثبيت الجلد',
+        'تقليل التجاعيد',
+        'تعزيز امتصاص المكونات الفعالة',
+        'تهدئة البشرة (مناسب لحب الشباب/الاحمرار)',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'تردد Sono-I',
+        'i-Booster Frequency': 'تردد i-Booster',
+      },
+      specNotes: {
+        'Dual frequency modes': 'أوضاع تردد مزدوج',
+        'For sonophoresis': 'للإدخال بالموجات فوق الصوتية',
+      },
+      clinicalBenefits: [
+        'بدون فترة توقف - بدون ألم، بدون عدوى',
+        'مناسب للاستخدام اليومي',
+        'نطاق علاج متعدد من التهدئة إلى الرفع',
+        'تحسين كفاءة امتصاص المنتجات',
+      ],
+    },
+    'newchae-shot': {
+      tagline: 'جهاز تجميل شخصي 3 في 1',
+      overview: 'NEWCHAE SHOT هو جهاز تجميل منزلي يدمج تقنيات طبية احترافية في تصميم مدمج مع توصيل طاقة متعدد القنوات.',
+      description: 'يجمع بين تقنية RF للشد وEMS للنحت وELP لتعزيز البشرة، يقدم NEWCHAE SHOT نتائج بمستوى العيادات للاستخدام المنزلي.',
+      keyTechnologies: [
+        {
+          name: 'وضع RF (الشد)',
+          description: 'تقنية Multi-Channel RF Stack توصل الحرارة عميقاً في الأدمة لتعزيز تجديد الكولاجين.',
+        },
+        {
+          name: 'وضع EMS (V-Line)',
+          description: 'التحفيز الكهربائي للعضلات لنحت الوجه والشد.',
+        },
+        {
+          name: 'وضع ELP (تعزيز البشرة)',
+          description: 'تقنية الإدخال الكهربائي تعزز امتصاص منتجات العناية بالبشرة.',
+        },
+      ],
+      clinicalBenefits: [
+        'تحسن كثافة البشرة بنسبة 128.48%',
+        'تقليل حجم المسام بنسبة 26.74%',
+        'تحسن مرونة السطح والعمق',
+        'تعزيز إشراقة البشرة',
+      ],
+      differentiators: [
+        {
+          feature: 'نظام الإطلاق التلقائي',
+          description: 'يركز خرج الطاقة للتوصيل الدقيق',
+        },
+        {
+          feature: 'اهتزاز ثلاثي الأبعاد',
+          description: 'يهتز 10,000 مرة/دقيقة لمساعدة اختراق الطاقة',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: 'جهاز الدمج من الجيل القادم',
+      overview: 'LUMINO WAVE هو جهاز تجميلي متقدم مصمم لتعظيم فعالية العلاج من خلال الجمع بين طاقة الموجات فوق الصوتية والليزر.',
+      description: 'باستخدام الفقاعات الدقيقة المستحثة بالموجات فوق الصوتية لتعزيز عمق اختراق الليزر للجلد، يمثل LUMINO WAVE التطور القادم في العلاج بالدمج. حالياً قيد مراجعة MFDS مع إطلاق مخطط في النصف الثاني من 2026.',
+      keyTechnologies: [
+        {
+          name: 'دمج الموجات فوق الصوتية + الليزر',
+          description: 'علاج بالدمج حيث يحدث اهتزاز الموجات فوق الصوتية وإشعاع الليزر في وقت واحد. يتم تقليل تشتت الضوء بتأثير الموجات فوق الصوتية، مما يسمح لليزر بالوصول إلى طبقات أعمق بكفاءة.',
+        },
+      ],
+      clinicalBenefits: [
+        'تحقيق نتائج علاجية بطاقة أقل',
+        'تقليل تهيج الجلد والآثار الجانبية',
+        'تعظيم تأثيرات الرفع والتجديد',
+        'تعزيز اختراق الليزر لطبقات الأدمة',
+      ],
+    },
+  },
+};
+
+/**
+ * Get product translation for a given language and product ID.
+ * Returns undefined for English (use original product data).
+ * Returns undefined if translation not found (fallback to English).
+ */
+export function getProductTranslation(lang: string, productId: string): ProductTranslation | undefined {
+  if (lang === 'en') return undefined;
+  return translations[lang]?.[productId];
+}
