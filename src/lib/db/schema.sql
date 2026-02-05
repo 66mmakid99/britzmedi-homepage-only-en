@@ -65,6 +65,19 @@ CREATE TABLE IF NOT EXISTS lead_score_history (
   FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
 );
 
+-- Resource download tracking
+CREATE TABLE IF NOT EXISTS resource_downloads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  resource_id TEXT NOT NULL,
+  resource_title TEXT NOT NULL,
+  resource_category TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  referer TEXT,
+  country TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 -- Indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
@@ -72,3 +85,6 @@ CREATE INDEX IF NOT EXISTS idx_leads_country ON leads(country);
 CREATE INDEX IF NOT EXISTS idx_leads_score ON leads(lead_score DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activities_lead ON lead_activities(lead_id);
+CREATE INDEX IF NOT EXISTS idx_downloads_resource ON resource_downloads(resource_id);
+CREATE INDEX IF NOT EXISTS idx_downloads_created ON resource_downloads(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_downloads_country ON resource_downloads(country);

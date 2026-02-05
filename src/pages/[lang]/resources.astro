@@ -159,7 +159,10 @@ const typeColors: Record<string, string> = {
                 href={resource.driveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
+                class="resource-download-btn flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
+                data-resource-id={resource.id}
+                data-resource-title={resource.title}
+                data-resource-category={resource.category}
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -250,6 +253,23 @@ const typeColors: Record<string, string> = {
     firstButton.classList.add('bg-primary-100', 'text-primary-700');
     firstButton.classList.remove('text-slate-600');
   }
+
+  // Download tracking - fire-and-forget
+  document.querySelectorAll('.resource-download-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const el = btn as HTMLElement;
+      const body = JSON.stringify({
+        resource_id: el.dataset.resourceId,
+        resource_title: el.dataset.resourceTitle,
+        resource_category: el.dataset.resourceCategory,
+      });
+      fetch('/api/resources/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      }).catch(() => {});
+    });
+  });
 </script>
 
 <style>
