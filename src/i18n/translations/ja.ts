@@ -235,6 +235,12 @@ export const ja: TranslationKeys = {
   faq: {
     title: 'よくある質問',
     subtitle: 'よくある質問への回答をご覧ください',
+    heroLabel: 'サポート',
+    heroDescription: '製品、会社、注文プロセス、技術サポート、認証に関するよくある質問の回答をご覧ください。',
+    stillHaveQuestions: 'まだご質問がありますか？',
+    stillHaveQuestionsDesc: 'お探しの回答が見つかりませんか？私たちのチームがお手伝いします。お問い合わせいただければ、1-2営業日以内にご連絡いたします。',
+    contactUs: 'お問い合わせ',
+    emailUs: 'メールで問い合わせ',
     categories: {
       products: '製品',
       company: '会社',
@@ -242,6 +248,95 @@ export const ja: TranslationKeys = {
       technical: '技術サポート',
       certifications: '認証',
     },
+  },
+
+  // Certifications page
+  certifications: {
+    title: '認証',
+    subtitle: '品質と規制状況',
+    heroLabel: '品質とコンプライアンス',
+    heroTitle1: '認証 &',
+    heroTitle2: '規制状況',
+    qualityTitle: '品質・規制認証',
+    qualitySubtitle: '当社の包括的な認証は、品質と患者安全への取り組みを示しています。',
+    technicalLabel: 'コンプライアンス',
+    technicalTitle: '技術安全規格',
+    technicalSubtitle: '当社の機器は、FDA 510(k)およびMFDS審査プロセスで検証された厳格な国際安全基準を満たすよう設計・試験されています。',
+    powerRequirements: '電力要件',
+    voltage: '電圧',
+    protectionClass: '保護クラス',
+    roadmapLabel: 'グローバル展開',
+    roadmapTitle: '規制ロードマップ',
+    roadmapSubtitle: 'BRITZMEDI製品を世界市場に展開するための継続的な取り組み。',
+    tableRegion: '地域 / 機関',
+    tableProduct: '製品',
+    tableStatus: 'ステータス',
+    tableNotes: '備考',
+    fdaNote: 'FDA承認に関する重要なお知らせ',
+    ctaTitle: '認証書類が必要ですか？',
+    ctaSubtitle: '証明書のコピー、試験報告書、または詳細な規制情報をリクエストするには、お問い合わせください。',
+    ctaRequest: '書類をリクエスト',
+    ctaViewProducts: '製品を見る',
+    status: {
+      certified: '認証済み',
+      cleared: '承認済み',
+      registered: '登録済み',
+      inPreparation: '準備中',
+      planned: '計画中',
+    },
+    certificateNo: '証明書番号',
+    validUntil: '有効期限',
+    products: '製品:',
+  },
+
+  // Resources page
+  resources: {
+    title: 'リソース',
+    subtitle: 'リソースセンター',
+    heroLabel: 'ダウンロード',
+    heroDescription: '製品パンフレット、技術文書、マーケティング資料、証明書、ビデオにアクセスできます。すべてのリソースがダウンロード可能です。',
+    allResources: 'すべてのリソース',
+    download: 'ダウンロード',
+    noResults: 'リソースが見つかりません',
+    noResultsDesc: '別のカテゴリを選択してください。',
+    ctaTitle: '追加資料が必要ですか？',
+    ctaSubtitle: '特定の文書、カスタムプレゼンテーション、またはローカライズされた資料をお探しですか？チームにお問い合わせいただければ、必要な資料を準備いたします。',
+    ctaRequest: '資料をリクエスト',
+  },
+
+  // Privacy page
+  privacy: {
+    title: 'プライバシーポリシー',
+    heroLabel: '法的情報',
+    lastUpdated: '最終更新: 2025年1月',
+    intro: {
+      title: 'はじめに',
+      p1: 'BRITZMEDI株式会社（以下「当社」）は、britzmedi.comウェブサイトおよび関連サービスを運営しています。このプライバシーポリシーは、当社のウェブサイトを訪問し、サービスを利用する際に収集、使用、開示、保護する情報について説明しています。',
+      p2: 'このプライバシーポリシーをよくお読みください。当社のポリシーおよび慣行に同意されない場合は、サービスを利用しないでください。',
+    },
+    collection: {
+      title: '1. 収集する情報',
+      personalTitle: 'お客様が提供する個人情報',
+      personalDesc: '以下を含む、自発的に提供される個人情報を収集する場合があります:',
+      autoTitle: '自動収集情報',
+      autoDesc: 'ウェブサイト訪問時に、以下の情報が自動的に収集されます:',
+    },
+    contactTitle: 'お問い合わせ',
+    contactDesc: 'このプライバシーポリシーまたは当社のプライバシー慣行についてご質問がある場合は、お問い合わせください:',
+  },
+
+  // Terms page
+  terms: {
+    title: '利用規約',
+    heroLabel: '法的情報',
+    lastUpdated: '最終更新: 2025年1月',
+    intro: {
+      title: 'はじめに',
+      p1: 'この利用規約（以下「本規約」）は、BRITZMEDI株式会社（以下「当社」）が提供するbritzmedi.comウェブサイトおよびすべての関連サービス、コンテンツ、製品へのアクセスおよび使用を規定します。',
+      p2: 'ウェブサイトにアクセスし使用することで、お客様は本規約に同意したものとみなされます。本規約に同意されない場合は、ウェブサイトまたはサービスを利用しないでください。',
+    },
+    contactTitle: 'お問い合わせ',
+    contactDesc: 'この利用規約についてご質問がある場合、または違反を報告する場合は、お問い合わせください:',
   },
 
   // Footer

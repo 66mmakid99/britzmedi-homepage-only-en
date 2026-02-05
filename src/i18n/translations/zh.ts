@@ -235,6 +235,12 @@ export const zh: TranslationKeys = {
   faq: {
     title: '常见问题',
     subtitle: '查找常见问题的答案',
+    heroLabel: '支持',
+    heroDescription: '查找关于我们产品、公司、订购流程、技术支持和认证的常见问题解答。',
+    stillHaveQuestions: '还有其他问题吗？',
+    stillHaveQuestionsDesc: '找不到您要找的答案？我们的团队随时为您提供帮助。联系我们，我们将在1-2个工作日内回复您。',
+    contactUs: '联系我们',
+    emailUs: '发送邮件',
     categories: {
       products: '产品',
       company: '公司',
@@ -242,6 +248,95 @@ export const zh: TranslationKeys = {
       technical: '技术支持',
       certifications: '认证',
     },
+  },
+
+  // Certifications page
+  certifications: {
+    title: '认证',
+    subtitle: '质量与法规状态',
+    heroLabel: '质量与合规',
+    heroTitle1: '认证 &',
+    heroTitle2: '法规状态',
+    qualityTitle: '质量与法规认证',
+    qualitySubtitle: '我们的综合认证展示了对质量和患者安全的承诺。',
+    technicalLabel: '合规',
+    technicalTitle: '技术安全标准',
+    technicalSubtitle: '我们的设备经过设计和测试，符合FDA 510(k)和MFDS审查过程中验证的严格国际安全标准。',
+    powerRequirements: '电源要求',
+    voltage: '电压',
+    protectionClass: '保护等级',
+    roadmapLabel: '全球扩展',
+    roadmapTitle: '法规路线图',
+    roadmapSubtitle: '我们正在努力将BRITZMEDI产品推向全球市场。',
+    tableRegion: '地区 / 机构',
+    tableProduct: '产品',
+    tableStatus: '状态',
+    tableNotes: '备注',
+    fdaNote: '关于FDA批准的重要说明',
+    ctaTitle: '需要认证文件吗？',
+    ctaSubtitle: '请联系我们索取证书副本、测试报告或详细的法规信息。',
+    ctaRequest: '申请文件',
+    ctaViewProducts: '查看产品',
+    status: {
+      certified: '已认证',
+      cleared: '已批准',
+      registered: '已注册',
+      inPreparation: '准备中',
+      planned: '计划中',
+    },
+    certificateNo: '证书编号',
+    validUntil: '有效期至',
+    products: '产品:',
+  },
+
+  // Resources page
+  resources: {
+    title: '资源',
+    subtitle: '资源中心',
+    heroLabel: '下载',
+    heroDescription: '访问产品手册、技术文档、营销材料、证书和视频。所有资源均可下载。',
+    allResources: '所有资源',
+    download: '下载',
+    noResults: '未找到资源',
+    noResultsDesc: '请尝试选择其他类别。',
+    ctaTitle: '需要其他材料吗？',
+    ctaSubtitle: '正在寻找特定文档、定制演示文稿或本地化材料？请联系我们的团队，我们将为您准备所需的资源。',
+    ctaRequest: '申请材料',
+  },
+
+  // Privacy page
+  privacy: {
+    title: '隐私政策',
+    heroLabel: '法律',
+    lastUpdated: '最后更新：2025年1月',
+    intro: {
+      title: '引言',
+      p1: 'BRITZMEDI株式会社（以下简称"公司"、"我们"）运营britzmedi.com网站及相关服务。本隐私政策说明了当您访问我们的网站和使用我们的服务时，我们如何收集、使用、披露和保护您的信息。',
+      p2: '请仔细阅读本隐私政策。如果您不同意我们的政策和做法，请不要使用我们的服务。',
+    },
+    collection: {
+      title: '1. 我们收集的信息',
+      personalTitle: '您提供的个人信息',
+      personalDesc: '我们可能会收集您自愿提供的个人信息，包括：',
+      autoTitle: '自动收集的信息',
+      autoDesc: '当您访问我们的网站时，我们会自动收集以下信息：',
+    },
+    contactTitle: '联系信息',
+    contactDesc: '如果您对本隐私政策或我们的隐私做法有任何疑问，请联系我们：',
+  },
+
+  // Terms page
+  terms: {
+    title: '服务条款',
+    heroLabel: '法律',
+    lastUpdated: '最后更新：2025年1月',
+    intro: {
+      title: '引言',
+      p1: '本服务条款（以下简称"条款"）规定您对BRITZMEDI株式会社（以下简称"公司"、"我们"）提供的britzmedi.com网站及所有相关服务、内容和产品的访问和使用。',
+      p2: '通过访问和使用我们的网站，即表示您同意受本条款的约束。如果您不同意本条款，请不要使用我们的网站或服务。',
+    },
+    contactTitle: '联系信息',
+    contactDesc: '如果您对本服务条款有任何疑问或需要报告违规行为，请联系我们：',
   },
 
   // Footer

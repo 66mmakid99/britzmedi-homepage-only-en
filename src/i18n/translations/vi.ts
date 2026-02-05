@@ -235,6 +235,12 @@ export const vi: TranslationKeys = {
   faq: {
     title: 'Câu hỏi thường gặp',
     subtitle: 'Tìm câu trả lời cho các câu hỏi thường gặp',
+    heroLabel: 'Hỗ trợ',
+    heroDescription: 'Tìm câu trả lời cho các câu hỏi thường gặp về sản phẩm, công ty, quy trình đặt hàng, hỗ trợ kỹ thuật và chứng nhận của chúng tôi.',
+    stillHaveQuestions: 'Vẫn còn thắc mắc?',
+    stillHaveQuestionsDesc: 'Không tìm thấy những gì bạn đang tìm kiếm? Đội ngũ của chúng tôi sẵn sàng hỗ trợ. Liên hệ với chúng tôi và chúng tôi sẽ phản hồi trong vòng 1-2 ngày làm việc.',
+    contactUs: 'Liên hệ với chúng tôi',
+    emailUs: 'Gửi email cho chúng tôi',
     categories: {
       products: 'Sản phẩm',
       company: 'Công ty',
@@ -242,6 +248,95 @@ export const vi: TranslationKeys = {
       technical: 'Hỗ trợ kỹ thuật',
       certifications: 'Chứng nhận',
     },
+  },
+
+  // Certifications page
+  certifications: {
+    title: 'Chứng nhận',
+    subtitle: 'Chất lượng & Tình trạng pháp quy',
+    heroLabel: 'Chất lượng & Tuân thủ',
+    heroTitle1: 'Chứng nhận &',
+    heroTitle2: 'Tình trạng pháp quy',
+    qualityTitle: 'Chứng nhận chất lượng & pháp quy',
+    qualitySubtitle: 'Các chứng nhận toàn diện của chúng tôi thể hiện cam kết về chất lượng và an toàn cho bệnh nhân.',
+    technicalLabel: 'Tuân thủ',
+    technicalTitle: 'Tiêu chuẩn an toàn kỹ thuật',
+    technicalSubtitle: 'Các thiết bị của chúng tôi được thiết kế và thử nghiệm để đáp ứng các tiêu chuẩn an toàn quốc tế nghiêm ngặt, như đã được xác minh trong quá trình đánh giá FDA 510(k) và MFDS.',
+    powerRequirements: 'Yêu cầu nguồn điện',
+    voltage: 'Điện áp',
+    protectionClass: 'Cấp bảo vệ',
+    roadmapLabel: 'Mở rộng toàn cầu',
+    roadmapTitle: 'Lộ trình pháp quy',
+    roadmapSubtitle: 'Nỗ lực không ngừng của chúng tôi để đưa sản phẩm BRITZMEDI ra thị trường toàn cầu.',
+    tableRegion: 'Khu vực / Cơ quan',
+    tableProduct: 'Sản phẩm',
+    tableStatus: 'Trạng thái',
+    tableNotes: 'Ghi chú',
+    fdaNote: 'Lưu ý quan trọng về phê duyệt FDA',
+    ctaTitle: 'Cần tài liệu chứng nhận?',
+    ctaSubtitle: 'Liên hệ với chúng tôi để yêu cầu bản sao chứng chỉ, báo cáo thử nghiệm hoặc thông tin pháp quy chi tiết.',
+    ctaRequest: 'Yêu cầu tài liệu',
+    ctaViewProducts: 'Xem sản phẩm',
+    status: {
+      certified: 'Đã chứng nhận',
+      cleared: 'Đã phê duyệt',
+      registered: 'Đã đăng ký',
+      inPreparation: 'Đang chuẩn bị',
+      planned: 'Đã lên kế hoạch',
+    },
+    certificateNo: 'Số chứng chỉ',
+    validUntil: 'Có hiệu lực đến',
+    products: 'Sản phẩm:',
+  },
+
+  // Resources page
+  resources: {
+    title: 'Tài nguyên',
+    subtitle: 'Trung tâm tài nguyên',
+    heroLabel: 'Tải xuống',
+    heroDescription: 'Truy cập brochure sản phẩm, tài liệu kỹ thuật, tài liệu tiếp thị, chứng chỉ và video. Tất cả tài nguyên đều có sẵn để tải xuống.',
+    allResources: 'Tất cả tài nguyên',
+    download: 'Tải xuống',
+    noResults: 'Không tìm thấy tài nguyên',
+    noResultsDesc: 'Hãy thử chọn danh mục khác.',
+    ctaTitle: 'Cần tài liệu bổ sung?',
+    ctaSubtitle: 'Đang tìm kiếm tài liệu cụ thể, bản trình bày tùy chỉnh hoặc tài liệu bản địa hóa? Liên hệ với đội ngũ của chúng tôi và chúng tôi sẽ chuẩn bị các tài nguyên bạn cần.',
+    ctaRequest: 'Yêu cầu tài liệu',
+  },
+
+  // Privacy page
+  privacy: {
+    title: 'Chính sách bảo mật',
+    heroLabel: 'Pháp lý',
+    lastUpdated: 'Cập nhật lần cuối: Tháng 1 năm 2025',
+    intro: {
+      title: 'Giới thiệu',
+      p1: 'BRITZMEDI Co., Ltd. ("Công ty", "chúng tôi") vận hành trang web britzmedi.com và các dịch vụ liên quan. Chính sách bảo mật này giải thích cách chúng tôi thu thập, sử dụng, tiết lộ và bảo vệ thông tin của bạn khi bạn truy cập trang web và sử dụng dịch vụ của chúng tôi.',
+      p2: 'Vui lòng đọc kỹ Chính sách bảo mật này. Nếu bạn không đồng ý với các chính sách và thông lệ của chúng tôi, vui lòng không sử dụng dịch vụ của chúng tôi.',
+    },
+    collection: {
+      title: '1. Thông tin chúng tôi thu thập',
+      personalTitle: 'Thông tin cá nhân bạn cung cấp',
+      personalDesc: 'Chúng tôi có thể thu thập thông tin cá nhân mà bạn tự nguyện cung cấp, bao gồm:',
+      autoTitle: 'Thông tin thu thập tự động',
+      autoDesc: 'Khi bạn truy cập trang web của chúng tôi, chúng tôi tự động thu thập một số thông tin nhất định:',
+    },
+    contactTitle: 'Thông tin liên hệ',
+    contactDesc: 'Nếu bạn có câu hỏi về Chính sách bảo mật này hoặc các thông lệ bảo mật của chúng tôi, vui lòng liên hệ với chúng tôi:',
+  },
+
+  // Terms page
+  terms: {
+    title: 'Điều khoản dịch vụ',
+    heroLabel: 'Pháp lý',
+    lastUpdated: 'Cập nhật lần cuối: Tháng 1 năm 2025',
+    intro: {
+      title: 'Giới thiệu',
+      p1: 'Các Điều khoản dịch vụ này ("Điều khoản") chi phối quyền truy cập và sử dụng của bạn đối với trang web britzmedi.com và tất cả các dịch vụ, nội dung và sản phẩm liên quan do BRITZMEDI Co., Ltd. ("Công ty", "chúng tôi") cung cấp.',
+      p2: 'Bằng cách truy cập và sử dụng trang web của chúng tôi, bạn đồng ý bị ràng buộc bởi các Điều khoản này. Nếu bạn không đồng ý với các Điều khoản này, vui lòng không sử dụng trang web hoặc dịch vụ của chúng tôi.',
+    },
+    contactTitle: 'Thông tin liên hệ',
+    contactDesc: 'Nếu bạn có câu hỏi về các Điều khoản dịch vụ này hoặc cần báo cáo vi phạm, vui lòng liên hệ với chúng tôi:',
   },
 
   // Footer

@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supportedLanguages, defaultLang, type Language } from '../../i18n/config';
+import { useTranslations } from '../../i18n';
+
+export function getStaticPaths() {
+  return supportedLanguages
+    .filter(lang => lang !== defaultLang)
+    .map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params as { lang: Language };
+const t = useTranslations(lang);
+
+const pageDescription = t('terms.intro.p1');
+---
+
+<BaseLayout
+  title={t('terms.title')}
+  description={pageDescription}
+  keywords={["terms of service", "terms and conditions", "BRITZMEDI", "legal", "user agreement"]}
+>
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
+    <div class="container">
+      <div class="max-w-3xl">
+        <span class="label mb-3 block">{t('terms.heroLabel')}</span>
+        <h1 class="heading-1 mb-6">
+          {t('terms.title').split(' ').slice(0, -1).join(' ')}<br />
+          <span class="text-primary-600">{t('terms.title').split(' ').slice(-1)[0]}</span>
+        </h1>
+        <p class="body-large text-slate-600">
+          {t('terms.lastUpdated')}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Terms of Service Content -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="max-w-3xl">
+        <!-- Introduction -->
+        <div class="mb-12">
+          <h2 class="heading-2 mb-4">{t('terms.intro.title')}</h2>
+          <p class="body-base mb-4">
+            {t('terms.intro.p1')}
+          </p>
+          <p class="body-base">
+            {t('terms.intro.p2')}
+          </p>
+        </div>
+
+        <!-- Acceptance of Terms -->
+        <div class="mb-12">
+          <h2 class="heading-2 mb-4">1. {lang === 'ko' ? '약관의 동의' :
+            lang === 'ja' ? '利用規約への同意' :
+            lang === 'zh' ? '条款的接受' :
+            lang === 'th' ? 'การยอมรับข้อกำหนด' :
+            lang === 'vi' ? 'Chấp nhận điều khoản' :
+            lang === 'es' ? 'Aceptación de Términos' :
+            lang === 'ar' ? 'قبول الشروط' :
+            'Acceptance of Terms'}</h2>
+          <p class="body-base mb-4">
+            {lang === 'ko' ? '웹사이트에 접근함으로써 귀하는 본 이용약관과 개인정보처리방침을 읽고, 이해하고, 동의한 것으로 인정됩니다. 본 약관의 어느 부분에도 동의하지 않으시면 웹사이트 사용을 즉시 중단해야 합니다.' :
+             lang === 'ja' ? 'ウェブサイトにアクセスすることで、お客様は本利用規約およびプライバシーポリシーを読み、理解し、同意したものとみなされます。本規約のいずれかの部分に同意されない場合は、直ちにウェブサイトの使用を中止してください。' :
+             lang === 'zh' ? '通过访问我们的网站，即表示您确认已阅读、理解并同意受本服务条款和隐私政策的约束。如果您不同意本条款的任何部分，您必须立即停止使用我们的网站。' :
+             lang === 'th' ? 'โดยการเข้าถึงเว็บไซต์ของเรา คุณยอมรับว่าคุณได้อ่าน เข้าใจ และยอมรับที่จะผูกพันตามข้อกำหนดในการให้บริการเหล่านี้และนโยบายความเป็นส่วนตัวของเรา หากคุณไม่เห็นด้วยกับส่วนใดส่วนหนึ่งของข้อกำหนดเหล่านี้ คุณต้องหยุดใช้งานเว็บไซต์ของเราทันที' :
+             lang === 'vi' ? 'Bằng cách truy cập trang web của chúng tôi, bạn xác nhận rằng bạn đã đọc, hiểu và đồng ý bị ràng buộc bởi các Điều khoản dịch vụ này và Chính sách bảo mật của chúng tôi. Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản này, bạn phải ngừng sử dụng trang web của chúng tôi ngay lập tức.' :
+             lang === 'es' ? 'Al acceder a nuestro sitio web, reconoce que ha leído, entendido y acepta estar obligado por estos Términos de Servicio y nuestra Política de Privacidad. Si no está de acuerdo con alguna parte de estos términos, debe dejar de usar nuestro sitio web inmediatamente.' :
+             lang === 'ar' ? 'بالوصول إلى موقعنا الإلكتروني، فإنك تقر بأنك قد قرأت وفهمت ووافقت على الالتزام بشروط الخدمة هذه وسياسة الخصوصية الخاصة بنا. إذا كنت لا توافق على أي جزء من هذه الشروط، يجب عليك التوقف عن استخدام موقعنا على الفور.' :
+             'By accessing our website, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree with any part of these terms, you must discontinue use of our website immediately.'}
+          </p>
+        </div>
+
+        <!-- Use License -->
+        <div class="mb-12">
+          <h2 class="heading-2 mb-4">2. {lang === 'ko' ? '사용 라이선스' :
+            lang === 'ja' ? '使用ライセンス' :
+            lang === 'zh' ? '使用许可' :
+            lang === 'th' ? 'ใบอนุญาตการใช้งาน' :
+            lang === 'vi' ? 'Giấy phép sử dụng' :
+            lang === 'es' ? 'Licencia de Uso' :
+            lang === 'ar' ? 'رخصة الاستخدام' :
+            'Use License'}</h2>
+          <p class="body-base mb-4">
+            {lang === 'ko' ? '당사는 귀하에게 합법적인 목적으로 웹사이트에 접근하고 사용할 수 있는 제한적이고 비독점적이며 양도 불가능한 라이선스를 부여합니다. 귀하는 다음 사항에 동의합니다:' :
+             lang === 'ja' ? '私たちは、お客様に合法的な目的でウェブサイトにアクセスし使用するための限定的、非独占的、譲渡不可能なライセンスを付与します。お客様は以下に同意するものとします:' :
+             lang === 'zh' ? '我们授予您有限的、非排他性的、不可转让的许可，以合法目的访问和使用我们的网站。您同意不：' :
+             lang === 'th' ? 'เราให้ใบอนุญาตที่จำกัด ไม่ผูกขาด และไม่สามารถโอนให้แก่คุณในการเข้าถึงและใช้งานเว็บไซต์ของเราเพื่อวัตถุประสงค์ที่ถูกกฎหมาย คุณตกลงที่จะไม่:' :
+             lang === 'vi' ? 'Chúng tôi cấp cho bạn giấy phép hạn chế, không độc quyền, không thể chuyển nhượng để truy cập và sử dụng trang web của chúng tôi cho các mục đích hợp pháp. Bạn đồng ý không:' :
+             lang === 'es' ? 'Le otorgamos una licencia limitada, no exclusiva e intransferible para acceder y usar nuestro sitio web con fines lícitos. Usted acepta no:' :
+             lang === 'ar' ? 'نمنحك ترخيصًا محدودًا وغير حصري وغير قابل للتحويل للوصول إلى موقعنا واستخدامه لأغراض مشروعة. أنت توافق على عدم:' :
+             'We grant you a limited, non-exclusive, non-transferable license to access and use our website for lawful purposes. You agree not to:'}
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-slate-700">
+            <li>{lang === 'ko' ? '웹사이트의 콘텐츠나 서비스를 복제, 복사 또는 판매' :
+              lang === 'ja' ? 'ウェブサイトのコンテンツやサービスを複製、コピー、販売しない' :
+              lang === 'zh' ? '复制、拷贝或出售我们网站的任何内容或服务' :
+              lang === 'th' ? 'ทำซ้ำ คัดลอก หรือขายเนื้อหาหรือบริการใดๆ จากเว็บไซต์ของเรา' :
+              lang === 'vi' ? 'Sao chép, nhân bản hoặc bán bất kỳ nội dung hoặc dịch vụ nào từ trang web của chúng tôi' :
+              lang === 'es' ? 'Reproducir, duplicar, copiar o vender cualquier contenido o servicio de nuestro sitio web' :
+              lang === 'ar' ? 'استنساخ أو نسخ أو بيع أي محتوى أو خدمات من موقعنا' :
+              'Reproduce, duplicate, copy, or sell any content or services from our website'}</li>
+            <li>{lang === 'ko' ? '웹사이트나 시스템에 무단 접근 시도' :
+              lang === 'ja' ? 'ウェブサイトやシステムへの不正アクセスを試みない' :
+              lang === 'zh' ? '试图未经授权访问我们的网站或系统' :
+              lang === 'th' ? 'พยายามเข้าถึงเว็บไซต์หรือระบบของเราโดยไม่ได้รับอนุญาต' :
+              lang === 'vi' ? 'Cố gắng truy cập trái phép vào trang web hoặc hệ thống của chúng tôi' :
+              lang === 'es' ? 'Intentar obtener acceso no autorizado a nuestro sitio web o sistemas' :
+              lang === 'ar' ? 'محاولة الوصول غير المصرح به إلى موقعنا أو أنظمتنا' :
+              'Attempt to gain unauthorized access to our website or systems'}</li>
+            <li>{lang === 'ko' ? '바이러스, 악성코드 또는 파괴적 성격의 코드 전송' :
+              lang === 'ja' ? 'ウイルス、マルウェア、または破壊的なコードを送信しない' :
+              lang === 'zh' ? '传输病毒、恶意软件或任何具有破坏性的代码' :
+              lang === 'th' ? 'ส่งไวรัส มัลแวร์ หรือโค้ดใดๆ ที่มีลักษณะทำลาย' :
+              lang === 'vi' ? 'Truyền virus, phần mềm độc hại hoặc bất kỳ mã nào có tính chất phá hoại' :
+              lang === 'es' ? 'Transmitir virus, malware o cualquier código de naturaleza destructiva' :
+              lang === 'ar' ? 'نقل الفيروسات أو البرامج الضارة أو أي رمز ذي طبيعة مدمرة' :
+              'Transmit viruses, malware, or any code of destructive nature'}</li>
+            <li>{lang === 'ko' ? '해당 법률이나 규정 위반' :
+              lang === 'ja' ? '適用される法律または規制に違反しない' :
+              lang === 'zh' ? '违反任何适用的法律或法规' :
+              lang === 'th' ? 'ละเมิดกฎหมายหรือระเบียบข้อบังคับที่บังคับใช้' :
+              lang === 'vi' ? 'Vi phạm bất kỳ luật hoặc quy định hiện hành nào' :
+              lang === 'es' ? 'Violar cualquier ley o regulación aplicable' :
+              lang === 'ar' ? 'انتهاك أي قوانين أو لوائح سارية' :
+              'Violate any applicable laws or regulations'}</li>
+          </ul>
+        </div>
+
+        <!-- Intellectual Property -->
+        <div class="mb-12">
+          <h2 class="heading-2 mb-4">3. {lang === 'ko' ? '지적재산권' :
+            lang === 'ja' ? '知的財産権' :
+            lang === 'zh' ? '知识产权' :
+            lang === 'th' ? 'สิทธิ์ในทรัพย์สินทางปัญญา' :
+            lang === 'vi' ? 'Quyền sở hữu trí tuệ' :
+            lang === 'es' ? 'Derechos de Propiedad Intelectual' :
+            lang === 'ar' ? 'حقوق الملكية الفكرية' :
+            'Intellectual Property Rights'}</h2>
+          <p class="body-base">
+            {lang === 'ko' ? '텍스트, 그래픽, 로고, 이미지, 비디오 및 소프트웨어를 포함한 웹사이트의 모든 콘텐츠는 (주)브리츠메디 또는 콘텐츠 공급자의 자산이며 국제 저작권 및 지적재산권법의 보호를 받습니다. 당사의 사전 서면 허가 없이 웹사이트의 콘텐츠를 복제, 배포, 전송, 표시 또는 수행할 수 없습니다.' :
+             lang === 'ja' ? 'テキスト、グラフィック、ロゴ、画像、ビデオ、ソフトウェアを含むウェブサイト上のすべてのコンテンツは、BRITZMEDI株式会社またはそのコンテンツ提供者の資産であり、国際著作権および知的財産法によって保護されています。当社の事前の書面による許可なく、ウェブサイトのコンテンツを複製、配布、送信、表示、または上演することはできません。' :
+             lang === 'zh' ? '我们网站上的所有内容，包括文本、图形、标志、图像、视频和软件，均为BRITZMEDI株式会社或其内容提供商的财产，受国际版权和知识产权法保护。未经我们事先书面许可，您不得复制、分发、传输、展示或表演我们网站上的任何内容。' :
+             lang === 'th' ? 'เนื้อหาทั้งหมดบนเว็บไซต์ของเรา รวมถึงข้อความ กราฟิก โลโก้ รูปภาพ วิดีโอ และซอฟต์แวร์ เป็นทรัพย์สินของ BRITZMEDI Co., Ltd. หรือซัพพลายเออร์เนื้อหา และได้รับการคุ้มครองโดยกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญาระหว่างประเทศ คุณไม่สามารถทำซ้ำ แจกจ่าย ส่ง แสดง หรือดำเนินการใดๆ กับเนื้อหาจากเว็บไซต์ของเราโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรจากเราก่อน' :
+             lang === 'vi' ? 'Tất cả nội dung trên trang web của chúng tôi, bao gồm văn bản, đồ họa, logo, hình ảnh, video và phần mềm, là tài sản của BRITZMEDI Co., Ltd. hoặc các nhà cung cấp nội dung và được bảo vệ bởi luật bản quyền và sở hữu trí tuệ quốc tế. Bạn không được sao chép, phân phối, truyền tải, hiển thị hoặc thực hiện bất kỳ nội dung nào từ trang web của chúng tôi mà không có sự cho phép bằng văn bản trước của chúng tôi.' :
+             lang === 'es' ? 'Todo el contenido de nuestro sitio web, incluidos textos, gráficos, logotipos, imágenes, videos y software, es propiedad de BRITZMEDI Co., Ltd. o sus proveedores de contenido y está protegido por las leyes internacionales de derechos de autor y propiedad intelectual. No puede reproducir, distribuir, transmitir, mostrar o ejecutar ningún contenido de nuestro sitio web sin nuestro permiso previo por escrito.' :
+             lang === 'ar' ? 'جميع المحتويات على موقعنا، بما في ذلك النصوص والرسومات والشعارات والصور ومقاطع الفيديو والبرامج، هي ملك لشركة BRITZMEDI Co., Ltd. أو موردي المحتوى التابعين لها ومحمية بموجب قوانين حقوق الطبع والنشر والملكية الفكرية الدولية. لا يجوز لك إعادة إنتاج أو توزيع أو نقل أو عرض أو أداء أي محتوى من موقعنا دون إذن كتابي مسبق منا.' :
+             'All content on our website, including text, graphics, logos, images, videos, and software, is the property of BRITZMEDI Co., Ltd. or its content suppliers and is protected by international copyright and intellectual property laws. You may not reproduce, distribute, transmit, display, or perform any content from our website without our prior written permission.'}
+          </p>
+        </div>
+
+        <!-- Limitation of Liability -->
+        <div class="mb-12">
+          <h2 class="heading-2 mb-4">4. {lang === 'ko' ? '책임 제한' :
+            lang === 'ja' ? '責任の制限' :
+            lang === 'zh' ? '责任限制' :
+            lang === 'th' ? 'ข้อจำกัดความรับผิด' :
+            lang === 'vi' ? 'Giới hạn trách nhiệm' :
+            lang === 'es' ? 'Limitación de Responsabilidad' :
+            lang === 'ar' ? 'تحديد المسؤولية' :
+            'Limitation of Liability'}</h2>
+          <p class="body-base">
+            {lang === 'ko' ? '법이 허용하는 최대 범위 내에서, (주)브리츠메디는 웹사이트 또는 서비스 사용 또는 사용 불능으로 인해 발생하는 간접적, 우발적, 특별, 결과적 또는 징벌적 손해에 대해 책임을 지지 않습니다. 이익 또는 수익 손실, 데이터 또는 정보 손실, 사업 중단, 인명 피해 또는 재산 피해를 포함하되 이에 국한되지 않습니다.' :
+             lang === 'ja' ? '法律で許容される最大限の範囲において、BRITZMEDI株式会社は、ウェブサイトまたはサービスの使用または使用不能から生じる間接的、偶発的、特別、結果的、または懲罰的損害について責任を負いません。これには、利益または収益の損失、データまたは情報の損失、事業の中断、人身傷害または財産の損害が含まれますが、これらに限定されません。' :
+             lang === 'zh' ? '在法律允许的最大范围内，BRITZMEDI株式会社不对因您使用或无法使用我们的网站或服务而产生的任何间接、附带、特殊、后果性或惩罚性损害承担责任，包括但不限于利润或收入损失、数据或信息损失、业务中断、人身伤害或财产损失。' :
+             lang === 'th' ? 'ในขอบเขตสูงสุดที่กฎหมายอนุญาต BRITZMEDI Co., Ltd. จะไม่รับผิดชอบต่อความเสียหายทางอ้อม โดยบังเอิญ พิเศษ สืบเนื่อง หรือเป็นการลงโทษที่เกิดขึ้นจากการใช้หรือการไม่สามารถใช้เว็บไซต์หรือบริการของเราได้ รวมถึงแต่ไม่จำกัดเพียงการสูญเสียกำไรหรือรายได้ การสูญเสียข้อมูลหรือข้อมูล การหยุดชะงักทางธุรกิจ การบาดเจ็บส่วนบุคคลหรือความเสียหายต่อทรัพย์สิน' :
+             lang === 'vi' ? 'Trong phạm vi tối đa được pháp luật cho phép, BRITZMEDI Co., Ltd. sẽ không chịu trách nhiệm về bất kỳ thiệt hại gián tiếp, ngẫu nhiên, đặc biệt, hậu quả hoặc mang tính trừng phạt nào phát sinh từ việc bạn sử dụng hoặc không thể sử dụng trang web hoặc dịch vụ của chúng tôi, bao gồm nhưng không giới hạn ở việc mất lợi nhuận hoặc doanh thu, mất dữ liệu hoặc thông tin, gián đoạn kinh doanh, thương tích cá nhân hoặc thiệt hại tài sản.' :
+             lang === 'es' ? 'En la máxima medida permitida por la ley, BRITZMEDI Co., Ltd. no será responsable de ningún daño indirecto, incidental, especial, consecuente o punitivo que surja del uso o la imposibilidad de usar nuestro sitio web o servicios, incluyendo pero no limitado a la pérdida de ganancias o ingresos, pérdida de datos o información, interrupción del negocio, lesiones personales o daños a la propiedad.' :
+             lang === 'ar' ? 'إلى أقصى حد يسمح به القانون، لن تكون شركة BRITZMEDI Co., Ltd. مسؤولة عن أي أضرار غير مباشرة أو عرضية أو خاصة أو تبعية أو عقابية تنشأ عن استخدامك أو عدم قدرتك على استخدام موقعنا أو خدماتنا، بما في ذلك على سبيل المثال لا الحصر فقدان الأرباح أو الإيرادات وفقدان البيانات أو المعلومات وانقطاع الأعمال والإصابة الشخصية أو الأضرار الممتلكات.' :
+             'To the fullest extent permitted by law, BRITZMEDI Co., Ltd. shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use our website or services, including but not limited to loss of profits or revenue, loss of data or information, business interruption, personal injury or property damage.'}
+          </p>
+        </div>
+
+        <!-- Governing Law -->
+        <div class="mb-12">
+          <h2 class="heading-2 mb-4">5. {lang === 'ko' ? '준거법 및 관할권' :
+            lang === 'ja' ? '準拠法と管轄' :
+            lang === 'zh' ? '管辖法律与司法管辖权' :
+            lang === 'th' ? 'กฎหมายที่ใช้บังคับและเขตอำนาจศาล' :
+            lang === 'vi' ? 'Luật điều chỉnh & Thẩm quyền' :
+            lang === 'es' ? 'Ley Aplicable y Jurisdicción' :
+            lang === 'ar' ? 'القانون المعمول به والاختصاص القضائي' :
+            'Governing Law & Jurisdiction'}</h2>
+          <p class="body-base">
+            {lang === 'ko' ? '본 이용약관은 대한민국 법률에 따라 해석되고 규율되며, 법률 충돌 원칙에 관계없이 적용됩니다. 본 약관 또는 웹사이트 사용으로 인해 발생하는 분쟁의 해결을 위해 대한민국 경기도 성남시에 위치한 법원의 전속 관할권에 동의합니다.' :
+             lang === 'ja' ? 'この利用規約は、法律の抵触に関する原則に関係なく、大韓民国の法律に従って解釈され、準拠します。本規約またはウェブサイトの使用から生じる紛争の解決のため、大韓民国京畿道城南市に所在する裁判所の専属管轄権に同意するものとします。' :
+             lang === 'zh' ? '本服务条款受大韩民国法律管辖并据其解释，不考虑其法律冲突原则。您同意接受位于大韩民国京畿道城南市的法院对因本条款或您使用我们网站而产生的任何争议的专属管辖权。' :
+             lang === 'th' ? 'ข้อกำหนดในการให้บริการเหล่านี้อยู่ภายใต้และตีความตามกฎหมายของสาธารณรัฐเกาหลี โดยไม่คำนึงถึงหลักความขัดแย้งของกฎหมาย คุณตกลงที่จะยอมรับเขตอำนาจศาลเฉพาะของศาลที่ตั้งอยู่ในซองนัม-ซี คยองกี-โด สาธารณรัฐเกาหลี สำหรับการแก้ไขข้อพิพาทใดๆ ที่เกิดขึ้นจากข้อกำหนดเหล่านี้หรือการใช้งานเว็บไซต์ของเรา' :
+             lang === 'vi' ? 'Các Điều khoản dịch vụ này được điều chỉnh và giải thích theo luật pháp của Đại Hàn Dân Quốc, không tính đến các nguyên tắc xung đột pháp luật. Bạn đồng ý chịu sự thẩm quyền riêng biệt của các tòa án tại Seongnam-si, Gyeonggi-do, Đại Hàn Dân Quốc để giải quyết bất kỳ tranh chấp nào phát sinh từ các điều khoản này hoặc việc sử dụng trang web của chúng tôi.' :
+             lang === 'es' ? 'Estos Términos de Servicio se rigen e interpretan de acuerdo con las leyes de la República de Corea, sin tener en cuenta sus principios de conflicto de leyes. Usted acepta someterse a la jurisdicción exclusiva de los tribunales ubicados en Seongnam-si, Gyeonggi-do, República de Corea para la resolución de cualquier disputa que surja de estos términos o su uso de nuestro sitio web.' :
+             lang === 'ar' ? 'تخضع شروط الخدمة هذه وتُفسر وفقًا لقوانين جمهورية كوريا، بغض النظر عن مبادئ تعارض القوانين الخاصة بها. أنت توافق على الخضوع للاختصاص القضائي الحصري للمحاكم الموجودة في سيونغنام-سي، جيونجي-دو، جمهورية كوريا لحل أي نزاعات تنشأ عن هذه الشروط أو استخدامك لموقعنا.' :
+             'These Terms of Service are governed by and construed in accordance with the laws of the Republic of Korea, without regard to its conflict of law principles. You agree to submit to the exclusive jurisdiction of the courts located in Seongnam-si, Gyeonggi-do, Republic of Korea for the resolution of any disputes arising from these terms or your use of our website.'}
+          </p>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="bg-primary-50 rounded-2xl p-8">
+          <h2 class="heading-2 mb-6">{t('terms.contactTitle')}</h2>
+          <p class="body-base mb-4">
+            {t('terms.contactDesc')}
+          </p>
+          <div class="space-y-3 text-slate-700">
+            <div>
+              <span class="font-semibold">BRITZMEDI Co., Ltd.</span>
+            </div>
+            <div>
+              <span class="font-semibold">{lang === 'ko' ? '이메일:' :
+                lang === 'ja' ? 'メール:' :
+                lang === 'zh' ? '邮箱:' :
+                lang === 'th' ? 'อีเมล:' :
+                lang === 'vi' ? 'Email:' :
+                lang === 'es' ? 'Correo:' :
+                lang === 'ar' ? 'البريد الإلكتروني:' :
+                'Email:'}</span> contact@britzmedi.co.kr
+            </div>
+            <div>
+              <span class="font-semibold">{lang === 'ko' ? '주소:' :
+                lang === 'ja' ? '住所:' :
+                lang === 'zh' ? '地址:' :
+                lang === 'th' ? 'ที่อยู่:' :
+                lang === 'vi' ? 'Địa chỉ:' :
+                lang === 'es' ? 'Dirección:' :
+                lang === 'ar' ? 'العنوان:' :
+                'Address:'}</span><br />
+              1211, 388, Dunchon-daero, Jungwon-gu,<br />
+              Seongnam-si, Gyeonggi-do,<br />
+              Republic of Korea
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

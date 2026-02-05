@@ -235,6 +235,12 @@ export const ko: TranslationKeys = {
   faq: {
     title: '자주 묻는 질문',
     subtitle: '궁금한 점을 확인하세요',
+    heroLabel: '고객지원',
+    heroDescription: '제품, 회사, 주문, 기술 지원, 인증에 대한 자주 묻는 질문의 답변을 확인하세요.',
+    stillHaveQuestions: '더 궁금한 점이 있으신가요?',
+    stillHaveQuestionsDesc: '찾으시는 답변이 없으신가요? 저희 팀이 도와드리겠습니다. 문의해 주시면 1-2영업일 내에 답변 드리겠습니다.',
+    contactUs: '문의하기',
+    emailUs: '이메일로 문의',
     categories: {
       products: '제품',
       company: '회사',
@@ -242,6 +248,95 @@ export const ko: TranslationKeys = {
       technical: '기술 지원',
       certifications: '인증',
     },
+  },
+
+  // Certifications page
+  certifications: {
+    title: '인증',
+    subtitle: '품질 및 규제 현황',
+    heroLabel: '품질 및 규정 준수',
+    heroTitle1: '인증 &',
+    heroTitle2: '규제 현황',
+    qualityTitle: '품질 및 규제 인증',
+    qualitySubtitle: '당사의 종합적인 인증은 품질과 환자 안전에 대한 헌신을 보여줍니다.',
+    technicalLabel: '규정 준수',
+    technicalTitle: '기술 안전 표준',
+    technicalSubtitle: '당사 기기는 FDA 510(k) 및 MFDS 심사 과정에서 검증된 엄격한 국제 안전 표준을 충족하도록 설계 및 테스트되었습니다.',
+    powerRequirements: '전력 요구사항',
+    voltage: '전압',
+    protectionClass: '보호 등급',
+    roadmapLabel: '글로벌 확장',
+    roadmapTitle: '규제 로드맵',
+    roadmapSubtitle: 'BRITZMEDI 제품을 전 세계 시장에 출시하기 위한 진행 상황입니다.',
+    tableRegion: '지역 / 기관',
+    tableProduct: '제품',
+    tableStatus: '상태',
+    tableNotes: '비고',
+    fdaNote: 'FDA 승인에 대한 중요 안내',
+    ctaTitle: '인증 문서가 필요하신가요?',
+    ctaSubtitle: '인증서 사본, 시험 보고서 또는 상세 규제 정보를 요청하시려면 문의해 주세요.',
+    ctaRequest: '문서 요청',
+    ctaViewProducts: '제품 보기',
+    status: {
+      certified: '인증됨',
+      cleared: '승인됨',
+      registered: '등록됨',
+      inPreparation: '준비 중',
+      planned: '계획됨',
+    },
+    certificateNo: '인증서 번호',
+    validUntil: '유효 기간',
+    products: '제품:',
+  },
+
+  // Resources page
+  resources: {
+    title: '자료실',
+    subtitle: '자료 센터',
+    heroLabel: '다운로드',
+    heroDescription: '제품 브로슈어, 기술 문서, 마케팅 자료, 인증서 및 비디오에 접근하세요. 모든 자료를 다운로드할 수 있습니다.',
+    allResources: '전체 자료',
+    download: '다운로드',
+    noResults: '자료를 찾을 수 없습니다',
+    noResultsDesc: '다른 카테고리를 선택해 보세요.',
+    ctaTitle: '추가 자료가 필요하신가요?',
+    ctaSubtitle: '특정 문서, 맞춤 프레젠테이션 또는 현지화된 자료를 찾고 계신가요? 담당자에게 문의하시면 필요한 자료를 준비해 드리겠습니다.',
+    ctaRequest: '자료 요청',
+  },
+
+  // Privacy page
+  privacy: {
+    title: '개인정보처리방침',
+    heroLabel: '법적 고지',
+    lastUpdated: '최종 업데이트: 2025년 1월',
+    intro: {
+      title: '소개',
+      p1: '(주)브리츠메디("회사", "당사")는 britzmedi.com 웹사이트 및 관련 서비스를 운영합니다. 본 개인정보처리방침은 귀하가 당사 웹사이트를 방문하고 서비스를 이용할 때 수집, 사용, 공개 및 보호하는 정보에 대해 설명합니다.',
+      p2: '본 개인정보처리방침을 주의 깊게 읽어주세요. 당사의 정책 및 관행에 동의하지 않으시면 서비스를 이용하지 마세요.',
+    },
+    collection: {
+      title: '1. 수집하는 정보',
+      personalTitle: '귀하가 제공하는 개인정보',
+      personalDesc: '다음을 포함하여 자발적으로 제공하는 개인정보를 수집할 수 있습니다:',
+      autoTitle: '자동 수집 정보',
+      autoDesc: '웹사이트 방문 시 다음 정보가 자동으로 수집됩니다:',
+    },
+    contactTitle: '연락처 정보',
+    contactDesc: '본 개인정보처리방침 또는 당사의 개인정보 관행에 대해 질문이 있으시면 연락해 주세요:',
+  },
+
+  // Terms page
+  terms: {
+    title: '이용약관',
+    heroLabel: '법적 고지',
+    lastUpdated: '최종 업데이트: 2025년 1월',
+    intro: {
+      title: '소개',
+      p1: '본 이용약관("약관")은 (주)브리츠메디("회사", "당사")가 제공하는 britzmedi.com 웹사이트 및 모든 관련 서비스, 콘텐츠 및 제품에 대한 접근 및 이용을 규율합니다.',
+      p2: '웹사이트에 접근하고 이용함으로써 귀하는 본 약관에 동의하게 됩니다. 본 약관에 동의하지 않으시면 웹사이트나 서비스를 이용하지 마세요.',
+    },
+    contactTitle: '연락처 정보',
+    contactDesc: '본 이용약관에 대한 질문이 있거나 위반 사항을 신고하려면 연락해 주세요:',
   },
 
   // Footer

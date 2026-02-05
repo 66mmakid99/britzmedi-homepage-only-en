@@ -235,6 +235,12 @@ export const es: TranslationKeys = {
   faq: {
     title: 'Preguntas Frecuentes',
     subtitle: 'Encuentre respuestas a preguntas comunes',
+    heroLabel: 'Soporte',
+    heroDescription: 'Encuentre respuestas a preguntas comunes sobre nuestros productos, empresa, proceso de pedido, soporte técnico y certificaciones.',
+    stillHaveQuestions: '¿Aún tiene preguntas?',
+    stillHaveQuestionsDesc: '¿No encuentra lo que busca? Nuestro equipo está aquí para ayudar. Contáctenos y le responderemos en 1-2 días hábiles.',
+    contactUs: 'Contáctenos',
+    emailUs: 'Envíenos un correo',
     categories: {
       products: 'Productos',
       company: 'Empresa',
@@ -242,6 +248,95 @@ export const es: TranslationKeys = {
       technical: 'Soporte Técnico',
       certifications: 'Certificaciones',
     },
+  },
+
+  // Certifications page
+  certifications: {
+    title: 'Certificaciones',
+    subtitle: 'Calidad y Estado Regulatorio',
+    heroLabel: 'Calidad y Cumplimiento',
+    heroTitle1: 'Certificaciones y',
+    heroTitle2: 'Estado Regulatorio',
+    qualityTitle: 'Certificaciones de Calidad y Regulatorias',
+    qualitySubtitle: 'Nuestras certificaciones integrales demuestran nuestro compromiso con la calidad y la seguridad del paciente.',
+    technicalLabel: 'Cumplimiento',
+    technicalTitle: 'Estándares de Seguridad Técnica',
+    technicalSubtitle: 'Nuestros dispositivos están diseñados y probados para cumplir con rigurosos estándares de seguridad internacionales, verificados durante los procesos de revisión de FDA 510(k) y MFDS.',
+    powerRequirements: 'Requisitos de Alimentación',
+    voltage: 'Voltaje',
+    protectionClass: 'Clase de Protección',
+    roadmapLabel: 'Expansión Global',
+    roadmapTitle: 'Hoja de Ruta Regulatoria',
+    roadmapSubtitle: 'Nuestros esfuerzos continuos para llevar los productos BRITZMEDI a mercados de todo el mundo.',
+    tableRegion: 'Región / Agencia',
+    tableProduct: 'Producto',
+    tableStatus: 'Estado',
+    tableNotes: 'Notas',
+    fdaNote: 'Nota Importante sobre la Aprobación FDA',
+    ctaTitle: '¿Necesita Documentos de Certificación?',
+    ctaSubtitle: 'Contáctenos para solicitar copias de certificados, informes de pruebas o información regulatoria detallada.',
+    ctaRequest: 'Solicitar Documentos',
+    ctaViewProducts: 'Ver Productos',
+    status: {
+      certified: 'Certificado',
+      cleared: 'Aprobado',
+      registered: 'Registrado',
+      inPreparation: 'En Preparación',
+      planned: 'Planificado',
+    },
+    certificateNo: 'N° de Certificado',
+    validUntil: 'Válido Hasta',
+    products: 'Productos:',
+  },
+
+  // Resources page
+  resources: {
+    title: 'Recursos',
+    subtitle: 'Centro de Recursos',
+    heroLabel: 'Descargas',
+    heroDescription: 'Acceda a folletos de productos, documentos técnicos, materiales de marketing, certificados y videos. Todos los recursos están disponibles para descargar.',
+    allResources: 'Todos los Recursos',
+    download: 'Descargar',
+    noResults: 'No se encontraron recursos',
+    noResultsDesc: 'Intente seleccionar una categoría diferente.',
+    ctaTitle: '¿Necesita Materiales Adicionales?',
+    ctaSubtitle: '¿Busca documentos específicos, presentaciones personalizadas o materiales localizados? Contacte a nuestro equipo y prepararemos los recursos que necesita.',
+    ctaRequest: 'Solicitar Materiales',
+  },
+
+  // Privacy page
+  privacy: {
+    title: 'Política de Privacidad',
+    heroLabel: 'Legal',
+    lastUpdated: 'Última actualización: Enero 2025',
+    intro: {
+      title: 'Introducción',
+      p1: 'BRITZMEDI Co., Ltd. ("Empresa", "nosotros") opera el sitio web britzmedi.com y servicios relacionados. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos su información cuando visita nuestro sitio web y utiliza nuestros servicios.',
+      p2: 'Por favor lea esta Política de Privacidad cuidadosamente. Si no está de acuerdo con nuestras políticas y prácticas, por favor no use nuestros servicios.',
+    },
+    collection: {
+      title: '1. Información que Recopilamos',
+      personalTitle: 'Información Personal que Proporciona',
+      personalDesc: 'Podemos recopilar información personal que proporciona voluntariamente, incluyendo:',
+      autoTitle: 'Información Recopilada Automáticamente',
+      autoDesc: 'Cuando visita nuestro sitio web, recopilamos automáticamente cierta información:',
+    },
+    contactTitle: 'Información de Contacto',
+    contactDesc: 'Si tiene preguntas sobre esta Política de Privacidad o nuestras prácticas de privacidad, contáctenos:',
+  },
+
+  // Terms page
+  terms: {
+    title: 'Términos de Servicio',
+    heroLabel: 'Legal',
+    lastUpdated: 'Última actualización: Enero 2025',
+    intro: {
+      title: 'Introducción',
+      p1: 'Estos Términos de Servicio ("Términos") rigen su acceso y uso del sitio web britzmedi.com y todos los servicios, contenidos y productos relacionados proporcionados por BRITZMEDI Co., Ltd. ("Empresa", "nosotros").',
+      p2: 'Al acceder y usar nuestro sitio web, acepta estar obligado por estos Términos. Si no está de acuerdo con estos Términos, por favor no use nuestro sitio web o servicios.',
+    },
+    contactTitle: 'Información de Contacto',
+    contactDesc: 'Si tiene preguntas sobre estos Términos de Servicio o necesita reportar una violación, contáctenos:',
   },
 
   // Footer
