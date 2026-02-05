@@ -1,12 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { certifications, technicalStandards, regulatoryRoadmap, fdaDisclaimer, qualitySummary } from '../content/certifications';
+import { useTranslations } from '../i18n';
 
-const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA 510(k) cleared, ISO 13485:2016 certified, GMP manufacturing. View our complete quality credentials.";
+const t = useTranslations('en');
+
+const pageDescription = t('certifications.qualitySubtitle');
 ---
 
-<BaseLayout 
-  title="Certifications"
+<BaseLayout
+  title={t('certifications.title')}
   description={pageDescription}
   keywords={["BRITZMEDI certifications", "FDA 510k", "ISO 13485", "GMP", "medical device certification", "regulatory compliance"]}
 >
@@ -14,10 +17,10 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
   <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
     <div class="container">
       <div class="max-w-3xl">
-        <span class="label mb-3 block">Quality & Compliance</span>
+        <span class="label mb-3 block">{t('certifications.heroLabel')}</span>
         <h1 class="heading-1 mb-6">
-          Certifications &<br />
-          <span class="text-primary-600">Regulatory Status</span>
+          {t('certifications.heroTitle1')}<br />
+          <span class="text-primary-600">{t('certifications.heroTitle2')}</span>
         </h1>
         <p class="body-large">
           {qualitySummary.description}
@@ -48,12 +51,12 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
   <section class="section bg-white">
     <div class="container">
       <div class="max-w-2xl mb-12">
-        <h2 class="heading-2 mb-4">Quality & Regulatory Certifications</h2>
+        <h2 class="heading-2 mb-4">{t('certifications.qualityTitle')}</h2>
         <p class="body-large">
-          Our comprehensive certifications demonstrate our commitment to quality and patient safety.
+          {t('certifications.qualitySubtitle')}
         </p>
       </div>
-      
+
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {certifications.map((cert) => (
           <div class="bg-white border border-slate-200 rounded-xl p-6 hover:border-primary-200 hover:shadow-md transition-all">
@@ -69,39 +72,39 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
                       ? "bg-amber-50 text-amber-700"
                       : "bg-slate-100 text-slate-600"
               ]}>
-                {cert.status === 'certified' && 'Certified'}
-                {cert.status === 'cleared' && 'Cleared'}
-                {cert.status === 'registered' && 'Registered'}
-                {cert.status === 'in-preparation' && 'In Preparation'}
-                {cert.status === 'planned' && 'Planned'}
+                {cert.status === 'certified' && t('certifications.status.certified')}
+                {cert.status === 'cleared' && t('certifications.status.cleared')}
+                {cert.status === 'registered' && t('certifications.status.registered')}
+                {cert.status === 'in-preparation' && t('certifications.status.inPreparation')}
+                {cert.status === 'planned' && t('certifications.status.planned')}
               </span>
               <span class="text-xs text-slate-500">{cert.region}</span>
             </div>
-            
+
             <!-- Certification Name -->
             <h3 class="text-xl font-semibold text-slate-900 mb-1">{cert.name}</h3>
             <p class="text-sm text-slate-500 mb-4">{cert.fullName}</p>
-            
+
             <!-- Description -->
             <p class="body-small mb-4">{cert.description}</p>
-            
+
             <!-- Details -->
             <div class="space-y-2 pt-4 border-t border-slate-100">
               {cert.certificateNo && (
                 <div class="flex justify-between text-sm">
-                  <span class="text-slate-500">Certificate No.</span>
+                  <span class="text-slate-500">{t('certifications.certificateNo')}</span>
                   <span class="text-slate-900 font-medium">{cert.certificateNo}</span>
                 </div>
               )}
               {cert.validUntil && (
                 <div class="flex justify-between text-sm">
-                  <span class="text-slate-500">Valid Until</span>
+                  <span class="text-slate-500">{t('certifications.validUntil')}</span>
                   <span class="text-slate-900 font-medium">{cert.validUntil}</span>
                 </div>
               )}
               {cert.products && (
                 <div class="text-sm">
-                  <span class="text-slate-500 block mb-1">Products:</span>
+                  <span class="text-slate-500 block mb-1">{t('certifications.products')}</span>
                   <div class="flex flex-wrap gap-1">
                     {cert.products.map((p) => (
                       <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">{p}</span>
@@ -121,28 +124,27 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
     <div class="container">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
         <div>
-          <span class="label mb-3 block">Compliance</span>
-          <h2 class="heading-2 mb-4">Technical Safety Standards</h2>
+          <span class="label mb-3 block">{t('certifications.technicalLabel')}</span>
+          <h2 class="heading-2 mb-4">{t('certifications.technicalTitle')}</h2>
           <p class="body-large mb-8">
-            Our devices are designed and tested to meet rigorous international safety standards, 
-            as verified during FDA 510(k) and MFDS review processes.
+            {t('certifications.technicalSubtitle')}
           </p>
-          
+
           <div class="bg-white rounded-xl p-6 border border-slate-100">
-            <h3 class="font-semibold text-slate-900 mb-4">Power Requirements</h3>
+            <h3 class="font-semibold text-slate-900 mb-4">{t('certifications.powerRequirements')}</h3>
             <div class="space-y-3 text-sm">
               <div class="flex justify-between">
-                <span class="text-slate-500">Voltage</span>
+                <span class="text-slate-500">{t('certifications.voltage')}</span>
                 <span class="text-slate-900">100-240 VAC, 50/60 Hz (Universal)</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-slate-500">Protection Class</span>
+                <span class="text-slate-500">{t('certifications.protectionClass')}</span>
                 <span class="text-slate-900">Class I, Type BF Applied Part</span>
               </div>
             </div>
           </div>
         </div>
-        
+
         <div class="space-y-4">
           {technicalStandards.map((standard) => (
             <div class="bg-white rounded-xl p-6 border border-slate-100">
@@ -171,25 +173,25 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
   <section class="section bg-white">
     <div class="container">
       <div class="text-center max-w-2xl mx-auto mb-12">
-        <span class="label mb-3 block">Global Expansion</span>
-        <h2 class="heading-2 mb-4">Regulatory Roadmap</h2>
+        <span class="label mb-3 block">{t('certifications.roadmapLabel')}</span>
+        <h2 class="heading-2 mb-4">{t('certifications.roadmapTitle')}</h2>
         <p class="body-large">
-          Our ongoing efforts to bring BRITZMEDI products to markets worldwide.
+          {t('certifications.roadmapSubtitle')}
         </p>
       </div>
-      
+
       <div class="overflow-x-auto">
         <table class="w-full bg-white rounded-xl border border-slate-200 overflow-hidden">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="text-left p-4 font-semibold text-slate-900">Region / Agency</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Product</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Status</th>
-              <th class="text-left p-4 font-semibold text-slate-900">Notes</th>
+              <th class="text-left p-4 font-semibold text-slate-900">{t('certifications.tableRegion')}</th>
+              <th class="text-left p-4 font-semibold text-slate-900">{t('certifications.tableProduct')}</th>
+              <th class="text-left p-4 font-semibold text-slate-900">{t('certifications.tableStatus')}</th>
+              <th class="text-left p-4 font-semibold text-slate-900">{t('certifications.tableNotes')}</th>
             </tr>
           </thead>
           <tbody>
-            {regulatoryRoadmap.flatMap((region) => 
+            {regulatoryRoadmap.flatMap((region) =>
               region.products.map((product, idx) => (
                 <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                   {idx === 0 && (
@@ -240,7 +242,7 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
             </svg>
           </div>
           <div>
-            <h3 class="font-semibold text-slate-900 mb-2">Important Note on FDA Clearance</h3>
+            <h3 class="font-semibold text-slate-900 mb-2">{t('certifications.fdaNote')}</h3>
             <p class="text-sm text-slate-600">{fdaDisclaimer}</p>
           </div>
         </div>
@@ -253,23 +255,23 @@ const pageDescription = "BRITZMEDI certifications and regulatory compliance. FDA
     <div class="container">
       <div class="text-center max-w-2xl mx-auto">
         <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">
-          Need Certification Documents?
+          {t('certifications.ctaTitle')}
         </h2>
         <p class="text-lg text-primary-100 mb-8">
-          Contact us to request copies of certificates, test reports, or detailed regulatory information.
+          {t('certifications.ctaSubtitle')}
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <a 
-            href="/contact" 
+          <a
+            href="/contact"
             class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-primary-600 bg-white hover:bg-primary-50 rounded-lg transition-colors"
           >
-            Request Documents
+            {t('certifications.ctaRequest')}
           </a>
-          <a 
-            href="/products" 
+          <a
+            href="/products"
             class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white border border-white/30 hover:bg-white/10 rounded-lg transition-colors"
           >
-            View Products
+            {t('certifications.ctaViewProducts')}
           </a>
         </div>
       </div>

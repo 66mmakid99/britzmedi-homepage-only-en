@@ -1,0 +1,11 @@
+name: FDA 510(k)
+fullName: U.S. Food and Drug Administration 510(k) Clearance
+status: cleared
+region: USA
+description: >-
+  FDA has determined the device to be substantially equivalent to a legally
+  marketed predicate device for indications including temporary relief of muscle
+  pain and temporary reduction in the appearance of cellulite.
+products:
+  - TORR RF (MTX-C1)
+certificateNo: K212561

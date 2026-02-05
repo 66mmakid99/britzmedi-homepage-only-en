@@ -1,0 +1,80 @@
+name: TORR RF
+model: MTX-C1
+tagline: Innovative Multi-Wave RF Workstation
+category: medical-device
+status: available
+featured: true
+overview: >-
+  TORR RF is a non-invasive medical device utilizing specialized Multi-Wave
+  Radiofrequency (RF) technology to deliver thermal energy into the dermal and
+  subcutaneous layers.
+keyTechnologies:
+  - name: Auto Circular Motion Head (Patented)
+    description: >-
+      The handpiece features a head that automatically rotates (68 rpm),
+      creating a 'Toroidal' thermal field ensuring RF energy is distributed
+      uniformly without hot spots and reducing operator fatigue.
+  - name: Real-Time Temperature Control
+    description: >-
+      Integrated sensors monitor skin temperature continuously. The system
+      automatically cuts off RF output if temperature exceeds the set safety
+      limit (adjustable 30°C–50°C), preventing burns.
+  - name: Vibro-Comfort Mode
+    description: >-
+      3D vibration technology (10,000 times/min) mitigates the sensation of heat
+      through neurological distraction (Gate Control Theory), making treatments
+      comfortable for patients sensitive to heat.
+indications:
+  - >-
+    Lifting & Skin Tightening - Delivers thermal energy to the deep dermis to
+    stimulate collagen remodeling
+  - >-
+    Body Contouring & Cellulite - FDA-cleared for temporary reduction in the
+    appearance of cellulite
+  - >-
+    Vascular (Circulation) - Cleared for temporary improvement of local blood
+    circulation
+  - Pain Management - Relief of minor muscle aches, pains, and muscle spasms
+specifications:
+  - label: Frequency
+    value: 1 MHz ± 10%
+    note: Stable deep heating frequency
+  - label: Max Output Power
+    value: 55W (Medium/Large), 7.5W (Small)
+    note: Low power, high efficiency
+  - label: Operation Modes
+    value: Single / Pulse / Repeat
+    note: Selectable via GUI
+  - label: Treatment Depth
+    value: 1.5mm ~ 10mm
+    note: Adjustable Low/Deep Mode
+  - label: Temperature Control
+    value: 30°C ~ 50°C
+    note: Real-time monitoring & Auto-cut off
+  - label: User Interface
+    value: 10.1" TFT LCD Touch Screen
+    note: Intuitive GUI with Preset Memory
+  - label: Dimensions
+    value: 338.1mm (W) × 643mm (D) × 857.5mm (H)
+  - label: Weight
+    value: 36 kg
+  - label: Power
+    value: 100-240 VAC, 50/60 Hz, 200 VA
+  - label: Safety Class
+    value: Class I, Type BF Applied Part
+certifications:
+  - name: FDA 510(k)
+    status: Cleared
+    detail: K212561
+  - name: Korea MFDS
+    status: Approved
+    detail: License No. 22-156
+  - name: ISO 13485:2016
+    status: Certified
+  - name: GMP
+    status: Certified
+clinicalBenefits:
+  - Pain-Free treatments with Vibro-Comfort Mode
+  - Uniform energy delivery preventing operator fatigue
+  - Real-time safety monitoring preventing burns
+  - No consumable cartridges - low running costs

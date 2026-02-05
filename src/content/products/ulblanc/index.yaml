@@ -1,0 +1,42 @@
+name: ULBLANC
+model: i-Booster
+tagline: Multi-Frequency Ultrasound Workstation
+category: medical-device
+status: available
+featured: false
+overview: >-
+  ULBLANC is a comprehensive skincare workstation combining dual-frequency
+  ultrasound for tightening with acoustic cavitation for transdermal drug
+  delivery.
+keyTechnologies:
+  - name: Sono-I (Dynamic Dual Wave™)
+    description: >-
+      Alternates between different ultrasound frequencies to target both
+      epidermis and dermis. 1/3 MHz for deep dermal tightening, 3/10 MHz for
+      epidermal soothing.
+  - name: i-Booster (Sonophoresis)
+    description: >-
+      Utilizes 28kHz ultrasound to generate acoustic cavitation (micro-jet
+      effect), opening micro-pathways for deep transdermal delivery of active
+      ingredients.
+indications:
+  - Skin firming and tightening
+  - Wrinkle reduction
+  - Enhanced absorption of active ingredients
+  - Skin soothing (suitable for ACNE/Flushing)
+specifications:
+  - label: Sono-I Frequency
+    value: 1/3 MHz, 3/10 MHz
+    note: Dual frequency modes
+  - label: i-Booster Frequency
+    value: 28 kHz
+    note: For sonophoresis
+certifications:
+  - name: Korea MFDS
+    status: Certified
+    detail: No. 21-4685
+clinicalBenefits:
+  - No downtime - Pain-free, infection-free
+  - Suitable for daily use
+  - Versatile treatment range from soothing to lifting
+  - Enhanced product absorption efficiency

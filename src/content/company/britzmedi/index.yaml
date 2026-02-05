@@ -1,0 +1,44 @@
+name: BRITZMEDI Co., Ltd.
+nameKo: (주)브리츠메디
+ceo: Shin Jae Lee
+establishment: October 23, 2017
+philosophy: >-
+  Beyond developing aesthetic devices, we are committed to researching
+  sustainable beauty for everyday life.
+address:
+  full: >-
+    1211, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of
+    Korea
+  city: Seongnam-si
+  province: Gyeonggi-do
+  country: Republic of Korea
+  postalCode: '13403'
+contact:
+  phone: '+82-70-4348-7244'
+  email: contact@britzmedi.co.kr
+  website: www.britzmedi.co.kr
+milestones:
+  - year: '2017'
+    title: Company Establishment
+    description: >-
+      Established BRITZMEDI Co., Ltd. and certified as a Company-Affiliated
+      Research Institute
+    upcoming: false
+  - year: '2021'
+    title: GMP Certification
+    description: Obtained GMP (Good Manufacturing Practice) Certification from MFDS
+    upcoming: false
+  - year: '2022'
+    title: FDA Clearance & ISO Certification
+    description: >-
+      Acquired FDA 510(k) clearance for TORR RF (K212561) and ISO 13485:2016
+      certification
+    upcoming: false
+  - year: '2025'
+    title: Venture Enterprise Re-designation
+    description: Re-designated as 'Venture Enterprise' (R&D Type), valid until June 2028
+    upcoming: false
+  - year: '2026'
+    title: LUMINO WAVE Launch
+    description: Scheduled launch of next-generation LUMINO WAVE device (H2 2026)
+    upcoming: true

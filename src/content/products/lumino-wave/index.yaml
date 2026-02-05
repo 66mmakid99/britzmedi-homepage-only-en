@@ -1,0 +1,29 @@
+name: LUMINO WAVE
+model: LSR-10
+tagline: Next-Generation Convergence Device
+category: medical-device
+status: coming-soon
+featured: false
+overview: >-
+  LUMINO WAVE is an advanced aesthetic device designed to maximize treatment
+  efficacy by combining Ultrasound and Laser energies.
+keyTechnologies:
+  - name: Ultrasound + Laser Convergence
+    description: >-
+      A convergence therapy where ultrasound vibration and laser irradiation
+      occur simultaneously. Light scattering is minimized by ultrasound effects,
+      allowing the laser to reach deeper layers more efficiently.
+indications: []
+specifications: []
+certifications:
+  - name: KC (EMC)
+    status: Registered
+    detail: R-R-bzm-LSR-10 (April 2025)
+  - name: Korea MFDS
+    status: Under Review
+    detail: 'Target: H2 2026'
+clinicalBenefits:
+  - Achieves therapeutic results with lower power/energy
+  - Minimized skin irritation and side effects
+  - Maximized lifting and regeneration effects
+  - Enhanced laser penetration to dermal layers

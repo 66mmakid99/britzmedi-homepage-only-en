@@ -1,0 +1,27 @@
+name: NEWCHAE SHOT
+model: NEWCHAE SHOT
+tagline: 3-in-1 Personal Beauty Device
+category: cosmetic
+status: available
+featured: false
+overview: >-
+  NEWCHAE SHOT is a home-care beauty device integrating professional-grade
+  medical technologies into a compact form factor with multi-channel energy
+  delivery.
+keyTechnologies:
+  - name: RF Mode (Tightening)
+    description: >-
+      Multi-Channel RF Stack technology delivers heat deep into the dermis,
+      promoting collagen regeneration.
+  - name: EMS Mode (V-Line)
+    description: Electrical Muscle Stimulation for facial contouring and toning.
+  - name: ELP Mode (Skin Boost)
+    description: Electroporation technology enhances absorption of skincare products.
+indications: []
+specifications: []
+certifications: []
+clinicalBenefits:
+  - Skin Density improved by 128.48%
+  - Pore Size reduced by 26.74%
+  - Improved surface and deep elasticity
+  - Enhanced skin radiance

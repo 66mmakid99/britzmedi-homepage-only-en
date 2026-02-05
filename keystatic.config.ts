@@ -86,9 +86,8 @@ export default config({
     products: collection({
       label: 'Products',
       slugField: 'name',
-      path: 'src/content/products/*',
-      format: { contentField: 'description' },
-      entryLayout: 'content',
+      path: 'src/content/products/*/',
+      format: { data: 'yaml' },
       schema: {
         name: fields.slug({ 
           name: { 
@@ -120,16 +119,34 @@ export default config({
           ],
           defaultValue: 'available'
         }),
-        featured: fields.checkbox({ 
+        featured: fields.checkbox({
           label: 'Featured Product',
           defaultValue: false
         }),
-        overview: fields.text({ 
+        mainImage: fields.image({
+          label: 'Main Product Image',
+          directory: 'public/images/products',
+          publicPath: '/images/products/',
+          description: 'Primary hero image for the product'
+        }),
+        gallery: fields.array(
+          fields.image({
+            label: 'Gallery Image',
+            directory: 'public/images/products',
+            publicPath: '/images/products/',
+          }),
+          {
+            label: 'Product Gallery',
+            itemLabel: (props) => props.value?.filename || 'Image',
+            description: 'Additional product images for gallery view'
+          }
+        ),
+        overview: fields.text({
           label: 'Overview',
           multiline: true,
           validation: { isRequired: true }
         }),
-        description: fields.markdoc({ 
+        description: fields.markdoc({
           label: 'Detailed Description',
           options: {
             image: {
@@ -191,17 +208,19 @@ export default config({
     faq: collection({
       label: 'FAQ',
       slugField: 'question',
-      path: 'src/content/faq/*',
-      format: { contentField: 'answer' },
+      path: 'src/content/faq/*/',
+      format: { data: 'yaml' },
       schema: {
-        question: fields.slug({ 
-          name: { 
+        question: fields.slug({
+          name: {
             label: 'Question',
             validation: { isRequired: true }
-          } 
+          }
         }),
-        answer: fields.markdoc({ 
+        answer: fields.text({
           label: 'Answer',
+          multiline: true,
+          validation: { isRequired: true }
         }),
         category: fields.select({
           label: 'Category',
@@ -221,7 +240,8 @@ export default config({
     resources: collection({
       label: 'Resources',
       slugField: 'title',
-      path: 'src/content/resources/*',
+      path: 'src/content/resources/*/',
+      format: { data: 'yaml' },
       schema: {
         title: fields.slug({ 
           name: { 
@@ -283,20 +303,23 @@ export default config({
     company: collection({
       label: 'Company Info',
       slugField: 'name',
-      path: 'src/content/company/*',
-      format: { contentField: 'description' },
+      path: 'src/content/company/*/',
+      format: { data: 'yaml' },
       schema: {
-        name: fields.slug({ 
-          name: { 
+        name: fields.slug({
+          name: {
             label: 'Company Name',
             validation: { isRequired: true }
-          } 
+          }
         }),
         nameKo: fields.text({ label: 'Korean Name' }),
         ceo: fields.text({ label: 'CEO Name' }),
         establishment: fields.text({ label: 'Establishment Date' }),
-        description: fields.markdoc({ label: 'Company Description' }),
-        philosophy: fields.text({ 
+        description: fields.text({
+          label: 'Company Description',
+          multiline: true
+        }),
+        philosophy: fields.text({
           label: 'Company Philosophy',
           multiline: true
         }),
@@ -331,7 +354,8 @@ export default config({
     certifications: collection({
       label: 'Certifications',
       slugField: 'name',
-      path: 'src/content/certifications/*',
+      path: 'src/content/certifications/*/',
+      format: { data: 'yaml' },
       schema: {
         name: fields.slug({ 
           name: { 

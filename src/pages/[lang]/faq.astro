@@ -18,18 +18,28 @@ const pageDescription = t('faq.heroDescription');
 // Helper to generate language-aware URLs
 const localizedUrl = (path: string) => `/${lang}${path}`;
 
-// Generate FAQ Schema for SEO
+// Helper to get translated FAQ content
+const getTranslatedFaq = (faqId: string) => {
+  const question = t(`faq.items.${faqId}.question` as any);
+  const answer = t(`faq.items.${faqId}.answer` as any);
+  return { question, answer };
+};
+
+// Generate FAQ Schema for SEO with translated content
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": faqItems.map(faq => ({
-    "@type": "Question",
-    "name": faq.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": faq.answer
-    }
-  }))
+  "mainEntity": faqItems.map(faq => {
+    const translated = getTranslatedFaq(faq.id);
+    return {
+      "@type": "Question",
+      "name": translated.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": translated.answer
+      }
+    };
+  })
 };
 ---
 
@@ -96,27 +106,30 @@ const faqSchema = {
               </h2>
 
               <div class="space-y-4">
-                {categoryFaqs.map((faq) => (
-                  <details class="group card-premium overflow-hidden" id={faq.id}>
-                    <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer list-none">
-                      <h3 class="text-base font-semibold text-slate-900 group-hover:text-primary-600 transition-colors pr-4">
-                        {faq.question}
-                      </h3>
-                      <span class="shrink-0 w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-open:bg-primary-100 transition-colors">
-                        <svg class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </span>
-                    </summary>
-                    <div class="px-6 pb-6 pt-0">
-                      <div class="prose prose-slate max-w-none">
-                        <p class="text-slate-600 leading-relaxed">
-                          {faq.answer}
-                        </p>
+                {categoryFaqs.map((faq) => {
+                  const translated = getTranslatedFaq(faq.id);
+                  return (
+                    <details class="group card-premium overflow-hidden" id={faq.id}>
+                      <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer list-none">
+                        <h3 class="text-base font-semibold text-slate-900 group-hover:text-primary-600 transition-colors pr-4">
+                          {translated.question}
+                        </h3>
+                        <span class="shrink-0 w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-open:bg-primary-100 transition-colors">
+                          <svg class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </span>
+                      </summary>
+                      <div class="px-6 pb-6 pt-0">
+                        <div class="prose prose-slate max-w-none">
+                          <p class="text-slate-600 leading-relaxed">
+                            {translated.answer}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </details>
-                ))}
+                    </details>
+                  );
+                })}
               </div>
             </div>
           );

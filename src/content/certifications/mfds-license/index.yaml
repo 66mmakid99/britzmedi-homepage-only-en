@@ -1,0 +1,8 @@
+name: MFDS License
+fullName: Korea Ministry of Food and Drug Safety Manufacturing License
+status: certified
+region: Korea
+description: Official manufacturing license for medical devices issued by MFDS.
+products:
+  - TORR RF (MTX-C1)
+certificateNo: No. 22-156

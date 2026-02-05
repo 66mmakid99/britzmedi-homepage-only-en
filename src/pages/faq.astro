@@ -1,26 +1,39 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { faqItems, faqCategories, getFAQsByCategory } from '../content/faq';
+import { useTranslations } from '../i18n';
 
-const pageDescription = "Frequently asked questions about BRITZMEDI products, company, ordering, technical support, and certifications. Find answers to common questions about TORR RF, ULBLANC, and more.";
+const t = useTranslations('en');
 
-// Generate FAQ Schema for SEO
+const pageDescription = t('faq.heroDescription');
+
+// Helper to get translated FAQ content
+const getTranslatedFaq = (faqId: string) => {
+  const question = t(`faq.items.${faqId}.question` as any);
+  const answer = t(`faq.items.${faqId}.answer` as any);
+  return { question, answer };
+};
+
+// Generate FAQ Schema for SEO with translated content
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": faqItems.map(faq => ({
-    "@type": "Question",
-    "name": faq.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": faq.answer
-    }
-  }))
+  "mainEntity": faqItems.map(faq => {
+    const translated = getTranslatedFaq(faq.id);
+    return {
+      "@type": "Question",
+      "name": translated.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": translated.answer
+      }
+    };
+  })
 };
 ---
 
 <BaseLayout
-  title="FAQ"
+  title={t('faq.title')}
   description={pageDescription}
   keywords={["BRITZMEDI FAQ", "medical device questions", "TORR RF FAQ", "aesthetic device FAQ", "distributor FAQ"]}
 >
@@ -32,14 +45,13 @@ const faqSchema = {
     <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
     <div class="container relative">
       <div class="max-w-3xl">
-        <span class="label mb-4">Support</span>
+        <span class="label mb-4">{t('faq.heroLabel')}</span>
         <h1 class="heading-1 mb-6">
-          Frequently Asked<br />
-          <span class="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">Questions</span>
+          {t('faq.title').split(' ').slice(0, -1).join(' ')}<br />
+          <span class="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">{t('faq.title').split(' ').slice(-1)[0]}</span>
         </h1>
         <p class="body-large">
-          Find answers to common questions about our products, company, ordering process,
-          technical support, and certifications.
+          {t('faq.heroDescription')}
         </p>
       </div>
     </div>
@@ -54,7 +66,7 @@ const faqSchema = {
             href={`#${category.id}`}
             class="shrink-0 px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
           >
-            {category.name}
+            {t(`faq.categories.${category.id}` as any)}
           </a>
         ))}
       </nav>
@@ -79,31 +91,34 @@ const faqSchema = {
                     {category.id === 'certifications' && <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />}
                   </svg>
                 </span>
-                {category.name}
+                {t(`faq.categories.${category.id}` as any)}
               </h2>
 
               <div class="space-y-4">
-                {categoryFaqs.map((faq) => (
-                  <details class="group card-premium overflow-hidden" id={faq.id}>
-                    <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer list-none">
-                      <h3 class="text-base font-semibold text-slate-900 group-hover:text-primary-600 transition-colors pr-4">
-                        {faq.question}
-                      </h3>
-                      <span class="shrink-0 w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-open:bg-primary-100 transition-colors">
-                        <svg class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </span>
-                    </summary>
-                    <div class="px-6 pb-6 pt-0">
-                      <div class="prose prose-slate max-w-none">
-                        <p class="text-slate-600 leading-relaxed">
-                          {faq.answer}
-                        </p>
+                {categoryFaqs.map((faq) => {
+                  const translated = getTranslatedFaq(faq.id);
+                  return (
+                    <details class="group card-premium overflow-hidden" id={faq.id}>
+                      <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer list-none">
+                        <h3 class="text-base font-semibold text-slate-900 group-hover:text-primary-600 transition-colors pr-4">
+                          {translated.question}
+                        </h3>
+                        <span class="shrink-0 w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-open:bg-primary-100 transition-colors">
+                          <svg class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </span>
+                      </summary>
+                      <div class="px-6 pb-6 pt-0">
+                        <div class="prose prose-slate max-w-none">
+                          <p class="text-slate-600 leading-relaxed">
+                            {translated.answer}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </details>
-                ))}
+                    </details>
+                  );
+                })}
               </div>
             </div>
           );
@@ -116,14 +131,13 @@ const faqSchema = {
   <section class="section bg-gradient-section">
     <div class="container">
       <div class="max-w-3xl mx-auto text-center">
-        <h2 class="heading-2 mb-4">Still Have Questions?</h2>
+        <h2 class="heading-2 mb-4">{t('faq.stillHaveQuestions')}</h2>
         <p class="body-large mb-8">
-          Can't find what you're looking for? Our team is here to help.
-          Contact us and we'll get back to you within 1-2 business days.
+          {t('faq.stillHaveQuestionsDesc')}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <a href="/contact" class="btn-primary">
-            Contact Us
+            {t('faq.contactUs')}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
@@ -132,7 +146,7 @@ const faqSchema = {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            Email Us Directly
+            {t('faq.emailUs')}
           </a>
         </div>
       </div>
