@@ -293,6 +293,7 @@ export default config({
         }),
         thumbnail: fields.image({
           label: 'Thumbnail Image (optional)',
+          description: 'Recommended: 800x800px, JPEG, under 200KB',
           directory: 'public/images/resources',
           publicPath: '/images/resources/',
         }),

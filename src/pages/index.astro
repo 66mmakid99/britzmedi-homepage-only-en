@@ -3,12 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { company, milestones, coreTechnologies } from '../content/company';
 import { products, getFeaturedProducts } from '../content/products';
 import { certifications, qualitySummary } from '../content/certifications';
-import { heroSettings } from '../content/hero';
+import homepageConfig from '../data/homepage.json';
+import type { HomepageConfig } from '../data/homepage.types';
 
-const featuredProducts = products.filter(p => p.status === 'available').slice(0, 3);
+const config = homepageConfig as HomepageConfig;
+const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
 ---
 
-<BaseLayout 
+<BaseLayout
   title="Home"
   description="BRITZMEDI is a leading Korean manufacturer of FDA-cleared aesthetic medical devices. Discover TORR RF and innovative skincare technology."
   keywords={["BRITZMEDI", "aesthetic medical device", "TORR RF", "FDA cleared", "Korean medical device", "RF technology", "skin tightening"]}
@@ -16,117 +18,113 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
   <!-- Hero Section with Video/Image/Gradient Background Support -->
   <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
     <!-- Background Layer -->
-    {heroSettings.backgroundType === 'video' && heroSettings.backgroundVideo && (
+    {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
       <div class="absolute inset-0 z-0">
-        <video 
-          autoplay 
-          muted 
-          loop 
+        <video
+          autoplay
+          muted
+          loop
           playsinline
-          poster={heroSettings.backgroundVideoPoster}
+          poster={config.hero.backgroundVideoPoster}
           class="w-full h-full object-cover"
         >
-          <source src={heroSettings.backgroundVideo} type="video/mp4" />
+          <source src={config.hero.backgroundVideo} type="video/mp4" />
         </video>
       </div>
     )}
-    
-    {heroSettings.backgroundType === 'image' && heroSettings.backgroundImage && (
+
+    {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
       <div class="absolute inset-0 z-0">
-        {/* Desktop: show full model, Mobile: focus on face */}
-        <img 
-          src={heroSettings.backgroundImage}
-          alt={heroSettings.backgroundImageAlt || 'Hero background'}
+        <img
+          src={config.hero.backgroundImage}
+          alt={config.hero.backgroundImageAlt || 'Hero background'}
           class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
         />
       </div>
     )}
-    
-    {heroSettings.backgroundType === 'gradient' && (
+
+    {config.hero.backgroundType === 'gradient' && (
       <div class="absolute inset-0 z-0 bg-gradient-hero">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
         <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
       </div>
     )}
-    
+
     <!-- Overlay (for image/video backgrounds) -->
-    {heroSettings.backgroundType !== 'gradient' && (
-      <div 
+    {config.hero.backgroundType !== 'gradient' && (
+      <div
         class:list={[
           "absolute inset-0 z-10",
-          heroSettings.overlayColor === 'dark' && "bg-slate-900",
-          heroSettings.overlayColor === 'light' && "bg-white",
-          heroSettings.overlayColor === 'primary' && "bg-primary-900"
+          config.hero.overlayColor === 'dark' && "bg-slate-900",
+          config.hero.overlayColor === 'light' && "bg-white",
+          config.hero.overlayColor === 'primary' && "bg-primary-900"
         ]}
-        style={`opacity: ${heroSettings.overlayOpacity / 100}`}
+        style={`opacity: ${config.hero.overlayOpacity / 100}`}
       />
     )}
-    
+
     <!-- Content -->
     <div class="container relative z-20">
       <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
-        {/* Grid layout: Text left, Image space right on desktop */}
         <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Text Content - Left side */}
           <div class="order-2 lg:order-1">
-            <!-- Premium Badge - Positioned to not overlap face on mobile -->
+            <!-- Premium Badge -->
             <div class:list={[
               "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
-              heroSettings.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
+              config.hero.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
             ]}>
-              {heroSettings.badge}
+              {config.hero.badge}
             </div>
-            
+
             <!-- Heading -->
             <h1 class:list={[
               "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
-              heroSettings.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
+              config.hero.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
             ]}>
-              {heroSettings.headline}<br />
+              {config.hero.headline}<br />
               <span class:list={[
-                heroSettings.backgroundType === 'gradient' 
+                config.hero.backgroundType === 'gradient'
                   ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
                   : "text-primary-400"
-              ]}>{heroSettings.highlightText}</span><br />
-              {heroSettings.subheadline}
+              ]}>{config.hero.highlightText}</span><br />
+              {config.hero.subheadline}
             </h1>
-            
+
             <!-- Description -->
             <p class:list={[
               "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
-              heroSettings.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
+              config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
             ]}>
-              {heroSettings.description}
+              {config.hero.description}
             </p>
-            
+
             <!-- CTAs -->
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
-              <a href={heroSettings.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
-                {heroSettings.primaryCTA.text}
+              <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
+                {config.hero.primaryCTA.text}
                 <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </a>
-              <a href={heroSettings.secondaryCTA.href} class:list={[
+              <a href={config.hero.secondaryCTA.href} class:list={[
                 "btn-secondary justify-center sm:justify-start",
-                heroSettings.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
+                config.hero.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
               ]}>
-                {heroSettings.secondaryCTA.text}
+                {config.hero.secondaryCTA.text}
               </a>
             </div>
           </div>
-          
-          {/* Spacer for image area on desktop */}
+
           <div class="order-1 lg:order-2 hidden lg:block"></div>
         </div>
       </div>
     </div>
-    
+
     <!-- Bottom gradient fade -->
     <div class:list={[
       "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
-      heroSettings.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
+      config.hero.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
     ]}></div>
   </section>
 
@@ -134,34 +132,15 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
   <section class="py-16 lg:py-20 bg-white relative">
     <div class="container">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">FDA</span>
+        {config.trustBadges.badges.map((badge) => (
+          <div class="text-center group">
+            <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+              <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">{badge.label}</span>
+            </div>
+            <div class="text-sm font-medium text-slate-900">{badge.title}</div>
+            <div class="text-xs text-slate-500 mt-1">{badge.subtitle}</div>
           </div>
-          <div class="text-sm font-medium text-slate-900">510(k) Cleared</div>
-          <div class="text-xs text-slate-500 mt-1">U.S. Regulatory</div>
-        </div>
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">ISO</span>
-          </div>
-          <div class="text-sm font-medium text-slate-900">13485:2016</div>
-          <div class="text-xs text-slate-500 mt-1">Quality Management</div>
-        </div>
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">GMP</span>
-          </div>
-          <div class="text-sm font-medium text-slate-900">Certified</div>
-          <div class="text-xs text-slate-500 mt-1">Manufacturing</div>
-        </div>
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">11+</span>
-          </div>
-          <div class="text-sm font-medium text-slate-900">Patents</div>
-          <div class="text-xs text-slate-500 mt-1">Registered</div>
-        </div>
+        ))}
       </div>
     </div>
   </section>
@@ -171,26 +150,25 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
     <div class="container">
       <!-- Section Header -->
       <div class="max-w-2xl mb-14">
-        <span class="label mb-4">Our Products</span>
-        <h2 class="heading-2 mb-5">Medical Device Excellence</h2>
+        <span class="label mb-4">{config.featuredProducts.label}</span>
+        <h2 class="heading-2 mb-5">{config.featuredProducts.title}</h2>
         <p class="body-large">
-          From our flagship FDA-cleared TORR RF to innovative ultrasound solutions, 
-          discover technology designed for superior clinical outcomes.
+          {config.featuredProducts.description}
         </p>
       </div>
-      
+
       <!-- Products Grid -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {featuredProducts.map((product, index) => (
-          <a 
+          <a
             href={`/products/${product.id}`}
             class="group card-premium p-6 lg:p-7"
           >
             <!-- Product Image -->
             <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-xl mb-6 relative overflow-hidden">
               {product.images?.main ? (
-                <img 
-                  src={product.images.main} 
+                <img
+                  src={product.images.main}
                   alt={product.name}
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -201,7 +179,7 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
               )}
               <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
-            
+
             <!-- Badge -->
             {product.featured && (
               <span class="inline-flex items-center gap-1.5 px-3 py-1.5 mb-4 text-xs font-semibold bg-gradient-to-r from-primary-50 to-primary-100 text-primary-700 rounded-full border border-primary-200/50">
@@ -211,7 +189,7 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
                 Flagship Product
               </span>
             )}
-            
+
             <!-- Content -->
             <div class="flex items-start justify-between gap-4 mb-3">
               <div>
@@ -224,9 +202,9 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
                 </svg>
               </div>
             </div>
-            
+
             <p class="body-small line-clamp-2 mb-5">{product.overview}</p>
-            
+
             <!-- Certifications -->
             {product.certifications && product.certifications.length > 0 && (
               <div class="flex flex-wrap gap-2 pt-5 border-t border-slate-100">
@@ -243,7 +221,7 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
           </a>
         ))}
       </div>
-      
+
       <!-- View All Link -->
       <div class="mt-12 text-center">
         <a href="/products" class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
@@ -262,82 +240,59 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <!-- Content -->
         <div>
-          <span class="label mb-4">Why Choose Us</span>
+          <span class="label mb-4">{config.whyBritzMedi.label}</span>
           <h2 class="heading-2 mb-6">
-            Technology-Driven<br />Medical Device Excellence
+            {config.whyBritzMedi.title.split('\n').map((line, i) => (
+              <>{i > 0 && <br />}{line}</>
+            ))}
           </h2>
           <p class="body-large mb-10">
-            {company.philosophy}
+            {config.whyBritzMedi.description || company.philosophy}
           </p>
-          
+
           <!-- Features List -->
           <div class="space-y-6">
-            {[
-              {
-                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />`,
-                title: "FDA 510(k) Cleared",
-                desc: "Our flagship TORR RF is FDA-cleared for safety and efficacy, meeting rigorous U.S. regulatory standards."
-              },
-              {
-                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />`,
-                title: "In-House R&D Center",
-                desc: "Company-affiliated research institute developing proprietary technologies with 11+ registered patents."
-              },
-              {
-                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />`,
-                title: "Global Quality Standards",
-                desc: "ISO 13485 certified quality management and GMP manufacturing for consistent, reliable products."
-              },
-              {
-                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />`,
-                title: "OEM/ODM Partner",
-                desc: "FDA-registered contract manufacturer offering end-to-end development services for global partners."
-              }
-            ].map((feature) => (
+            {config.whyBritzMedi.features.map((feature) => (
               <div class="flex gap-5 group">
                 <div class="shrink-0 w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" set:html={feature.icon} />
+                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={feature.iconPath} />
+                  </svg>
                 </div>
                 <div>
                   <h3 class="font-semibold text-slate-900 mb-1.5">{feature.title}</h3>
-                  <p class="body-small">{feature.desc}</p>
+                  <p class="body-small">{feature.description}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        
+
         <!-- Stats Card -->
         <div class="relative">
           <div class="absolute -inset-4 bg-gradient-to-br from-primary-500/5 to-accent-500/5 rounded-3xl blur-2xl"></div>
           <div class="relative bg-white rounded-2xl border border-slate-200/80 p-8 lg:p-10 shadow-xl shadow-slate-200/50">
-            <h3 class="text-lg font-bold text-slate-900 mb-8">Company at a Glance</h3>
-            
+            <h3 class="text-lg font-bold text-slate-900 mb-8">{config.whyBritzMedi.statsTitle}</h3>
+
             <div class="space-y-6">
-              <div class="flex items-center justify-between pb-6 border-b border-slate-100">
-                <span class="text-slate-600">Established</span>
-                <span class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">2017</span>
-              </div>
-              <div class="flex items-center justify-between pb-6 border-b border-slate-100">
-                <span class="text-slate-600">Registered Patents</span>
-                <span class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">{company.intellectualProperty.registeredPatents}+</span>
-              </div>
-              <div class="flex items-center justify-between pb-6 border-b border-slate-100">
-                <span class="text-slate-600">Product Lines</span>
-                <span class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">4</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-slate-600">Venture Enterprise</span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-full border border-green-200/50">
-                  <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                  R&D Type
-                </span>
-              </div>
+              {config.whyBritzMedi.stats.map((stat, i) => (
+                <div class:list={["flex items-center justify-between", i < config.whyBritzMedi.stats.length - 1 && "pb-6 border-b border-slate-100"]}>
+                  <span class="text-slate-600">{stat.label}</span>
+                  {stat.type === 'badge' ? (
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-full border border-green-200/50">
+                      <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                      {stat.badgeText || stat.value}
+                    </span>
+                  ) : (
+                    <span class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">{stat.value}</span>
+                  )}
+                </div>
+              ))}
             </div>
-            
+
             <div class="mt-8 pt-8 border-t border-slate-100">
-              <a href="/about" class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
-                Learn more about us
+              <a href={config.whyBritzMedi.learnMoreHref} class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
+                {config.whyBritzMedi.learnMoreText}
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
@@ -353,13 +308,13 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
   <section class="section bg-gradient-section">
     <div class="container">
       <div class="text-center max-w-2xl mx-auto mb-14">
-        <span class="label mb-4 justify-center">Innovation</span>
-        <h2 class="heading-2 mb-5">Core Technologies</h2>
+        <span class="label mb-4 justify-center">{config.coreTechnologies.label}</span>
+        <h2 class="heading-2 mb-5">{config.coreTechnologies.title}</h2>
         <p class="body-large">
-          Our proprietary technologies power the next generation of aesthetic treatments.
+          {config.coreTechnologies.description}
         </p>
       </div>
-      
+
       <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
         {coreTechnologies.map((tech, index) => (
           <div class="card-premium p-7 lg:p-8 group">
@@ -387,31 +342,30 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
     <!-- Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800"></div>
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
-    
+
     <div class="container relative">
       <div class="text-center max-w-2xl mx-auto">
         <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-5">
-          Ready to Partner with BRITZMEDI?
+          {config.cta.title}
         </h2>
         <p class="text-lg text-primary-100 mb-10 leading-relaxed">
-          Whether you're a distributor, clinic, or OEM partner, we're here to help you bring 
-          world-class aesthetic technology to your market.
+          {config.cta.description}
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <a 
-            href="/contact" 
+          <a
+            href={config.cta.primaryCTA.href}
             class="group inline-flex items-center gap-2 px-7 py-4 text-base font-semibold text-primary-700 bg-white hover:bg-primary-50 rounded-xl shadow-lg shadow-black/10 transition-all"
           >
-            Contact Sales Team
+            {config.cta.primaryCTA.text}
             <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </a>
-          <a 
-            href="/products" 
+          <a
+            href={config.cta.secondaryCTA.href}
             class="inline-flex items-center gap-2 px-7 py-4 text-base font-semibold text-white border-2 border-white/20 hover:bg-white/10 rounded-xl transition-all"
           >
-            View Products
+            {config.cta.secondaryCTA.text}
           </a>
         </div>
       </div>

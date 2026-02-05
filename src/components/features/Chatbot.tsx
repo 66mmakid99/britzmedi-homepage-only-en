@@ -15,6 +15,7 @@ interface ChatbotProps {
 export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -184,10 +185,14 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[100] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col transition-all duration-300 ${
-        isMinimized ? 'w-80 h-16' : 'w-96 h-[32rem]'
+      className={`fixed z-[100] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col transition-all duration-300 ${
+        isMinimized
+          ? 'bottom-6 right-6 w-80 h-16'
+          : isExpanded
+            ? 'bottom-3 right-3 left-3 sm:left-auto sm:w-96 h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-1.5rem)]'
+            : 'bottom-6 right-6 w-96 h-[32rem]'
       }`}
-      style={{ maxHeight: 'calc(100vh - 6rem)' }}
+      style={{ maxHeight: isExpanded ? undefined : 'calc(100vh - 6rem)' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 rounded-t-2xl">
@@ -203,6 +208,23 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {!isMinimized && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              aria-label={isExpanded ? 'Shrink chat' : 'Expand chat'}
+            >
+              {isExpanded ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9L4 4m0 0v4m0-4h4m6 6l5 5m0 0v-4m0 4h-4" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h6m0 0v6m0-6l-7 7M9 21H3m0 0v-6m0 6l7-7" />
+                </svg>
+              )}
+            </button>
+          )}
           <button
             onClick={() => setIsMinimized(!isMinimized)}
             className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"

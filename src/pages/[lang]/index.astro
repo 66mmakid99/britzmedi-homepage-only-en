@@ -2,7 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { company, coreTechnologies } from '../../content/company';
 import { products } from '../../content/products';
-import { heroSettings } from '../../content/hero';
+import homepageConfig from '../../data/homepage.json';
+import type { HomepageConfig } from '../../data/homepage.types';
 import { supportedLanguages, languages, defaultLang, type Language } from '../../i18n/config';
 import { useTranslations } from '../../i18n';
 
@@ -13,10 +14,11 @@ export function getStaticPaths() {
     .map(lang => ({ params: { lang } }));
 }
 
+const config = homepageConfig as HomepageConfig;
 const { lang } = Astro.params as { lang: Language };
 const t = useTranslations(lang);
 const langInfo = languages[lang];
-const featuredProducts = products.filter(p => p.status === 'available').slice(0, 3);
+const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
 
 // SEO for this language
 const langSeoTitles: Record<string, string> = {
@@ -47,32 +49,32 @@ const langSeoDescriptions: Record<string, string> = {
   <!-- Hero Section -->
   <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
     <!-- Background Layer -->
-    {heroSettings.backgroundType === 'video' && heroSettings.backgroundVideo && (
+    {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
       <div class="absolute inset-0 z-0">
         <video
           autoplay
           muted
           loop
           playsinline
-          poster={heroSettings.backgroundVideoPoster}
+          poster={config.hero.backgroundVideoPoster}
           class="w-full h-full object-cover"
         >
-          <source src={heroSettings.backgroundVideo} type="video/mp4" />
+          <source src={config.hero.backgroundVideo} type="video/mp4" />
         </video>
       </div>
     )}
 
-    {heroSettings.backgroundType === 'image' && heroSettings.backgroundImage && (
+    {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
       <div class="absolute inset-0 z-0">
         <img
-          src={heroSettings.backgroundImage}
-          alt={heroSettings.backgroundImageAlt || 'Hero background'}
+          src={config.hero.backgroundImage}
+          alt={config.hero.backgroundImageAlt || 'Hero background'}
           class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
         />
       </div>
     )}
 
-    {heroSettings.backgroundType === 'gradient' && (
+    {config.hero.backgroundType === 'gradient' && (
       <div class="absolute inset-0 z-0 bg-gradient-hero">
         <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
         <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
@@ -81,15 +83,15 @@ const langSeoDescriptions: Record<string, string> = {
     )}
 
     <!-- Overlay -->
-    {heroSettings.backgroundType !== 'gradient' && (
+    {config.hero.backgroundType !== 'gradient' && (
       <div
         class:list={[
           "absolute inset-0 z-10",
-          heroSettings.overlayColor === 'dark' && "bg-slate-900",
-          heroSettings.overlayColor === 'light' && "bg-white",
-          heroSettings.overlayColor === 'primary' && "bg-primary-900"
+          config.hero.overlayColor === 'dark' && "bg-slate-900",
+          config.hero.overlayColor === 'light' && "bg-white",
+          config.hero.overlayColor === 'primary' && "bg-primary-900"
         ]}
-        style={`opacity: ${heroSettings.overlayOpacity / 100}`}
+        style={`opacity: ${config.hero.overlayOpacity / 100}`}
       />
     )}
 
@@ -100,18 +102,18 @@ const langSeoDescriptions: Record<string, string> = {
           <div class="order-2 lg:order-1">
             <div class:list={[
               "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
-              heroSettings.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
+              config.hero.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
             ]}>
-              {heroSettings.badge}
+              {config.hero.badge}
             </div>
 
             <h1 class:list={[
               "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
-              heroSettings.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
+              config.hero.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
             ]}>
               {t('home.hero.title')}<br />
               <span class:list={[
-                heroSettings.backgroundType === 'gradient'
+                config.hero.backgroundType === 'gradient'
                   ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
                   : "text-primary-400"
               ]}>BRITZMEDI</span>
@@ -119,7 +121,7 @@ const langSeoDescriptions: Record<string, string> = {
 
             <p class:list={[
               "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
-              heroSettings.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
+              config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
             ]}>
               {t('home.hero.subtitle')}
             </p>
@@ -133,7 +135,7 @@ const langSeoDescriptions: Record<string, string> = {
               </a>
               <a href={`/${lang}/contact`} class:list={[
                 "btn-secondary justify-center sm:justify-start",
-                heroSettings.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
+                config.hero.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
               ]}>
                 {t('home.hero.ctaSecondary')}
               </a>
@@ -147,7 +149,7 @@ const langSeoDescriptions: Record<string, string> = {
 
     <div class:list={[
       "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
-      heroSettings.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
+      config.hero.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
     ]}></div>
   </section>
 
@@ -155,34 +157,15 @@ const langSeoDescriptions: Record<string, string> = {
   <section class="py-16 lg:py-20 bg-white relative">
     <div class="container">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">FDA</span>
+        {config.trustBadges.badges.map((badge) => (
+          <div class="text-center group">
+            <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+              <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">{badge.label}</span>
+            </div>
+            <div class="text-sm font-medium text-slate-900">{badge.title}</div>
+            <div class="text-xs text-slate-500 mt-1">{badge.subtitle}</div>
           </div>
-          <div class="text-sm font-medium text-slate-900">510(k) Cleared</div>
-          <div class="text-xs text-slate-500 mt-1">U.S. Regulatory</div>
-        </div>
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">ISO</span>
-          </div>
-          <div class="text-sm font-medium text-slate-900">13485:2016</div>
-          <div class="text-xs text-slate-500 mt-1">Quality Management</div>
-        </div>
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">GMP</span>
-          </div>
-          <div class="text-sm font-medium text-slate-900">Certified</div>
-          <div class="text-xs text-slate-500 mt-1">Manufacturing</div>
-        </div>
-        <div class="text-center group">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
-            <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">11+</span>
-          </div>
-          <div class="text-sm font-medium text-slate-900">Patents</div>
-          <div class="text-xs text-slate-500 mt-1">Registered</div>
-        </div>
+        ))}
       </div>
     </div>
   </section>
