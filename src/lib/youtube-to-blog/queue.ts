@@ -3,6 +3,13 @@
 import type { BlogJob, JobStatus, StepName } from './schemas';
 import { STEP_PROGRESS } from './schemas';
 
+// Allowed columns for dynamic updates (prevents SQL injection)
+const ALLOWED_EXTRA_COLUMNS = new Set([
+  'transcript_text', 'transcript_lang', 'translated_text',
+  'video_title', 'channel_name', 'channel_id',
+  'blog_post_id', 'error_message', 'current_step',
+]);
+
 /**
  * Update job status and progress in the database
  */
@@ -22,6 +29,7 @@ export async function updateJobStatus(
 
   if (extra) {
     for (const [key, value] of Object.entries(extra)) {
+      if (!ALLOWED_EXTRA_COLUMNS.has(key)) continue;
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
