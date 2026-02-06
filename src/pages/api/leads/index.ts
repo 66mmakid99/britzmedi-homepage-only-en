@@ -6,6 +6,52 @@ interface Env {
   DB: D1Database;
 }
 
+// IP-based rate limiting for lead submissions
+const leadRateLimitStore = new Map<string, number[]>();
+
+const LEAD_RATE_LIMIT = {
+  maxPerMinute: 3,
+  maxPerHour: 10,
+};
+
+function checkLeadRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  let timestamps = leadRateLimitStore.get(ip) || [];
+
+  // Clean entries older than 1 hour
+  timestamps = timestamps.filter(t => now - t < 3600000);
+  leadRateLimitStore.set(ip, timestamps);
+
+  // Check per-minute limit
+  const minuteCount = timestamps.filter(t => now - t < 60000).length;
+  if (minuteCount >= LEAD_RATE_LIMIT.maxPerMinute) {
+    return { allowed: false, retryAfter: 60 };
+  }
+
+  // Check per-hour limit
+  if (timestamps.length >= LEAD_RATE_LIMIT.maxPerHour) {
+    return { allowed: false, retryAfter: 3600 };
+  }
+
+  timestamps.push(now);
+  return { allowed: true };
+}
+
+// Periodically clean stale entries (every 100 requests)
+let requestCounter = 0;
+function cleanupRateLimitStore() {
+  if (++requestCounter % 100 !== 0) return;
+  const now = Date.now();
+  for (const [ip, timestamps] of leadRateLimitStore) {
+    const fresh = timestamps.filter(t => now - t < 3600000);
+    if (fresh.length === 0) {
+      leadRateLimitStore.delete(ip);
+    } else {
+      leadRateLimitStore.set(ip, fresh);
+    }
+  }
+}
+
 // GET /api/leads - List leads with filtering
 export const GET: APIRoute = async (context) => {
   const { request, locals } = context;
@@ -110,6 +156,26 @@ export const GET: APIRoute = async (context) => {
 
 // POST /api/leads - Create new lead
 export const POST: APIRoute = async ({ request, locals }) => {
+  // Rate limiting
+  const clientIP = request.headers.get('cf-connecting-ip')
+    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'unknown';
+
+  cleanupRateLimitStore();
+  const rateCheck = checkLeadRateLimit(clientIP);
+  if (!rateCheck.allowed) {
+    console.log(`[Leads API] Rate limited IP: ${clientIP}`);
+    return new Response(JSON.stringify({
+      error: 'Too many submissions. Please try again later.',
+    }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(rateCheck.retryAfter),
+      },
+    });
+  }
+
   try {
     const data = await request.json();
     const source = data.source || 'website';

@@ -14,6 +14,8 @@ if (sessionToken) {
 }
 
 const error = Astro.url.searchParams.get('error');
+const lockoutMinutes = Astro.url.searchParams.get('minutes');
+const remainingAttempts = Astro.url.searchParams.get('remaining');
 ---
 
 <!DOCTYPE html>
@@ -46,11 +48,13 @@ const error = Astro.url.searchParams.get('error');
       <h2 class="text-xl font-semibold text-slate-900 mb-6">Sign in to continue</h2>
 
       {error && (
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p class="text-sm text-red-600">
-            {error === 'invalid' && 'Invalid password. Please try again.'}
+        <div class={`mb-6 p-4 border rounded-lg ${error === 'locked' ? 'bg-orange-50 border-orange-200' : 'bg-red-50 border-red-200'}`}>
+          <p class={`text-sm ${error === 'locked' ? 'text-orange-700' : 'text-red-600'}`}>
+            {error === 'invalid' && !remainingAttempts && 'Invalid password. Please try again.'}
+            {error === 'invalid' && remainingAttempts && `Invalid password. ${remainingAttempts} attempt(s) remaining before lockout.`}
             {error === 'required' && 'Password is required.'}
             {error === 'expired' && 'Session expired. Please sign in again.'}
+            {error === 'locked' && `Too many failed attempts. Please try again in ${lockoutMinutes || 15} minute(s).`}
           </p>
         </div>
       )}
