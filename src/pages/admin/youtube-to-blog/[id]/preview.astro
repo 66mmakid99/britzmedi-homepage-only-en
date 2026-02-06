@@ -2,11 +2,11 @@
 export const prerender = false;
 
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import BlogPreview from '../../../../components/admin/youtube-to-blog/BlogPreview.tsx';
+import BlogPreview from '../../../../components/admin/youtube-to-blog/BlogPreview';
 
 const { id } = Astro.params;
 ---
 
-<AdminLayout title="Preview Blog Post">
-  <BlogPreview client:only="react" postId={id} />
+<AdminLayout title="Blog Preview">
+  <BlogPreview postId={id!} client:only="react" />
 </AdminLayout>
