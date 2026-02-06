@@ -39,41 +39,88 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
   };
 
   const handleStartProcessing = async () => {
-    if (!['pending', 'failed'].includes(job.status)) return;
+    if (!['pending', 'failed', 'extracting', 'translating', 'generating', 'researching', 'imaging'].includes(job.status)) return;
     setProcessing(true);
 
-    const steps = ['extract', 'translate', 'generate', 'research', 'image', 'finalize'];
+    // Fetch fresh job state to determine which steps to skip
+    let freshJob = job;
+    try {
+      const jobRes = await fetch(`/api/blog/queue/${job.id}`);
+      if (jobRes.ok) {
+        const jobData = await jobRes.json();
+        if (jobData.job) freshJob = jobData.job;
+      }
+    } catch { /* use existing job state */ }
 
-    for (const step of steps) {
+    const allSteps: Array<{ name: string; skipIf: () => boolean }> = [
+      { name: 'extract', skipIf: () => !!freshJob.transcript_text },
+      { name: 'translate', skipIf: () => !!freshJob.translated_text || freshJob.transcript_lang === 'en' },
+      { name: 'generate', skipIf: () => !!freshJob.blog_post_id },
+      { name: 'research', skipIf: () => false },
+      { name: 'image', skipIf: () => false },
+      { name: 'finalize', skipIf: () => false },
+    ];
+
+    for (const step of allSteps) {
+      if (step.skipIf()) {
+        console.log(`[Queue] Skipping ${step.name} (already done)`);
+        continue;
+      }
+
       try {
-        const res = await fetch(`/api/blog/queue/${job.id}/step/${step}`, {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 55000);
+
+        const res = await fetch(`/api/blog/queue/${job.id}/step/${step.name}`, {
           method: 'POST',
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({ error: `Step ${step} returned ${res.status}` }));
-          console.error(`Step ${step} failed:`, data.error);
-          // Mark job as failed in DB so UI can show error and allow retry
+          const data = await res.json().catch(() => ({ error: `${res.status} ${res.statusText}` }));
+          console.error(`Step ${step.name} failed:`, data.error);
           await fetch(`/api/blog/queue/${job.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'failed', error_message: `Step "${step}" failed: ${data.error || res.statusText}` }),
-          });
+            body: JSON.stringify({ status: 'failed', error_message: `Step "${step.name}": ${data.error || res.statusText}` }),
+          }).catch(() => {});
           break;
         }
       } catch (err: any) {
-        console.error(`Step ${step} failed:`, err);
+        const isTimeout = err.name === 'AbortError';
+        console.error(`Step ${step.name} ${isTimeout ? 'timed out' : 'failed'}:`, err);
+
+        // On timeout, check if the step actually completed in DB
+        if (isTimeout) {
+          try {
+            const checkRes = await fetch(`/api/blog/queue/${job.id}`);
+            if (checkRes.ok) {
+              const checkData = await checkRes.json();
+              const updatedJob = checkData.job;
+              // If progress advanced past this step, it completed despite timeout
+              if (updatedJob && updatedJob.progress > freshJob.progress) {
+                console.log(`[Queue] Step ${step.name} completed despite timeout (progress: ${updatedJob.progress})`);
+                freshJob = updatedJob;
+                continue;
+              }
+            }
+          } catch { /* fall through to error */ }
+        }
+
         await fetch(`/api/blog/queue/${job.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'failed', error_message: `Step "${step}" error: ${err.message || 'Network error'}` }),
+          body: JSON.stringify({
+            status: 'failed',
+            error_message: `Step "${step.name}": ${isTimeout ? 'Timed out (server may still be processing)' : err.message || 'Network error'}`,
+          }),
         }).catch(() => {});
         break;
       }
     }
 
     setProcessing(false);
-    // Parent will poll for updates
   };
 
   return (
@@ -103,7 +150,7 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
           </div>
 
           {/* Progress bar */}
-          {(isActive || processing) && (
+          {(isActive || processing || (job.progress > 0 && !['completed', 'failed'].includes(job.status))) && (
             <div className="mt-3">
               <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
@@ -162,13 +209,23 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
               </a>
             )}
 
-            {job.status === 'failed' && (
+            {(job.status === 'failed' || (!processing && !['pending', 'completed'].includes(job.status))) && (
               <button
                 onClick={handleStartProcessing}
                 disabled={processing}
-                className="px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
               >
-                Retry
+                {processing ? (
+                  <>
+                    <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Resuming...
+                  </>
+                ) : (
+                  job.status === 'failed' ? 'Retry' : 'Resume'
+                )}
               </button>
             )}
 
