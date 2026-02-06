@@ -1,0 +1,41 @@
+name: Scheduled Build & Deploy
+
+on:
+  # Daily backup build at 09:00 KST (00:00 UTC)
+  schedule:
+    - cron: '0 0 * * *'
+
+  # Triggered by Cloudflare Worker after publishing scheduled posts
+  repository_dispatch:
+    types: [scheduled-publish]
+
+  # Manual trigger
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=britzmedi-homepage-only-en

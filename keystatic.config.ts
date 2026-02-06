@@ -35,9 +35,34 @@ export default config({
           label: 'Author',
           defaultValue: 'BRITZMEDI Team'
         }),
+        thumbnail: fields.image({
+          label: 'Thumbnail Image',
+          directory: 'public/images/blog',
+          publicPath: '/images/blog/',
+          description: 'Optional thumbnail for blog list cards (recommended: 800x450px)'
+        }),
+        status: fields.select({
+          label: 'Publishing Status',
+          options: [
+            { label: 'Draft', value: 'draft' },
+            { label: 'Scheduled', value: 'scheduled' },
+            { label: 'Published', value: 'published' }
+          ],
+          defaultValue: 'draft',
+          description: 'Draft = admin only, Scheduled = auto-publish at scheduled date, Published = visible on site'
+        }),
+        scheduledDate: fields.datetime({
+          label: 'Scheduled Publish Date',
+          description: 'Required when status is "scheduled". Post will auto-publish at this date/time.'
+        }),
+        publishDate: fields.datetime({
+          label: 'Publish Date',
+          description: 'The date this post was or will be published'
+        }),
         publishedAt: fields.date({
-          label: 'Published Date',
-          validation: { isRequired: true }
+          label: 'Published Date (Legacy)',
+          validation: { isRequired: true },
+          description: 'Legacy field - use Publish Date for new posts'
         }),
         updatedAt: fields.date({
           label: 'Updated Date'

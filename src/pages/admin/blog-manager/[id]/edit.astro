@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import BlogPostEditor from '../../../../components/admin/blog-manager/BlogPostEditor.tsx';
+
+const { id } = Astro.params;
+---
+
+<AdminLayout title="Edit Blog Post">
+  <BlogPostEditor postId={id!} client:only="react" />
+</AdminLayout>

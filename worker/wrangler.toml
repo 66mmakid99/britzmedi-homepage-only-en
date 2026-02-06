@@ -1,0 +1,17 @@
+name = "britzmedi-scheduled-publish"
+main = "scheduled-publish.ts"
+compatibility_date = "2026-01-24"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["0 * * * *"]  # Every hour
+
+[[d1_databases]]
+binding = "DB"
+database_name = "britzmedi-leads"
+database_id = "b42c1b3d-bb23-4559-9a25-3d8811d975dc"
+
+[vars]
+# GITHUB_TOKEN and GITHUB_REPO should be set as secrets:
+# wrangler secret put GITHUB_TOKEN
+# wrangler secret put GITHUB_REPO
