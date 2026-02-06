@@ -8,13 +8,39 @@ import type { HomepageConfig } from '../data/homepage.types';
 
 const config = homepageConfig as HomepageConfig;
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
+
+// Map appliedTo text to product page URLs
+const techProductLinks: Record<string, { href: string; label: string }> = {
+  'LUMINO WAVE': { href: '/products/lumino-wave', label: 'LUMINO WAVE' },
+  'TORR RF': { href: '/products/torr-rf', label: 'TORR RF' },
+  'ULBLANC (i-Booster)': { href: '/products/ulblanc', label: 'ULBLANC (i-Booster)' },
+};
 ---
 
 <BaseLayout
   title="Home"
-  description="BRITZMEDI is a leading Korean manufacturer of FDA-cleared aesthetic medical devices. Discover TORR RF and innovative skincare technology."
-  keywords={["BRITZMEDI", "aesthetic medical device", "TORR RF", "FDA cleared", "Korean medical device", "RF technology", "skin tightening"]}
+  description="BRITZMEDI manufactures FDA 510(k) cleared aesthetic medical devices in Korea. Explore TORR RF multi-wave RF and innovative skin tightening technology. Request a demo today."
+  keywords={["BRITZMEDI", "medical aesthetic device manufacturer", "RF technology", "Korean medical device", "TORR RF", "FDA cleared", "skin tightening device", "body contouring"]}
 >
+  {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
+    <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
+  )}
+  <!-- WebSite Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "BRITZMEDI",
+    "alternateName": "브리츠메디",
+    "url": "https://britzmedi.com",
+    "description": "BRITZMEDI is a South Korean medical aesthetic device manufacturer specializing in innovative RF technology for skin tightening and body contouring.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "BRITZMEDI Co., Ltd.",
+      "logo": { "@type": "ImageObject", "url": "https://britzmedi.com/images/logos/britzmedi-logo.png" }
+    },
+    "inLanguage": ["en", "ja", "zh", "th", "vi", "es", "fr", "ru", "ar"]
+  })} />
+
   <!-- Hero Section with Video/Image/Gradient Background Support -->
   <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
     <!-- Background Layer -->
@@ -38,6 +64,11 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
         <img
           src={config.hero.backgroundImage}
           alt={config.hero.backgroundImageAlt || 'Hero background'}
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
           class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
         />
       </div>
@@ -133,13 +164,13 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
     <div class="container">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
-          <div class="text-center group">
+          <a href="/certifications" class="text-center group block">
             <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
               <span class="text-2xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">{badge.label}</span>
             </div>
             <div class="text-sm font-medium text-slate-900">{badge.title}</div>
             <div class="text-xs text-slate-500 mt-1">{badge.subtitle}</div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
@@ -170,6 +201,10 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
                 <img
                   src={product.images.main}
                   alt={product.name}
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                  decoding="async"
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
@@ -325,12 +360,21 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
             </div>
             <h3 class="text-lg font-bold text-slate-900 mb-3">{tech.name}</h3>
             <p class="body-base mb-5">{tech.description}</p>
-            <div class="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-              {tech.appliedTo}
-            </div>
+            {techProductLinks[tech.appliedTo] ? (
+              <a href={techProductLinks[tech.appliedTo].href} class="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                {techProductLinks[tech.appliedTo].label}
+              </a>
+            ) : (
+              <div class="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                {tech.appliedTo}
+              </div>
+            )}
           </div>
         ))}
       </div>

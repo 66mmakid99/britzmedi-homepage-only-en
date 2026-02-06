@@ -55,19 +55,19 @@ const cfOptimizedUrl = (url: string, options: { width?: number; quality?: number
     loading={loading}
     fetchpriority={fetchpriority}
     decoding={decoding}
-    class:list={['transition-opacity duration-300', className]}
+    class:list={['optimized-img transition-opacity duration-300', className]}
     onload="this.classList.add('loaded')"
   />
 </picture>
 
 <style>
-  img {
+  .optimized-img {
     opacity: 0;
   }
-  img.loaded {
+  .optimized-img.loaded {
     opacity: 1;
   }
-  img[loading="eager"] {
+  .optimized-img[loading="eager"] {
     opacity: 1;
   }
 </style>

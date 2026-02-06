@@ -8,10 +8,39 @@ const t = useTranslations('en');
 ---
 
 <BaseLayout
-  title={t('contact.title')}
-  description={t('contact.subtitle')}
-  keywords={["BRITZMEDI contact", "sales inquiry", "distributor", "partnership", "medical device Korea"]}
+  title="Contact Us - Sales & Distributor Partnership Inquiries"
+  description="Contact BRITZMEDI for product inquiries, distributor partnerships, and demo requests. Korean medical device manufacturer with global support. Get a response within 24h."
+  keywords={["contact BRITZMEDI", "medical device inquiry", "distributor partnership", "sales inquiry", "demo request", "Korean medical device", "aesthetic device partnership"]}
 >
+  <!-- ContactPage Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact BRITZMEDI",
+    "description": "Contact BRITZMEDI for sales inquiries, distributor partnerships, and product information. Professional aesthetic medical devices from Korea.",
+    "url": "https://britzmedi.com/contact",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "BRITZMEDI Co., Ltd.",
+      "telephone": "+82-70-4348-7244",
+      "email": "contact@britzmedi.co.kr",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1211, 388, Dunchon-daero, Jungwon-gu",
+        "addressLocality": "Seongnam-si",
+        "addressRegion": "Gyeonggi-do",
+        "postalCode": "13403",
+        "addressCountry": "KR"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      }
+    }
+  })} />
+
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-hero py-16 lg:py-24">
     <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>

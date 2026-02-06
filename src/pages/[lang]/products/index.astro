@@ -29,9 +29,10 @@ const comingSoonProducts = products.filter(p => p.status === 'coming-soon');
         <span class="label mb-4">{t('products.title')}</span>
         <h1 class="heading-1 mb-6">{t('products.subtitle')}</h1>
         <p class="body-large">
-          {lang === 'ko' ? 'FDA 510(k) 승인 및 ISO 13485 인증 미용의료기기' :
-           lang === 'ja' ? 'FDA 510(k)承認およびISO 13485認証の美容医療機器' :
+          {lang === 'ja' ? 'FDA 510(k)承認およびISO 13485認証の美容医療機器' :
            lang === 'zh' ? 'FDA 510(k)认证和ISO 13485认证的医美设备' :
+           lang === 'fr' ? 'Dispositifs médicaux certifiés FDA 510(k) et ISO 13485' :
+           lang === 'ru' ? 'Медицинские устройства с сертификацией FDA 510(k) и ISO 13485' :
            'FDA 510(k) Cleared and ISO 13485 Certified Medical Devices'}
         </p>
       </div>

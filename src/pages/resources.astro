@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ResourceGateModal from '../components/features/ResourceGateModal.tsx';
 import { resources, resourceCategories, getResourcesByCategory } from '../content/resources';
 import { useTranslations } from '../i18n';
 
@@ -38,9 +39,9 @@ const getCategoryName = (categoryId: string): string => {
 ---
 
 <BaseLayout
-  title={t('resources.title')}
-  description={pageDescription}
-  keywords={["BRITZMEDI downloads", "product brochures", "technical documents", "medical device resources", "TORR RF brochure"]}
+  title="Resources - Product Brochures & Technical Specifications"
+  description="Download BRITZMEDI product brochures, technical specs, certification documents, and training materials for TORR RF, ULBLANC, and NEWCHAE SHOT. Free for professionals."
+  keywords={["BRITZMEDI downloads", "product brochures", "technical specifications", "TORR RF brochure", "medical device resources", "certification documents", "product catalog"]}
 >
   <!-- Hero Section -->
   <section class="relative overflow-hidden bg-gradient-hero py-16 lg:py-24">
@@ -154,13 +155,11 @@ const getCategoryName = (categoryId: string): string => {
                 )}
               </div>
 
-              <!-- Download Button -->
-              <a
-                href={resource.driveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="resource-download-btn flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
-                data-resource-id={resource.id}
+              <!-- Download Button (gated) -->
+              <button
+                type="button"
+                class="resource-download-btn flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors cursor-pointer"
+                data-gate-resource-id={resource.id}
                 data-resource-title={resource.title}
                 data-resource-category={resource.category}
               >
@@ -168,7 +167,7 @@ const getCategoryName = (categoryId: string): string => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 {t('resources.download')}
-              </a>
+              </button>
             </div>
           </div>
         ))}
@@ -204,6 +203,12 @@ const getCategoryName = (categoryId: string): string => {
       </div>
     </div>
   </section>
+
+  <!-- Resource Download Gate Modal -->
+  <ResourceGateModal
+    client:idle
+    resources={resources.map(r => ({ id: r.id, title: r.title, driveUrl: r.driveUrl }))}
+  />
 </BaseLayout>
 
 <script>
@@ -254,22 +259,7 @@ const getCategoryName = (categoryId: string): string => {
     firstButton.classList.remove('text-slate-600');
   }
 
-  // Download tracking - fire-and-forget
-  document.querySelectorAll('.resource-download-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const el = btn as HTMLElement;
-      const body = JSON.stringify({
-        resource_id: el.dataset.resourceId,
-        resource_title: el.dataset.resourceTitle,
-        resource_category: el.dataset.resourceCategory,
-      });
-      fetch('/api/resources/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body,
-      }).catch(() => {});
-    });
-  });
+  // Download tracking now handled by ResourceGateModal component
 </script>
 
 <style>

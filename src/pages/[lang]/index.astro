@@ -22,22 +22,24 @@ const featuredProducts = products.filter(p => p.status === 'available').slice(0,
 
 // SEO for this language
 const langSeoTitles: Record<string, string> = {
-  ko: '홈 | BRITZMEDI - FDA 승인 미용의료기기',
   ja: 'ホーム | BRITZMEDI - FDA承認美容医療機器',
   zh: '首页 | BRITZMEDI - FDA认证医美设备',
   th: 'หน้าแรก | BRITZMEDI - อุปกรณ์การแพทย์ที่ได้รับการรับรอง FDA',
   vi: 'Trang chủ | BRITZMEDI - Thiết bị y tế được FDA phê duyệt',
   es: 'Inicio | BRITZMEDI - Dispositivos Médicos Estéticos',
+  fr: 'Accueil | BRITZMEDI - Dispositifs Médicaux Esthétiques Certifiés FDA',
+  ru: 'Главная | BRITZMEDI - Эстетические медицинские устройства с одобрением FDA',
   ar: 'الرئيسية | BRITZMEDI - أجهزة طبية معتمدة من FDA',
 };
 
 const langSeoDescriptions: Record<string, string> = {
-  ko: 'BRITZMEDI는 FDA 510(k) 승인 미용의료기기 제조사입니다. TORR RF와 혁신적인 스킨케어 기술을 만나보세요.',
   ja: 'BRITZMEDIはFDA 510(k)承認の美容医療機器メーカーです。TORR RFと革新的なスキンケア技術をご覧ください。',
   zh: 'BRITZMEDI是FDA 510(k)认证的医美设备制造商。探索TORR RF和创新护肤技术。',
   th: 'BRITZMEDI เป็นผู้ผลิตอุปกรณ์การแพทย์ด้านความงามที่ได้รับการรับรอง FDA 510(k) สำรวจ TORR RF',
   vi: 'BRITZMEDI là nhà sản xuất thiết bị y tế thẩm mỹ được FDA 510(k) phê duyệt. Khám phá TORR RF.',
   es: 'BRITZMEDI es un fabricante líder de dispositivos médicos estéticos con certificación FDA 510(k). Descubra TORR RF.',
+  fr: 'BRITZMEDI est un fabricant de dispositifs médicaux esthétiques certifié FDA 510(k). Découvrez TORR RF et nos technologies innovantes de soins de la peau.',
+  ru: 'BRITZMEDI — производитель эстетических медицинских устройств с сертификацией FDA 510(k). Откройте для себя TORR RF и инновационные технологии ухода за кожей.',
   ar: 'BRITZMEDI هي شركة رائدة في تصنيع الأجهزة الطبية التجميلية المعتمدة من FDA 510(k). اكتشف TORR RF.',
 };
 ---
@@ -46,6 +48,9 @@ const langSeoDescriptions: Record<string, string> = {
   title={langSeoTitles[lang] || 'Home'}
   description={langSeoDescriptions[lang]}
 >
+  {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
+    <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
+  )}
   <!-- Hero Section -->
   <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
     <!-- Background Layer -->
@@ -69,6 +74,11 @@ const langSeoDescriptions: Record<string, string> = {
         <img
           src={config.hero.backgroundImage}
           alt={config.hero.backgroundImageAlt || 'Hero background'}
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
           class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
         />
       </div>
@@ -189,6 +199,10 @@ const langSeoDescriptions: Record<string, string> = {
                 <img
                   src={product.images.main}
                   alt={product.name}
+                  width="800"
+                  height="600"
+                  loading="lazy"
+                  decoding="async"
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (

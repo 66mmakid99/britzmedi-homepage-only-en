@@ -221,17 +221,52 @@ export const products: Product[] = [
     specifications: [
       { label: "Sono-I Frequency", value: "1/3 MHz, 3/10 MHz", note: "Dual frequency modes" },
       { label: "i-Booster Frequency", value: "28 kHz", note: "For sonophoresis" },
+      { label: "Output Power", value: "0.5 ~ 2.0 W/cm²", note: "Adjustable intensity" },
+      { label: "Treatment Modes", value: "Tightening / Soothing / Boosting" },
+      { label: "Display", value: '7" LCD Touch Screen' },
+      { label: "Dimensions", value: "280mm (W) × 350mm (D) × 180mm (H)" },
+      { label: "Weight", value: "4.5 kg" },
     ],
-    
+
+    handpieces: [
+      {
+        name: "Sono-I Handpiece (Face)",
+        tipSize: "Ø 25mm",
+        depth: "Epidermis to Dermis",
+        feature: "Dual-wave technology for comprehensive facial treatment",
+      },
+      {
+        name: "i-Booster Handpiece",
+        tipSize: "Ø 30mm",
+        depth: "Transdermal",
+        feature: "28kHz ultrasound for enhanced active ingredient delivery",
+      },
+    ],
+
     certifications: [
       { name: "Korea MFDS", status: "Certified", detail: "No. 21-4685" },
     ],
-    
+
     clinicalBenefits: [
       "No downtime - Pain-free, infection-free",
       "Suitable for daily use",
       "Versatile treatment range from soothing to lifting",
       "Enhanced product absorption efficiency",
+    ],
+
+    differentiators: [
+      {
+        feature: "Dynamic Dual Wave™",
+        description: "Alternating frequency technology targets both superficial and deep tissue layers in a single treatment session",
+      },
+      {
+        feature: "Sonophoresis Integration",
+        description: "28kHz acoustic cavitation creates micro-pathways for 10x better absorption of active ingredients",
+      },
+      {
+        feature: "ACNE/Flushing Safe",
+        description: "Gentle enough for sensitive skin conditions while delivering effective results",
+      },
     ],
   },
   
@@ -271,22 +306,44 @@ export const products: Product[] = [
         description: "Electroporation technology enhances absorption of skincare products.",
       },
     ],
-    
+
+    indications: [
+      "Skin Tightening - RF energy stimulates collagen for firmer skin",
+      "Face Contouring - EMS tones facial muscles for V-line effect",
+      "Product Absorption - ELP enhances skincare penetration",
+      "Anti-Aging - Reduces fine lines and improves skin texture",
+    ],
+
+    specifications: [
+      { label: "RF Frequency", value: "1 MHz", note: "Multi-channel stack" },
+      { label: "EMS Frequency", value: "1-100 Hz", note: "Adjustable" },
+      { label: "ELP Frequency", value: "100-1000 Hz", note: "Electroporation" },
+      { label: "Treatment Modes", value: "RF / EMS / ELP / Combined" },
+      { label: "Vibration", value: "10,000 times/min", note: "3D vibration" },
+      { label: "Dimensions", value: "65mm × 65mm × 170mm" },
+      { label: "Weight", value: "180g" },
+      { label: "Battery", value: "Li-ion, USB-C Charging" },
+    ],
+
     clinicalBenefits: [
       "Skin Density improved by 128.48%",
       "Pore Size reduced by 26.74%",
       "Improved surface and deep elasticity",
       "Enhanced skin radiance",
     ],
-    
+
     differentiators: [
       {
         feature: "Automated Shot System",
-        description: "Concentrates energy output for precise delivery",
+        description: "Concentrates energy output for precise delivery at optimal intervals",
       },
       {
-        feature: "3D Vibration",
-        description: "Vibrates 10,000 times/min to assist energy penetration",
+        feature: "3D Vibration Technology",
+        description: "Vibrates 10,000 times/min to assist energy penetration and comfort",
+      },
+      {
+        feature: "Clinical-Grade Home Care",
+        description: "Professional technology miniaturized for convenient daily home use",
       },
     ],
   },

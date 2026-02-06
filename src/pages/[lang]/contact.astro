@@ -91,23 +91,25 @@ const t = useTranslations(lang);
 
           <div class="card-premium p-6">
             <h3 class="font-semibold text-slate-900 mb-4">
-              {lang === 'ko' ? '업무 시간' :
-               lang === 'ja' ? '営業時間' :
+              {lang === 'ja' ? '営業時間' :
                lang === 'zh' ? '工作时间' :
                lang === 'th' ? 'เวลาทำการ' :
                lang === 'vi' ? 'Giờ làm việc' :
                lang === 'es' ? 'Horario de Atención' :
+               lang === 'fr' ? 'Heures d\'ouverture' :
+               lang === 'ru' ? 'Часы работы' :
                lang === 'ar' ? 'ساعات العمل' :
                'Business Hours'}
             </h3>
             <div class="text-sm text-slate-600 space-y-2">
               <p>
-                {lang === 'ko' ? '월-금: 09:00 - 18:00 (KST)' :
-                 lang === 'ja' ? '月〜金: 09:00 - 18:00 (KST)' :
+                {lang === 'ja' ? '月〜金: 09:00 - 18:00 (KST)' :
                  lang === 'zh' ? '周一至周五: 09:00 - 18:00 (KST)' :
                  lang === 'th' ? 'จันทร์-ศุกร์: 09:00 - 18:00 (KST)' :
                  lang === 'vi' ? 'Thứ Hai-Thứ Sáu: 09:00 - 18:00 (KST)' :
                  lang === 'es' ? 'Lun-Vie: 09:00 - 18:00 (KST)' :
+                 lang === 'fr' ? 'Lun-Ven : 09:00 - 18:00 (KST)' :
+                 lang === 'ru' ? 'Пн-Пт: 09:00 - 18:00 (KST)' :
                  lang === 'ar' ? 'الاثنين-الجمعة: 09:00 - 18:00 (KST)' :
                  'Mon-Fri: 09:00 - 18:00 (KST)'}
               </p>

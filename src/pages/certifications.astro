@@ -9,10 +9,31 @@ const pageDescription = t('certifications.qualitySubtitle');
 ---
 
 <BaseLayout
-  title={t('certifications.title')}
-  description={pageDescription}
-  keywords={["BRITZMEDI certifications", "FDA 510k", "ISO 13485", "GMP", "medical device certification", "regulatory compliance"]}
+  title="Certifications - FDA 510(k), ISO 13485, GMP Quality"
+  description="View BRITZMEDI's regulatory certifications: FDA 510(k) clearance K212561, ISO 13485:2016, GMP, and MFDS approvals. Verified quality assurance for medical devices."
+  keywords={["FDA 510k clearance", "ISO 13485 certification", "GMP certified", "MFDS approval", "medical device certification", "CE marking", "regulatory compliance", "BRITZMEDI certifications"]}
 >
+  <!-- Certifications Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Certifications & Quality Assurance - BRITZMEDI",
+    "description": "BRITZMEDI quality certifications including FDA 510(k), ISO 13485:2016, GMP, and MFDS approvals for medical aesthetic devices.",
+    "url": "https://britzmedi.com/certifications",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "BRITZMEDI Co., Ltd.",
+      "hasCredential": certifications.filter(c => c.status === 'certified' || c.status === 'cleared' || c.status === 'registered').map(cert => ({
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": cert.name,
+        "name": cert.fullName,
+        "description": cert.description,
+        ...(cert.certificateNo ? { "identifier": cert.certificateNo } : {}),
+        ...(cert.validUntil ? { "validIn": { "@type": "AdministrativeArea", "name": cert.region } } : {})
+      }))
+    }
+  })} />
+
   <!-- Hero Section -->
   <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
     <div class="container">

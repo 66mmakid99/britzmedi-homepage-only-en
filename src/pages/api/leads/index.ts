@@ -112,9 +112,18 @@ export const GET: APIRoute = async (context) => {
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const data = await request.json();
+    const source = data.source || 'website';
 
-    // Validate required fields
-    const required = ['company_name', 'contact_name', 'job_title', 'email', 'country', 'interested_products'];
+    // Validate required fields based on source
+    let required: string[];
+    if (source === 'resource_download') {
+      required = ['email', 'contact_name', 'company_name'];
+    } else if (source === 'newsletter') {
+      required = ['email'];
+    } else {
+      required = ['company_name', 'contact_name', 'job_title', 'email', 'country', 'interested_products'];
+    }
+
     for (const field of required) {
       if (!data[field]) {
         return new Response(JSON.stringify({ error: `Missing required field: ${field}` }), {
@@ -122,6 +131,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+    }
+
+    // Build enrichment_data with referral_source if provided
+    let enrichmentData = null;
+    if (data.referral_source) {
+      enrichmentData = JSON.stringify({ referral_source: data.referral_source });
     }
 
     // Calculate lead score
@@ -146,30 +161,31 @@ export const POST: APIRoute = async ({ request, locals }) => {
       INSERT INTO leads (
         company_name, company_website, contact_name, job_title, email, country,
         interested_products, message, lead_score, lead_grade,
-        source, utm_source, utm_medium, utm_campaign
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        source, utm_source, utm_medium, utm_campaign, enrichment_data
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      data.company_name,
+      data.company_name || 'N/A',
       data.company_website || null,
-      data.contact_name,
-      data.job_title,
+      data.contact_name || 'N/A',
+      data.job_title || 'N/A',
       data.email,
-      data.country,
-      JSON.stringify(data.interested_products),
+      data.country || 'N/A',
+      JSON.stringify(data.interested_products || []),
       data.message || null,
       score,
       grade,
-      data.source || 'website',
+      source,
       data.utm_source || null,
       data.utm_medium || null,
       data.utm_campaign || null,
+      enrichmentData,
     ).run();
 
-    console.log('[Leads API] Lead created:', result.meta.last_row_id);
+    console.log('[Leads API] Lead created:', result.meta?.last_row_id);
 
     return new Response(JSON.stringify({
       success: true,
-      lead: { id: result.meta.last_row_id, ...data, lead_score: score, lead_grade: grade },
+      lead: { id: result.meta?.last_row_id, ...data, lead_score: score, lead_grade: grade },
     }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },

@@ -19,31 +19,31 @@ export const faqItems: FAQItem[] = [
   {
     id: 'what-is-torr-rf',
     question: 'What is TORR RF and what are its main applications?',
-    answer: 'TORR RF is our flagship FDA 510(k) cleared medical device that uses innovative Multi-Wave Radiofrequency technology to deliver thermal energy into the dermal and subcutaneous layers. It is primarily used for non-invasive aesthetic treatments including skin tightening, wrinkle reduction, and body contouring. The device features patented segmented electrode designs for precise energy delivery.',
+    answer: '<a href="/products/torr-rf" class="text-primary-600 hover:underline font-medium">TORR RF</a> is our flagship FDA 510(k) cleared medical device that uses innovative Multi-Wave Radiofrequency technology to deliver thermal energy into the dermal and subcutaneous layers. It is primarily used for non-invasive aesthetic treatments including skin tightening, wrinkle reduction, and body contouring. The device features patented segmented electrode designs for precise energy delivery.',
     category: 'products',
   },
   {
     id: 'torr-rf-fda-cleared',
     question: 'Is TORR RF FDA cleared?',
-    answer: 'Yes, TORR RF has received FDA 510(k) clearance (K212561) in 2022. This clearance confirms that the device meets the safety and effectiveness standards required by the U.S. Food and Drug Administration for marketing in the United States.',
+    answer: 'Yes, <a href="/products/torr-rf" class="text-primary-600 hover:underline font-medium">TORR RF</a> has received FDA 510(k) clearance (K212561) in 2022. This clearance confirms that the device meets the safety and effectiveness standards required by the U.S. Food and Drug Administration for marketing in the United States.',
     category: 'products',
   },
   {
     id: 'ulblanc-features',
     question: 'What makes ULBLANC different from other ultrasound devices?',
-    answer: 'ULBLANC is a comprehensive skincare workstation that combines dual-frequency ultrasound technology with acoustic cavitation for transdermal drug delivery (i-Booster technology). This unique combination allows for both skin tightening effects and enhanced absorption of skincare products, making it a versatile solution for aesthetic clinics.',
+    answer: '<a href="/products/ulblanc" class="text-primary-600 hover:underline font-medium">ULBLANC</a> is a comprehensive skincare workstation that combines dual-frequency ultrasound technology with acoustic cavitation for transdermal drug delivery (i-Booster technology). This unique combination allows for both skin tightening effects and enhanced absorption of skincare products, making it a versatile solution for aesthetic clinics.',
     category: 'products',
   },
   {
     id: 'newchae-shot-home-use',
     question: 'Can NEWCHAE SHOT be used at home?',
-    answer: 'Yes, NEWCHAE SHOT is specifically designed as a 3-in-1 personal beauty device for home care use. It integrates professional-grade medical technologies into a compact, user-friendly form factor with multi-channel energy delivery, allowing consumers to achieve professional-level skincare results at home.',
+    answer: 'Yes, <a href="/products/newchae-shot" class="text-primary-600 hover:underline font-medium">NEWCHAE SHOT</a> is specifically designed as a 3-in-1 personal beauty device for home care use. It integrates professional-grade medical technologies into a compact, user-friendly form factor with multi-channel energy delivery, allowing consumers to achieve professional-level skincare results at home.',
     category: 'products',
   },
   {
     id: 'lumino-wave-availability',
     question: 'When will LUMINO WAVE be available?',
-    answer: 'LUMINO WAVE is scheduled for launch in the second half of 2026. This next-generation device features our innovative Convergence Therapy technology, combining Ultrasound and Laser to maximize skin penetration. Contact our sales team to be notified when it becomes available.',
+    answer: '<a href="/products/lumino-wave" class="text-primary-600 hover:underline font-medium">LUMINO WAVE</a> is scheduled for launch in the second half of 2026. This next-generation device features our innovative Convergence Therapy technology, combining Ultrasound and Laser to maximize skin penetration. <a href="/contact" class="text-primary-600 hover:underline font-medium">Contact our sales team</a> to be notified when it becomes available.',
     category: 'products',
   },
   
@@ -51,7 +51,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'company-history',
     question: 'When was BRITZMEDI established?',
-    answer: 'BRITZMEDI Co., Ltd. was established on October 23, 2017, in South Korea. We started as a Company-Affiliated Research Institute and have grown into a global medical device manufacturer with FDA clearance, ISO 13485 certification, and Venture Enterprise designation.',
+    answer: 'BRITZMEDI Co., Ltd. was established on October 23, 2017, in South Korea. We started as a Company-Affiliated Research Institute and have grown into a global medical device manufacturer with FDA clearance, ISO 13485 certification, and Venture Enterprise designation. <a href="/about" class="text-primary-600 hover:underline font-medium">Learn more about our story</a>.',
     category: 'company',
   },
   {
@@ -71,7 +71,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'become-distributor',
     question: 'How can I become a BRITZMEDI distributor?',
-    answer: 'We welcome partnership inquiries from qualified distributors worldwide. To become a distributor, please contact our sales team through the Contact page with information about your company, territory of interest, and relevant experience in medical device distribution. We will review your application and arrange a consultation.',
+    answer: 'We welcome partnership inquiries from qualified distributors worldwide. To become a distributor, please <a href="/contact" class="text-primary-600 hover:underline font-medium">contact our sales team</a> with information about your company, territory of interest, and relevant experience in medical device distribution. We will review your application and arrange a consultation.',
     category: 'ordering',
   },
   {
@@ -89,7 +89,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'oem-odm-services',
     question: 'Do you offer OEM/ODM services?',
-    answer: 'Yes, BRITZMEDI is an FDA-registered contract manufacturer (Owner Operator Number: 10088936) offering comprehensive OEM/ODM services. We provide end-to-end development services from design to manufacturing, leveraging our GMP-certified facility and experienced R&D team. Contact us to discuss your specific requirements.',
+    answer: 'Yes, BRITZMEDI is an FDA-registered contract manufacturer (Owner Operator Number: 10088936) offering comprehensive OEM/ODM services. We provide end-to-end development services from design to manufacturing, leveraging our GMP-certified facility and experienced R&D team. <a href="/contact" class="text-primary-600 hover:underline font-medium">Contact us</a> to discuss your specific requirements.',
     category: 'ordering',
   },
   
@@ -97,7 +97,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'training-provided',
     question: 'Do you provide training for your devices?',
-    answer: 'Yes, we provide comprehensive training programs for all our medical devices. Training includes device operation, treatment protocols, safety procedures, and maintenance. Training can be conducted on-site, at our facility in Korea, or through our digital training platform. Contact your local distributor or our support team for training arrangements.',
+    answer: 'Yes, we provide comprehensive training programs for all our medical devices. Training includes device operation, treatment protocols, safety procedures, and maintenance. Training can be conducted on-site, at our facility in Korea, or through our digital training platform. <a href="/contact" class="text-primary-600 hover:underline font-medium">Contact us</a> for training arrangements.',
     category: 'technical',
   },
   {
@@ -109,7 +109,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'technical-support',
     question: 'How can I get technical support?',
-    answer: 'Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at contact@britzmedi.co.kr, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days.',
+    answer: 'Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at contact@britzmedi.co.kr, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days. You can also reach us through our <a href="/contact" class="text-primary-600 hover:underline font-medium">contact page</a>.',
     category: 'technical',
   },
   
@@ -129,7 +129,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'regulatory-approvals',
     question: 'What regulatory approvals do your products have?',
-    answer: 'Our products hold various regulatory approvals depending on the market. TORR RF has FDA 510(k) clearance for the US market and Korea MFDS approval. All products have Korea MFDS approval. We are continuously expanding our regulatory portfolio and can provide specific certification information for your target market upon request.',
+    answer: 'Our products hold various regulatory approvals depending on the market. <a href="/products/torr-rf" class="text-primary-600 hover:underline font-medium">TORR RF</a> has FDA 510(k) clearance for the US market and Korea MFDS approval. All products have Korea MFDS approval. We are continuously expanding our regulatory portfolio and can provide specific certification information for your target market upon request. See our <a href="/certifications" class="text-primary-600 hover:underline font-medium">certifications page</a> for details.',
     category: 'certifications',
   },
 ];

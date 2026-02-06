@@ -361,7 +361,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                 className="flex-1 px-4 py-2.5 text-sm bg-slate-100 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-slate-800 placeholder-slate-400 disabled:opacity-50"
               />
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={isLoading || !inputValue.trim()}
                 className="p-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
                 aria-label="Send message"

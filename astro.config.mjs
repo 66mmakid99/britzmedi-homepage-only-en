@@ -24,12 +24,13 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: {
           en: 'en-US',
-          ko: 'ko-KR',
           ja: 'ja-JP',
           zh: 'zh-CN',
           th: 'th-TH',
           vi: 'vi-VN',
           es: 'es-ES',
+          fr: 'fr-FR',
+          ru: 'ru-RU',
           ar: 'ar-SA',
         },
       },
@@ -41,6 +42,11 @@ export default defineConfig({
     ssr: {
       noExternal: ['lucide-react'],
     },
+  },
+
+  prefetch: {
+    prefetchAll: false,
+    defaultStrategy: 'hover',
   },
 
   adapter: cloudflare({

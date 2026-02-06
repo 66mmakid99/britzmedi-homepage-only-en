@@ -75,18 +75,8 @@ const isRtl = isRTL(currentLang);
   </script>
 
   <!-- Consent Manager (GDPR/Cookie Consent Banner) -->
-  <script type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/be2c22fa62941.js" data-cmp-host="b.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
+  <script async type="text/javascript" data-cmp-ab="1" src="https://cdn.consentmanager.net/delivery/autoblocking/be2c22fa62941.js" data-cmp-host="b.delivery.consentmanager.net" data-cmp-cdn="cdn.consentmanager.net" data-cmp-codesrc="16"></script>
 
-  <!-- Dark Mode Initialization (prevents flash) -->
-  <script is:inline>
-    (function() {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.classList.add('dark');
-      }
-    })();
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -110,9 +100,10 @@ const isRtl = isRTL(currentLang);
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-  <!-- Fonts - Inter with font-display swap for better LCP -->
+  <!-- Fonts - Inter with non-blocking load for better LCP -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
   
   <!-- Structured Data - Organization -->
   <script type="application/ld+json" set:html={JSON.stringify({
@@ -121,9 +112,15 @@ const isRtl = isRTL(currentLang);
     "name": "BRITZMEDI Co., Ltd.",
     "alternateName": "(주)브리츠메디",
     "url": siteUrl,
-    "logo": `${siteUrl}/logo.png`,
-    "description": "Professional aesthetic medical device manufacturer established in 2017. FDA 510(k) cleared products.",
+    "logo": `${siteUrl}/images/logos/britzmedi-logo.png`,
+    "image": `${siteUrl}/og-image.jpg`,
+    "description": "BRITZMEDI is a South Korean medical aesthetic device manufacturer specializing in innovative RF technology for skin tightening and body contouring.",
     "foundingDate": "2017-10-23",
+    "numberOfEmployees": {
+      "@type": "QuantitativeValue",
+      "minValue": 10,
+      "maxValue": 50
+    },
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "1211, 388, Dunchon-daero, Jungwon-gu",
@@ -132,14 +129,33 @@ const isRtl = isRTL(currentLang);
       "postalCode": "13403",
       "addressCountry": "KR"
     },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+82-70-4348-7244",
-      "contactType": "customer service",
-      "email": "contact@britzmedi.co.kr"
-    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+82-70-4348-7244",
+        "contactType": "customer service",
+        "email": "contact@britzmedi.co.kr",
+        "availableLanguage": ["English", "Korean", "Japanese", "Chinese"]
+      },
+      {
+        "@type": "ContactPoint",
+        "telephone": "+82-70-4348-7244",
+        "contactType": "sales",
+        "email": "contact@britzmedi.co.kr"
+      }
+    ],
+    "areaServed": "Worldwide",
+    "knowsAbout": ["RF Technology", "Aesthetic Medical Devices", "Skin Tightening", "Body Contouring"],
+    "hasCredential": [
+      { "@type": "EducationalOccupationalCredential", "credentialCategory": "FDA 510(k) Clearance", "name": "K212561" },
+      { "@type": "EducationalOccupationalCredential", "credentialCategory": "ISO 13485:2016" },
+      { "@type": "EducationalOccupationalCredential", "credentialCategory": "GMP Certification" }
+    ],
     "sameAs": []
   })} />
+
+  <!-- Page-specific head content (preloads, etc.) -->
+  <slot name="head" />
 
   <!-- Claude AI Chatbot (replaced Tawk.to) -->
 </head>

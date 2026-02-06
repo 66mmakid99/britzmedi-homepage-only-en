@@ -60,36 +60,40 @@ const pageDescription = t('privacy.intro.p1');
               <h3 class="heading-3 mb-3">{t('privacy.collection.personalTitle')}</h3>
               <p class="body-base mb-3">{t('privacy.collection.personalDesc')}</p>
               <ul class="list-disc list-inside space-y-2 text-slate-700">
-                <li>{lang === 'ko' ? '이름, 이메일 주소 및 전화번호' :
-                  lang === 'ja' ? '氏名、メールアドレス、電話番号' :
+                <li>{lang === 'ja' ? '氏名、メールアドレス、電話番号' :
                   lang === 'zh' ? '姓名、电子邮件地址和电话号码' :
                   lang === 'th' ? 'ชื่อ ที่อยู่อีเมล และหมายเลขโทรศัพท์' :
                   lang === 'vi' ? 'Tên, địa chỉ email và số điện thoại' :
                   lang === 'es' ? 'Nombre, dirección de correo electrónico y número de teléfono' :
+                  lang === 'fr' ? 'Nom, adresse e-mail et numéro de téléphone' :
+                  lang === 'ru' ? 'Имя, адрес электронной почты и номер телефона' :
                   lang === 'ar' ? 'الاسم وعنوان البريد الإلكتروني ورقم الهاتف' :
                   'Name, email address, and phone number'}</li>
-                <li>{lang === 'ko' ? '회사명 및 직책' :
-                  lang === 'ja' ? '会社名と役職' :
+                <li>{lang === 'ja' ? '会社名と役職' :
                   lang === 'zh' ? '公司名称和职位' :
                   lang === 'th' ? 'ชื่อบริษัทและตำแหน่งงาน' :
                   lang === 'vi' ? 'Tên công ty và chức danh' :
                   lang === 'es' ? 'Nombre de la empresa y cargo' :
+                  lang === 'fr' ? 'Nom de l\'entreprise et intitulé du poste' :
+                  lang === 'ru' ? 'Название компании и должность' :
                   lang === 'ar' ? 'اسم الشركة والمسمى الوظيفي' :
                   'Company name and job title'}</li>
-                <li>{lang === 'ko' ? '우편 주소 및 위치 정보' :
-                  lang === 'ja' ? '郵送先住所と位置情報' :
+                <li>{lang === 'ja' ? '郵送先住所と位置情報' :
                   lang === 'zh' ? '邮寄地址和位置信息' :
                   lang === 'th' ? 'ที่อยู่ทางไปรษณีย์และข้อมูลตำแหน่งที่ตั้ง' :
                   lang === 'vi' ? 'Địa chỉ gửi thư và thông tin vị trí' :
                   lang === 'es' ? 'Dirección postal e información de ubicación' :
+                  lang === 'fr' ? 'Adresse postale et informations de localisation' :
+                  lang === 'ru' ? 'Почтовый адрес и информация о местоположении' :
                   lang === 'ar' ? 'عنوان البريد ومعلومات الموقع' :
                   'Mailing address and location information'}</li>
-                <li>{lang === 'ko' ? '제품 문의 및 선호도' :
-                  lang === 'ja' ? '製品に関するお問い合わせと好み' :
+                <li>{lang === 'ja' ? '製品に関するお問い合わせと好み' :
                   lang === 'zh' ? '产品咨询和偏好' :
                   lang === 'th' ? 'การสอบถามผลิตภัณฑ์และความชอบ' :
                   lang === 'vi' ? 'Yêu cầu sản phẩm và sở thích' :
                   lang === 'es' ? 'Consultas sobre productos y preferencias' :
+                  lang === 'fr' ? 'Demandes de produits et préférences' :
+                  lang === 'ru' ? 'Запросы о продуктах и предпочтения' :
                   lang === 'ar' ? 'استفسارات المنتجات والتفضيلات' :
                   'Product inquiries and preferences'}</li>
               </ul>
@@ -99,36 +103,40 @@ const pageDescription = t('privacy.intro.p1');
               <h3 class="heading-3 mb-3">{t('privacy.collection.autoTitle')}</h3>
               <p class="body-base mb-3">{t('privacy.collection.autoDesc')}</p>
               <ul class="list-disc list-inside space-y-2 text-slate-700">
-                <li>{lang === 'ko' ? 'IP 주소 및 브라우저 유형' :
-                  lang === 'ja' ? 'IPアドレスとブラウザタイプ' :
+                <li>{lang === 'ja' ? 'IPアドレスとブラウザタイプ' :
                   lang === 'zh' ? 'IP地址和浏览器类型' :
                   lang === 'th' ? 'ที่อยู่ IP และประเภทเบราว์เซอร์' :
                   lang === 'vi' ? 'Địa chỉ IP và loại trình duyệt' :
                   lang === 'es' ? 'Dirección IP y tipo de navegador' :
+                  lang === 'fr' ? 'Adresse IP et type de navigateur' :
+                  lang === 'ru' ? 'IP-адрес и тип браузера' :
                   lang === 'ar' ? 'عنوان IP ونوع المتصفح' :
                   'IP address and browser type'}</li>
-                <li>{lang === 'ko' ? '방문한 페이지 및 체류 시간' :
-                  lang === 'ja' ? '訪問したページと滞在時間' :
+                <li>{lang === 'ja' ? '訪問したページと滞在時間' :
                   lang === 'zh' ? '访问的页面和停留时间' :
                   lang === 'th' ? 'หน้าที่เยี่ยมชมและเวลาที่ใช้ในหน้า' :
                   lang === 'vi' ? 'Các trang đã truy cập và thời gian trên các trang' :
                   lang === 'es' ? 'Páginas visitadas y tiempo en las páginas' :
+                  lang === 'fr' ? 'Pages visitées et temps passé sur les pages' :
+                  lang === 'ru' ? 'Посещённые страницы и время, проведённое на страницах' :
                   lang === 'ar' ? 'الصفحات التي تمت زيارتها والوقت المستغرق' :
                   'Pages visited and time spent on pages'}</li>
-                <li>{lang === 'ko' ? '유입 웹사이트 및 이탈 페이지' :
-                  lang === 'ja' ? '参照元ウェブサイトと離脱ページ' :
+                <li>{lang === 'ja' ? '参照元ウェブサイトと離脱ページ' :
                   lang === 'zh' ? '引荐网站和退出页面' :
                   lang === 'th' ? 'เว็บไซต์อ้างอิงและหน้าออก' :
                   lang === 'vi' ? 'Trang web giới thiệu và trang thoát' :
                   lang === 'es' ? 'Sitio web de referencia y páginas de salida' :
+                  lang === 'fr' ? 'Site web de référence et pages de sortie' :
+                  lang === 'ru' ? 'Ссылающийся сайт и страницы выхода' :
                   lang === 'ar' ? 'موقع الإحالة وصفحات الخروج' :
                   'Referring website and exit pages'}</li>
-                <li>{lang === 'ko' ? '쿠키 및 유사한 추적 기술' :
-                  lang === 'ja' ? 'クッキーと類似のトラッキング技術' :
+                <li>{lang === 'ja' ? 'クッキーと類似のトラッキング技術' :
                   lang === 'zh' ? 'Cookie和类似的跟踪技术' :
                   lang === 'th' ? 'คุกกี้และเทคโนโลยีการติดตามที่คล้ายกัน' :
                   lang === 'vi' ? 'Cookie và các công nghệ theo dõi tương tự' :
                   lang === 'es' ? 'Cookies y tecnologías de seguimiento similares' :
+                  lang === 'fr' ? 'Cookies et technologies de suivi similaires' :
+                  lang === 'ru' ? 'Файлы cookie и аналогичные технологии отслеживания' :
                   lang === 'ar' ? 'ملفات تعريف الارتباط وتقنيات التتبع المماثلة' :
                   'Cookies and similar tracking technologies'}</li>
               </ul>
@@ -138,55 +146,61 @@ const pageDescription = t('privacy.intro.p1');
 
         <!-- Use of Information -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">2. {lang === 'ko' ? '정보 사용' :
-            lang === 'ja' ? '情報の使用' :
+          <h2 class="heading-2 mb-4">2. {lang === 'ja' ? '情報の使用' :
             lang === 'zh' ? '信息使用' :
             lang === 'th' ? 'การใช้ข้อมูล' :
             lang === 'vi' ? 'Sử dụng thông tin' :
             lang === 'es' ? 'Uso de la Información' :
+            lang === 'fr' ? 'Utilisation des informations' :
+            lang === 'ru' ? 'Использование информации' :
             lang === 'ar' ? 'استخدام المعلومات' :
             'Use of Information'}</h2>
           <p class="body-base mb-4">
-            {lang === 'ko' ? '당사는 수집한 정보를 다음 목적으로 사용합니다:' :
-             lang === 'ja' ? '収集した情報を以下の目的で使用します:' :
+            {lang === 'ja' ? '収集した情報を以下の目的で使用します:' :
              lang === 'zh' ? '我们将收集的信息用于以下目的：' :
              lang === 'th' ? 'เราใช้ข้อมูลที่เก็บรวบรวมเพื่อวัตถุประสงค์ดังต่อไปนี้:' :
              lang === 'vi' ? 'Chúng tôi sử dụng thông tin thu thập được cho các mục đích sau:' :
              lang === 'es' ? 'Utilizamos la información que recopilamos para los siguientes propósitos:' :
+             lang === 'fr' ? 'Nous utilisons les informations que nous collectons aux fins suivantes :' :
+             lang === 'ru' ? 'Мы используем собранную информацию в следующих целях:' :
              lang === 'ar' ? 'نستخدم المعلومات التي نجمعها للأغراض التالية:' :
              'We use the information we collect for the following purposes:'}
           </p>
           <ul class="list-disc list-inside space-y-2 text-slate-700">
-            <li>{lang === 'ko' ? '제품 및 서비스 제공, 유지 및 개선' :
-              lang === 'ja' ? '製品およびサービスの提供、維持、改善' :
+            <li>{lang === 'ja' ? '製品およびサービスの提供、維持、改善' :
               lang === 'zh' ? '提供、维护和改进我们的产品和服务' :
               lang === 'th' ? 'เพื่อจัดหา รักษา และปรับปรุงผลิตภัณฑ์และบริการของเรา' :
               lang === 'vi' ? 'Cung cấp, duy trì và cải thiện sản phẩm và dịch vụ của chúng tôi' :
               lang === 'es' ? 'Proporcionar, mantener y mejorar nuestros productos y servicios' :
+              lang === 'fr' ? 'Fournir, maintenir et améliorer nos produits et services' :
+              lang === 'ru' ? 'Предоставление, поддержание и улучшение наших продуктов и услуг' :
               lang === 'ar' ? 'توفير وصيانة وتحسين منتجاتنا وخدماتنا' :
               'To provide, maintain, and improve our products and services'}</li>
-            <li>{lang === 'ko' ? '문의 및 고객 서비스 요청에 응대' :
-              lang === 'ja' ? 'お問い合わせおよびカスタマーサービスへの対応' :
+            <li>{lang === 'ja' ? 'お問い合わせおよびカスタマーサービスへの対応' :
               lang === 'zh' ? '回复您的咨询和客户服务请求' :
               lang === 'th' ? 'เพื่อตอบคำถามและคำขอบริการลูกค้าของคุณ' :
               lang === 'vi' ? 'Phản hồi các yêu cầu và dịch vụ khách hàng của bạn' :
               lang === 'es' ? 'Responder a sus consultas y solicitudes de servicio al cliente' :
+              lang === 'fr' ? 'Répondre à vos demandes et à vos demandes de service client' :
+              lang === 'ru' ? 'Ответы на ваши запросы и обращения в службу поддержки' :
               lang === 'ar' ? 'الرد على استفساراتك وطلبات خدمة العملاء' :
               'To respond to your inquiries and customer service requests'}</li>
-            <li>{lang === 'ko' ? '프로모션 커뮤니케이션 발송 (동의 시)' :
-              lang === 'ja' ? 'プロモーション通信の送信（同意がある場合）' :
+            <li>{lang === 'ja' ? 'プロモーション通信の送信（同意がある場合）' :
               lang === 'zh' ? '发送促销通讯（经您同意）' :
               lang === 'th' ? 'เพื่อส่งการสื่อสารส่งเสริมการขาย (ตามความยินยอมของคุณ)' :
               lang === 'vi' ? 'Gửi thông tin khuyến mãi (với sự đồng ý của bạn)' :
               lang === 'es' ? 'Enviar comunicaciones promocionales (con su consentimiento)' :
+              lang === 'fr' ? 'Envoyer des communications promotionnelles (avec votre consentement)' :
+              lang === 'ru' ? 'Отправка рекламных сообщений (с вашего согласия)' :
               lang === 'ar' ? 'إرسال رسائل ترويجية (بموافقتك)' :
               'To send promotional communications (with your consent)'}</li>
-            <li>{lang === 'ko' ? '웹사이트 사용 및 트렌드 분석' :
-              lang === 'ja' ? 'ウェブサイトの使用状況とトレンドの分析' :
+            <li>{lang === 'ja' ? 'ウェブサイトの使用状況とトレンドの分析' :
               lang === 'zh' ? '分析网站使用情况和趋势' :
               lang === 'th' ? 'เพื่อวิเคราะห์การใช้งานเว็บไซต์และแนวโน้ม' :
               lang === 'vi' ? 'Phân tích việc sử dụng và xu hướng trang web' :
               lang === 'es' ? 'Analizar el uso del sitio web y las tendencias' :
+              lang === 'fr' ? 'Analyser l\'utilisation du site web et les tendances' :
+              lang === 'ru' ? 'Анализ использования веб-сайта и тенденций' :
               lang === 'ar' ? 'تحليل استخدام الموقع والاتجاهات' :
               'To analyze website usage and trends'}</li>
           </ul>
@@ -194,21 +208,23 @@ const pageDescription = t('privacy.intro.p1');
 
         <!-- Data Protection -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">3. {lang === 'ko' ? '데이터 보호 및 보안' :
-            lang === 'ja' ? 'データ保護とセキュリティ' :
+          <h2 class="heading-2 mb-4">3. {lang === 'ja' ? 'データ保護とセキュリティ' :
             lang === 'zh' ? '数据保护与安全' :
             lang === 'th' ? 'การคุ้มครองข้อมูลและความปลอดภัย' :
             lang === 'vi' ? 'Bảo vệ dữ liệu & Bảo mật' :
             lang === 'es' ? 'Protección de Datos y Seguridad' :
+            lang === 'fr' ? 'Protection des données et sécurité' :
+            lang === 'ru' ? 'Защита данных и безопасность' :
             lang === 'ar' ? 'حماية البيانات والأمان' :
             'Data Protection & Security'}</h2>
           <p class="body-base">
-            {lang === 'ko' ? '당사는 귀하의 개인정보를 무단 접근, 변경, 공개 또는 파괴로부터 보호하기 위해 적절한 기술적, 조직적 조치를 시행합니다. 그러나 인터넷을 통한 전송 방법은 100% 안전하지 않습니다. 귀하의 정보를 보호하기 위해 노력하지만 절대적인 보안을 보장할 수 없습니다.' :
-             lang === 'ja' ? '私たちは、お客様の個人情報を不正アクセス、改ざん、開示、破壊から保護するために適切な技術的・組織的措置を講じています。ただし、インターネット経由の送信方法は100%安全ではありません。お客様の情報を保護するよう努めていますが、絶対的なセキュリティを保証することはできません。' :
+            {lang === 'ja' ? '私たちは、お客様の個人情報を不正アクセス、改ざん、開示、破壊から保護するために適切な技術的・組織的措置を講じています。ただし、インターネット経由の送信方法は100%安全ではありません。お客様の情報を保護するよう努めていますが、絶対的なセキュリティを保証することはできません。' :
              lang === 'zh' ? '我们采取适当的技术和组织措施来保护您的个人信息免受未经授权的访问、更改、披露或破坏。但是，互联网传输方法并非100%安全。尽管我们努力保护您的信息，但无法保证绝对安全。' :
              lang === 'th' ? 'เราดำเนินมาตรการทางเทคนิคและองค์กรที่เหมาะสมเพื่อปกป้องข้อมูลส่วนบุคคลของคุณจากการเข้าถึง การแก้ไข การเปิดเผย หรือการทำลายโดยไม่ได้รับอนุญาต อย่างไรก็ตาม ไม่มีวิธีการส่งผ่านทางอินเทอร์เน็ตที่ปลอดภัย 100% แม้ว่าเราจะพยายามปกป้องข้อมูลของคุณ แต่เราไม่สามารถรับประกันความปลอดภัยอย่างแท้จริงได้' :
              lang === 'vi' ? 'Chúng tôi thực hiện các biện pháp kỹ thuật và tổ chức thích hợp để bảo vệ thông tin cá nhân của bạn khỏi việc truy cập, thay đổi, tiết lộ hoặc phá hủy trái phép. Tuy nhiên, không có phương pháp truyền tải qua Internet nào an toàn 100%. Mặc dù chúng tôi cố gắng bảo vệ thông tin của bạn, chúng tôi không thể đảm bảo an ninh tuyệt đối.' :
              lang === 'es' ? 'Implementamos medidas técnicas y organizativas apropiadas para proteger su información personal contra el acceso, alteración, divulgación o destrucción no autorizados. Sin embargo, ningún método de transmisión por Internet es 100% seguro. Si bien nos esforzamos por proteger su información, no podemos garantizar una seguridad absoluta.' :
+             lang === 'fr' ? 'Nous mettons en oeuvre des mesures techniques et organisationnelles appropriées pour protéger vos informations personnelles contre tout accès, modification, divulgation ou destruction non autorisés. Cependant, aucune méthode de transmission via Internet n\'est sûre à 100%. Bien que nous nous efforcions de protéger vos informations, nous ne pouvons garantir une sécurité absolue.' :
+             lang === 'ru' ? 'Мы применяем соответствующие технические и организационные меры для защиты вашей личной информации от несанкционированного доступа, изменения, раскрытия или уничтожения. Однако ни один метод передачи данных через Интернет не является на 100% безопасным. Хотя мы стремимся защитить вашу информацию, мы не можем гарантировать абсолютную безопасность.' :
              lang === 'ar' ? 'نقوم بتنفيذ تدابير تقنية وتنظيمية مناسبة لحماية معلوماتك الشخصية من الوصول غير المصرح به أو التغيير أو الكشف أو التدمير. ومع ذلك، لا توجد طريقة نقل عبر الإنترنت آمنة بنسبة 100٪. بينما نسعى لحماية معلوماتك، لا يمكننا ضمان الأمان المطلق.' :
              'We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet is 100% secure. While we strive to protect your information, we cannot guarantee absolute security.'}
           </p>
@@ -216,55 +232,61 @@ const pageDescription = t('privacy.intro.p1');
 
         <!-- Your Rights -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">4. {lang === 'ko' ? '개인정보 권리' :
-            lang === 'ja' ? 'プライバシー権' :
+          <h2 class="heading-2 mb-4">4. {lang === 'ja' ? 'プライバシー権' :
             lang === 'zh' ? '您的隐私权' :
             lang === 'th' ? 'สิทธิความเป็นส่วนตัวของคุณ' :
             lang === 'vi' ? 'Quyền riêng tư của bạn' :
             lang === 'es' ? 'Sus Derechos de Privacidad' :
+            lang === 'fr' ? 'Vos droits en matière de confidentialité' :
+            lang === 'ru' ? 'Ваши права на конфиденциальность' :
             lang === 'ar' ? 'حقوق الخصوصية الخاصة بك' :
             'Your Privacy Rights'}</h2>
           <p class="body-base mb-4">
-            {lang === 'ko' ? '귀하의 위치에 따라 개인정보와 관련하여 다음과 같은 권리가 있을 수 있습니다:' :
-             lang === 'ja' ? 'お客様の所在地によっては、個人情報に関して以下の権利を有する場合があります:' :
+            {lang === 'ja' ? 'お客様の所在地によっては、個人情報に関して以下の権利を有する場合があります:' :
              lang === 'zh' ? '根据您所在的位置，您可能拥有以下关于个人信息的权利：' :
              lang === 'th' ? 'คุณอาจมีสิทธิ์ต่อไปนี้เกี่ยวกับข้อมูลส่วนบุคคลของคุณ ขึ้นอยู่กับตำแหน่งที่ตั้งของคุณ:' :
              lang === 'vi' ? 'Tùy thuộc vào vị trí của bạn, bạn có thể có các quyền sau đây liên quan đến thông tin cá nhân của bạn:' :
              lang === 'es' ? 'Dependiendo de su ubicación, puede tener los siguientes derechos con respecto a su información personal:' :
+             lang === 'fr' ? 'Selon votre localisation, vous pouvez disposer des droits suivants concernant vos informations personnelles :' :
+             lang === 'ru' ? 'В зависимости от вашего местоположения вы можете иметь следующие права в отношении вашей личной информации:' :
              lang === 'ar' ? 'اعتمادًا على موقعك، قد يكون لديك الحقوق التالية فيما يتعلق بمعلوماتك الشخصية:' :
              'Depending on your location, you may have the following rights regarding your personal information:'}
           </p>
           <ul class="list-disc list-inside space-y-2 text-slate-700">
-            <li>{lang === 'ko' ? '개인정보 접근 권리' :
-              lang === 'ja' ? '個人情報へのアクセス権' :
+            <li>{lang === 'ja' ? '個人情報へのアクセス権' :
               lang === 'zh' ? '访问您的个人信息的权利' :
               lang === 'th' ? 'สิทธิในการเข้าถึงข้อมูลส่วนบุคคลของคุณ' :
               lang === 'vi' ? 'Quyền truy cập thông tin cá nhân của bạn' :
               lang === 'es' ? 'Derecho a acceder a su información personal' :
+              lang === 'fr' ? 'Droit d\'accès à vos informations personnelles' :
+              lang === 'ru' ? 'Право на доступ к вашей личной информации' :
               lang === 'ar' ? 'الحق في الوصول إلى معلوماتك الشخصية' :
               'Right to access your personal information'}</li>
-            <li>{lang === 'ko' ? '부정확한 정보 수정 권리' :
-              lang === 'ja' ? '不正確な情報の修正権' :
+            <li>{lang === 'ja' ? '不正確な情報の修正権' :
               lang === 'zh' ? '更正不准确信息的权利' :
               lang === 'th' ? 'สิทธิในการแก้ไขข้อมูลที่ไม่ถูกต้อง' :
               lang === 'vi' ? 'Quyền sửa thông tin không chính xác' :
               lang === 'es' ? 'Derecho a corregir información inexacta' :
+              lang === 'fr' ? 'Droit de corriger les informations inexactes' :
+              lang === 'ru' ? 'Право на исправление неточной информации' :
               lang === 'ar' ? 'الحق في تصحيح المعلومات غير الدقيقة' :
               'Right to correct inaccurate information'}</li>
-            <li>{lang === 'ko' ? '정보 삭제 요청 권리' :
-              lang === 'ja' ? '情報削除を要求する権利' :
+            <li>{lang === 'ja' ? '情報削除を要求する権利' :
               lang === 'zh' ? '要求删除信息的权利' :
               lang === 'th' ? 'สิทธิในการขอให้ลบข้อมูลของคุณ' :
               lang === 'vi' ? 'Quyền yêu cầu xóa thông tin của bạn' :
               lang === 'es' ? 'Derecho a solicitar la eliminación de su información' :
+              lang === 'fr' ? 'Droit de demander la suppression de vos informations' :
+              lang === 'ru' ? 'Право на запрос удаления вашей информации' :
               lang === 'ar' ? 'الحق في طلب حذف معلوماتك' :
               'Right to request deletion of your information'}</li>
-            <li>{lang === 'ko' ? '마케팅 커뮤니케이션 수신 거부 권리' :
-              lang === 'ja' ? 'マーケティング通信のオプトアウト権' :
+            <li>{lang === 'ja' ? 'マーケティング通信のオプトアウト権' :
               lang === 'zh' ? '选择退出营销通讯的权利' :
               lang === 'th' ? 'สิทธิในการยกเลิกการสื่อสารการตลาด' :
               lang === 'vi' ? 'Quyền từ chối nhận thông tin tiếp thị' :
               lang === 'es' ? 'Derecho a optar por no recibir comunicaciones de marketing' :
+              lang === 'fr' ? 'Droit de vous désinscrire des communications marketing' :
+              lang === 'ru' ? 'Право на отказ от маркетинговых сообщений' :
               lang === 'ar' ? 'الحق في إلغاء الاشتراك في رسائل التسويق' :
               'Right to opt-out of marketing communications'}</li>
           </ul>
@@ -281,22 +303,24 @@ const pageDescription = t('privacy.intro.p1');
               <span class="font-semibold">BRITZMEDI Co., Ltd.</span>
             </div>
             <div>
-              <span class="font-semibold">{lang === 'ko' ? '이메일:' :
-                lang === 'ja' ? 'メール:' :
+              <span class="font-semibold">{lang === 'ja' ? 'メール:' :
                 lang === 'zh' ? '邮箱:' :
                 lang === 'th' ? 'อีเมล:' :
                 lang === 'vi' ? 'Email:' :
                 lang === 'es' ? 'Correo:' :
+                lang === 'fr' ? 'E-mail :' :
+                lang === 'ru' ? 'Эл. почта:' :
                 lang === 'ar' ? 'البريد الإلكتروني:' :
                 'Email:'}</span> contact@britzmedi.co.kr
             </div>
             <div>
-              <span class="font-semibold">{lang === 'ko' ? '주소:' :
-                lang === 'ja' ? '住所:' :
+              <span class="font-semibold">{lang === 'ja' ? '住所:' :
                 lang === 'zh' ? '地址:' :
                 lang === 'th' ? 'ที่อยู่:' :
                 lang === 'vi' ? 'Địa chỉ:' :
                 lang === 'es' ? 'Dirección:' :
+                lang === 'fr' ? 'Adresse :' :
+                lang === 'ru' ? 'Адрес:' :
                 lang === 'ar' ? 'العنوان:' :
                 'Address:'}</span><br />
               1211, 388, Dunchon-daero, Jungwon-gu,<br />

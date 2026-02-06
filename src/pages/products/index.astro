@@ -6,10 +6,32 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
 ---
 
 <BaseLayout
-  title="Products"
-  description={pageDescription}
-  keywords={["BRITZMEDI products", "TORR RF", "ULBLANC", "NEWCHAE SHOT", "LUMINO WAVE", "aesthetic medical device", "RF technology"]}
+  title="Medical Aesthetic Devices - FDA Cleared Products"
+  description="Explore BRITZMEDI's FDA 510(k) cleared aesthetic devices. TORR RF skin tightening, ULBLANC ultrasound, NEWCHAE SHOT beauty device, and LUMINO WAVE. Request product specs today."
+  keywords={["BRITZMEDI products", "TORR RF", "ULBLANC", "NEWCHAE SHOT", "LUMINO WAVE", "aesthetic medical device", "FDA cleared device", "RF skin tightening"]}
 >
+  <!-- Products ItemList Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "BRITZMEDI Product Lineup",
+    "description": "Complete lineup of BRITZMEDI aesthetic medical devices including FDA 510(k) cleared TORR RF.",
+    "url": "https://britzmedi.com/products",
+    "numberOfItems": products.length,
+    "itemListElement": products.map((p, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": p.name,
+      "url": `https://britzmedi.com/products/${p.id}`,
+      "item": {
+        "@type": p.category === 'medical-device' ? "MedicalDevice" : "Product",
+        "name": p.name,
+        "description": p.overview,
+        ...(p.images?.main ? { "image": `https://britzmedi.com${p.images.main}` } : {})
+      }
+    }))
+  })} />
+
   <!-- Hero Section -->
   <section class="relative bg-gradient-to-br from-slate-50 to-white py-16 lg:py-24">
     <div class="container">
@@ -73,6 +95,9 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
                   <img
                     src={product.images.main}
                     alt={product.name}
+                    width="800"
+                    height="600"
+                    loading="lazy"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
@@ -165,6 +190,9 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
                   <img
                     src={product.images.main}
                     alt={product.name}
+                    width="800"
+                    height="600"
+                    loading="lazy"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (

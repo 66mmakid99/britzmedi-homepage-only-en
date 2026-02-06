@@ -121,7 +121,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 
     const result = await env.DB.prepare('DELETE FROM leads WHERE id = ?').bind(id).run();
 
-    if (result.meta.changes === 0) {
+    if (result.meta?.changes === 0) {
       return new Response(JSON.stringify({ error: 'Lead not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },

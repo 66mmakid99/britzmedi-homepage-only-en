@@ -33,7 +33,9 @@ const {
 } = Astro.props;
 
 const siteUrl = 'https://britzmedi.com';
-const fullTitle = title === 'Home' ? 'BRITZMEDI | Aesthetic Medical Device Manufacturer' : `${title} | BRITZMEDI`;
+const fullTitle = title === 'Home'
+  ? 'BRITZMEDI | Korean Medical Aesthetic Device Manufacturer | RF Technology'
+  : `${title} | BRITZMEDI`;
 const canonical = canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 
