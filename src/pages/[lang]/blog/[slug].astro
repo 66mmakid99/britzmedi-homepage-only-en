@@ -1,0 +1,429 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import TldrBox from '../../../components/ui/TldrBox.astro';
+import { supportedLanguages, defaultLang, type Language } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n';
+
+export function getStaticPaths() {
+  // Load dynamic blog posts from content/blog/*.json
+  const dynamicPostModules = import.meta.glob('../../../content/blog/*.json', { eager: true });
+  const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
+    const data = mod.default || mod;
+    return {
+      slug: data.slug,
+      title: data.title,
+      description: data.excerpt || data.metaDescription || '',
+      tldr: '',
+      author: data.author || 'BRITZMEDI Team',
+      publishedAt: data.publishedAt,
+      updatedAt: data.updatedAt || data.publishedAt,
+      category: data.category || 'medical-devices',
+      tags: data.tags || [],
+      content: data.content || '',
+      faqs: [] as { question: string; answer: string }[],
+      featuredImage: data.featuredImage || null,
+      youtubeEmbedUrl: data.youtubeEmbedUrl || null,
+      doctor: data.doctor || null,
+      isDynamic: true,
+    };
+  });
+
+  const posts = [
+    {
+      slug: 'fda-510k-clearance-process',
+      title: 'FDA 510(k) Clearance: The Complete Guide for Medical Device Distributors',
+      description: 'Everything distributors need to know about FDA 510(k) clearance — from process steps and costs to why it matters for your business. Includes BRITZMEDI TORR RF case study.',
+      tldr: 'FDA 510(k) clearance proves a device is substantially equivalent to a predicate device already on the US market. The process takes 3-6 months and costs $50K-$150K. For distributors, partnering with FDA-cleared manufacturers like BRITZMEDI (K212561) means faster market access, insurance reimbursement eligibility, and stronger credibility with clinics.',
+      author: 'BRITZMEDI Team',
+      publishedAt: '2025-12-15',
+      updatedAt: '2026-01-10',
+      category: 'education',
+      tags: ['FDA', '510(k)', 'Regulatory Compliance', 'Medical Devices', 'US Market Entry', 'TORR RF'],
+      content: `
+## What is FDA 510(k) Clearance?
+
+The FDA 510(k) premarket notification is one of the most common regulatory pathways for bringing medical devices to the United States market. Named after Section 510(k) of the Federal Food, Drug, and Cosmetic Act, this process requires manufacturers to demonstrate that their device is **substantially equivalent** to a legally marketed predicate device.
+
+For B2B buyers — distributors, importers, and clinic purchasing managers — understanding 510(k) clearance is not just a regulatory formality. It directly impacts your ability to sell, market, and gain reimbursement for aesthetic medical devices in the world's largest healthcare market.
+
+The US medical device market is valued at over **$180 billion** and accounts for roughly 40% of the global market. Without FDA clearance, a device simply cannot be legally sold in the United States.
+
+## Why FDA Clearance Matters for Distributors
+
+If you are evaluating aesthetic medical devices for distribution, FDA 510(k) clearance should be at the top of your due diligence checklist. Here is why:
+
+**Market Access**: The US is the single largest market for aesthetic medical devices. FDA clearance is your entry ticket — without it, you cannot legally import, sell, or promote a device in the United States.
+
+**Credibility with Clinics**: Dermatologists, plastic surgeons, and medical spas overwhelmingly prefer FDA-cleared devices. Clearance signals that a device has been reviewed for safety and efficacy, making your sales conversations significantly easier.
+
+**Insurance and Reimbursement**: Many insurance providers require FDA clearance as a prerequisite for reimbursement. For devices used in pain management and rehabilitation (like certain RF systems), this can be a major revenue driver.
+
+**Liability Protection**: Distributing non-cleared devices in the US exposes you to significant legal and financial risk. FDA clearance provides a documented regulatory foundation that protects both you and your customers.
+
+**Competitive Advantage**: In a crowded market, FDA clearance differentiates your product portfolio. It is a tangible proof point that resonates with clinics and end users alike.
+
+## BRITZMEDI's FDA Success: TORR RF (K212561)
+
+BRITZMEDI received FDA 510(k) clearance for the TORR RF Multi-Wave Radiofrequency System under clearance number **K212561** in 2022. This achievement demonstrates BRITZMEDI's commitment to meeting the highest global regulatory standards.
+
+Ready to add an FDA-cleared RF device to your portfolio? [Contact BRITZMEDI](/contact) to discuss distribution opportunities.
+      `,
+      faqs: [
+        {
+          question: 'How can I verify that a device has FDA 510(k) clearance?',
+          answer: 'You can verify any 510(k) clearance on the FDA\'s public database at accessdata.fda.gov. Search by the K-number (for BRITZMEDI TORR RF, use K212561) or by device name.'
+        },
+        {
+          question: 'Do I need separate FDA clearance to distribute an already-cleared device?',
+          answer: 'No. If the manufacturer already holds 510(k) clearance, you do not need to file your own submission. However, you must register as an importer or distributor with the FDA.'
+        },
+      ]
+    },
+    {
+      slug: 'rf-technology-aesthetic-medicine',
+      title: 'RF Technology in Aesthetic Medicine: How Clinics Maximize ROI with Radiofrequency Devices',
+      description: 'A comprehensive guide to RF technology for clinic owners and device buyers. Covers single vs. multi-wave RF, clinical applications, ROI analysis, and a practical buyer\'s checklist.',
+      tldr: 'The global RF aesthetic device market is projected to reach $5.8 billion by 2028. Multi-wave RF systems like TORR RF offer 3 frequencies (1, 2, 4 MHz) for broader treatment coverage and higher ROI. Clinics typically see $800-$1,500 per session revenue and full ROI within 6-12 months.',
+      author: 'BRITZMEDI Team',
+      publishedAt: '2025-11-28',
+      updatedAt: '2026-01-15',
+      category: 'technology',
+      tags: ['RF Technology', 'Aesthetic Medicine', 'TORR RF', 'Clinic ROI', 'Non-Invasive Treatments', 'Skin Tightening'],
+      content: `
+## The Rise of Non-Invasive RF Treatments
+
+Non-invasive aesthetic treatments are the fastest-growing segment in the global aesthetics market. Radiofrequency (RF) technology sits at the center of this growth, driven by patient demand for effective treatments with minimal downtime.
+
+The numbers tell a compelling story:
+- The global aesthetic device market reached **$15.9 billion in 2024** and is growing at 10.2% CAGR
+- Non-invasive procedures now represent over **60% of all aesthetic treatments** performed globally
+- The RF device segment specifically is projected to reach **$5.8 billion by 2028**
+
+For clinic owners and device buyers, RF technology represents one of the highest-ROI investments in the aesthetic device space.
+
+Interested in learning how TORR RF can fit into your clinic or distribution business? [Request a consultation](/contact) to discuss specifications, pricing, and partnership options.
+      `,
+      faqs: [
+        {
+          question: 'How does multi-wave RF differ from monopolar and bipolar RF?',
+          answer: 'Monopolar and bipolar refer to electrode configuration, while multi-wave refers to frequency capability (1, 2, and 4 MHz). A multi-wave system like TORR RF can operate in both modes across multiple frequencies.'
+        },
+        {
+          question: 'Is RF treatment safe for all skin types?',
+          answer: 'Yes. Unlike laser-based treatments that target chromophores (melanin), RF energy heats tissue based on electrical impedance. This makes RF safe and effective for all Fitzpatrick skin types (I-VI).'
+        },
+      ]
+    },
+    {
+      slug: 'korean-beauty-device-market',
+      title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
+      description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry.',
+      tldr: 'South Korea is the world\'s 4th largest medical device exporter with beauty device exports growing 23% in 2024. Korean manufacturers combine competitive R&D, multi-market regulatory clearances (FDA, CE, MFDS), and strong OEM/ODM capabilities.',
+      author: 'BRITZMEDI Team',
+      publishedAt: '2025-10-20',
+      updatedAt: '2026-01-20',
+      category: 'industry-news',
+      tags: ['Korean Medical Devices', 'K-Beauty', 'Market Analysis', 'Distribution Partnership', 'Aesthetic Industry', 'Global Trade'],
+      content: `
+## Korea's Position in the Global Aesthetic Device Market
+
+South Korea has established itself as a powerhouse in the global aesthetic medical device industry. The numbers reflect a market that has moved well beyond the "emerging" label:
+
+- South Korea is the **4th largest medical device exporter** globally
+- Korean medical device exports reached **$9.7 billion in 2024**
+- Korean beauty and aesthetic device exports grew **23% year-over-year** in 2024
+
+Ready to explore a distribution partnership? [Contact BRITZMEDI](/contact) to discuss territory availability, pricing, and partnership terms.
+      `,
+      faqs: [
+        {
+          question: 'What is the minimum order quantity for BRITZMEDI distribution partnerships?',
+          answer: 'BRITZMEDI offers flexible order quantities based on market size and territory agreements. Initial orders typically start from 5-10 units for new markets.'
+        },
+        {
+          question: 'Does BRITZMEDI offer exclusive distribution territories?',
+          answer: 'Yes, BRITZMEDI offers exclusive territory agreements for qualified distribution partners.'
+        },
+      ]
+    }
+  ];
+
+  const allPosts = [...posts, ...dynamicPosts];
+  const paths: { params: { lang: string; slug: string }; props: { post: any } }[] = [];
+
+  supportedLanguages
+    .filter(lang => lang !== defaultLang)
+    .forEach(lang => {
+      allPosts.forEach(post => {
+        paths.push({ params: { lang, slug: post.slug }, props: { post } });
+      });
+    });
+
+  return paths;
+}
+
+const { lang } = Astro.params as { lang: Language };
+const t = useTranslations(lang);
+const { post } = Astro.props;
+
+// Article structured data
+const articleSchema: Record<string, any> = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  'headline': post.title,
+  'description': post.description,
+  'author': {
+    '@type': 'Organization',
+    'name': post.author,
+    'url': 'https://britzmedi.com'
+  },
+  'publisher': {
+    '@type': 'Organization',
+    'name': 'BRITZMEDI Co., Ltd.',
+    'logo': {
+      '@type': 'ImageObject',
+      'url': 'https://britzmedi.com/images/logos/britzmedi-logo.png'
+    }
+  },
+  'datePublished': post.publishedAt,
+  'dateModified': post.updatedAt || post.publishedAt,
+  'inLanguage': lang,
+  'mainEntityOfPage': {
+    '@type': 'WebPage',
+    '@id': `https://britzmedi.com/${lang}/blog/${post.slug}`
+  }
+};
+
+// Add doctor as author if available
+if (post.doctor) {
+  articleSchema['author'] = {
+    '@type': 'Person',
+    'name': post.doctor.name,
+    'jobTitle': post.doctor.title || undefined,
+    'image': post.doctor.image || undefined,
+  };
+}
+
+// FAQ structured data
+const faqSchema = post.faqs?.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  'mainEntity': post.faqs.map((faq: any) => ({
+    '@type': 'Question',
+    'name': faq.question,
+    'acceptedAnswer': {
+      '@type': 'Answer',
+      'text': faq.answer
+    }
+  }))
+} : null;
+
+// Breadcrumb structured data
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  'itemListElement': [
+    {
+      '@type': 'ListItem',
+      'position': 1,
+      'name': t('blog.home'),
+      'item': `https://britzmedi.com/${lang}`
+    },
+    {
+      '@type': 'ListItem',
+      'position': 2,
+      'name': t('nav.blog'),
+      'item': `https://britzmedi.com/${lang}/blog`
+    },
+    {
+      '@type': 'ListItem',
+      'position': 3,
+      'name': post.title,
+      'item': `https://britzmedi.com/${lang}/blog/${post.slug}`
+    }
+  ]
+};
+---
+
+<BaseLayout
+  title={post.title}
+  description={post.description}
+  keywords={post.tags}
+>
+  <!-- Article Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <!-- FAQ Structured Data (if applicable) -->
+  {faqSchema && (
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  )}
+
+  <!-- Breadcrumb Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+
+  <!-- Breadcrumb -->
+  <nav class="container py-4 text-sm">
+    <ol class="flex items-center gap-2 text-slate-500">
+      <li><a href={`/${lang}`} class="hover:text-primary-600">{t('blog.home')}</a></li>
+      <li>/</li>
+      <li><a href={`/${lang}/blog`} class="hover:text-primary-600">{t('nav.blog')}</a></li>
+      <li>/</li>
+      <li class="text-slate-700 truncate max-w-[250px]">{post.title}</li>
+    </ol>
+  </nav>
+
+  <article class="blog-article">
+    <!-- Category & Date -->
+    <div class="blog-meta">
+      <span class="category-badge">{post.category.replace('-', ' ')}</span>
+      <time datetime={post.publishedAt}>
+        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      </time>
+      {post.updatedAt && post.updatedAt !== post.publishedAt && (
+        <span class="text-slate-400">
+          (Updated {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
+        </span>
+      )}
+    </div>
+
+    <!-- Title -->
+    <h1>{post.title}</h1>
+
+    <!-- Description -->
+    <p class="text-lg" style="color: var(--color-slate-600); line-height: 1.75; margin-bottom: 1.5rem;">
+      {post.description}
+    </p>
+
+    <!-- Featured Image -->
+    {post.featuredImage && (
+      <div class="blog-featured-image">
+        <img src={post.featuredImage} alt={post.title} />
+      </div>
+    )}
+
+    <!-- TL;DR Box -->
+    {post.tldr && (
+      <TldrBox summary={post.tldr} />
+    )}
+
+    <!-- Doctor Profile (for dynamic posts) -->
+    {post.doctor && (
+      <div class="blog-doctor-card">
+        {post.doctor.image ? (
+          <img src={post.doctor.image} alt={post.doctor.name} class="doctor-avatar" />
+        ) : (
+          <div class="doctor-avatar-placeholder">
+            {post.doctor.name?.charAt(0) || 'D'}
+          </div>
+        )}
+        <div class="doctor-info">
+          <h4>{post.doctor.name}</h4>
+          {post.doctor.title && <p class="doctor-title">{post.doctor.title}</p>}
+          {post.doctor.credentials && <p class="doctor-credentials">{post.doctor.credentials}</p>}
+          {post.doctor.bio && <p class="doctor-bio">{post.doctor.bio}</p>}
+        </div>
+      </div>
+    )}
+
+    <!-- Author and Share -->
+    <div class="blog-author-bar">
+      <div class="author-info">
+        <div class="author-avatar">B</div>
+        <div>
+          <p class="author-name">{post.author}</p>
+          <p class="author-org">BRITZMEDI Co., Ltd.</p>
+        </div>
+      </div>
+      <div class="share-links">
+        <span>{t('blog.share')}:</span>
+        <a
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=https://britzmedi.com/${lang}/blog/${post.slug}&title=${encodeURIComponent(post.title)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share on LinkedIn"
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </a>
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=https://britzmedi.com/${lang}/blog/${post.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share on Twitter"
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <div>
+      {post.isDynamic ? (
+        <Fragment set:html={post.content} />
+      ) : (
+        <Fragment set:html={post.content.split('\n').map((line: string) => {
+          if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+          if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
+          if (line.startsWith('**Q:')) return `<p class="font-semibold">${line}</p>`;
+          if (line.startsWith('**A:')) return `<p>${line}</p>`;
+          if (line.startsWith('- **')) return `<li><strong>${line.slice(4).split('**')[0]}</strong>: ${line.split('**')[2] || ''}</li>`;
+          if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`;
+          if (line.match(/^\d+\./)) return `<li>${line.slice(line.indexOf(' ') + 1)}</li>`;
+          if (line.trim() === '') return '<br />';
+          return `<p>${line}</p>`;
+        }).join('')} />
+      )}
+    </div>
+
+    <!-- YouTube Embed -->
+    {post.youtubeEmbedUrl && (
+      <div class="blog-youtube-embed">
+        <p class="embed-label">Watch the Full Video</p>
+        <div class="embed-wrapper">
+          <iframe
+            src={post.youtubeEmbedUrl}
+            allowfullscreen
+            title="Source video"
+          />
+        </div>
+      </div>
+    )}
+
+    <!-- FAQ Section -->
+    {post.faqs?.length > 0 && (
+      <section class="blog-faq-section">
+        <h2>{t('blog.faq')}</h2>
+        {post.faqs.map((faq: any) => (
+          <div class="blog-faq-item">
+            <h3>{faq.question}</h3>
+            <p>{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+    )}
+
+    <!-- Tags -->
+    <div class="blog-tags">
+      {post.tags.map((tag: string) => (
+        <span class="tag">#{tag}</span>
+      ))}
+    </div>
+
+    <!-- Back to Blog -->
+    <div style="margin-top: 2rem;">
+      <a
+        href={`/${lang}/blog`}
+        class="inline-flex items-center text-primary-600 font-medium hover:text-primary-700"
+        style="text-decoration: none;"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        {t('blog.backToBlog')}
+      </a>
+    </div>
+  </article>
+</BaseLayout>

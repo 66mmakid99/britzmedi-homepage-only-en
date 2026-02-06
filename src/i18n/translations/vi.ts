@@ -216,6 +216,31 @@ export const vi: TranslationKeys = {
     },
   },
 
+  // Blog
+  blog: {
+    title: 'Blog - Thông tin ngành thiết bị y tế & Công nghệ RF',
+    subtitle: 'Thông tin chuyên sâu từ chuyên gia về công nghệ RF, quy trình FDA và xu hướng y học thẩm mỹ từ BRITZMEDI.',
+    heroLabel: 'Blog & Thông tin',
+    heroTitle: 'Thông tin & Cập nhật ngành',
+    heroDescription: 'Cập nhật tin tức mới nhất, thông tin công nghệ và nội dung giáo dục từ ngành thiết bị y tế thẩm mỹ.',
+    featured: 'Nổi bật',
+    featuredArticles: 'Bài viết nổi bật',
+    allArticles: 'Tất cả bài viết',
+    readMore: 'Đọc thêm',
+    backToBlog: 'Quay lại Blog',
+    share: 'Chia sẻ',
+    faq: 'Câu hỏi thường gặp',
+    home: 'Trang chủ',
+    categories: {
+      all: 'Tất cả bài viết',
+      industryNews: 'Tin ngành',
+      productUpdates: 'Cập nhật sản phẩm',
+      technology: 'Công nghệ',
+      clinicalStudies: 'Nghiên cứu lâm sàng',
+      education: 'Giáo dục',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: 'Liên hệ với chúng tôi',

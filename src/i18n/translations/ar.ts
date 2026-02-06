@@ -216,6 +216,31 @@ export const ar: TranslationKeys = {
     },
   },
 
+  // Blog
+  blog: {
+    title: 'المدونة - رؤى صناعة الأجهزة الطبية وتقنية RF',
+    subtitle: 'رؤى الخبراء حول تقنية RF وعملية موافقة FDA واتجاهات الطب التجميلي من BRITZMEDI.',
+    heroLabel: 'المدونة والرؤى',
+    heroTitle: 'رؤى وتحديثات الصناعة',
+    heroDescription: 'ابقَ على اطلاع بأحدث الأخبار والرؤى التقنية والمحتوى التعليمي من صناعة الأجهزة الطبية التجميلية.',
+    featured: 'مميز',
+    featuredArticles: 'مقالات مميزة',
+    allArticles: 'جميع المقالات',
+    readMore: 'اقرأ المزيد',
+    backToBlog: 'العودة إلى المدونة',
+    share: 'مشاركة',
+    faq: 'الأسئلة الشائعة',
+    home: 'الرئيسية',
+    categories: {
+      all: 'جميع المنشورات',
+      industryNews: 'أخبار الصناعة',
+      productUpdates: 'تحديثات المنتجات',
+      technology: 'التكنولوجيا',
+      clinicalStudies: 'الدراسات السريرية',
+      education: 'التعليم',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: 'اتصل بنا',

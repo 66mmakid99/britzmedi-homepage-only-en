@@ -216,6 +216,31 @@ export const th: TranslationKeys = {
     },
   },
 
+  // Blog
+  blog: {
+    title: 'บล็อก - ข้อมูลเชิงลึกอุตสาหกรรมอุปกรณ์การแพทย์และเทคโนโลยี RF',
+    subtitle: 'ข้อมูลเชิงลึกจากผู้เชี่ยวชาญเกี่ยวกับเทคโนโลยี RF กระบวนการอนุมัติ FDA และแนวโน้มการแพทย์เสริมความงามจาก BRITZMEDI',
+    heroLabel: 'บล็อกและข้อมูลเชิงลึก',
+    heroTitle: 'ข้อมูลเชิงลึกและอัปเดตอุตสาหกรรม',
+    heroDescription: 'ติดตามข่าวสาร ข้อมูลเชิงลึกทางเทคโนโลยี และเนื้อหาการศึกษาล่าสุดจากอุตสาหกรรมอุปกรณ์การแพทย์เสริมความงาม',
+    featured: 'แนะนำ',
+    featuredArticles: 'บทความแนะนำ',
+    allArticles: 'บทความทั้งหมด',
+    readMore: 'อ่านเพิ่มเติม',
+    backToBlog: 'กลับไปบล็อก',
+    share: 'แชร์',
+    faq: 'คำถามที่พบบ่อย',
+    home: 'หน้าแรก',
+    categories: {
+      all: 'โพสต์ทั้งหมด',
+      industryNews: 'ข่าวอุตสาหกรรม',
+      productUpdates: 'อัปเดตผลิตภัณฑ์',
+      technology: 'เทคโนโลยี',
+      clinicalStudies: 'การศึกษาทางคลินิก',
+      education: 'การศึกษา',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: 'ติดต่อเรา',

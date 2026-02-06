@@ -214,6 +214,31 @@ export const en = {
     },
   },
 
+  // Blog
+  blog: {
+    title: 'Blog - Medical Device Industry Insights & RF Technology',
+    subtitle: 'Expert insights on RF technology, FDA clearance process, and aesthetic medicine trends from BRITZMEDI.',
+    heroLabel: 'Blog & Insights',
+    heroTitle: 'Industry Insights & Updates',
+    heroDescription: 'Stay informed with the latest news, technology insights, and educational content from the aesthetic medical device industry.',
+    featured: 'Featured',
+    featuredArticles: 'Featured Articles',
+    allArticles: 'All Articles',
+    readMore: 'Read More',
+    backToBlog: 'Back to Blog',
+    share: 'Share',
+    faq: 'Frequently Asked Questions',
+    home: 'Home',
+    categories: {
+      all: 'All Posts',
+      industryNews: 'Industry News',
+      productUpdates: 'Product Updates',
+      technology: 'Technology',
+      clinicalStudies: 'Clinical Studies',
+      education: 'Education',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: 'Contact Us',

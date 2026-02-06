@@ -216,6 +216,31 @@ export const es: TranslationKeys = {
     },
   },
 
+  // Blog
+  blog: {
+    title: 'Blog - Perspectivas de la industria de dispositivos médicos y tecnología RF',
+    subtitle: 'Perspectivas de expertos sobre tecnología RF, proceso de aprobación FDA y tendencias en medicina estética de BRITZMEDI.',
+    heroLabel: 'Blog y Perspectivas',
+    heroTitle: 'Perspectivas y Actualizaciones del sector',
+    heroDescription: 'Manténgase informado con las últimas noticias, perspectivas tecnológicas y contenido educativo de la industria de dispositivos médicos estéticos.',
+    featured: 'Destacado',
+    featuredArticles: 'Artículos destacados',
+    allArticles: 'Todos los artículos',
+    readMore: 'Leer más',
+    backToBlog: 'Volver al Blog',
+    share: 'Compartir',
+    faq: 'Preguntas frecuentes',
+    home: 'Inicio',
+    categories: {
+      all: 'Todas las publicaciones',
+      industryNews: 'Noticias del sector',
+      productUpdates: 'Actualizaciones de productos',
+      technology: 'Tecnología',
+      clinicalStudies: 'Estudios clínicos',
+      education: 'Educación',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: 'Contáctenos',

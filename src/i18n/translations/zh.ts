@@ -216,6 +216,31 @@ export const zh: TranslationKeys = {
     },
   },
 
+  // Blog
+  blog: {
+    title: '博客 - 医疗器械行业洞察与RF技术',
+    subtitle: 'BRITZMEDI关于RF技术、FDA审批流程和美容医疗趋势的专业见解。',
+    heroLabel: '博客与洞察',
+    heroTitle: '行业洞察与更新',
+    heroDescription: '了解美容医疗器械行业的最新新闻、技术洞察和教育内容。',
+    featured: '精选',
+    featuredArticles: '精选文章',
+    allArticles: '所有文章',
+    readMore: '阅读更多',
+    backToBlog: '返回博客',
+    share: '分享',
+    faq: '常见问题',
+    home: '首页',
+    categories: {
+      all: '所有文章',
+      industryNews: '行业新闻',
+      productUpdates: '产品更新',
+      technology: '技术',
+      clinicalStudies: '临床研究',
+      education: '教育',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: '联系我们',

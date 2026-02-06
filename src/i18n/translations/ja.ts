@@ -216,6 +216,31 @@ export const ja: TranslationKeys = {
     },
   },
 
+  // Blog
+  blog: {
+    title: 'ブログ - 医療機器業界の洞察とRF技術',
+    subtitle: 'BRITZMEDIによるRF技術、FDA認可プロセス、美容医療のトレンドに関する専門的な洞察。',
+    heroLabel: 'ブログ＆インサイト',
+    heroTitle: '業界の洞察とアップデート',
+    heroDescription: '美容医療機器業界の最新ニュース、技術的洞察、教育コンテンツをご覧ください。',
+    featured: '注目',
+    featuredArticles: '注目の記事',
+    allArticles: 'すべての記事',
+    readMore: '続きを読む',
+    backToBlog: 'ブログに戻る',
+    share: '共有',
+    faq: 'よくある質問',
+    home: 'ホーム',
+    categories: {
+      all: 'すべての投稿',
+      industryNews: '業界ニュース',
+      productUpdates: '製品アップデート',
+      technology: 'テクノロジー',
+      clinicalStudies: '臨床研究',
+      education: '教育',
+    },
+  },
+
   // Contact / Lead Form
   contact: {
     title: 'お問い合わせ',
