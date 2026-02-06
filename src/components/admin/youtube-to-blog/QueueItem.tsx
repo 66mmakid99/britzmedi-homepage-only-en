@@ -23,7 +23,7 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
   const [processing, setProcessing] = useState(false);
   const config = STATUS_CONFIG[job.status] || STATUS_CONFIG.pending;
 
-  const isActive = !['completed', 'failed', 'pending'].includes(job.status);
+  const isActive = !['completed', 'failed', 'pending'].includes(job.status) && processing;
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this job?')) return;
@@ -39,7 +39,7 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
   };
 
   const handleStartProcessing = async () => {
-    if (job.status !== 'pending') return;
+    if (!['pending', 'failed'].includes(job.status)) return;
     setProcessing(true);
 
     const steps = ['extract', 'translate', 'generate', 'research', 'image', 'finalize'];
@@ -51,12 +51,23 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
         });
 
         if (!res.ok) {
-          const data = await res.json();
+          const data = await res.json().catch(() => ({ error: `Step ${step} returned ${res.status}` }));
           console.error(`Step ${step} failed:`, data.error);
+          // Mark job as failed in DB so UI can show error and allow retry
+          await fetch(`/api/blog/queue/${job.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'failed', error_message: `Step "${step}" failed: ${data.error || res.statusText}` }),
+          });
           break;
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(`Step ${step} failed:`, err);
+        await fetch(`/api/blog/queue/${job.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'failed', error_message: `Step "${step}" error: ${err.message || 'Network error'}` }),
+        }).catch(() => {});
         break;
       }
     }

@@ -1,5 +1,6 @@
 // Blog Queue Item API
 // GET /api/blog/queue/[id] - Get job details
+// PUT /api/blog/queue/[id] - Update job status (client-side error reporting)
 // DELETE /api/blog/queue/[id] - Cancel/delete job
 
 export const prerender = false;
@@ -52,6 +53,64 @@ export const GET: APIRoute = async ({ params, locals }) => {
   }
 };
 
+// PUT /api/blog/queue/[id] - Update job status (for client-side error reporting)
+export const PUT: APIRoute = async ({ params, request, locals }) => {
+  const { id } = params;
+  if (!id) {
+    return new Response(JSON.stringify({ error: 'Job ID required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  try {
+    const body = await request.json();
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Only allow setting status to 'failed' or 'pending' (for retry reset)
+    const allowedStatuses = ['failed', 'pending'];
+    if (!body.status || !allowedStatuses.includes(body.status)) {
+      return new Response(JSON.stringify({ error: 'Only "failed" or "pending" status allowed' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const setClauses = ['status = ?', "updated_at = datetime('now')"];
+    const values: (string | number | null)[] = [body.status];
+
+    if (body.error_message) {
+      setClauses.push('error_message = ?');
+      values.push(String(body.error_message).slice(0, 500));
+    }
+
+    if (body.status === 'pending') {
+      setClauses.push('progress = 0');
+      setClauses.push('error_message = NULL');
+    }
+
+    values.push(id);
+    await db.prepare(`UPDATE blog_jobs SET ${setClauses.join(', ')} WHERE id = ?`).bind(...values).run();
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Blog Queue API] PUT Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to update job', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
 // DELETE /api/blog/queue/[id]
 export const DELETE: APIRoute = async ({ params, locals }) => {
   const { id } = params;
@@ -81,14 +140,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    // Don't delete jobs that are actively processing (unless failed)
-    const activeStatuses = ['extracting', 'translating', 'generating', 'researching', 'imaging', 'finalizing'];
-    if (activeStatuses.includes(job.status)) {
-      return new Response(JSON.stringify({ error: 'Cannot delete a job that is currently processing' }), {
-        status: 409,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Allow deleting jobs in any status (stuck jobs need cleanup too)
 
     await db.prepare('DELETE FROM blog_jobs WHERE id = ?').bind(id).run();
 
