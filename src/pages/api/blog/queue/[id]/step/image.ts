@@ -4,7 +4,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { generateImagePrompt, generateImage } from '../../../../../../lib/youtube-to-blog/gemini';
+import { generateImagePrompt, generateImage, generateContentImagePrompts } from '../../../../../../lib/youtube-to-blog/gemini';
+import type { ContentImageSpec } from '../../../../../../lib/youtube-to-blog/gemini';
 import { uploadToR2, generateImageKey } from '../../../../../../lib/youtube-to-blog/images';
 import { getJob, updateJobStatus, failJob } from '../../../../../../lib/youtube-to-blog/queue';
 import type { BlogPost } from '../../../../../../lib/youtube-to-blog/schemas';
@@ -62,36 +63,72 @@ export const POST: APIRoute = async ({ params, locals }) => {
     }
 
     let featuredImageUrl: string | null = null;
+    let contentImagesInserted = 0;
 
     if (geminiKey && r2) {
+      // --- Featured image ---
       try {
-        // Generate image prompt
         const imagePrompt = await generateImagePrompt(
           geminiKey,
           post.title,
           post.excerpt || ''
         );
 
-        // Generate image
         const imageData = await generateImage(geminiKey, imagePrompt);
 
         if (imageData) {
-          // Upload to R2
           const imageKey = generateImageKey(job.blog_post_id, 0);
           featuredImageUrl = await uploadToR2(r2, imageKey, imageData);
         }
       } catch (imgErr) {
-        console.error('[Image Step] Image generation failed:', imgErr);
-        // Non-critical - continue without image
+        console.error('[Image Step] Featured image generation failed:', imgErr);
+      }
+
+      // --- Content images (2 in-body images at H2 sections) ---
+      try {
+        if (post.content) {
+          const specs = await generateContentImagePrompts(geminiKey, post.content, post.title);
+
+          if (specs.length > 0) {
+            // Generate all content images in parallel
+            const imageResults = await Promise.all(
+              specs.map(async (spec, i) => {
+                const imgData = await generateImage(geminiKey, spec.imagePrompt);
+                if (!imgData) return null;
+                const imgKey = generateImageKey(job.blog_post_id, i + 1);
+                const imgUrl = await uploadToR2(r2, imgKey, imgData);
+                return { spec, url: imgUrl };
+              })
+            );
+
+            // Insert figures into HTML content
+            let updatedContent = post.content;
+            for (const result of imageResults) {
+              if (!result) continue;
+              updatedContent = insertFigureAfterH2(updatedContent, result.spec, result.url);
+              contentImagesInserted++;
+            }
+
+            if (contentImagesInserted > 0) {
+              await db.prepare(`
+                UPDATE blog_posts SET content = ?, updated_at = datetime('now')
+                WHERE id = ?
+              `).bind(updatedContent, job.blog_post_id).run();
+            }
+          }
+        }
+      } catch (contentImgErr) {
+        console.error('[Image Step] Content images failed:', contentImgErr);
+        // Non-critical - continue
       }
     }
 
-    // Use YouTube thumbnail as fallback
+    // Use YouTube thumbnail as fallback for featured image
     if (!featuredImageUrl) {
       featuredImageUrl = `https://img.youtube.com/vi/${job.youtube_id}/maxresdefault.jpg`;
     }
 
-    // Update blog post
+    // Update featured image
     await db.prepare(`
       UPDATE blog_posts SET featured_image = ?, updated_at = datetime('now')
       WHERE id = ?
@@ -103,6 +140,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
       success: true,
       featured_image: featuredImageUrl,
       generated: featuredImageUrl !== `https://img.youtube.com/vi/${job.youtube_id}/maxresdefault.jpg`,
+      content_images: contentImagesInserted,
     }), {
       headers: { 'Content-Type': 'application/json' },
     });
@@ -133,3 +171,24 @@ export const POST: APIRoute = async ({ params, locals }) => {
     });
   }
 };
+
+/**
+ * Insert a <figure> block after the first </p> following a matching H2 heading
+ */
+function insertFigureAfterH2(html: string, spec: ContentImageSpec, imageUrl: string): string {
+  // Find the H2 that contains the section heading text (case-insensitive)
+  const escapedHeading = spec.sectionHeading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const h2Regex = new RegExp(`<h2[^>]*>[^<]*${escapedHeading}[^<]*<\\/h2>`, 'i');
+  const h2Match = h2Regex.exec(html);
+
+  if (!h2Match) return html;
+
+  // Find the first </p> after this H2
+  const afterH2 = html.indexOf('</p>', h2Match.index + h2Match[0].length);
+  if (afterH2 === -1) return html;
+
+  const insertPos = afterH2 + '</p>'.length;
+  const figureBlock = `\n<figure><img src="${imageUrl}" alt="${spec.altText.replace(/"/g, '&quot;')}" loading="lazy"><figcaption>${spec.caption}</figcaption></figure>\n`;
+
+  return html.slice(0, insertPos) + figureBlock + html.slice(insertPos);
+}

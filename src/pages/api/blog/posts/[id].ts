@@ -94,13 +94,26 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       });
     }
 
-    // Check post exists
-    const existing = await db.prepare('SELECT id FROM blog_posts WHERE id = ?').bind(id).first();
+    // Check post exists and fetch current doctor_name + content for sync
+    const existing = await db.prepare('SELECT id, doctor_name, content FROM blog_posts WHERE id = ?').bind(id).first<{ id: string; doctor_name: string | null; content: string | null }>();
     if (!existing) {
       return new Response(JSON.stringify({ error: 'Post not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // Doctor name sync: if name changed, replace old name in content body
+    let contentOverride = data.content;
+    if (
+      data.doctor_name &&
+      existing.doctor_name &&
+      data.doctor_name !== existing.doctor_name
+    ) {
+      const currentContent = data.content || existing.content;
+      if (currentContent) {
+        contentOverride = currentContent.replaceAll(existing.doctor_name, data.doctor_name);
+      }
     }
 
     // Build dynamic UPDATE
@@ -109,7 +122,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
 
     const fields: [string, unknown][] = [
       ['title', data.title],
-      ['content', data.content],
+      ['content', contentOverride],
       ['excerpt', data.excerpt],
       ['meta_description', data.meta_description],
       ['keywords', data.keywords ? JSON.stringify(data.keywords) : undefined],

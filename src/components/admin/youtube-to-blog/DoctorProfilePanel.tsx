@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { BlogPost } from '../../../lib/youtube-to-blog/schemas';
 
 interface DoctorProfilePanelProps {
   post: BlogPost;
   onUpdate: (post: BlogPost) => void;
+  editor?: any;
 }
 
-export function DoctorProfilePanel({ post, onUpdate }: DoctorProfilePanelProps) {
+export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePanelProps) {
   const [name, setName] = useState(post.doctor_name || '');
   const [title, setTitle] = useState(post.doctor_title || '');
   const [credentials, setCredentials] = useState(post.doctor_credentials || '');
@@ -14,6 +15,7 @@ export function DoctorProfilePanel({ post, onUpdate }: DoctorProfilePanelProps) 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [researching, setResearching] = useState(false);
+  const originalNameRef = useRef(post.doctor_name || '');
 
   const handleSave = async () => {
     setSaving(true);
@@ -34,6 +36,13 @@ export function DoctorProfilePanel({ post, onUpdate }: DoctorProfilePanelProps) 
       if (res.ok) {
         const data = await res.json();
         onUpdate(data.post);
+
+        // If doctor name changed, re-sync TipTap editor with server-updated content
+        if (name !== originalNameRef.current && editor && data.post.content) {
+          editor.commands.setContent(data.post.content);
+        }
+        originalNameRef.current = name;
+
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       }

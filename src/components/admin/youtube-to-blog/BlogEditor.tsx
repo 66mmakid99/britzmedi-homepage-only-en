@@ -250,7 +250,7 @@ export default function BlogEditor({ postId }: BlogEditorProps) {
         )}
 
         {activePanel === 'doctor' && (
-          <DoctorProfilePanel post={post} onUpdate={setPost} />
+          <DoctorProfilePanel post={post} onUpdate={setPost} editor={editor} />
         )}
 
         {activePanel === 'images' && (

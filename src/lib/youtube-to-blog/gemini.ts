@@ -125,6 +125,67 @@ Respond with ONLY the image generation prompt (1-2 sentences), nothing else.`;
   return await callGemini(apiKey, prompt);
 }
 
+export interface ContentImageSpec {
+  sectionHeading: string;
+  imagePrompt: string;
+  altText: string;
+  caption: string;
+}
+
+/**
+ * Analyze blog HTML and generate image prompts for the 2 most visual H2 sections
+ */
+export async function generateContentImagePrompts(
+  apiKey: string,
+  htmlContent: string,
+  title: string
+): Promise<ContentImageSpec[]> {
+  // Extract H2 headings from HTML
+  const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+  const headings: string[] = [];
+  let match;
+  while ((match = h2Regex.exec(htmlContent)) !== null) {
+    headings.push(match[1].replace(/<[^>]*>/g, '').trim());
+  }
+
+  if (headings.length < 2) return [];
+
+  const prompt = `You are an image director for a professional medical/aesthetic blog.
+
+Blog title: ${title}
+
+H2 sections in the article:
+${headings.map((h, i) => `${i + 1}. ${h}`).join('\n')}
+
+Pick the 2 most visually interesting sections that would benefit from an illustrative image.
+For each, provide:
+- sectionHeading: the exact H2 text (copy exactly from the list above)
+- imagePrompt: a concise Imagen prompt (1-2 sentences) for a professional medical photo. No text overlays, clean modern style, photorealistic.
+- altText: a descriptive alt text for AEO/SEO (10-20 words)
+- caption: a short figure caption (5-10 words)
+
+Respond ONLY with a JSON array of 2 objects. No markdown, no commentary.
+Example:
+[
+  {"sectionHeading":"...","imagePrompt":"...","altText":"...","caption":"..."},
+  {"sectionHeading":"...","imagePrompt":"...","altText":"...","caption":"..."}
+]`;
+
+  try {
+    const result = await callGemini(apiKey, prompt);
+    const cleaned = result.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const specs: ContentImageSpec[] = JSON.parse(cleaned);
+
+    // Validate: keep only specs whose heading actually appears in content
+    return specs.filter(s =>
+      headings.some(h => h.toLowerCase() === s.sectionHeading.toLowerCase())
+    ).slice(0, 2);
+  } catch (err) {
+    console.error('[Gemini] Content image prompts failed:', err);
+    return [];
+  }
+}
+
 /**
  * Generate image using Gemini's Imagen model
  */
