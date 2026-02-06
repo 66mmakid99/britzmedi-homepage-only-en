@@ -254,6 +254,8 @@ export const vi: TranslationKeys = {
         description: 'Dữ liệu thị trường, cảnh quan pháp lý và cơ hội hợp tác trong ngành thiết bị thẩm mỹ Hàn Quốc.',
       },
     },
+    contentNotice: 'Bài viết này được viết bằng tiếng Anh.',
+    readInEnglish: 'Đọc bằng tiếng Anh',
   },
 
   // Contact / Lead Form

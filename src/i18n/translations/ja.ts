@@ -254,6 +254,8 @@ export const ja: TranslationKeys = {
         description: '韓国美容機器業界の市場データ、規制環境、パートナーシップの機会。',
       },
     },
+    contentNotice: 'この記事は英語で書かれています。',
+    readInEnglish: '英語で読む',
   },
 
   // Contact / Lead Form

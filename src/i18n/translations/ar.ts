@@ -254,6 +254,8 @@ export const ar: TranslationKeys = {
         description: 'بيانات السوق والمشهد التنظيمي وفرص الشراكة في صناعة أجهزة التجميل الكورية.',
       },
     },
+    contentNotice: 'هذا المقال مكتوب باللغة الإنجليزية.',
+    readInEnglish: 'اقرأ بالإنجليزية',
   },
 
   // Contact / Lead Form

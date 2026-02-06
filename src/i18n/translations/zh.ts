@@ -254,6 +254,8 @@ export const zh: TranslationKeys = {
         description: '韩国美容设备行业的市场数据、监管环境和合作机会。',
       },
     },
+    contentNotice: '本文以英文撰写。',
+    readInEnglish: '阅读英文原文',
   },
 
   // Contact / Lead Form

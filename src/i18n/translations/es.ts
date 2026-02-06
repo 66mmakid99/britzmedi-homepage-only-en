@@ -254,6 +254,8 @@ export const es: TranslationKeys = {
         description: 'Datos de mercado, panorama regulatorio y oportunidades de asociación en la industria de dispositivos estéticos coreanos.',
       },
     },
+    contentNotice: 'Este artículo está escrito en inglés.',
+    readInEnglish: 'Leer en inglés',
   },
 
   // Contact / Lead Form

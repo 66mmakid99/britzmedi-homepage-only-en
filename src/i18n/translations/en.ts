@@ -252,6 +252,8 @@ export const en = {
         description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry.',
       },
     },
+    contentNotice: 'This article is written in English.',
+    readInEnglish: 'Read in English',
   },
 
   // Contact / Lead Form

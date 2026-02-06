@@ -254,6 +254,8 @@ export const fr: TranslationKeys = {
         description: "Données de marché, environnement réglementaire et opportunités de partenariat dans l'industrie des dispositifs esthétiques coréens.",
       },
     },
+    contentNotice: 'Cet article est rédigé en anglais.',
+    readInEnglish: "Lire en anglais",
   },
 
   // Contact / Lead Form

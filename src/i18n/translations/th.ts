@@ -254,6 +254,8 @@ export const th: TranslationKeys = {
         description: 'ข้อมูลตลาด ภูมิทัศน์ด้านกฎระเบียบ และโอกาสในการเป็นพันธมิตรในอุตสาหกรรมอุปกรณ์เสริมความงามเกาหลี',
       },
     },
+    contentNotice: 'บทความนี้เขียนเป็นภาษาอังกฤษ',
+    readInEnglish: 'อ่านเป็นภาษาอังกฤษ',
   },
 
   // Contact / Lead Form

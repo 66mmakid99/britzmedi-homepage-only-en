@@ -895,3 +895,40 @@ img.loaded {
   height: 1.25rem;
   color: var(--color-slate-600);
 }
+
+.content-lang-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--color-blue-50, #eff6ff);
+  border: 1px solid var(--color-blue-200, #bfdbfe);
+  border-radius: 0.5rem;
+  color: var(--color-blue-800, #1e40af);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.content-lang-notice .notice-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-blue-500, #3b82f6);
+}
+
+.content-lang-notice p {
+  margin: 0;
+}
+
+.content-lang-notice a {
+  color: var(--color-blue-600, #2563eb);
+  font-weight: 500;
+  text-decoration: underline;
+  margin-left: 0.25rem;
+}
+
+.content-lang-notice a:hover {
+  color: var(--color-blue-800, #1e40af);
+}
