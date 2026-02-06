@@ -1,5 +1,5 @@
 // YouTube transcript extraction and metadata
-// Custom implementation that works in Cloudflare Workers (no Node.js deps)
+// Uses YouTube innertube API with ANDROID client (works in Cloudflare Workers)
 
 interface TranscriptSegment {
   text: string;
@@ -29,32 +29,31 @@ export interface ExtractResult {
   metadata: VideoMetadata;
 }
 
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+const USER_AGENT = 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip';
 
 /**
  * Extract transcript from YouTube video.
- * Uses direct YouTube page scraping to find caption tracks,
- * then fetches and parses the timedtext XML.
+ * Uses YouTube innertube API with ANDROID client (bypasses consent pages).
  * Works reliably in Cloudflare Workers environment.
  */
 export async function extractTranscript(youtubeId: string): Promise<ExtractResult> {
-  // Step 1: Fetch the YouTube video page to get player config
+  // Step 1: Get player response via innertube API
   const playerResponse = await fetchPlayerResponse(youtubeId);
 
-  // Step 2: Extract caption tracks from player response
+  // Step 2: Extract caption tracks
   const captionTracks = extractCaptionTracks(playerResponse);
 
   if (captionTracks.length === 0) {
     throw new Error(
-      'No captions available for this video. Please use a video with subtitles/captions enabled.'
+      'No captions available for this video. The video must have subtitles or auto-generated captions enabled.'
     );
   }
 
-  // Step 3: Select best caption track (prefer English, then any manual, then auto-generated)
+  // Step 3: Select best caption track
   const { track, language } = selectBestTrack(captionTracks);
 
-  // Step 4: Fetch and parse the caption XML
-  const segments = await fetchCaptionXml(track.baseUrl);
+  // Step 4: Fetch and parse the captions
+  const segments = await fetchCaptions(track.baseUrl);
 
   if (!segments || segments.length === 0) {
     throw new Error('Caption track was found but contained no text segments.');
@@ -63,63 +62,19 @@ export async function extractTranscript(youtubeId: string): Promise<ExtractResul
   // Combine segments into full text
   const transcript = segments.map(s => s.text).join(' ');
 
-  // Step 5: Extract metadata from player response
-  const metadata = extractMetadata(playerResponse, youtubeId);
+  // Step 5: Extract metadata
+  const metadata = extractMetadata(playerResponse);
 
   return { transcript, language, metadata };
 }
 
 /**
- * Fetch YouTube video page and extract ytInitialPlayerResponse
+ * Fetch player response via YouTube innertube API (ANDROID client).
+ * ANDROID client is used because WEB client requires consent cookies
+ * and returns UNPLAYABLE from server environments like Cloudflare Workers.
  */
 async function fetchPlayerResponse(youtubeId: string): Promise<any> {
-  const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': USER_AGENT,
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept': 'text/html,application/xhtml+xml',
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch YouTube page: HTTP ${res.status}`);
-  }
-
-  const html = await res.text();
-
-  // Extract ytInitialPlayerResponse from the page
-  const playerMatch = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});/s);
-  if (playerMatch) {
-    try {
-      return JSON.parse(playerMatch[1]);
-    } catch {
-      // Try alternative extraction
-    }
-  }
-
-  // Alternative: look for player response in script tags
-  const altMatch = html.match(/var\s+ytInitialPlayerResponse\s*=\s*(\{.+?\});/s);
-  if (altMatch) {
-    try {
-      return JSON.parse(altMatch[1]);
-    } catch {
-      // Fall through
-    }
-  }
-
-  // Try innertube API as fallback
-  return await fetchViaInnertube(youtubeId);
-}
-
-/**
- * Fallback: Use YouTube's innertube API directly
- */
-async function fetchViaInnertube(youtubeId: string): Promise<any> {
-  const apiUrl = 'https://www.youtube.com/youtubei/v1/player';
-
-  const res = await fetch(apiUrl, {
+  const res = await fetch('https://www.youtube.com/youtubei/v1/player', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -129,8 +84,9 @@ async function fetchViaInnertube(youtubeId: string): Promise<any> {
       videoId: youtubeId,
       context: {
         client: {
-          clientName: 'WEB',
-          clientVersion: '2.20240101.00.00',
+          clientName: 'ANDROID',
+          clientVersion: '19.09.37',
+          androidSdkVersion: 30,
           hl: 'en',
           gl: 'US',
         },
@@ -142,7 +98,16 @@ async function fetchViaInnertube(youtubeId: string): Promise<any> {
     throw new Error(`YouTube API request failed: HTTP ${res.status}`);
   }
 
-  return await res.json();
+  const data = await res.json();
+
+  // Check playability
+  const status = (data as any)?.playabilityStatus?.status;
+  if (status === 'ERROR' || status === 'LOGIN_REQUIRED') {
+    const reason = (data as any)?.playabilityStatus?.reason || 'Video unavailable';
+    throw new Error(`Video not accessible: ${reason}`);
+  }
+
+  return data;
 }
 
 /**
@@ -170,60 +135,58 @@ function extractCaptionTracks(playerResponse: any): CaptionTrack[] {
  * 4. Any auto-generated captions
  */
 function selectBestTrack(tracks: CaptionTrack[]): { track: CaptionTrack; language: string } {
-  // Prefer English manual
   const enManual = tracks.find(t => t.languageCode.startsWith('en') && t.kind !== 'asr');
   if (enManual) return { track: enManual, language: 'en' };
 
-  // English auto-generated
   const enAuto = tracks.find(t => t.languageCode.startsWith('en') && t.kind === 'asr');
   if (enAuto) return { track: enAuto, language: 'en' };
 
-  // Any manual captions
   const anyManual = tracks.find(t => t.kind !== 'asr');
   if (anyManual) return { track: anyManual, language: anyManual.languageCode };
 
-  // Any auto-generated
   return { track: tracks[0], language: tracks[0].languageCode };
 }
 
 /**
- * Fetch caption XML and parse into segments
+ * Fetch captions from the timedtext URL.
+ * Tries JSON3 format first (easier to parse), falls back to XML.
  */
-async function fetchCaptionXml(baseUrl: string): Promise<TranscriptSegment[]> {
-  // Request JSON3 format for easier parsing (no XML parsing needed)
-  const url = new URL(baseUrl);
-  url.searchParams.set('fmt', 'json3');
+async function fetchCaptions(baseUrl: string): Promise<TranscriptSegment[]> {
+  // Try JSON3 format first
+  try {
+    const url = new URL(baseUrl);
+    url.searchParams.set('fmt', 'json3');
 
-  const res = await fetch(url.toString(), {
-    headers: { 'User-Agent': USER_AGENT },
-  });
+    const res = await fetch(url.toString(), {
+      headers: { 'User-Agent': USER_AGENT },
+    });
 
-  if (res.ok) {
-    try {
+    if (res.ok) {
       const data = await res.json() as any;
       if (data.events) {
-        return parseJson3Captions(data.events);
+        const segments = parseJson3Captions(data.events);
+        if (segments.length > 0) return segments;
       }
-    } catch {
-      // Fall back to XML format
     }
+  } catch {
+    // Fall through to XML
   }
 
-  // Fallback: fetch XML format
-  const xmlRes = await fetch(baseUrl, {
+  // Fallback: XML format
+  const res = await fetch(baseUrl, {
     headers: { 'User-Agent': USER_AGENT },
   });
 
-  if (!xmlRes.ok) {
-    throw new Error(`Failed to fetch captions: HTTP ${xmlRes.status}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch captions: HTTP ${res.status}`);
   }
 
-  const xml = await xmlRes.text();
+  const xml = await res.text();
   return parseXmlCaptions(xml);
 }
 
 /**
- * Parse JSON3 format captions (preferred - no XML parsing needed)
+ * Parse JSON3 format captions
  */
 function parseJson3Captions(events: any[]): TranscriptSegment[] {
   const segments: TranscriptSegment[] = [];
@@ -253,8 +216,6 @@ function parseJson3Captions(events: any[]): TranscriptSegment[] {
  */
 function parseXmlCaptions(xml: string): TranscriptSegment[] {
   const segments: TranscriptSegment[] = [];
-
-  // Simple regex-based XML parsing (works in Workers, no DOM parser needed)
   const textRegex = /<text\s+start="([^"]*)"(?:\s+dur="([^"]*)")?\s*>([\s\S]*?)<\/text>/g;
   let match;
 
@@ -291,7 +252,7 @@ function decodeHtmlEntities(text: string): string {
 /**
  * Extract metadata from player response
  */
-function extractMetadata(playerResponse: any, youtubeId: string): VideoMetadata {
+function extractMetadata(playerResponse: any): VideoMetadata {
   const videoDetails = playerResponse?.videoDetails || {};
   const microformat = playerResponse?.microformat?.playerMicroformatRenderer || {};
 
