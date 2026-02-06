@@ -3,147 +3,493 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TldrBox from '../../components/ui/TldrBox.astro';
 
 export function getStaticPaths() {
-  // Sample blog posts - will be replaced with Keystatic content
+  // Load dynamic blog posts from content/blog/*.json
+  const dynamicPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
+  const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
+    const data = mod.default || mod;
+    return {
+      slug: data.slug,
+      title: data.title,
+      description: data.excerpt || data.metaDescription || '',
+      tldr: '',
+      author: data.author || 'BRITZMEDI Team',
+      publishedAt: data.publishedAt,
+      updatedAt: data.updatedAt || data.publishedAt,
+      category: data.category || 'medical-devices',
+      tags: data.tags || [],
+      content: data.content || '',
+      faqs: [] as { question: string; answer: string }[],
+      featuredImage: data.featuredImage || null,
+      youtubeEmbedUrl: data.youtubeEmbedUrl || null,
+      doctor: data.doctor || null,
+      isDynamic: true,
+    };
+  });
+
   const posts = [
     {
       slug: 'fda-510k-clearance-process',
-      title: 'Understanding FDA 510(k) Clearance for Medical Devices',
-      description: 'A comprehensive guide to the FDA 510(k) clearance process for medical device manufacturers looking to enter the US market.',
-      tldr: 'FDA 510(k) clearance requires demonstrating substantial equivalence to a predicate device. The process typically takes 3-6 months and involves quality system compliance, biocompatibility testing, and clinical data.',
+      title: 'FDA 510(k) Clearance: The Complete Guide for Medical Device Distributors',
+      description: 'Everything distributors need to know about FDA 510(k) clearance — from process steps and costs to why it matters for your business. Includes BRITZMEDI TORR RF case study.',
+      tldr: 'FDA 510(k) clearance proves a device is substantially equivalent to a predicate device already on the US market. The process takes 3-6 months and costs $50K-$150K. For distributors, partnering with FDA-cleared manufacturers like BRITZMEDI (K212561) means faster market access, insurance reimbursement eligibility, and stronger credibility with clinics.',
       author: 'BRITZMEDI Team',
       publishedAt: '2025-12-15',
-      updatedAt: '2025-12-20',
+      updatedAt: '2026-01-10',
       category: 'education',
-      tags: ['FDA', 'Regulatory', 'Medical Devices', '510(k)', 'US Market'],
+      tags: ['FDA', '510(k)', 'Regulatory Compliance', 'Medical Devices', 'US Market Entry', 'TORR RF'],
       content: `
 ## What is FDA 510(k) Clearance?
 
-The FDA 510(k) premarket notification is a regulatory pathway that allows medical device manufacturers to demonstrate that their device is substantially equivalent to a legally marketed predicate device.
+The FDA 510(k) premarket notification is one of the most common regulatory pathways for bringing medical devices to the United States market. Named after Section 510(k) of the Federal Food, Drug, and Cosmetic Act, this process requires manufacturers to demonstrate that their device is **substantially equivalent** to a legally marketed predicate device.
 
-### Key Requirements
+For B2B buyers — distributors, importers, and clinic purchasing managers — understanding 510(k) clearance is not just a regulatory formality. It directly impacts your ability to sell, market, and gain reimbursement for aesthetic medical devices in the world's largest healthcare market.
 
-1. **Substantial Equivalence**: Your device must have the same intended use and similar technological characteristics as a predicate device.
+The US medical device market is valued at over **$180 billion** and accounts for roughly 40% of the global market. Without FDA clearance, a device simply cannot be legally sold in the United States.
 
-2. **Quality System Compliance**: Manufacturers must comply with FDA's Quality System Regulation (21 CFR Part 820).
+## Why FDA Clearance Matters for Distributors
 
-3. **Documentation**: Comprehensive technical documentation including design controls, risk analysis, and verification/validation testing.
+If you are evaluating aesthetic medical devices for distribution, FDA 510(k) clearance should be at the top of your due diligence checklist. Here is why:
 
-### Timeline and Process
+**Market Access**: The US is the single largest market for aesthetic medical devices. FDA clearance is your entry ticket — without it, you cannot legally import, sell, or promote a device in the United States.
 
-The typical 510(k) review process takes 3-6 months:
+**Credibility with Clinics**: Dermatologists, plastic surgeons, and medical spas overwhelmingly prefer FDA-cleared devices. Clearance signals that a device has been reviewed for safety and efficacy, making your sales conversations significantly easier.
 
-- **Pre-submission Meeting** (Optional): 2-3 months before submission
-- **Submission Preparation**: 2-4 months
-- **FDA Review**: 90-180 days
-- **Additional Information Requests**: Variable
+**Insurance and Reimbursement**: Many insurance providers require FDA clearance as a prerequisite for reimbursement. For devices used in pain management and rehabilitation (like certain RF systems), this can be a major revenue driver.
 
-### BRITZMEDI's FDA Journey
+**Liability Protection**: Distributing non-cleared devices in the US exposes you to significant legal and financial risk. FDA clearance provides a documented regulatory foundation that protects both you and your customers.
 
-BRITZMEDI successfully obtained FDA 510(k) clearance (K212561) for the TORR RF Multi-Wave RF System in 2022. This clearance demonstrates our commitment to meeting the highest international regulatory standards.
+**Competitive Advantage**: In a crowded market, FDA clearance differentiates your product portfolio. It is a tangible proof point that resonates with clinics and end users alike.
 
-## Frequently Asked Questions
+## The 510(k) Process: Step by Step
 
-**Q: How much does 510(k) clearance cost?**
-A: Total costs typically range from $50,000 to $150,000, including testing, consulting, and FDA user fees.
+Understanding the 510(k) process helps distributors evaluate manufacturers and set realistic timelines for product launches.
 
-**Q: Can I market my device during the review?**
-A: No, you must wait for FDA clearance before marketing in the United States.
+**Step 1: Pre-Submission (Q-Sub) Meeting**
+Manufacturers can request a pre-submission meeting with the FDA to discuss their regulatory strategy. This optional but highly recommended step takes 2-3 months to schedule and helps identify potential issues early.
 
-**Q: What's the difference between 510(k) and PMA?**
-A: 510(k) is for devices substantially equivalent to existing devices, while PMA (Premarket Approval) is required for higher-risk Class III devices.
+**Step 2: Predicate Device Selection**
+The manufacturer identifies a legally marketed predicate device and builds the case for substantial equivalence. This is the foundation of the entire 510(k) submission.
+
+**Step 3: Testing and Documentation**
+Comprehensive testing is conducted, including:
+- Performance testing and bench studies
+- Biocompatibility testing per ISO 10993
+- Electrical safety testing per IEC 60601
+- Software validation (if applicable)
+- Clinical data compilation
+
+**Step 4: 510(k) Submission**
+The complete submission package is filed with the FDA, including device description, predicate comparison, testing data, labeling, and quality system documentation.
+
+**Step 5: FDA Review**
+The FDA conducts a substantive review, which typically takes 90 to 180 days. During this period, the FDA may issue Additional Information (AI) requests requiring supplemental data.
+
+**Step 6: Clearance Decision**
+The FDA issues a Substantially Equivalent (SE) determination, and the device receives 510(k) clearance. The manufacturer can then legally market the device in the US.
+
+## Key Requirements for 510(k) Clearance
+
+**Substantial Equivalence**: The device must have the same intended use and similar technological characteristics as the predicate device. If there are technological differences, the manufacturer must demonstrate they do not raise new questions of safety or effectiveness.
+
+**Quality System Regulation (QSR)**: Manufacturers must comply with FDA's Quality System Regulation under 21 CFR Part 820, which covers design controls, production processes, corrective actions, and record-keeping.
+
+**Biocompatibility**: Any device component that contacts the patient must be tested for biological safety according to ISO 10993 standards.
+
+**Labeling Compliance**: Device labeling must meet FDA requirements, including clear indications for use, contraindications, warnings, and instructions for use.
+
+## Timeline and Cost Overview
+
+Distributors need realistic expectations when planning product launches around 510(k) clearance:
+
+**Typical Timeline**: 3 to 6 months from submission to clearance, plus 2-4 months of preparation time before submission. Total timeline from project start to market: approximately 6-12 months.
+
+**Cost Range**: $50,000 to $150,000 total, including:
+- FDA user fee: approximately $13,000 for small businesses (2025 rates)
+- Testing (biocompatibility, electrical safety, performance): $15,000-$60,000
+- Regulatory consulting: $20,000-$50,000
+- Quality system implementation: $10,000-$30,000
+
+**Success Rate**: Approximately 85-90% of 510(k) submissions receive clearance, though this varies by device type and submission quality.
+
+## BRITZMEDI's FDA Success: TORR RF (K212561)
+
+BRITZMEDI received FDA 510(k) clearance for the TORR RF Multi-Wave Radiofrequency System under clearance number **K212561** in 2022. This achievement demonstrates BRITZMEDI's commitment to meeting the highest global regulatory standards.
+
+**What was cleared**: The TORR RF system for use in dermatological and general surgical procedures requiring electrocoagulation and hemostasis of soft tissue.
+
+**Why it matters for distributors**: The TORR RF's FDA clearance means you can immediately market and sell this device in the United States. The clearance documentation is available for your regulatory compliance needs, and BRITZMEDI provides full support for market-specific labeling and documentation.
+
+**Regulatory portfolio**: Beyond FDA clearance, BRITZMEDI holds CE marking (EU), MFDS approval (South Korea), and multiple additional country-specific certifications, enabling distribution across global markets.
+
+## What This Means for Your Business
+
+Partnering with an FDA-cleared manufacturer like BRITZMEDI provides tangible business advantages:
+
+**Faster Time to Market**: No need to navigate the 510(k) process yourself. The device is already cleared and ready for US distribution.
+
+**Reduced Risk**: FDA clearance eliminates the regulatory uncertainty that can delay product launches and increase costs.
+
+**Sales Enablement**: Use FDA clearance as a key selling point with clinic buyers. Provide the K-number (K212561) for instant verification on the FDA's 510(k) database.
+
+**Portfolio Strength**: Add an FDA-cleared RF device to your catalog alongside other aesthetic devices, creating a stronger overall product offering for your clinic customers.
+
+**Regulatory Support**: BRITZMEDI provides distributors with regulatory documentation, technical files, and marketing clearance support to streamline your compliance processes.
+
+Ready to add an FDA-cleared RF device to your portfolio? [Contact BRITZMEDI](/contact) to discuss distribution opportunities.
       `,
       faqs: [
         {
-          question: 'How much does FDA 510(k) clearance cost?',
-          answer: 'Total costs typically range from $50,000 to $150,000, including testing, consulting, and FDA user fees of approximately $13,000 for small businesses.'
+          question: 'How can I verify that a device has FDA 510(k) clearance?',
+          answer: 'You can verify any 510(k) clearance on the FDA\'s public database at accessdata.fda.gov. Search by the K-number (for BRITZMEDI TORR RF, use K212561) or by device name. This database is free and publicly accessible.'
         },
         {
-          question: 'Can I market my device during the FDA review?',
-          answer: 'No, you must wait for FDA clearance before marketing in the United States. Marketing without clearance can result in significant penalties.'
+          question: 'Do I need separate FDA clearance to distribute an already-cleared device?',
+          answer: 'No. If the manufacturer already holds 510(k) clearance, you do not need to file your own submission. However, you must register as an importer or distributor with the FDA and comply with establishment registration and device listing requirements.'
         },
         {
-          question: 'What is the difference between 510(k) and PMA?',
-          answer: '510(k) is for devices substantially equivalent to existing devices, while PMA (Premarket Approval) is required for higher-risk Class III devices and involves more extensive clinical testing.'
+          question: 'What happens if a manufacturer makes changes to an FDA-cleared device?',
+          answer: 'Significant changes to a cleared device may require a new 510(k) submission. Minor changes can often be documented through the manufacturer\'s quality system without a new submission. As a distributor, always verify the current clearance status with the manufacturer.'
+        },
+        {
+          question: 'How does FDA 510(k) clearance compare to CE marking in Europe?',
+          answer: 'Both are regulatory pathways for market access, but they differ in process and requirements. FDA 510(k) focuses on substantial equivalence to a predicate device, while CE marking under the EU MDR requires conformity assessment by a Notified Body. Many manufacturers, including BRITZMEDI, hold both certifications to enable global distribution.'
+        },
+        {
+          question: 'Can I market a device in the US while the 510(k) review is pending?',
+          answer: 'No. Marketing a medical device in the US without FDA clearance or approval is a violation of federal law and can result in warning letters, seizure, injunctions, and civil or criminal penalties. Always wait for clearance before any marketing activities.'
         }
       ]
     },
     {
       slug: 'rf-technology-aesthetic-medicine',
-      title: 'RF Technology in Aesthetic Medicine: A 2025 Overview',
-      description: 'Explore how radiofrequency technology is transforming aesthetic treatments with improved safety and efficacy.',
-      tldr: 'Modern RF devices use multi-frequency technology for customized skin tightening treatments. Key innovations include real-time temperature monitoring and auto-circular motion for even energy delivery.',
+      title: 'RF Technology in Aesthetic Medicine: How Clinics Maximize ROI with Radiofrequency Devices',
+      description: 'A comprehensive guide to RF technology for clinic owners and device buyers. Covers single vs. multi-wave RF, clinical applications, ROI analysis, and a practical buyer\'s checklist.',
+      tldr: 'The global RF aesthetic device market is projected to reach $5.8 billion by 2028. Multi-wave RF systems like TORR RF offer 3 frequencies (1, 2, 4 MHz) for broader treatment coverage and higher ROI. Clinics typically see $800-$1,500 per session revenue and full ROI within 6-12 months.',
       author: 'BRITZMEDI Team',
       publishedAt: '2025-11-28',
+      updatedAt: '2026-01-15',
       category: 'technology',
-      tags: ['RF Technology', 'Aesthetic Medicine', 'TORR RF', 'Skin Tightening'],
+      tags: ['RF Technology', 'Aesthetic Medicine', 'TORR RF', 'Clinic ROI', 'Non-Invasive Treatments', 'Skin Tightening'],
       content: `
-## The Evolution of RF Technology
+## The Rise of Non-Invasive RF Treatments
 
-Radiofrequency technology has become a cornerstone of non-invasive aesthetic treatments. Modern devices offer precise energy delivery for skin tightening, body contouring, and collagen stimulation.
+Non-invasive aesthetic treatments are the fastest-growing segment in the global aesthetics market. Radiofrequency (RF) technology sits at the center of this growth, driven by patient demand for effective treatments with minimal downtime.
 
-### Multi-Wave RF Technology
+The numbers tell a compelling story:
+- The global aesthetic device market reached **$15.9 billion in 2024** and is growing at 10.2% CAGR
+- Non-invasive procedures now represent over **60% of all aesthetic treatments** performed globally
+- The RF device segment specifically is projected to reach **$5.8 billion by 2028**
+- Patient demand for non-surgical skin tightening grew **35% year-over-year** from 2023 to 2024
 
-Traditional RF devices operate at a single frequency, limiting treatment customization. Multi-Wave RF technology, pioneered in devices like BRITZMEDI's TORR RF, offers:
+For clinic owners and device buyers, RF technology represents one of the highest-ROI investments in the aesthetic device space. The combination of broad clinical applications, patient demand, and favorable economics makes RF a cornerstone of any modern aesthetic practice.
 
-- **Multiple Frequency Options**: 1MHz, 2MHz, and 4MHz for different treatment depths
-- **Real-Time Temperature Control**: Ensures consistent treatment outcomes
-- **Auto Circular Motion**: Patented technology for even energy distribution
+## How Radiofrequency Works
 
-### Clinical Applications
+Understanding the science behind RF technology helps clinic owners make informed purchasing decisions and communicate effectively with patients.
 
-RF technology is used for various aesthetic indications:
+**The Basic Principle**: RF devices deliver controlled electromagnetic energy (typically in the 1-4 MHz range) into tissue. This energy causes molecular friction in the dermis and subcutaneous layers, generating heat. When tissue reaches 40-45 degrees Celsius, controlled thermal injury triggers the body's natural wound healing response.
 
-1. Facial skin tightening and lifting
-2. Body contouring and cellulite reduction
-3. Vascular lesion treatment
-4. Pain management and rehabilitation
+**Collagen Remodeling**: The thermal energy causes immediate collagen contraction (visible tightening) and stimulates new collagen production (neocollagenesis) over the following weeks and months. This dual mechanism produces both instant and progressive results.
+
+**Depth Control**: Different RF frequencies penetrate to different tissue depths:
+- **4 MHz**: Superficial dermis (1-2mm) — ideal for fine lines, skin texture, and facial treatments
+- **2 MHz**: Mid-dermis (2-4mm) — optimal for skin laxity and moderate tightening
+- **1 MHz**: Deep dermis and subcutaneous tissue (4-6mm) — effective for body contouring and deep tissue heating
+
+**Tissue Selectivity**: RF energy heats tissue based on electrical impedance rather than chromophore absorption (as with lasers), making it safe and effective across all skin types (Fitzpatrick I-VI). This broad applicability is a significant advantage for clinics serving diverse patient populations.
+
+## Single Frequency vs. Multi-Wave RF
+
+Not all RF devices are created equal. The technology gap between single-frequency and multi-wave RF systems has significant clinical and business implications.
+
+**Single-Frequency RF**:
+- Operates at one fixed frequency (typically 1 MHz or 6 MHz)
+- Limited to a specific tissue depth range
+- Requires separate devices or handpieces for different treatment areas
+- Lower purchase price but narrower treatment menu
+
+**Multi-Wave RF (e.g., TORR RF)**:
+- Offers multiple selectable frequencies (1 MHz, 2 MHz, 4 MHz)
+- Treats superficial, mid, and deep tissue layers with one device
+- Broader treatment menu from a single investment
+- Real-time parameter adjustment during treatment
+- Higher initial investment but significantly better ROI
+
+**Why Multi-Wave Matters for Clinics**: A single multi-wave RF device can perform facial skin tightening, body contouring, vascular treatment, and pain management. This eliminates the need to purchase multiple devices and maximizes treatment room utilization.
+
+## Clinical Applications
+
+RF technology supports a wide range of revenue-generating treatments:
+
+**Facial Skin Tightening and Rejuvenation**
+The most popular RF application. Treatments target jowls, nasolabial folds, periorbital area, and overall skin laxity. Typical protocol: 4-6 sessions, 1-2 weeks apart. Average session price: $500-$1,200.
+
+**Body Contouring and Cellulite Reduction**
+RF-based body treatments address skin laxity on the abdomen, arms, thighs, and buttocks. Often combined with other modalities for comprehensive body sculpting packages. Average session price: $800-$2,000.
+
+**Vascular Lesion Treatment**
+Select RF systems are cleared for electrocoagulation and treatment of vascular lesions including spider veins and telangiectasias. This expands your treatment menu into the medical dermatology space.
+
+**Pain Management and Rehabilitation**
+RF energy is used in physiotherapy and rehabilitation for deep tissue heating, pain relief, and accelerated healing. This application opens additional revenue streams beyond aesthetics.
+
+**Acne and Scar Treatment**
+RF microneedling and surface RF treatments address active acne and acne scarring. This appeals to a younger demographic and supports long-term patient retention.
+
+## Key Innovation: Real-Time Temperature Control
+
+Temperature control is what separates professional-grade RF devices from commodity products. Uncontrolled tissue heating leads to inconsistent results, patient discomfort, and potential burns.
+
+**Why Temperature Matters**: The therapeutic window for collagen remodeling is narrow — tissue must reach 40-45 degrees Celsius and maintain that temperature for a specific duration. Too low, and the treatment is ineffective. Too high, and there is risk of burns or unwanted tissue damage.
+
+**TORR RF's Approach**: The TORR RF system integrates real-time impedance and temperature monitoring that continuously measures tissue temperature during treatment. The system automatically adjusts power output to maintain optimal therapeutic temperature, providing:
+- Consistent treatment outcomes regardless of operator experience
+- Enhanced patient safety with automatic power cutoff at threshold temperatures
+- Reduced treatment time through efficient energy delivery
+- Reproducible results across different patients and treatment areas
+
+**The Auto Circular Motion System**: TORR RF's patented auto circular motion technology ensures even energy distribution across the treatment area. This eliminates hot spots that can occur with manual handpiece movement and reduces operator fatigue during longer body treatments.
+
+## ROI Analysis for Clinics
+
+The financial case for RF technology investment is compelling when you examine the numbers:
+
+**Revenue Per Session**:
+- Facial treatments: $500-$1,200 per session
+- Body treatments: $800-$2,000 per session
+- Treatment packages (4-6 sessions): $2,000-$8,000 per patient
+
+**Treatment Volume**: A single RF device can perform 4-8 treatments per day, depending on treatment type and clinic scheduling.
+
+**Monthly Revenue Potential**: At an average of 5 treatments per day, 22 working days per month, and $800 average session price:
+- Monthly gross revenue: approximately $88,000
+- Annual gross revenue: approximately $1,056,000
+
+**Investment Recovery**: Most clinics report full ROI on their RF device investment within **6-12 months**, depending on treatment volume and pricing strategy.
+
+**Operating Costs**: RF treatments have low consumable costs compared to laser or injectable treatments. Primary ongoing costs include handpiece tips (if applicable), gel, and routine maintenance.
+
+**Patient Lifetime Value**: RF treatments require maintenance sessions every 3-6 months, creating recurring revenue. Satisfied RF patients also become candidates for additional treatments, increasing overall patient lifetime value.
+
+## Choosing the Right RF Device: Buyer's Checklist
+
+Use this practical checklist when evaluating RF devices for your clinic:
+
+**Regulatory Clearances**
+- Is the device FDA 510(k) cleared for your intended applications?
+- Does it hold CE marking for European markets?
+- Are country-specific certifications available for your market?
+
+**Technology and Performance**
+- Single frequency or multi-wave? (Multi-wave offers greater versatility)
+- Does it include real-time temperature monitoring?
+- What is the maximum power output and treatment speed?
+- How many handpiece options are available?
+
+**Clinical Versatility**
+- How many treatment indications does it support?
+- Can it treat both face and body?
+- Is it effective across all skin types (Fitzpatrick I-VI)?
+
+**Safety Features**
+- Automatic temperature cutoff protection?
+- Real-time impedance monitoring?
+- Built-in treatment protocols for operator guidance?
+
+**Business Support**
+- Does the manufacturer provide clinical training?
+- Are marketing materials and patient brochures available?
+- What is the warranty period and service support structure?
+- Does the manufacturer offer KOL (Key Opinion Leader) support for product launches?
+
+**Total Cost of Ownership**
+- Initial device purchase price
+- Consumable costs per treatment
+- Maintenance and service contract pricing
+- Expected device lifespan
+
+Interested in learning how TORR RF can fit into your clinic or distribution business? [Request a consultation](/contact) to discuss specifications, pricing, and partnership options.
       `,
       faqs: [
         {
-          question: 'Is RF treatment painful?',
-          answer: 'RF treatments are generally well-tolerated. Patients may feel warmth and mild pressure during treatment. Advanced devices include comfort features like vibration to minimize discomfort.'
+          question: 'How does multi-wave RF differ from monopolar and bipolar RF?',
+          answer: 'Monopolar and bipolar refer to electrode configuration (how energy is delivered), while multi-wave refers to frequency capability (1, 2, and 4 MHz). A multi-wave system like TORR RF can operate in both monopolar and bipolar modes across multiple frequencies, giving practitioners maximum versatility for different treatment depths and indications.'
         },
         {
-          question: 'How many RF sessions are needed?',
-          answer: 'Most patients see results after 3-6 sessions, spaced 1-2 weeks apart. Maintenance treatments every 3-6 months help sustain results.'
+          question: 'Is RF treatment safe for all skin types?',
+          answer: 'Yes. Unlike laser-based treatments that target chromophores (melanin), RF energy heats tissue based on electrical impedance. This makes RF safe and effective for all Fitzpatrick skin types (I-VI), including darker skin tones that carry higher risk with certain laser treatments.'
+        },
+        {
+          question: 'What is the typical ROI timeline for an RF device in an aesthetic clinic?',
+          answer: 'Most clinics achieve full return on investment within 6-12 months, depending on treatment volume and pricing. At an average of 5 treatments per day at $800 per session, monthly gross revenue potential exceeds $80,000. Operating costs are low compared to laser or injectable treatments.'
+        },
+        {
+          question: 'How does RF compare to HIFU for skin tightening?',
+          answer: 'RF and HIFU are complementary technologies. HIFU targets the SMAS layer (4-5mm depth) for a lifting effect, while RF treats multiple tissue depths for comprehensive skin tightening and collagen remodeling. RF typically requires more sessions but offers broader clinical applications including body contouring and vascular treatment. Many clinics offer both technologies.'
+        },
+        {
+          question: 'What training is required to operate an RF device?',
+          answer: 'RF devices are typically classified as prescription devices requiring operation by or under the supervision of a licensed healthcare provider. BRITZMEDI provides comprehensive training programs covering device operation, treatment protocols, patient selection, safety procedures, and business best practices. Training is included with device purchase.'
         }
       ]
     },
     {
       slug: 'korean-beauty-device-market',
-      title: 'Korean Beauty Device Market: Global Expansion Trends',
-      description: 'How Korean medical device manufacturers are leading innovation in the global aesthetic market.',
-      tldr: 'Korean beauty device exports grew 23% in 2024. Key success factors include FDA/CE certifications, advanced R&D, and focus on non-invasive treatments.',
+      title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
+      description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry. A strategic guide for international distributors evaluating Korean manufacturers.',
+      tldr: 'South Korea is the world\'s 4th largest medical device exporter with beauty device exports growing 23% in 2024. Korean manufacturers combine competitive R&D, multi-market regulatory clearances (FDA, CE, MFDS), and strong OEM/ODM capabilities. For distributors, Korean partnerships offer high-margin products with proven technology.',
       author: 'BRITZMEDI Team',
       publishedAt: '2025-10-20',
+      updatedAt: '2026-01-20',
       category: 'industry-news',
-      tags: ['K-Beauty', 'Market Trends', 'Export', 'Medical Devices'],
+      tags: ['Korean Medical Devices', 'K-Beauty', 'Market Analysis', 'Distribution Partnership', 'Aesthetic Industry', 'Global Trade'],
       content: `
-## Korean Beauty Device Industry Overview
+## Korea's Position in the Global Aesthetic Device Market
 
-South Korea has emerged as a global leader in aesthetic medical device manufacturing, combining advanced technology with innovative design.
+South Korea has established itself as a powerhouse in the global aesthetic medical device industry. The numbers reflect a market that has moved well beyond the "emerging" label:
 
-### Market Growth Factors
+- South Korea is the **4th largest medical device exporter** globally, behind the US, Germany, and Japan
+- Korean medical device exports reached **$9.7 billion in 2024**, with aesthetic devices representing a rapidly growing segment
+- Korean beauty and aesthetic device exports grew **23% year-over-year** in 2024
+- The domestic Korean aesthetic market is valued at approximately **$4.2 billion**, serving as a sophisticated testing ground for global products
+- Over **6,000 medical device manufacturers** operate in South Korea, with hundreds specializing in aesthetic devices
 
-- Strong government support for medical device R&D
-- Established K-beauty brand recognition
-- Focus on non-invasive treatment options
-- Competitive manufacturing costs with high quality
+For international distributors, the Korean aesthetic device market represents a unique combination of innovation, quality, regulatory compliance, and value that is difficult to find elsewhere.
 
-### Export Success
+## Why Korean Manufacturers Lead Innovation
 
-Korean beauty device exports have shown consistent growth, with key markets including:
+Several structural factors explain Korea's competitive position in aesthetic device manufacturing:
 
-1. United States and Canada
-2. European Union
-3. Southeast Asia
-4. Middle East
+**Massive R&D Investment**: South Korea invests approximately 4.9% of GDP in research and development — one of the highest rates globally. The medical device sector benefits from this broader R&D ecosystem, including materials science, electronics, and software engineering expertise.
+
+**Government Support**: The Korean government actively supports medical device exports through programs including:
+- KOTRA (Korea Trade-Investment Promotion Agency) export support
+- KGMP (Korea Good Manufacturing Practice) compliance infrastructure
+- Tax incentives for medical device R&D
+- Trade mission and exhibition support programs
+
+**Sophisticated Domestic Market**: Korea has one of the highest per-capita rates of aesthetic procedures globally. Korean manufacturers develop products for a demanding domestic market first, then adapt them for global distribution. This means products are clinically validated and market-tested before they reach international partners.
+
+**Manufacturing Excellence**: Korea's electronics and precision manufacturing heritage translates directly to medical device production. Korean manufacturers deliver consistent quality with competitive production costs, enabling attractive margins for distributors.
+
+**Speed to Market**: Korean manufacturers are known for rapid product development cycles. From concept to market-ready product, Korean companies often deliver in 12-18 months — significantly faster than many Western competitors.
+
+## Regulatory Excellence
+
+One of the strongest arguments for partnering with Korean manufacturers is their regulatory track record across multiple markets:
+
+**MFDS (Ministry of Food and Drug Safety)**: Korea's domestic regulatory body maintains standards that are recognized internationally. MFDS approval demonstrates compliance with rigorous safety and efficacy requirements.
+
+**FDA 510(k) Clearance**: Leading Korean manufacturers invest in FDA clearance to access the US market. Companies like BRITZMEDI hold active 510(k) clearances, enabling immediate distribution in the United States.
+
+**CE Marking (EU MDR)**: Korean manufacturers increasingly hold CE marking under the new EU Medical Device Regulation (MDR 2017/745), demonstrating compliance with the EU's enhanced safety requirements.
+
+**Multi-Market Certifications**: Top-tier Korean manufacturers maintain certifications across 20 or more countries, reducing the regulatory burden for distributors entering new markets.
+
+**ISO 13485 Compliance**: Korean medical device manufacturers overwhelmingly maintain ISO 13485 quality management systems, providing a documented quality foundation that meets international distributor requirements.
+
+## Key Product Categories
+
+Korean manufacturers lead innovation across several aesthetic device categories:
+
+**Radiofrequency (RF) Devices**: Multi-wave RF systems, RF microneedling, and combination RF platforms. Korean manufacturers have pioneered advanced temperature control and multi-frequency capabilities in this space.
+
+**High-Intensity Focused Ultrasound (HIFU)**: Korea is a global leader in HIFU device manufacturing for non-invasive face lifting and body contouring. Korean HIFU devices are widely used across Asia, Europe, and the Middle East.
+
+**LED and Light Therapy**: Korean manufacturers produce a wide range of LED panels, masks, and targeted light therapy devices for skin rejuvenation, acne treatment, and wound healing.
+
+**Laser Systems**: From fractional CO2 to Nd:YAG and diode lasers, Korean manufacturers offer comprehensive laser portfolios at competitive price points without compromising on performance.
+
+**Combination Platforms**: Increasingly, Korean manufacturers are developing multi-modality platforms that combine RF, ultrasound, LED, and other technologies in a single device, maximizing clinic versatility and reducing capital equipment costs.
+
+## The Distributor Opportunity
+
+For international distributors, Korean aesthetic devices offer compelling business advantages:
+
+**Competitive Margins**: Korean manufacturers' efficient production costs translate to attractive wholesale pricing. Distributors typically achieve **50-70% gross margins** on Korean aesthetic devices, compared to 30-50% on devices from Western manufacturers.
+
+**Product Differentiation**: Korean innovation in areas like multi-wave RF technology provides genuine technical differentiation that supports premium positioning in your market.
+
+**OEM and ODM Options**: Many Korean manufacturers offer OEM (Original Equipment Manufacturing) and ODM (Original Design Manufacturing) options, allowing distributors to build their own branded device portfolios.
+
+**Comprehensive Support**: Leading Korean manufacturers provide distributors with clinical training, marketing materials, technical support, and regulatory documentation. This turnkey approach reduces the barrier to entry for new distributors.
+
+**Growing Brand Recognition**: K-beauty's global reputation creates natural consumer awareness and curiosity about Korean aesthetic technology. This brand halo effect benefits distributors marketing Korean-manufactured devices.
+
+## How to Evaluate a Korean Manufacturer
+
+Not all Korean manufacturers are equal. Use this checklist to identify the right manufacturing partner:
+
+**Regulatory Portfolio**
+- Does the manufacturer hold FDA 510(k) clearance for the products you want to distribute?
+- Is CE marking available for European markets?
+- What country-specific certifications are maintained?
+- Is the manufacturer ISO 13485 certified?
+
+**R&D Capabilities**
+- Does the company invest in proprietary technology development?
+- How many patents does the manufacturer hold?
+- What is the product development pipeline?
+- Are clinical studies available to support marketing claims?
+
+**Manufacturing Quality**
+- Is the production facility KGMP (Korea GMP) certified?
+- What quality control processes are in place?
+- Can the manufacturer scale production to meet your volume requirements?
+- What is the track record for product reliability and defect rates?
+
+**Distributor Support**
+- Does the manufacturer provide clinical training programs?
+- Are marketing materials and patient education resources available?
+- What warranty and after-sales service support is offered?
+- Is there a dedicated international sales team?
+
+**Business Stability**
+- How long has the company been manufacturing medical devices?
+- What is the financial stability of the company?
+- How many international distribution partners does the manufacturer currently support?
+- What is the company's reputation among existing distributors?
+
+## BRITZMEDI: Your Gateway to Korean Innovation
+
+BRITZMEDI exemplifies the advantages of partnering with a Korean aesthetic device manufacturer:
+
+**Proven Technology**: The TORR RF Multi-Wave Radiofrequency System represents Korean innovation at its best — multi-frequency capability (1, 2, 4 MHz), real-time temperature control, patented auto circular motion, and broad clinical applications from a single platform.
+
+**Global Regulatory Compliance**: FDA 510(k) cleared (K212561), CE marked, MFDS approved, with certifications in over 20 countries. Your regulatory pathway is already established.
+
+**Distributor-Focused Approach**: BRITZMEDI provides comprehensive support including clinical training, marketing materials, technical documentation, and dedicated account management for distribution partners.
+
+**Manufacturing Excellence**: ISO 13485 certified facility with rigorous quality control and the capacity to support distributors across global markets.
+
+**Partnership Model**: BRITZMEDI seeks long-term distribution partnerships built on mutual success. The company provides exclusive territory options, co-marketing support, and ongoing product training to ensure distributor success.
+
+Ready to explore a distribution partnership? [Contact BRITZMEDI](/contact) to discuss territory availability, pricing, and partnership terms.
       `,
-      faqs: []
+      faqs: [
+        {
+          question: 'What is the minimum order quantity for BRITZMEDI distribution partnerships?',
+          answer: 'BRITZMEDI offers flexible order quantities based on market size and territory agreements. Initial orders typically start from 5-10 units for new markets, with volume pricing available for larger commitments. Contact our international sales team for specific territory pricing.'
+        },
+        {
+          question: 'Does BRITZMEDI offer exclusive distribution territories?',
+          answer: 'Yes, BRITZMEDI offers exclusive territory agreements for qualified distribution partners. Exclusivity terms are based on market potential, distributor capabilities, and mutual commitment to sales targets. This ensures your investment in the brand is protected.'
+        },
+        {
+          question: 'What regulatory support does BRITZMEDI provide for new market entry?',
+          answer: 'BRITZMEDI provides comprehensive regulatory support including technical documentation packages, clinical data summaries, and guidance on country-specific registration requirements. The company has successfully registered products in over 20 countries and can leverage this experience to support your market entry process.'
+        },
+        {
+          question: 'How does BRITZMEDI support distributor marketing efforts?',
+          answer: 'BRITZMEDI provides a complete marketing toolkit including product brochures, clinical before-and-after photography, treatment protocol guides, social media content assets, and KOL (Key Opinion Leader) introduction support. Materials are available in multiple languages and can be customized with distributor branding.'
+        }
+      ]
     }
   ];
 
-  return posts.map(post => ({
+  const allPosts = [...posts, ...dynamicPosts];
+
+  return allPosts.map(post => ({
     params: { slug: post.slug },
     props: { post }
   }));
@@ -167,7 +513,7 @@ const articleSchema = {
     'name': 'BRITZMEDI Co., Ltd.',
     'logo': {
       '@type': 'ImageObject',
-      'url': 'https://britzmedi.com/logo.png'
+      'url': 'https://britzmedi.com/images/logos/britzmedi-logo.png'
     }
   },
   'datePublished': post.publishedAt,
@@ -191,6 +537,32 @@ const faqSchema = post.faqs?.length > 0 ? {
     }
   }))
 } : null;
+
+// Breadcrumb structured data
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  'itemListElement': [
+    {
+      '@type': 'ListItem',
+      'position': 1,
+      'name': 'Home',
+      'item': 'https://britzmedi.com'
+    },
+    {
+      '@type': 'ListItem',
+      'position': 2,
+      'name': 'Blog',
+      'item': 'https://britzmedi.com/blog'
+    },
+    {
+      '@type': 'ListItem',
+      'position': 3,
+      'name': post.title,
+      'item': `https://britzmedi.com/blog/${post.slug}`
+    }
+  ]
+};
 ---
 
 <BaseLayout
@@ -205,6 +577,9 @@ const faqSchema = post.faqs?.length > 0 ? {
   {faqSchema && (
     <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   )}
+
+  <!-- Breadcrumb Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
 
   <article class="py-12 lg:py-20">
     <div class="container">
@@ -229,6 +604,11 @@ const faqSchema = post.faqs?.length > 0 ? {
             <time datetime={post.publishedAt} class="text-sm text-slate-500">
               {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </time>
+            {post.updatedAt && post.updatedAt !== post.publishedAt && (
+              <span class="text-sm text-slate-400">
+                (Updated {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
+              </span>
+            )}
           </div>
 
           <h1 class="heading-1 mb-6">{post.title}</h1>
@@ -284,18 +664,56 @@ const faqSchema = post.faqs?.length > 0 ? {
 
         <!-- Article Content -->
         <div class="prose prose-lg max-w-none prose-headings:font-semibold prose-a:text-primary-600 prose-img:rounded-xl">
-          <Fragment set:html={post.content.split('\n').map(line => {
-            if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
-            if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
-            if (line.startsWith('**Q:')) return `<p class="font-semibold">${line}</p>`;
-            if (line.startsWith('**A:')) return `<p>${line}</p>`;
-            if (line.startsWith('- **')) return `<li><strong>${line.slice(4).split('**')[0]}</strong>: ${line.split('**')[2] || ''}</li>`;
-            if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`;
-            if (line.match(/^\d+\./)) return `<li>${line.slice(line.indexOf(' ') + 1)}</li>`;
-            if (line.trim() === '') return '<br />';
-            return `<p>${line}</p>`;
-          }).join('')} />
+          {post.isDynamic ? (
+            <Fragment set:html={post.content} />
+          ) : (
+            <Fragment set:html={post.content.split('\n').map(line => {
+              if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+              if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
+              if (line.startsWith('**Q:')) return `<p class="font-semibold">${line}</p>`;
+              if (line.startsWith('**A:')) return `<p>${line}</p>`;
+              if (line.startsWith('- **')) return `<li><strong>${line.slice(4).split('**')[0]}</strong>: ${line.split('**')[2] || ''}</li>`;
+              if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`;
+              if (line.match(/^\d+\./)) return `<li>${line.slice(line.indexOf(' ') + 1)}</li>`;
+              if (line.trim() === '') return '<br />';
+              return `<p>${line}</p>`;
+            }).join('')} />
+          )}
         </div>
+
+        <!-- YouTube Embed (for dynamic posts) -->
+        {post.youtubeEmbedUrl && (
+          <div class="mt-8">
+            <h3 class="text-lg font-semibold text-slate-900 mb-3">Watch the Full Video</h3>
+            <div class="aspect-video">
+              <iframe
+                src={post.youtubeEmbedUrl}
+                class="w-full h-full rounded-xl"
+                allowfullscreen
+                title="Source video"
+              />
+            </div>
+          </div>
+        )}
+
+        <!-- Doctor Profile (for dynamic posts) -->
+        {post.doctor && (
+          <div class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
+            <div class="flex items-start gap-4">
+              <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-xl font-bold text-blue-700">
+                  {post.doctor.name?.charAt(0) || 'D'}
+                </span>
+              </div>
+              <div>
+                <p class="font-semibold text-slate-900">{post.doctor.name}</p>
+                {post.doctor.title && <p class="text-sm text-slate-600">{post.doctor.title}</p>}
+                {post.doctor.credentials && <p class="text-xs text-slate-500 mt-1">{post.doctor.credentials}</p>}
+                {post.doctor.bio && <p class="text-sm text-slate-600 mt-2">{post.doctor.bio}</p>}
+              </div>
+            </div>
+          </div>
+        )}
 
         <!-- FAQ Section (if applicable) -->
         {post.faqs?.length > 0 && (

@@ -8,6 +8,7 @@ export const vi: TranslationKeys = {
     about: 'Giới thiệu',
     certifications: 'Chứng nhận',
     resources: 'Tài nguyên',
+    blog: 'Blog',
     faq: 'Câu hỏi thường gặp',
     contact: 'Liên hệ',
     contactUs: 'Liên hệ với chúng tôi',

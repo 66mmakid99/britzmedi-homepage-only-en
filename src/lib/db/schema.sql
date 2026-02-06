@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS resource_downloads (
   resource_id TEXT NOT NULL,
   resource_title TEXT NOT NULL,
   resource_category TEXT,
+  email TEXT,
   ip_address TEXT,
   user_agent TEXT,
   referer TEXT,
@@ -88,3 +89,104 @@ CREATE INDEX IF NOT EXISTS idx_activities_lead ON lead_activities(lead_id);
 CREATE INDEX IF NOT EXISTS idx_downloads_resource ON resource_downloads(resource_id);
 CREATE INDEX IF NOT EXISTS idx_downloads_created ON resource_downloads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_downloads_country ON resource_downloads(country);
+
+-- ============================================
+-- YouTube to Blog Automation Tables
+-- ============================================
+-- (Full schema in schema-blog.sql)
+
+-- Blog generation jobs (queue)
+CREATE TABLE IF NOT EXISTS blog_jobs (
+  id TEXT PRIMARY KEY,
+  youtube_url TEXT NOT NULL,
+  youtube_id TEXT NOT NULL,
+  video_title TEXT,
+  channel_name TEXT,
+  channel_id TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  current_step TEXT,
+  progress INTEGER DEFAULT 0,
+  error_message TEXT,
+  transcript_text TEXT,
+  transcript_lang TEXT,
+  translated_text TEXT,
+  target_lang TEXT DEFAULT 'en',
+  tone TEXT DEFAULT 'professional',
+  word_count INTEGER DEFAULT 1500,
+  blog_post_id TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  started_at TEXT,
+  completed_at TEXT
+);
+
+-- Blog posts (generated content)
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id TEXT PRIMARY KEY,
+  job_id TEXT,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  content TEXT NOT NULL,
+  excerpt TEXT,
+  meta_description TEXT,
+  keywords TEXT,
+  schema_json_ld TEXT,
+  featured_image TEXT,
+  images TEXT,
+  youtube_embed_url TEXT,
+  doctor_name TEXT,
+  doctor_title TEXT,
+  doctor_credentials TEXT,
+  doctor_image TEXT,
+  doctor_bio TEXT,
+  category TEXT DEFAULT 'medical-devices',
+  tags TEXT,
+  status TEXT NOT NULL DEFAULT 'draft',
+  approval_token TEXT,
+  approved_by TEXT,
+  approved_at TEXT,
+  published_at TEXT,
+  github_commit_sha TEXT,
+  youtube_url TEXT,
+  youtube_id TEXT,
+  channel_name TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- YouTube channels (for batch processing)
+CREATE TABLE IF NOT EXISTS youtube_channels (
+  id TEXT PRIMARY KEY,
+  channel_id TEXT NOT NULL UNIQUE,
+  channel_name TEXT NOT NULL,
+  channel_url TEXT,
+  thumbnail_url TEXT,
+  auto_process INTEGER DEFAULT 0,
+  last_checked_at TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- YouTube videos (tracking processed videos)
+CREATE TABLE IF NOT EXISTS youtube_videos (
+  id TEXT PRIMARY KEY,
+  youtube_id TEXT NOT NULL UNIQUE,
+  channel_id TEXT,
+  title TEXT,
+  thumbnail_url TEXT,
+  duration TEXT,
+  published_at TEXT,
+  processed INTEGER DEFAULT 0,
+  job_id TEXT,
+  blog_post_id TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Blog indexes
+CREATE INDEX IF NOT EXISTS idx_blog_jobs_status ON blog_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_blog_jobs_created ON blog_jobs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_jobs_youtube_id ON blog_jobs(youtube_id);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_youtube_videos_youtube_id ON youtube_videos(youtube_id);
+CREATE INDEX IF NOT EXISTS idx_youtube_videos_channel ON youtube_videos(channel_id);

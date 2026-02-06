@@ -8,6 +8,7 @@ export const ar: TranslationKeys = {
     about: 'عن الشركة',
     certifications: 'الشهادات',
     resources: 'الموارد',
+    blog: 'مدونة',
     faq: 'الأسئلة الشائعة',
     contact: 'اتصل بنا',
     contactUs: 'اتصل بنا',

@@ -1,25 +1,43 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Blog posts data (will be replaced with Keystatic content)
-const blogPosts = [
+// Load dynamic blog posts from content/blog/*.json
+const dynamicPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
+const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
+  const data = mod.default || mod;
+  return {
+    slug: data.slug,
+    title: data.title,
+    description: data.excerpt || data.metaDescription || '',
+    tldr: '',
+    author: data.author || 'BRITZMEDI Team',
+    publishedAt: data.publishedAt,
+    category: data.category || 'medical-devices',
+    tags: data.tags || [],
+    featuredImage: data.featuredImage || null,
+    featured: false,
+  };
+});
+
+// Static blog posts (original hardcoded posts)
+const staticPosts = [
   {
     slug: 'fda-510k-clearance-process',
-    title: 'Understanding FDA 510(k) Clearance for Medical Devices',
-    description: 'A comprehensive guide to the FDA 510(k) clearance process for medical device manufacturers looking to enter the US market.',
-    tldr: 'FDA 510(k) clearance requires demonstrating substantial equivalence to a predicate device. The process typically takes 3-6 months and involves quality system compliance, biocompatibility testing, and clinical data.',
+    title: 'FDA 510(k) Clearance: The Complete Guide for Medical Device Distributors',
+    description: 'Everything distributors need to know about FDA 510(k) clearance — from process steps and costs to why it matters for your business. Includes BRITZMEDI TORR RF case study.',
+    tldr: 'FDA 510(k) clearance proves a device is substantially equivalent to a predicate device already on the US market. The process takes 3-6 months and costs $50K-$150K. For distributors, partnering with FDA-cleared manufacturers like BRITZMEDI (K212561) means faster market access, insurance reimbursement eligibility, and stronger credibility with clinics.',
     author: 'BRITZMEDI Team',
     publishedAt: '2025-12-15',
     category: 'education',
-    tags: ['FDA', 'Regulatory', 'Medical Devices'],
+    tags: ['FDA', '510(k)', 'Regulatory Compliance'],
     featuredImage: '/images/blog/fda-510k.jpg',
     featured: true,
   },
   {
     slug: 'rf-technology-aesthetic-medicine',
-    title: 'RF Technology in Aesthetic Medicine: A 2025 Overview',
-    description: 'Explore how radiofrequency technology is transforming aesthetic treatments with improved safety and efficacy.',
-    tldr: 'Modern RF devices use multi-frequency technology for customized skin tightening treatments. Key innovations include real-time temperature monitoring and auto-circular motion for even energy delivery.',
+    title: 'RF Technology in Aesthetic Medicine: How Clinics Maximize ROI with Radiofrequency Devices',
+    description: 'A comprehensive guide to RF technology for clinic owners and device buyers. Covers single vs. multi-wave RF, clinical applications, ROI analysis, and a practical buyer\'s checklist.',
+    tldr: 'The global RF aesthetic device market is projected to reach $5.8 billion by 2028. Multi-wave RF systems like TORR RF offer 3 frequencies (1, 2, 4 MHz) for broader treatment coverage and higher ROI. Clinics typically see $800-$1,500 per session revenue and full ROI within 6-12 months.',
     author: 'BRITZMEDI Team',
     publishedAt: '2025-11-28',
     category: 'technology',
@@ -29,17 +47,22 @@ const blogPosts = [
   },
   {
     slug: 'korean-beauty-device-market',
-    title: 'Korean Beauty Device Market: Global Expansion Trends',
-    description: 'How Korean medical device manufacturers are leading innovation in the global aesthetic market.',
-    tldr: 'Korean beauty device exports grew 23% in 2024. Key success factors include FDA/CE certifications, advanced R&D, and focus on non-invasive treatments.',
+    title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
+    description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry. A strategic guide for international distributors evaluating Korean manufacturers.',
+    tldr: 'South Korea is the world\'s 4th largest medical device exporter with beauty device exports growing 23% in 2024. Korean manufacturers combine competitive R&D, multi-market regulatory clearances (FDA, CE, MFDS), and strong OEM/ODM capabilities.',
     author: 'BRITZMEDI Team',
     publishedAt: '2025-10-20',
     category: 'industry-news',
-    tags: ['K-Beauty', 'Market Trends', 'Export'],
+    tags: ['Korean Medical Devices', 'K-Beauty', 'Distribution Partnership'],
     featuredImage: '/images/blog/korean-market.jpg',
-    featured: false,
+    featured: true,
   },
 ];
+
+// Merge static and dynamic posts, sort by date
+const blogPosts = [...staticPosts, ...dynamicPosts].sort(
+  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+);
 
 const categories = [
   { value: 'all', label: 'All Posts' },
@@ -62,7 +85,7 @@ const blogListSchema = {
     'name': 'BRITZMEDI Co., Ltd.',
     'logo': {
       '@type': 'ImageObject',
-      'url': 'https://britzmedi.com/logo.png'
+      'url': 'https://britzmedi.com/images/logos/britzmedi-logo.png'
     }
   },
   'blogPost': blogPosts.map(post => ({
@@ -80,9 +103,9 @@ const blogListSchema = {
 ---
 
 <BaseLayout
-  title="Blog"
-  description="Industry insights, product updates, and educational content about aesthetic medical devices from BRITZMEDI."
-  keywords={['medical device blog', 'aesthetic medicine', 'RF technology', 'FDA clearance', 'K-beauty devices']}
+  title="Blog - Medical Device Industry Insights & RF Technology"
+  description="Expert insights on RF technology, FDA clearance process, and aesthetic medicine trends from BRITZMEDI. Stay informed with industry news and clinical updates."
+  keywords={['medical device blog', 'RF technology insights', 'aesthetic medicine trends', 'FDA clearance process', 'K-beauty devices', 'TORR RF updates', 'medical device industry']}
 >
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify(blogListSchema)} />

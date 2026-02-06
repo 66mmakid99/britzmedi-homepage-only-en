@@ -8,6 +8,7 @@ export const es: TranslationKeys = {
     about: 'Nosotros',
     certifications: 'Certificaciones',
     resources: 'Recursos',
+    blog: 'Blog',
     faq: 'Preguntas Frecuentes',
     contact: 'Contacto',
     contactUs: 'Contáctenos',

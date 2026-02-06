@@ -8,6 +8,7 @@ export const th: TranslationKeys = {
     about: 'เกี่ยวกับ',
     certifications: 'การรับรอง',
     resources: 'ทรัพยากร',
+    blog: 'บล็อก',
     faq: 'คำถามที่พบบ่อย',
     contact: 'ติดต่อ',
     contactUs: 'ติดต่อเรา',

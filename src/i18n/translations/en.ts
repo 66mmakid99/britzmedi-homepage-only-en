@@ -6,6 +6,7 @@ export const en = {
     about: 'About',
     certifications: 'Certifications',
     resources: 'Resources',
+    blog: 'Blog',
     faq: 'FAQ',
     contact: 'Contact',
     contactUs: 'Contact Us',
@@ -517,4 +518,7 @@ export const en = {
   },
 } as const;
 
-export type TranslationKeys = typeof en;
+// Utility type to convert literal types to string
+type DeepString<T> = T extends string ? string : { [K in keyof T]: DeepString<T[K]> };
+
+export type TranslationKeys = DeepString<typeof en>;

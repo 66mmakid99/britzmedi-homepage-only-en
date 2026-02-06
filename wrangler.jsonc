@@ -23,5 +23,12 @@
       "binding": "SESSION",
       "id": "27c7cd159fc64df89f218371597e716c"
     }
+  ],
+  // R2 bucket for blog images
+  "r2_buckets": [
+    {
+      "binding": "BLOG_IMAGES",
+      "bucket_name": "britzmedi-blog-images"
+    }
   ]
 }

@@ -21,6 +21,7 @@ const navigation = [
   { key: 'nav.products', href: "/products" },
   { key: 'nav.about', href: "/about" },
   { key: 'nav.certifications', href: "/certifications" },
+  { key: 'nav.blog', href: "/blog" },
   { key: 'nav.resources', href: "/resources" },
   { key: 'nav.faq', href: "/faq" },
   { key: 'nav.contact', href: "/contact" },
@@ -116,12 +117,13 @@ const isActivePath = (href: string) => {
     <!-- Header -->
     <div class="flex items-center justify-between h-16 px-5 border-b border-slate-100">
       <span class="text-lg font-bold text-slate-900">
-        {currentLang === 'ko' ? '메뉴' :
-         currentLang === 'ja' ? 'メニュー' :
+        {currentLang === 'ja' ? 'メニュー' :
          currentLang === 'zh' ? '菜单' :
          currentLang === 'th' ? 'เมนู' :
          currentLang === 'vi' ? 'Menu' :
          currentLang === 'es' ? 'Menú' :
+         currentLang === 'fr' ? 'Menu' :
+         currentLang === 'ru' ? 'Меню' :
          currentLang === 'ar' ? 'القائمة' :
          'Menu'}
       </span>
