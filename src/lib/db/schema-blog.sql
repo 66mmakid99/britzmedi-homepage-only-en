@@ -116,6 +116,20 @@ CREATE TABLE IF NOT EXISTS youtube_videos (
   FOREIGN KEY (blog_post_id) REFERENCES blog_posts(id)
 );
 
+-- Korean name romanization mappings
+CREATE TABLE IF NOT EXISTS name_mappings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name_ko TEXT NOT NULL,
+  name_en TEXT NOT NULL,
+  affiliation_ko TEXT,
+  affiliation_en TEXT,
+  specialty TEXT,
+  verified BOOLEAN DEFAULT FALSE,
+  verified_source TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_blog_jobs_status ON blog_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_blog_jobs_created ON blog_jobs(created_at DESC);
@@ -125,3 +139,5 @@ CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_youtube_videos_youtube_id ON youtube_videos(youtube_id);
 CREATE INDEX IF NOT EXISTS idx_youtube_videos_channel ON youtube_videos(channel_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_name_mappings_name_ko ON name_mappings(name_ko);
+CREATE INDEX IF NOT EXISTS idx_name_mappings_verified ON name_mappings(verified);

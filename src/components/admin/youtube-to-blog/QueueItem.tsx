@@ -24,6 +24,7 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
   const config = STATUS_CONFIG[job.status] || STATUS_CONFIG.pending;
 
   const isActive = !['completed', 'failed', 'pending'].includes(job.status) && processing;
+  const isDocumentJob = job.youtube_url?.startsWith('doc://');
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this job?')) return;
@@ -127,14 +128,26 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
       }
     } catch { /* use existing job state */ }
 
-    const allSteps: Array<{ name: string; skipIf: () => boolean }> = [
-      { name: 'extract', skipIf: () => !!freshJob.transcript_text },
-      { name: 'translate', skipIf: () => !!freshJob.translated_text || freshJob.transcript_lang === 'en' },
-      { name: 'generate', skipIf: () => !!freshJob.blog_post_id },
-      { name: 'research', skipIf: () => false },
-      { name: 'image', skipIf: () => false },
-      { name: 'finalize', skipIf: () => false },
-    ];
+    const isDoc = freshJob.youtube_url?.startsWith('doc://');
+
+    const allSteps: Array<{ name: string; skipIf: () => boolean }> = isDoc
+      ? [
+          { name: 'extract-file', skipIf: () => !!freshJob.transcript_text },
+          { name: 'analyze-images', skipIf: () => !!freshJob.transcript_text && freshJob.transcript_text.includes('--- Visual Analysis ---') },
+          { name: 'translate', skipIf: () => !!freshJob.translated_text || freshJob.transcript_lang === 'en' },
+          { name: 'generate', skipIf: () => !!freshJob.blog_post_id },
+          { name: 'research', skipIf: () => false },
+          { name: 'image', skipIf: () => false },
+          { name: 'finalize', skipIf: () => false },
+        ]
+      : [
+          { name: 'extract', skipIf: () => !!freshJob.transcript_text },
+          { name: 'translate', skipIf: () => !!freshJob.translated_text || freshJob.transcript_lang === 'en' },
+          { name: 'generate', skipIf: () => !!freshJob.blog_post_id },
+          { name: 'research', skipIf: () => false },
+          { name: 'image', skipIf: () => false },
+          { name: 'finalize', skipIf: () => false },
+        ];
 
     for (const step of allSteps) {
       if (step.skipIf()) {
@@ -208,22 +221,32 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-4">
       <div className="flex items-start gap-4">
-        {/* Thumbnail */}
-        <img
-          src={`https://img.youtube.com/vi/${job.youtube_id}/mqdefault.jpg`}
-          alt={job.video_title || 'Video thumbnail'}
-          className="w-28 h-16 rounded-lg object-cover flex-shrink-0"
-        />
+        {/* Thumbnail / Icon */}
+        {isDocumentJob ? (
+          <div className="w-28 h-16 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+            <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+        ) : (
+          <img
+            src={`https://img.youtube.com/vi/${job.youtube_id}/mqdefault.jpg`}
+            alt={job.video_title || 'Video thumbnail'}
+            className="w-28 h-16 rounded-lg object-cover flex-shrink-0"
+          />
+        )}
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-sm font-medium text-slate-900 truncate">
-                {job.video_title || `Video: ${job.youtube_id}`}
+                {job.video_title || (isDocumentJob ? job.youtube_url?.replace('doc://', '') : `Video: ${job.youtube_id}`)}
               </h3>
               {job.channel_name && (
-                <p className="text-xs text-slate-500 mt-0.5">{job.channel_name}</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {isDocumentJob ? `Source: ${job.channel_name}` : job.channel_name}
+                </p>
               )}
             </div>
             <span className={`px-2 py-0.5 text-xs font-medium rounded-full flex-shrink-0 ${config.color}`}>

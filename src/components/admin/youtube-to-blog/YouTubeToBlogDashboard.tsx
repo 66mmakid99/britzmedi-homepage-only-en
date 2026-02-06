@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { BlogJob, BlogPost } from '../../../lib/youtube-to-blog/schemas';
-import { InputTabs } from './InputTabs';
+import { SourceTabs } from './SourceTabs';
 import { ProcessingQueue } from './ProcessingQueue';
 import { PublishedPosts } from './PublishedPosts';
 
@@ -72,9 +72,9 @@ export default function YouTubeToBlogDashboard() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">YouTube to Blog</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Content to Blog</h1>
               <p className="text-sm text-slate-500">
-                Convert YouTube videos into SEO-optimized blog posts with AI
+                Convert YouTube videos and documents into SEO-optimized blog posts with AI
               </p>
             </div>
             <div className="flex items-center gap-4 text-sm">
@@ -140,7 +140,7 @@ export default function YouTubeToBlogDashboard() {
         ) : (
           <>
             {activeTab === 'input' && (
-              <InputTabs onJobCreated={handleJobCreated} />
+              <SourceTabs onJobCreated={handleJobCreated} />
             )}
             {activeTab === 'queue' && (
               <ProcessingQueue
