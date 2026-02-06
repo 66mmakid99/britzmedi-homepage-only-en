@@ -238,6 +238,21 @@ export const ja: TranslationKeys = {
       technology: 'テクノロジー',
       clinicalStudies: '臨床研究',
       education: '教育',
+      medicalDevices: '医療機器',
+    },
+    posts: {
+      'fda-510k-clearance-process': {
+        title: 'FDA 510(k)認可：医療機器ディストリビューターのための完全ガイド',
+        description: 'FDA 510(k)認可について、プロセスの手順やコストからビジネスへの影響まで、ディストリビューターが知っておくべきすべてのこと。',
+      },
+      'rf-technology-aesthetic-medicine': {
+        title: '美容医療におけるRF技術：クリニックがRFデバイスでROIを最大化する方法',
+        description: 'クリニックオーナーとデバイスバイヤーのためのRF技術総合ガイド。',
+      },
+      'korean-beauty-device-market': {
+        title: '韓国美容機器市場：世界のディストリビューターが韓国メーカーと提携する理由',
+        description: '韓国美容機器業界の市場データ、規制環境、パートナーシップの機会。',
+      },
     },
   },
 

@@ -166,12 +166,46 @@ const { lang } = Astro.params as { lang: Language };
 const t = useTranslations(lang);
 const { post } = Astro.props;
 
+// Helper: get translated post title/description (falls back to English original)
+const getPostTitle = (slug: string, fallback: string) => {
+  const key = `blog.posts.${slug}.title`;
+  const translated = t(key as any);
+  return translated !== key ? translated : fallback;
+};
+const getPostDescription = (slug: string, fallback: string) => {
+  const key = `blog.posts.${slug}.description`;
+  const translated = t(key as any);
+  return translated !== key ? translated : fallback;
+};
+
+// Helper: translate category value to localized label
+const categoryMap: Record<string, string> = {
+  'industry-news': t('blog.categories.industryNews'),
+  'product-updates': t('blog.categories.productUpdates'),
+  'technology': t('blog.categories.technology'),
+  'clinical-studies': t('blog.categories.clinicalStudies'),
+  'education': t('blog.categories.education'),
+  'medical-devices': t('blog.categories.medicalDevices'),
+};
+const getCategoryLabel = (category: string) => categoryMap[category] || category.replace('-', ' ');
+
+// Locale for date formatting
+const localeMap: Record<string, string> = {
+  ja: 'ja-JP', zh: 'zh-CN', th: 'th-TH', vi: 'vi-VN',
+  es: 'es-ES', fr: 'fr-FR', ru: 'ru-RU', ar: 'ar-SA',
+};
+const dateLocale = localeMap[lang] || 'en-US';
+
+// Translated values
+const translatedTitle = getPostTitle(post.slug, post.title);
+const translatedDescription = getPostDescription(post.slug, post.description);
+
 // Article structured data
 const articleSchema: Record<string, any> = {
   '@context': 'https://schema.org',
   '@type': 'Article',
-  'headline': post.title,
-  'description': post.description,
+  'headline': translatedTitle,
+  'description': translatedDescription,
   'author': {
     '@type': 'Organization',
     'name': post.author,
@@ -246,8 +280,8 @@ const breadcrumbSchema = {
 ---
 
 <BaseLayout
-  title={post.title}
-  description={post.description}
+  title={translatedTitle}
+  description={translatedDescription}
   keywords={post.tags}
 >
   <!-- Article Structured Data -->
@@ -275,23 +309,23 @@ const breadcrumbSchema = {
   <article class="blog-article">
     <!-- Category & Date -->
     <div class="blog-meta">
-      <span class="category-badge">{post.category.replace('-', ' ')}</span>
+      <span class="category-badge">{getCategoryLabel(post.category)}</span>
       <time datetime={post.publishedAt}>
-        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        {new Date(post.publishedAt).toLocaleDateString(dateLocale, { month: 'long', day: 'numeric', year: 'numeric' })}
       </time>
       {post.updatedAt && post.updatedAt !== post.publishedAt && (
         <span class="text-slate-400">
-          (Updated {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
+          ({new Date(post.updatedAt).toLocaleDateString(dateLocale, { month: 'long', day: 'numeric', year: 'numeric' })})
         </span>
       )}
     </div>
 
     <!-- Title -->
-    <h1>{post.title}</h1>
+    <h1>{translatedTitle}</h1>
 
     <!-- Description -->
     <p class="text-lg" style="color: var(--color-slate-600); line-height: 1.75; margin-bottom: 1.5rem;">
-      {post.description}
+      {translatedDescription}
     </p>
 
     <!-- Featured Image -->

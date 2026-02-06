@@ -12,6 +12,29 @@ export function getStaticPaths() {
 const { lang } = Astro.params as { lang: Language };
 const t = useTranslations(lang);
 
+// Helper: get translated post title/description (falls back to English original)
+const getPostTitle = (slug: string, fallback: string) => {
+  const key = `blog.posts.${slug}.title`;
+  const translated = t(key as any);
+  return translated !== key ? translated : fallback;
+};
+const getPostDescription = (slug: string, fallback: string) => {
+  const key = `blog.posts.${slug}.description`;
+  const translated = t(key as any);
+  return translated !== key ? translated : fallback;
+};
+
+// Helper: translate category value to localized label
+const categoryMap: Record<string, string> = {
+  'industry-news': t('blog.categories.industryNews'),
+  'product-updates': t('blog.categories.productUpdates'),
+  'technology': t('blog.categories.technology'),
+  'clinical-studies': t('blog.categories.clinicalStudies'),
+  'education': t('blog.categories.education'),
+  'medical-devices': t('blog.categories.medicalDevices'),
+};
+const getCategoryLabel = (category: string) => categoryMap[category] || category.replace('-', ' ');
+
 // Load dynamic blog posts from content/blog/*.json
 const dynamicPostModules = import.meta.glob('../../../content/blog/*.json', { eager: true });
 const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
@@ -84,6 +107,13 @@ const categories = [
   { value: 'education', label: t('blog.categories.education') },
 ];
 
+// Locale for date formatting
+const localeMap: Record<string, string> = {
+  ja: 'ja-JP', zh: 'zh-CN', th: 'th-TH', vi: 'vi-VN',
+  es: 'es-ES', fr: 'fr-FR', ru: 'ru-RU', ar: 'ar-SA',
+};
+const dateLocale = localeMap[lang] || 'en-US';
+
 // Structured data for BlogPosting list
 const blogListSchema = {
   '@context': 'https://schema.org',
@@ -102,8 +132,8 @@ const blogListSchema = {
   },
   'blogPost': blogPosts.map(post => ({
     '@type': 'BlogPosting',
-    'headline': post.title,
-    'description': post.description,
+    'headline': getPostTitle(post.slug, post.title),
+    'description': getPostDescription(post.slug, post.description),
     'author': {
       '@type': 'Organization',
       'name': post.author
@@ -173,16 +203,16 @@ const blogListSchema = {
               </div>
               <div class="p-6">
                 <div class="flex items-center gap-3 mb-3 text-sm text-slate-500">
-                  <span class="capitalize">{post.category.replace('-', ' ')}</span>
+                  <span class="capitalize">{getCategoryLabel(post.category)}</span>
                   <span>&bull;</span>
-                  <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+                  <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })}</time>
                 </div>
                 <h3 class="heading-3 mb-3 group-hover:text-primary-600 transition-colors">
                   <a href={`/${lang}/blog/${post.slug}`} class="hover:underline">
-                    {post.title}
+                    {getPostTitle(post.slug, post.title)}
                   </a>
                 </h3>
-                <p class="body-base mb-4 line-clamp-2">{post.description}</p>
+                <p class="body-base mb-4 line-clamp-2">{getPostDescription(post.slug, post.description)}</p>
                 <div class="flex flex-wrap gap-2">
                   {post.tags.slice(0, 3).map(tag => (
                     <span class="text-xs px-2.5 py-1 bg-slate-100 rounded-full text-slate-600">
@@ -211,16 +241,16 @@ const blogListSchema = {
               </div>
               <div class="p-5">
                 <div class="flex items-center gap-3 mb-2 text-sm text-slate-500">
-                  <span class="capitalize">{post.category.replace('-', ' ')}</span>
+                  <span class="capitalize">{getCategoryLabel(post.category)}</span>
                   <span>&bull;</span>
-                  <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</time>
+                  <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}</time>
                 </div>
                 <h3 class="text-lg font-semibold mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
                   <a href={`/${lang}/blog/${post.slug}`} class="hover:underline">
-                    {post.title}
+                    {getPostTitle(post.slug, post.title)}
                   </a>
                 </h3>
-                <p class="body-small line-clamp-2 mb-3">{post.description}</p>
+                <p class="body-small line-clamp-2 mb-3">{getPostDescription(post.slug, post.description)}</p>
                 <a
                   href={`/${lang}/blog/${post.slug}`}
                   class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"

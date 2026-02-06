@@ -236,6 +236,21 @@ export const en = {
       technology: 'Technology',
       clinicalStudies: 'Clinical Studies',
       education: 'Education',
+      medicalDevices: 'Medical Devices',
+    },
+    posts: {
+      'fda-510k-clearance-process': {
+        title: 'FDA 510(k) Clearance: The Complete Guide for Medical Device Distributors',
+        description: 'Everything distributors need to know about FDA 510(k) clearance — from process steps and costs to why it matters for your business.',
+      },
+      'rf-technology-aesthetic-medicine': {
+        title: 'RF Technology in Aesthetic Medicine: How Clinics Maximize ROI with Radiofrequency Devices',
+        description: 'A comprehensive guide to RF technology for clinic owners and device buyers.',
+      },
+      'korean-beauty-device-market': {
+        title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
+        description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry.',
+      },
     },
   },
 

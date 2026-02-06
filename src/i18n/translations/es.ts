@@ -238,6 +238,21 @@ export const es: TranslationKeys = {
       technology: 'Tecnología',
       clinicalStudies: 'Estudios clínicos',
       education: 'Educación',
+      medicalDevices: 'Dispositivos médicos',
+    },
+    posts: {
+      'fda-510k-clearance-process': {
+        title: 'Aprobación FDA 510(k): Guía completa para distribuidores de dispositivos médicos',
+        description: 'Todo lo que los distribuidores necesitan saber sobre la aprobación FDA 510(k) — desde los pasos del proceso y costos hasta su importancia para su negocio.',
+      },
+      'rf-technology-aesthetic-medicine': {
+        title: 'Tecnología RF en Medicina Estética: Cómo las clínicas maximizan el ROI con dispositivos de radiofrecuencia',
+        description: 'Guía completa de tecnología RF para propietarios de clínicas y compradores de equipos.',
+      },
+      'korean-beauty-device-market': {
+        title: 'Mercado de dispositivos estéticos coreanos: Por qué los distribuidores globales se asocian con fabricantes coreanos',
+        description: 'Datos de mercado, panorama regulatorio y oportunidades de asociación en la industria de dispositivos estéticos coreanos.',
+      },
     },
   },
 

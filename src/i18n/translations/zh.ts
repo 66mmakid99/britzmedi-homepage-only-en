@@ -238,6 +238,21 @@ export const zh: TranslationKeys = {
       technology: '技术',
       clinicalStudies: '临床研究',
       education: '教育',
+      medicalDevices: '医疗器械',
+    },
+    posts: {
+      'fda-510k-clearance-process': {
+        title: 'FDA 510(k)审批：医疗器械经销商完整指南',
+        description: '经销商需要了解的关于FDA 510(k)审批的一切——从流程步骤和费用到对您业务的重要性。',
+      },
+      'rf-technology-aesthetic-medicine': {
+        title: '美容医疗中的RF技术：诊所如何通过射频设备最大化投资回报',
+        description: '面向诊所业主和设备买家的RF技术综合指南。',
+      },
+      'korean-beauty-device-market': {
+        title: '韩国美容设备市场：全球经销商为何选择与韩国制造商合作',
+        description: '韩国美容设备行业的市场数据、监管环境和合作机会。',
+      },
     },
   },
 

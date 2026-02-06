@@ -238,6 +238,21 @@ export const vi: TranslationKeys = {
       technology: 'Công nghệ',
       clinicalStudies: 'Nghiên cứu lâm sàng',
       education: 'Giáo dục',
+      medicalDevices: 'Thiết bị y tế',
+    },
+    posts: {
+      'fda-510k-clearance-process': {
+        title: 'FDA 510(k): Hướng dẫn đầy đủ cho nhà phân phối thiết bị y tế',
+        description: 'Tất cả những gì nhà phân phối cần biết về chứng nhận FDA 510(k) — từ quy trình và chi phí đến tầm quan trọng đối với doanh nghiệp của bạn.',
+      },
+      'rf-technology-aesthetic-medicine': {
+        title: 'Công nghệ RF trong Y học Thẩm mỹ: Phòng khám tối đa hóa ROI với thiết bị tần số vô tuyến',
+        description: 'Hướng dẫn toàn diện về công nghệ RF dành cho chủ phòng khám và người mua thiết bị.',
+      },
+      'korean-beauty-device-market': {
+        title: 'Thị trường thiết bị thẩm mỹ Hàn Quốc: Tại sao nhà phân phối toàn cầu hợp tác với nhà sản xuất Hàn Quốc',
+        description: 'Dữ liệu thị trường, cảnh quan pháp lý và cơ hội hợp tác trong ngành thiết bị thẩm mỹ Hàn Quốc.',
+      },
     },
   },
 
