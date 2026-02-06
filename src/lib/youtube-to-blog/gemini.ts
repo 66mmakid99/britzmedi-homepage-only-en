@@ -84,11 +84,16 @@ ${transcript.slice(0, 3000)}
 If a doctor/medical professional is clearly identified, respond ONLY with a JSON object:
 {
   "name": "Dr. Full Name",
-  "title": "Their professional title (e.g., Dermatologist, Plastic Surgeon)",
-  "credentials": "Their credentials (e.g., MD, Board Certified Dermatologist)",
+  "title": "Their medical specialty (e.g., Dermatologist, Plastic Surgeon, Aesthetic Medicine Specialist)",
+  "credentials": "Their credentials (e.g., MD, FAAD, Board Certified Dermatologist)",
   "bio": "A brief 2-3 sentence professional bio based on information from the video",
   "profileImageUrl": "URL to their public profile photo if findable (hospital website, LinkedIn, conference profile, or null)"
 }
+
+IMPORTANT rules for fields:
+- "name": MUST start with "Dr." prefix (e.g., "Dr. John Smith", NOT just "John Smith")
+- "title": MUST be their medical specialty or clinical role (e.g., "Dermatologist", "Plastic Surgeon", "Aesthetic Medicine Specialist"). Do NOT use administrative titles like "Director", "Department Head", "CEO", "Chairman", "Manager", or "President".
+- "credentials": List their medical degrees and certifications (e.g., "MD, PhD", "MD, FAAD", "MD, Board Certified Plastic Surgeon")
 
 For profileImageUrl: Search for the doctor's public profile photo from their hospital/clinic website, professional directory, or academic profile. Only include if you can find a real, publicly accessible URL. Use null if not found.
 
