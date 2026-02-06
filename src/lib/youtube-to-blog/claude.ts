@@ -5,15 +5,18 @@ interface ClaudeMessage {
   content: string;
 }
 
-interface ClaudeResponse {
-  content: { type: string; text?: string }[];
-  usage?: { input_tokens: number; output_tokens: number };
-}
-
 /**
- * Call Claude API to generate blog post content
+ * Call Claude API with streaming to avoid CF Workers timeout.
+ * Streams tokens from Claude and accumulates the full text.
+ * Optionally calls onProgress callback for each chunk.
  */
-async function callClaude(apiKey: string, systemPrompt: string, messages: ClaudeMessage[], maxTokens = 8192): Promise<string> {
+async function callClaude(
+  apiKey: string,
+  systemPrompt: string,
+  messages: ClaudeMessage[],
+  maxTokens = 8192,
+  onProgress?: (chunk: string, accumulated: string) => void
+): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -24,6 +27,7 @@ async function callClaude(apiKey: string, systemPrompt: string, messages: Claude
     body: JSON.stringify({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: maxTokens,
+      stream: true,
       system: systemPrompt,
       messages,
     }),
@@ -34,14 +38,59 @@ async function callClaude(apiKey: string, systemPrompt: string, messages: Claude
     throw new Error(`Claude API error (${res.status}): ${errText}`);
   }
 
-  const data: ClaudeResponse = await res.json();
-  const text = data.content.find(c => c.type === 'text')?.text;
+  if (!res.body) {
+    throw new Error('Claude returned no response body');
+  }
+
+  // Read SSE stream
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  let buffer = '';
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (!data || data === '[DONE]') continue;
+
+      try {
+        const event = JSON.parse(data);
+
+        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+          text += event.delta.text;
+          if (onProgress) {
+            onProgress(event.delta.text, text);
+          }
+        }
+
+        if (event.type === 'message_delta' && event.usage) {
+          outputTokens = event.usage.output_tokens || 0;
+        }
+
+        if (event.type === 'message_start' && event.message?.usage) {
+          inputTokens = event.message.usage.input_tokens || 0;
+        }
+      } catch {
+        // Skip non-JSON lines
+      }
+    }
+  }
 
   if (!text) {
     throw new Error('Claude returned no text');
   }
 
-  console.log(`[Claude] Tokens used: ${data.usage?.input_tokens} in / ${data.usage?.output_tokens} out`);
+  console.log(`[Claude] Tokens used: ${inputTokens} in / ${outputTokens} out`);
   return text;
 }
 
@@ -57,7 +106,9 @@ export interface GeneratedBlogPost {
 }
 
 /**
- * Generate a full blog post from translated transcript
+ * Generate a full blog post from translated transcript.
+ * Uses streaming to avoid CF Workers timeout.
+ * Calls onProgress for each text chunk to keep the client connection alive.
  */
 export async function generateBlogPost(
   apiKey: string,
@@ -69,7 +120,8 @@ export async function generateBlogPost(
     tone?: string;
     wordCount?: number;
     targetLang?: string;
-  } = {}
+  } = {},
+  onProgress?: (chunk: string, accumulated: string) => void
 ): Promise<GeneratedBlogPost> {
   const { tone = 'professional', wordCount = 1500, targetLang = 'en' } = options;
 
@@ -119,9 +171,13 @@ ${transcript.slice(0, 12000)}
 
 Generate a comprehensive, engaging blog post based on this content.`;
 
-  const result = await callClaude(apiKey, systemPrompt, [
-    { role: 'user', content: userMessage },
-  ]);
+  const result = await callClaude(
+    apiKey,
+    systemPrompt,
+    [{ role: 'user', content: userMessage }],
+    8192,
+    onProgress
+  );
 
   // Parse JSON response
   const cleaned = result.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();

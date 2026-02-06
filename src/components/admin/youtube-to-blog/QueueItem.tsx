@@ -38,6 +38,81 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
     }
   };
 
+  // Handle SSE streaming step (generate uses this to avoid CF 30s timeout)
+  const runStreamingStep = async (jobId: string, stepName: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/blog/queue/${jobId}/step/${stepName}`, {
+        method: 'POST',
+      });
+
+      if (!res.ok) {
+        // Non-streaming error response (e.g. 400, 404)
+        const data = await res.json().catch(() => ({ error: `${res.status}` }));
+        console.error(`Step ${stepName} failed:`, data.error);
+        await fetch(`/api/blog/queue/${jobId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'failed', error_message: `Step "${stepName}": ${data.error}` }),
+        }).catch(() => {});
+        return false;
+      }
+
+      // Read SSE stream
+      const reader = res.body?.getReader();
+      if (!reader) {
+        console.error(`Step ${stepName}: No response body`);
+        return false;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let success = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (!data) continue;
+
+          try {
+            const event = JSON.parse(data);
+            if (event.type === 'progress') {
+              console.log(`[Stream] ${stepName}: ${event.percent}%`);
+            } else if (event.type === 'done') {
+              console.log(`[Stream] ${stepName}: completed`, event);
+              success = true;
+            } else if (event.type === 'error') {
+              console.error(`[Stream] ${stepName}: error`, event.message);
+              await fetch(`/api/blog/queue/${jobId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'failed', error_message: `Step "${stepName}": ${event.message}` }),
+              }).catch(() => {});
+              return false;
+            }
+          } catch { /* skip parse errors */ }
+        }
+      }
+
+      return success;
+    } catch (err: any) {
+      console.error(`Step ${stepName} stream error:`, err);
+      await fetch(`/api/blog/queue/${jobId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'failed', error_message: `Step "${stepName}": ${err.message || 'Stream error'}` }),
+      }).catch(() => {});
+      return false;
+    }
+  };
+
   const handleStartProcessing = async () => {
     if (!['pending', 'failed', 'extracting', 'translating', 'generating', 'researching', 'imaging'].includes(job.status)) return;
     setProcessing(true);
@@ -68,6 +143,13 @@ export function QueueItem({ job, onDelete }: QueueItemProps) {
       }
 
       try {
+        // Generate step uses SSE streaming (to avoid CF Workers 30s timeout)
+        if (step.name === 'generate') {
+          const success = await runStreamingStep(job.id, step.name);
+          if (!success) break;
+          continue;
+        }
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 55000);
 
