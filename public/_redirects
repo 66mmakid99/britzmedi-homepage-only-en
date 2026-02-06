@@ -4,11 +4,11 @@
 # Normalize trailing index.html
 /index.html  /  301
 
-# Common old URL patterns
+# Common old URL patterns (exact matches first, then splats)
 /home  /  301
 /about-us  /about  301
 /product  /products  301
-/product/*  /products/:splat  301
 /faqs  /faq  301
 /inquiry  /contact  301
 /enquiry  /contact  301
+/product/*  /products/:splat  301
