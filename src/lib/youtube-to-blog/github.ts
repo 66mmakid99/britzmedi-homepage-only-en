@@ -25,6 +25,7 @@ export async function commitFileToGitHub(
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'BRITZMEDI-Blog-Publisher',
       },
     });
     if (checkRes.ok) {
@@ -51,6 +52,7 @@ export async function commitFileToGitHub(
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'BRITZMEDI-Blog-Publisher',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
@@ -84,6 +86,7 @@ export async function deleteFileFromGitHub(
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'BRITZMEDI-Blog-Publisher',
     },
   });
 
@@ -98,6 +101,7 @@ export async function deleteFileFromGitHub(
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'BRITZMEDI-Blog-Publisher',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
