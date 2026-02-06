@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   doctor_credentials TEXT,
   doctor_image TEXT,
   doctor_bio TEXT,
+  doctor_verified BOOLEAN DEFAULT FALSE,
+  doctor_verified_source TEXT,
 
   -- Categorization
   category TEXT DEFAULT 'medical-devices',

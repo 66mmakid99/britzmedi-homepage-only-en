@@ -61,6 +61,8 @@ export interface BlogPost {
   doctor_credentials: string | null;
   doctor_image: string | null;
   doctor_bio: string | null;
+  doctor_verified: boolean | null;
+  doctor_verified_source: string | null;
   category: string;
   tags: string | null;
   status: PostStatus;

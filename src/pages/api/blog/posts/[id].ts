@@ -134,6 +134,8 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       ['doctor_credentials', data.doctor_credentials],
       ['doctor_image', data.doctor_image],
       ['doctor_bio', data.doctor_bio],
+      ['doctor_verified', (body as any).doctor_verified !== undefined ? ((body as any).doctor_verified ? 1 : 0) : undefined],
+      ['doctor_verified_source', (body as any).doctor_verified_source],
       ['status', data.status],
     ];
 

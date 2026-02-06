@@ -64,38 +64,95 @@ ${truncated}`;
   return await callGemini(apiKey, prompt);
 }
 
-/**
- * Research doctor/expert info mentioned in the video
- */
-export async function researchDoctor(apiKey: string, transcript: string, videoTitle: string): Promise<{
+export interface DoctorResearchResult {
   name: string;
   title: string;
   credentials: string;
   bio: string;
   profileImageUrl?: string;
-} | null> {
+  verified: boolean;
+  verifiedSource: string;
+}
+
+/**
+ * Extract doctor name from subtitle/title/description using "Dr." pattern
+ */
+function extractDrNameFromText(text: string): string | null {
+  // Match "Dr." followed by a name (2-4 words, capitalized)
+  const patterns = [
+    /Dr\.\s+([A-Z][a-z]+(?:[- ][A-Z][a-z]+){0,3})/g,
+    /Doctor\s+([A-Z][a-z]+(?:[- ][A-Z][a-z]+){0,3})/g,
+  ];
+  const names: string[] = [];
+  for (const pattern of patterns) {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const name = match[1].trim();
+      // Skip generic words that follow "Dr." but aren't names
+      if (!['The', 'This', 'That', 'Who', 'Kim', 'Lee', 'Park'].includes(name) || name.split(' ').length > 1) {
+        names.push(`Dr. ${name}`);
+      }
+    }
+  }
+  // Return most frequently mentioned name
+  if (names.length === 0) return null;
+  const freq = new Map<string, number>();
+  for (const n of names) freq.set(n, (freq.get(n) || 0) + 1);
+  return [...freq.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
+/**
+ * Research doctor/expert info mentioned in the video
+ * Priority: 1) subtitle "Dr." pattern 2) title/description English name 3) AI inference (unverified)
+ */
+export async function researchDoctor(
+  apiKey: string,
+  transcript: string,
+  videoTitle: string,
+  videoDescription?: string
+): Promise<DoctorResearchResult | null> {
+  // Step 1: Try to extract "Dr." name from subtitle text first
+  const subtitleName = extractDrNameFromText(transcript);
+
+  // Step 2: Try title and description
+  const titleDescName = extractDrNameFromText(
+    `${videoTitle} ${videoDescription || ''}`
+  );
+
+  // Determine if we have a directly-extracted name
+  const directName = subtitleName || titleDescName;
+  const nameSource = subtitleName ? 'subtitle' : titleDescName ? 'title/description' : null;
+
   const prompt = `Analyze this YouTube video transcript and identify if a specific doctor or medical professional is featured.
 
 Video title: ${videoTitle}
+${videoDescription ? `Video description: ${videoDescription.slice(0, 500)}` : ''}
+${directName ? `\nA name was detected in the video text: "${directName}". Verify and use this name if it matches the featured professional.` : ''}
 
 Transcript (first 3000 chars):
 ${transcript.slice(0, 3000)}
 
 If a doctor/medical professional is clearly identified, respond ONLY with a JSON object:
 {
-  "name": "Dr. Full Name",
+  "name": "Dr. Full Name (in English)",
+  "name_ko": "Korean name if applicable, or null",
   "title": "Their medical specialty (e.g., Dermatologist, Plastic Surgeon, Aesthetic Medicine Specialist)",
   "credentials": "Their credentials (e.g., MD, FAAD, Board Certified Dermatologist)",
   "bio": "A brief 2-3 sentence professional bio based on information from the video",
-  "profileImageUrl": "URL to their public profile photo if findable (hospital website, LinkedIn, conference profile, or null)"
+  "profileImageUrl": "URL to their public profile photo if findable, or null",
+  "nameConfidence": "high" or "medium" or "low"
 }
 
-IMPORTANT rules for fields:
-- "name": MUST start with "Dr." prefix (e.g., "Dr. John Smith", NOT just "John Smith")
-- "title": MUST be their medical specialty or clinical role (e.g., "Dermatologist", "Plastic Surgeon", "Aesthetic Medicine Specialist"). Do NOT use administrative titles like "Director", "Department Head", "CEO", "Chairman", "Manager", or "President".
-- "credentials": List their medical degrees and certifications (e.g., "MD, PhD", "MD, FAAD", "MD, Board Certified Plastic Surgeon")
-
-For profileImageUrl: Search for the doctor's public profile photo from their hospital/clinic website, professional directory, or academic profile. Only include if you can find a real, publicly accessible URL. Use null if not found.
+IMPORTANT rules:
+- "name": MUST start with "Dr." prefix. Use the CORRECT English spelling of the name.
+  - For Korean names: use the doctor's KNOWN English name if available (from publications, hospital website, conference proceedings).
+  - If no known English spelling exists, use standard Korean romanization (e.g., Kim, Lee, Park for surnames).
+  - NEVER guess or approximate Korean name romanization - if unsure, set nameConfidence to "low".
+- "title": MUST be their medical specialty or clinical role. Do NOT use administrative titles like "Director", "CEO", "Chairman".
+- "nameConfidence":
+  - "high": name was explicitly shown/spoken in English in the video, or is well-known
+  - "medium": name was extracted from Korean with reasonable confidence
+  - "low": name is AI's best guess, may be inaccurate
 
 If no specific doctor is identified, respond with: null
 
@@ -107,8 +164,50 @@ Response:`;
 
     if (cleaned === 'null' || cleaned === '') return null;
 
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    const confidence = parsed.nameConfidence || 'low';
+
+    // Determine verified status:
+    // - "high" confidence from AI + direct name match = verified
+    // - Direct extraction from subtitle = verified
+    // - Otherwise = unverified
+    let verified = false;
+    let verifiedSource = 'ai-inference';
+
+    if (directName && parsed.name === directName) {
+      verified = true;
+      verifiedSource = nameSource!;
+    } else if (confidence === 'high') {
+      verified = true;
+      verifiedSource = 'ai-high-confidence';
+    } else if (directName) {
+      // We had a direct extraction but AI gave a different name
+      // Trust the AI's name but mark as unverified
+      verified = false;
+      verifiedSource = 'ai-inference';
+    }
+
+    return {
+      name: parsed.name,
+      title: parsed.title,
+      credentials: parsed.credentials,
+      bio: parsed.bio,
+      profileImageUrl: parsed.profileImageUrl || undefined,
+      verified,
+      verifiedSource,
+    };
   } catch {
+    // If AI fails but we have a direct name, return minimal info
+    if (directName) {
+      return {
+        name: directName,
+        title: 'Medical Professional',
+        credentials: 'MD',
+        bio: '',
+        verified: true,
+        verifiedSource: nameSource!,
+      };
+    }
     return null;
   }
 }

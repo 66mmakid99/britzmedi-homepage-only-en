@@ -17,6 +17,8 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
   const [saved, setSaved] = useState(false);
   const [researching, setResearching] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [verified, setVerified] = useState(!!post.doctor_verified);
+  const [verifiedSource, setVerifiedSource] = useState(post.doctor_verified_source || '');
   const originalNameRef = useRef(post.doctor_name || '');
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -25,6 +27,8 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
     setSaved(false);
 
     try {
+      // Manual edit marks as verified with 'manual' source
+      const isManualEdit = name !== originalNameRef.current;
       const res = await fetch(`/api/blog/posts/${post.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -34,6 +38,8 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
           doctor_credentials: credentials || null,
           doctor_bio: bio || null,
           doctor_image: image || null,
+          doctor_verified: isManualEdit ? true : verified,
+          doctor_verified_source: isManualEdit ? 'manual' : verifiedSource,
         }),
       });
 
@@ -71,6 +77,8 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
           setTitle(data.doctor_info.title || '');
           setCredentials(data.doctor_info.credentials || '');
           setBio(data.doctor_info.bio || '');
+          setVerified(!!data.doctor_info.verified);
+          setVerifiedSource(data.doctor_info.verifiedSource || '');
           // Refetch post to get doctor_image from R2 download
           const postRes = await fetch(`/api/blog/posts/${post.id}`);
           if (postRes.ok) {
@@ -140,7 +148,26 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-slate-900">Doctor / Expert Profile</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-slate-900">Doctor / Expert Profile</h2>
+            {name && (
+              verified ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Verified{verifiedSource ? ` (${verifiedSource})` : ''}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Unverified
+                </span>
+              )
+            )}
+          </div>
           <button
             onClick={handleResearch}
             disabled={researching}

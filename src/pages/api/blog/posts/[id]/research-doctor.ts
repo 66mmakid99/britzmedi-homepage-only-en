@@ -5,8 +5,10 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { researchDoctor } from '../../../../../lib/youtube-to-blog/gemini';
+import type { DoctorResearchResult } from '../../../../../lib/youtube-to-blog/gemini';
 import { uploadToR2, generateImageKey } from '../../../../../lib/youtube-to-blog/images';
 import type { BlogPost, BlogJob } from '../../../../../lib/youtube-to-blog/schemas';
+import { containsKorean, romanizeName } from '../../../../../lib/youtube-to-blog/name-romanization';
 
 export const POST: APIRoute = async ({ params, locals }) => {
   const { id } = params;
@@ -52,7 +54,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
       transcript = post.content.replace(/<[^>]+>/g, ' ');
     }
 
-    const doctorInfo = await researchDoctor(geminiKey, transcript, post.title);
+    const doctorInfo: DoctorResearchResult | null = await researchDoctor(geminiKey, transcript, post.title);
 
     if (doctorInfo) {
       let doctorImageUrl: string | null = null;
@@ -78,6 +80,24 @@ export const POST: APIRoute = async ({ params, locals }) => {
         }
       }
 
+      // Check name_mappings for verified name override
+      if (transcript && containsKorean(transcript)) {
+        try {
+          const koNameMatch = transcript.match(/[\uAC00-\uD7AF]{2,4}\s*(원장|의사|교수|박사|선생)/);
+          if (koNameMatch) {
+            const koName = koNameMatch[0].replace(/\s*(원장|의사|교수|박사|선생)/, '');
+            const mapping = await romanizeName(db, koName);
+            if (mapping.verified) {
+              doctorInfo.name = `Dr. ${mapping.nameEn}`;
+              doctorInfo.verified = true;
+              doctorInfo.verifiedSource = mapping.source;
+            }
+          }
+        } catch (err) {
+          console.warn('[Research Doctor] Name mapping lookup failed:', err);
+        }
+      }
+
       await db.prepare(`
         UPDATE blog_posts SET
           doctor_name = ?,
@@ -85,6 +105,8 @@ export const POST: APIRoute = async ({ params, locals }) => {
           doctor_credentials = ?,
           doctor_bio = ?,
           doctor_image = ?,
+          doctor_verified = ?,
+          doctor_verified_source = ?,
           updated_at = datetime('now')
         WHERE id = ?
       `).bind(
@@ -93,6 +115,8 @@ export const POST: APIRoute = async ({ params, locals }) => {
         doctorInfo.credentials,
         doctorInfo.bio,
         doctorImageUrl,
+        doctorInfo.verified ? 1 : 0,
+        doctorInfo.verifiedSource,
         id
       ).run();
     }

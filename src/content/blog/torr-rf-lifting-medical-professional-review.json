@@ -37,11 +37,13 @@
   "publishedAt": "2026-02-06T15:34:28.773Z",
   "updatedAt": "2026-02-06T15:34:28.773Z",
   "doctor": {
-    "name": "Dr. Kim Yong-ju",
-    "title": "Aesthetic Medicine Specialist",
+    "name": "Dr. Kim Hyung-ju",
+    "title": "Dermatologist, Aesthetic Medicine Specialist",
     "credentials": "MD",
     "image": null,
-    "bio": "Kim Yong-ju is the Director of Top National Healthcare. He discusses the Torr lifting procedure and its advantages, particularly the second version of the device."
+    "bio": "Dr. Kim Hyung-ju is a dermatologist at The Well Dermatology Clinic. He specializes in aesthetic procedures and provides expert insights on advanced RF lifting technology.",
+    "verified": true,
+    "verifiedSource": "manual"
   },
   "schemaJsonLd": [
     {
@@ -58,7 +60,7 @@
         },
         {
           "@type": "Person",
-          "name": "Dr. Kim Yong-ju",
+          "name": "Dr. Kim Hyung-ju",
           "jobTitle": "Aesthetic Medicine Specialist",
           "description": "MD"
         }
