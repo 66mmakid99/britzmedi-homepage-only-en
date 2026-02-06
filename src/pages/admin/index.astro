@@ -1,0 +1,6 @@
+---
+export const prerender = false;
+
+// Redirect /admin to /admin/leads (middleware handles auth)
+return Astro.redirect('/admin/leads');
+---
