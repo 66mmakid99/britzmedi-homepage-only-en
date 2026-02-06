@@ -60,10 +60,15 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const arrayBuffer = await file.arrayBuffer();
     const imageUrl = await uploadToR2(r2, imageKey, arrayBuffer, file.type);
 
-    // Update featured image if target is featured
+    // Update featured image or doctor image based on target
     if (target === 'featured') {
       await db.prepare(`
         UPDATE blog_posts SET featured_image = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).bind(imageUrl, id).run();
+    } else if (target === 'doctor') {
+      await db.prepare(`
+        UPDATE blog_posts SET doctor_image = ?, updated_at = datetime('now')
         WHERE id = ?
       `).bind(imageUrl, id).run();
     }

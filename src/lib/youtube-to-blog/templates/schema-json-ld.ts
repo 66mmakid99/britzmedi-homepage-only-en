@@ -14,6 +14,7 @@ interface BlogPostData {
     name: string;
     title: string;
     credentials: string;
+    image?: string | null;
   } | null;
 }
 
@@ -52,18 +53,23 @@ export function generateArticleSchema(post: BlogPostData): object {
 
   // Add medical author if available
   if (post.doctor) {
+    const personSchema: Record<string, unknown> = {
+      '@type': 'Person',
+      'name': post.doctor.name,
+      'jobTitle': post.doctor.title,
+      'description': post.doctor.credentials,
+    };
+    if (post.doctor.image) {
+      personSchema['image'] = post.doctor.image;
+    }
+
     schema['author'] = [
       {
         '@type': 'Organization',
         'name': post.author || 'BRITZMEDI Team',
         'url': 'https://britzmedi.com',
       },
-      {
-        '@type': 'Person',
-        'name': post.doctor.name,
-        'jobTitle': post.doctor.title,
-        'description': post.doctor.credentials,
-      },
+      personSchema,
     ];
   }
 

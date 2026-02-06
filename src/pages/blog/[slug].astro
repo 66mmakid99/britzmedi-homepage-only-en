@@ -498,7 +498,7 @@ Ready to explore a distribution partnership? [Contact BRITZMEDI](/contact) to di
 const { post } = Astro.props;
 
 // Article structured data
-const articleSchema = {
+const articleSchema: Record<string, any> = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   'headline': post.title,
@@ -523,6 +523,16 @@ const articleSchema = {
     '@id': `https://britzmedi.com/blog/${post.slug}`
   }
 };
+
+// Add doctor as author.image if available
+if (post.doctor) {
+  articleSchema['author'] = {
+    '@type': 'Person',
+    'name': post.doctor.name,
+    'jobTitle': post.doctor.title || undefined,
+    'image': post.doctor.image || undefined,
+  };
+}
 
 // FAQ structured data (if post has FAQs)
 const faqSchema = post.faqs?.length > 0 ? {
@@ -581,183 +591,169 @@ const breadcrumbSchema = {
   <!-- Breadcrumb Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
 
-  <article class="py-12 lg:py-20">
-    <div class="container">
-      <!-- Breadcrumb -->
-      <nav class="mb-8 text-sm">
-        <ol class="flex items-center gap-2 text-slate-500">
-          <li><a href="/" class="hover:text-primary-600">Home</a></li>
-          <li>/</li>
-          <li><a href="/blog" class="hover:text-primary-600">Blog</a></li>
-          <li>/</li>
-          <li class="text-slate-700 truncate max-w-[200px]">{post.title}</li>
-        </ol>
-      </nav>
+  <!-- Breadcrumb -->
+  <nav class="container py-4 text-sm">
+    <ol class="flex items-center gap-2 text-slate-500">
+      <li><a href="/" class="hover:text-primary-600">Home</a></li>
+      <li>/</li>
+      <li><a href="/blog" class="hover:text-primary-600">Blog</a></li>
+      <li>/</li>
+      <li class="text-slate-700 truncate max-w-[250px]">{post.title}</li>
+    </ol>
+  </nav>
 
-      <div class="max-w-4xl mx-auto">
-        <!-- Article Header -->
-        <header class="mb-10">
-          <div class="flex flex-wrap items-center gap-3 mb-4">
-            <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-primary-100 text-primary-700 rounded-full">
-              {post.category.replace('-', ' ')}
-            </span>
-            <time datetime={post.publishedAt} class="text-sm text-slate-500">
-              {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </time>
-            {post.updatedAt && post.updatedAt !== post.publishedAt && (
-              <span class="text-sm text-slate-400">
-                (Updated {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
-              </span>
-            )}
-          </div>
+  <article class="blog-article">
+    <!-- Category & Date -->
+    <div class="blog-meta">
+      <span class="category-badge">{post.category.replace('-', ' ')}</span>
+      <time datetime={post.publishedAt}>
+        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      </time>
+      {post.updatedAt && post.updatedAt !== post.publishedAt && (
+        <span class="text-slate-400">
+          (Updated {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
+        </span>
+      )}
+    </div>
 
-          <h1 class="heading-1 mb-6">{post.title}</h1>
+    <!-- Title -->
+    <h1>{post.title}</h1>
 
-          <p class="body-large text-slate-600 mb-8">
-            {post.description}
-          </p>
+    <!-- Description -->
+    <p class="text-lg" style="color: var(--color-slate-600); line-height: 1.75; margin-bottom: 1.5rem;">
+      {post.description}
+    </p>
 
-          <!-- TL;DR Box -->
-          {post.tldr && (
-            <TldrBox summary={post.tldr} class="mb-8" />
-          )}
+    <!-- Featured Image -->
+    {post.featuredImage && (
+      <div class="blog-featured-image">
+        <img src={post.featuredImage} alt={post.title} />
+      </div>
+    )}
 
-          <!-- Author and Share -->
-          <div class="flex items-center justify-between flex-wrap gap-4 py-6 border-y border-slate-200">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-semibold">
-                B
-              </div>
-              <div>
-                <p class="font-medium text-slate-900">{post.author}</p>
-                <p class="text-sm text-slate-500">BRITZMEDI Co., Ltd.</p>
-              </div>
-            </div>
+    <!-- TL;DR Box -->
+    {post.tldr && (
+      <TldrBox summary={post.tldr} />
+    )}
 
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-slate-500">Share:</span>
-              <a
-                href={`https://www.linkedin.com/shareArticle?mini=true&url=https://britzmedi.com/blog/${post.slug}&title=${encodeURIComponent(post.title)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-                aria-label="Share on LinkedIn"
-              >
-                <svg class="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </a>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=https://britzmedi.com/blog/${post.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-                aria-label="Share on Twitter"
-              >
-                <svg class="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </header>
-
-        <!-- Article Content -->
-        <div class="prose prose-lg max-w-none prose-headings:font-semibold prose-a:text-primary-600 prose-img:rounded-xl">
-          {post.isDynamic ? (
-            <Fragment set:html={post.content} />
-          ) : (
-            <Fragment set:html={post.content.split('\n').map(line => {
-              if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
-              if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
-              if (line.startsWith('**Q:')) return `<p class="font-semibold">${line}</p>`;
-              if (line.startsWith('**A:')) return `<p>${line}</p>`;
-              if (line.startsWith('- **')) return `<li><strong>${line.slice(4).split('**')[0]}</strong>: ${line.split('**')[2] || ''}</li>`;
-              if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`;
-              if (line.match(/^\d+\./)) return `<li>${line.slice(line.indexOf(' ') + 1)}</li>`;
-              if (line.trim() === '') return '<br />';
-              return `<p>${line}</p>`;
-            }).join('')} />
-          )}
-        </div>
-
-        <!-- YouTube Embed (for dynamic posts) -->
-        {post.youtubeEmbedUrl && (
-          <div class="mt-8">
-            <h3 class="text-lg font-semibold text-slate-900 mb-3">Watch the Full Video</h3>
-            <div class="aspect-video">
-              <iframe
-                src={post.youtubeEmbedUrl}
-                class="w-full h-full rounded-xl"
-                allowfullscreen
-                title="Source video"
-              />
-            </div>
+    <!-- Doctor Profile (for dynamic posts) -->
+    {post.doctor && (
+      <div class="blog-doctor-card">
+        {post.doctor.image ? (
+          <img src={post.doctor.image} alt={post.doctor.name} class="doctor-avatar" />
+        ) : (
+          <div class="doctor-avatar-placeholder">
+            {post.doctor.name?.charAt(0) || 'D'}
           </div>
         )}
-
-        <!-- Doctor Profile (for dynamic posts) -->
-        {post.doctor && (
-          <div class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-            <div class="flex items-start gap-4">
-              <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
-                <span class="text-xl font-bold text-blue-700">
-                  {post.doctor.name?.charAt(0) || 'D'}
-                </span>
-              </div>
-              <div>
-                <p class="font-semibold text-slate-900">{post.doctor.name}</p>
-                {post.doctor.title && <p class="text-sm text-slate-600">{post.doctor.title}</p>}
-                {post.doctor.credentials && <p class="text-xs text-slate-500 mt-1">{post.doctor.credentials}</p>}
-                {post.doctor.bio && <p class="text-sm text-slate-600 mt-2">{post.doctor.bio}</p>}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <!-- FAQ Section (if applicable) -->
-        {post.faqs?.length > 0 && (
-          <section class="mt-16 pt-12 border-t border-slate-200">
-            <h2 class="heading-2 mb-8">Frequently Asked Questions</h2>
-            <div class="space-y-6">
-              {post.faqs.map((faq, index) => (
-                <div class="card-premium p-6">
-                  <h3 class="text-lg font-semibold mb-3 text-slate-900">
-                    {faq.question}
-                  </h3>
-                  <p class="body-base text-slate-600">
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <!-- Tags -->
-        <div class="mt-12 pt-8 border-t border-slate-200">
-          <div class="flex flex-wrap gap-2">
-            {post.tags.map(tag => (
-              <span class="px-3 py-1.5 text-sm bg-slate-100 text-slate-600 rounded-full">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <!-- Back to Blog -->
-        <div class="mt-12">
-          <a
-            href="/blog"
-            class="inline-flex items-center text-primary-600 font-medium hover:text-primary-700"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Blog
-          </a>
+        <div class="doctor-info">
+          <h4>{post.doctor.name}</h4>
+          {post.doctor.title && <p class="doctor-title">{post.doctor.title}</p>}
+          {post.doctor.credentials && <p class="doctor-credentials">{post.doctor.credentials}</p>}
+          {post.doctor.bio && <p class="doctor-bio">{post.doctor.bio}</p>}
         </div>
       </div>
+    )}
+
+    <!-- Author and Share -->
+    <div class="blog-author-bar">
+      <div class="author-info">
+        <div class="author-avatar">B</div>
+        <div>
+          <p class="author-name">{post.author}</p>
+          <p class="author-org">BRITZMEDI Co., Ltd.</p>
+        </div>
+      </div>
+      <div class="share-links">
+        <span>Share:</span>
+        <a
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=https://britzmedi.com/blog/${post.slug}&title=${encodeURIComponent(post.title)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share on LinkedIn"
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </a>
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=https://britzmedi.com/blog/${post.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share on Twitter"
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <div>
+      {post.isDynamic ? (
+        <Fragment set:html={post.content} />
+      ) : (
+        <Fragment set:html={post.content.split('\n').map(line => {
+          if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+          if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
+          if (line.startsWith('**Q:')) return `<p class="font-semibold">${line}</p>`;
+          if (line.startsWith('**A:')) return `<p>${line}</p>`;
+          if (line.startsWith('- **')) return `<li><strong>${line.slice(4).split('**')[0]}</strong>: ${line.split('**')[2] || ''}</li>`;
+          if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`;
+          if (line.match(/^\d+\./)) return `<li>${line.slice(line.indexOf(' ') + 1)}</li>`;
+          if (line.trim() === '') return '<br />';
+          return `<p>${line}</p>`;
+        }).join('')} />
+      )}
+    </div>
+
+    <!-- YouTube Embed -->
+    {post.youtubeEmbedUrl && (
+      <div class="blog-youtube-embed">
+        <p class="embed-label">Watch the Full Video</p>
+        <div class="embed-wrapper">
+          <iframe
+            src={post.youtubeEmbedUrl}
+            allowfullscreen
+            title="Source video"
+          />
+        </div>
+      </div>
+    )}
+
+    <!-- FAQ Section -->
+    {post.faqs?.length > 0 && (
+      <section class="blog-faq-section">
+        <h2>Frequently Asked Questions</h2>
+        {post.faqs.map((faq) => (
+          <div class="blog-faq-item">
+            <h3>{faq.question}</h3>
+            <p>{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+    )}
+
+    <!-- Tags -->
+    <div class="blog-tags">
+      {post.tags.map(tag => (
+        <span class="tag">#{tag}</span>
+      ))}
+    </div>
+
+    <!-- Back to Blog -->
+    <div style="margin-top: 2rem;">
+      <a
+        href="/blog"
+        class="inline-flex items-center text-primary-600 font-medium hover:text-primary-700"
+        style="text-decoration: none;"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Blog
+      </a>
     </div>
   </article>
 </BaseLayout>

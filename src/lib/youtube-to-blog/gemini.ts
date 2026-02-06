@@ -72,6 +72,7 @@ export async function researchDoctor(apiKey: string, transcript: string, videoTi
   title: string;
   credentials: string;
   bio: string;
+  profileImageUrl?: string;
 } | null> {
   const prompt = `Analyze this YouTube video transcript and identify if a specific doctor or medical professional is featured.
 
@@ -85,8 +86,11 @@ If a doctor/medical professional is clearly identified, respond ONLY with a JSON
   "name": "Dr. Full Name",
   "title": "Their professional title (e.g., Dermatologist, Plastic Surgeon)",
   "credentials": "Their credentials (e.g., MD, Board Certified Dermatologist)",
-  "bio": "A brief 2-3 sentence professional bio based on information from the video"
+  "bio": "A brief 2-3 sentence professional bio based on information from the video",
+  "profileImageUrl": "URL to their public profile photo if findable (hospital website, LinkedIn, conference profile, or null)"
 }
+
+For profileImageUrl: Search for the doctor's public profile photo from their hospital/clinic website, professional directory, or academic profile. Only include if you can find a real, publicly accessible URL. Use null if not found.
 
 If no specific doctor is identified, respond with: null
 

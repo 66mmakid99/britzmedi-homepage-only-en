@@ -73,6 +73,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
         name: post.doctor_name,
         title: post.doctor_title || '',
         credentials: post.doctor_credentials || '',
+        image: post.doctor_image || null,
       } : null,
     });
 
@@ -106,6 +107,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
       doctor_name: post.doctor_name,
       doctor_title: post.doctor_title,
       doctor_credentials: post.doctor_credentials,
+      doctor_image: post.doctor_image,
       doctor_bio: post.doctor_bio,
       published_at: post.published_at || now,
       schema_json_ld: schemaJsonLd,

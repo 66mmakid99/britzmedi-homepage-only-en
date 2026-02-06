@@ -5,6 +5,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { researchDoctor } from '../../../../../../lib/youtube-to-blog/gemini';
+import { uploadToR2, generateImageKey } from '../../../../../../lib/youtube-to-blog/images';
 import { getJob, updateJobStatus, failJob } from '../../../../../../lib/youtube-to-blog/queue';
 import type { BlogPost } from '../../../../../../lib/youtube-to-blog/schemas';
 
@@ -61,12 +62,36 @@ export const POST: APIRoute = async ({ params, locals }) => {
 
     // Update blog post with doctor info if found
     if (doctorInfo) {
+      let doctorImageUrl: string | null = null;
+
+      // Try to download doctor profile photo to R2
+      if (doctorInfo.profileImageUrl) {
+        const r2 = runtime?.env?.BLOG_IMAGES as R2Bucket | undefined;
+        if (r2) {
+          try {
+            const imgRes = await fetch(doctorInfo.profileImageUrl, {
+              headers: { 'User-Agent': 'BRITZMEDI-Blog-Publisher' },
+            });
+            if (imgRes.ok) {
+              const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+              const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
+              const imageKey = generateImageKey(job.blog_post_id, Date.now(), ext);
+              const buffer = await imgRes.arrayBuffer();
+              doctorImageUrl = await uploadToR2(r2, `doctor-${imageKey}`, buffer, contentType);
+            }
+          } catch (err) {
+            console.warn('[Research] Failed to download doctor photo:', err);
+          }
+        }
+      }
+
       await db.prepare(`
         UPDATE blog_posts SET
           doctor_name = ?,
           doctor_title = ?,
           doctor_credentials = ?,
           doctor_bio = ?,
+          doctor_image = ?,
           updated_at = datetime('now')
         WHERE id = ?
       `).bind(
@@ -74,6 +99,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
         doctorInfo.title,
         doctorInfo.credentials,
         doctorInfo.bio,
+        doctorImageUrl,
         job.blog_post_id
       ).run();
     }

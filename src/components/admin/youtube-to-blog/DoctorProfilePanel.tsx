@@ -12,10 +12,13 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
   const [title, setTitle] = useState(post.doctor_title || '');
   const [credentials, setCredentials] = useState(post.doctor_credentials || '');
   const [bio, setBio] = useState(post.doctor_bio || '');
+  const [image, setImage] = useState(post.doctor_image || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [researching, setResearching] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const originalNameRef = useRef(post.doctor_name || '');
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = async () => {
     setSaving(true);
@@ -30,6 +33,7 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
           doctor_title: title || null,
           doctor_credentials: credentials || null,
           doctor_bio: bio || null,
+          doctor_image: image || null,
         }),
       });
 
@@ -67,6 +71,15 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
           setTitle(data.doctor_info.title || '');
           setCredentials(data.doctor_info.credentials || '');
           setBio(data.doctor_info.bio || '');
+          // Refetch post to get doctor_image from R2 download
+          const postRes = await fetch(`/api/blog/posts/${post.id}`);
+          if (postRes.ok) {
+            const postData = await postRes.json();
+            if (postData.post?.doctor_image) {
+              setImage(postData.post.doctor_image);
+            }
+            onUpdate(postData.post);
+          }
         } else {
           alert('No doctor/expert information found in the video content.');
         }
@@ -75,6 +88,51 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
       alert('Research failed. Please try again.');
     } finally {
       setResearching(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPhoto(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('target', 'doctor');
+
+    try {
+      const res = await fetch(`/api/blog/posts/${post.id}/upload-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setImage(data.url);
+        onUpdate({ ...post, doctor_image: data.url });
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Upload failed');
+      }
+    } catch {
+      alert('Network error');
+    } finally {
+      setUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setImage('');
+    try {
+      await fetch(`/api/blog/posts/${post.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ doctor_image: null }),
+      });
+      onUpdate({ ...post, doctor_image: null });
+    } catch {
+      // silent fail for photo removal
     }
   };
 
@@ -110,6 +168,48 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
         <p className="text-sm text-slate-500 mb-4">
           If the video features a medical professional, add their profile for credibility and SEO.
         </p>
+
+        {/* Profile Photo */}
+        <div className="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
+          {image ? (
+            <img
+              src={image}
+              alt={name || 'Doctor'}
+              className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold border-2 border-white shadow-md flex-shrink-0">
+              {name ? name.charAt(0) : '?'}
+            </div>
+          )}
+          <div className="flex-1">
+            <p className="text-sm font-medium text-slate-700 mb-2">Profile Photo</p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="px-3 py-1.5 text-xs font-medium bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors"
+              >
+                {uploadingPhoto ? 'Uploading...' : image ? 'Change Photo' : 'Upload Photo'}
+              </button>
+              {image && (
+                <button
+                  onClick={handleRemovePhoto}
+                  className="px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 transition-colors"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
+        </div>
 
         <div className="space-y-4">
           <div>
@@ -168,10 +268,10 @@ export function DoctorProfilePanel({ post, onUpdate, editor }: DoctorProfilePane
           {saved && <span className="text-sm text-green-600">Saved!</span>}
           {name && (
             <button
-              onClick={() => { setName(''); setTitle(''); setCredentials(''); setBio(''); }}
+              onClick={() => { setName(''); setTitle(''); setCredentials(''); setBio(''); setImage(''); }}
               className="text-sm text-red-500 hover:text-red-700"
             >
-              Clear
+              Clear All
             </button>
           )}
         </div>

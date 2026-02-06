@@ -135,6 +135,7 @@ export function buildBlogPostJson(post: {
   doctor_name: string | null;
   doctor_title: string | null;
   doctor_credentials: string | null;
+  doctor_image: string | null;
   doctor_bio: string | null;
   published_at: string;
   schema_json_ld: string | null;
@@ -158,6 +159,7 @@ export function buildBlogPostJson(post: {
       name: post.doctor_name,
       title: post.doctor_title,
       credentials: post.doctor_credentials,
+      image: post.doctor_image,
       bio: post.doctor_bio,
     } : null,
     schemaJsonLd: post.schema_json_ld ? JSON.parse(post.schema_json_ld) : null,
