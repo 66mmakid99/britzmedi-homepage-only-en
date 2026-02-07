@@ -138,6 +138,22 @@ export const POST: APIRoute = async ({ params, locals }) => {
       id
     ).run();
 
+    // Auto-post to social media (non-blocking)
+    try {
+      const { triggerAutoPost } = await import('../../../../../lib/social/auto-post');
+      await triggerAutoPost({
+        postId: id,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt || '',
+        category: post.category,
+        featuredImage: post.featured_image,
+        doctorName: post.doctor_name,
+      }, { db });
+    } catch (socialError) {
+      console.error('[Publish] Social auto-post error (non-blocking):', socialError);
+    }
+
     return new Response(JSON.stringify({
       success: true,
       message: 'Blog post published! Cloudflare Pages will rebuild automatically.',
