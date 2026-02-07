@@ -45,6 +45,26 @@
     "verified": true,
     "verifiedSource": "manual"
   },
+  "relatedResources": [
+    {
+      "type": "video",
+      "title": "TORR RF Lifting - Dr. Kim Hyung-ju Full Review",
+      "url": "https://www.youtube.com/watch?v=FRC-YV8-sN0",
+      "source": "YouTube"
+    },
+    {
+      "type": "article",
+      "title": "RF Technology in Aesthetic Medicine: How Clinics Maximize ROI",
+      "url": "/blog/rf-technology-aesthetic-medicine",
+      "source": "BRITZMEDI Blog"
+    },
+    {
+      "type": "article",
+      "title": "FDA 510(k) Clearance: The Complete Guide for Distributors",
+      "url": "/blog/fda-510k-clearance-process",
+      "source": "BRITZMEDI Blog"
+    }
+  ],
   "schemaJsonLd": [
     {
       "@context": "https://schema.org",
