@@ -5,27 +5,30 @@ import TldrBox from '../../components/ui/TldrBox.astro';
 export function getStaticPaths() {
   // Load dynamic blog posts from content/blog/*.json
   const dynamicPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
-  const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
-    const data = mod.default || mod;
-    return {
-      slug: data.slug,
-      title: data.title,
-      description: data.excerpt || data.metaDescription || '',
-      tldr: '',
-      author: data.author || 'BRITZMEDI Team',
-      publishedAt: data.publishedAt,
-      updatedAt: data.updatedAt || data.publishedAt,
-      category: data.category || 'medical-devices',
-      tags: data.tags || [],
-      content: data.content || '',
-      faqs: (data.faqs || []) as { question: string; answer: string }[],
-      featuredImage: data.featuredImage || null,
-      youtubeEmbedUrl: data.youtubeEmbedUrl || null,
-      doctor: data.doctor || null,
-      relatedResources: data.relatedResources || [],
-      isDynamic: true,
-    };
-  });
+  const dynamicPosts = Object.values(dynamicPostModules)
+    .map((mod: any) => {
+      const data = mod.default || mod;
+      return {
+        slug: data.slug,
+        title: data.title,
+        description: data.excerpt || data.metaDescription || '',
+        tldr: '',
+        author: data.author || 'BRITZMEDI Team',
+        publishedAt: data.publishedAt,
+        updatedAt: data.updatedAt || data.publishedAt,
+        category: data.category || 'medical-devices',
+        tags: data.tags || [],
+        content: data.content || '',
+        faqs: (data.faqs || []) as { question: string; answer: string }[],
+        featuredImage: data.featuredImage || null,
+        youtubeEmbedUrl: data.youtubeEmbedUrl || null,
+        doctor: data.doctor || null,
+        relatedResources: data.relatedResources || [],
+        isDynamic: true,
+        status: data.status || 'published',
+      };
+    })
+    .filter(post => post.status === 'published');
 
   const posts = [
     {

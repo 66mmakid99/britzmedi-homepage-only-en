@@ -7,19 +7,22 @@ import Pagination from '../../components/blog/Pagination.astro';
 
 // Load dynamic blog posts from content/blog/*.json
 const dynamicPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
-const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
-  const data = mod.default || mod;
-  return {
-    slug: data.slug,
-    title: data.title,
-    description: data.excerpt || data.metaDescription || '',
-    author: data.author || 'BRITZMEDI Team',
-    publishedAt: data.publishedAt,
-    category: data.category || 'medical-devices',
-    tags: data.tags || [],
-    featuredImage: data.featuredImage || null,
-  };
-});
+const dynamicPosts = Object.values(dynamicPostModules)
+  .map((mod: any) => {
+    const data = mod.default || mod;
+    return {
+      slug: data.slug,
+      title: data.title,
+      description: data.excerpt || data.metaDescription || '',
+      author: data.author || 'BRITZMEDI Team',
+      publishedAt: data.publishedAt,
+      category: data.category || 'medical-devices',
+      tags: data.tags || [],
+      featuredImage: data.featuredImage || null,
+      status: data.status || 'published',
+    };
+  })
+  .filter(post => post.status === 'published');
 
 // Static blog posts (original hardcoded posts)
 const staticPosts = [

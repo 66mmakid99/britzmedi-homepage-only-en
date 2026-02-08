@@ -16,6 +16,22 @@ interface BlogPost {
   updated_at: string;
   youtube_url: string | null;
   doctor_name: string | null;
+  source?: 'db' | 'file' | 'static';
+}
+
+interface ManifestPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  tags: string[];
+  status: string;
+  featured_image: string | null;
+  published_at: string | null;
+  updated_at: string | null;
+  author: string;
+  doctor_name: string | null;
+  source: 'file' | 'static';
 }
 
 type StatusFilter = 'all' | 'draft' | 'scheduled' | 'published';
@@ -41,10 +57,73 @@ export default function BlogManagerDashboard() {
       if (statusFilter !== 'all') params.set('status', statusFilter);
       if (search) params.set('search', search);
 
-      const res = await fetch(`/api/admin/blog/posts?${params}`);
-      const data = await res.json();
-      setPosts(data.posts || []);
-      setCounts(data.counts || {});
+      // Fetch D1 posts and file manifest in parallel
+      const [dbRes, manifestRes] = await Promise.all([
+        fetch(`/api/admin/blog/posts?${params}`),
+        fetch('/api/blog-manifest.json'),
+      ]);
+
+      const dbData = await dbRes.json();
+      const dbPosts: BlogPost[] = (dbData.posts || []).map((p: BlogPost) => ({
+        ...p,
+        source: 'db' as const,
+      }));
+
+      let manifestPosts: ManifestPost[] = [];
+      if (manifestRes.ok) {
+        manifestPosts = await manifestRes.json();
+      }
+
+      // Collect slugs from DB posts
+      const dbSlugs = new Set(dbPosts.map(p => p.slug));
+
+      // Convert manifest posts to BlogPost format, excluding duplicates
+      const filePosts: BlogPost[] = manifestPosts
+        .filter(mp => !dbSlugs.has(mp.slug))
+        .filter(mp => {
+          if (statusFilter !== 'all' && mp.status !== statusFilter) return false;
+          if (search && !mp.title.toLowerCase().includes(search.toLowerCase())) return false;
+          return true;
+        })
+        .map(mp => ({
+          id: `file:${mp.slug}`,
+          title: mp.title,
+          slug: mp.slug,
+          excerpt: mp.excerpt,
+          featured_image: mp.featured_image,
+          category: mp.category,
+          tags: Array.isArray(mp.tags) ? mp.tags.join(', ') : null,
+          status: mp.status,
+          scheduled_date: null,
+          published_at: mp.published_at,
+          created_at: mp.published_at || '',
+          updated_at: mp.updated_at || mp.published_at || '',
+          youtube_url: null,
+          doctor_name: mp.doctor_name,
+          source: mp.source,
+        }));
+
+      // Merge and sort by date descending
+      const allPosts = [...dbPosts, ...filePosts].sort(
+        (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+      );
+
+      // Recompute counts including file posts
+      const dbCounts = dbData.counts || {};
+      const fileCountsByStatus: Record<string, number> = {};
+      manifestPosts
+        .filter(mp => !dbSlugs.has(mp.slug))
+        .forEach(mp => {
+          fileCountsByStatus[mp.status] = (fileCountsByStatus[mp.status] || 0) + 1;
+        });
+
+      const mergedCounts: Record<string, number> = { ...dbCounts };
+      for (const [status, count] of Object.entries(fileCountsByStatus)) {
+        mergedCounts[status] = (mergedCounts[status] || 0) + count;
+      }
+
+      setPosts(allPosts);
+      setCounts(mergedCounts);
     } catch (err) {
       console.error('Failed to fetch posts:', err);
     } finally {
@@ -58,14 +137,25 @@ export default function BlogManagerDashboard() {
 
   const handleStatusChange = async (postId: string, status: string, scheduledDate?: string) => {
     try {
-      const body: Record<string, string> = { status };
-      if (scheduledDate) body.scheduled_date = scheduledDate;
+      if (postId.startsWith('file:')) {
+        // File-based post — use GitHub API endpoint
+        const slug = postId.replace('file:', '');
+        await fetch(`/api/admin/blog/file-posts/${slug}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        });
+      } else {
+        // DB post — use existing D1 API
+        const body: Record<string, string> = { status };
+        if (scheduledDate) body.scheduled_date = scheduledDate;
 
-      await fetch(`/api/admin/blog/${postId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+        await fetch(`/api/admin/blog/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+      }
       fetchPosts();
     } catch (err) {
       console.error('Failed to update status:', err);
@@ -73,6 +163,10 @@ export default function BlogManagerDashboard() {
   };
 
   const handleDelete = async (postId: string) => {
+    if (postId.startsWith('file:')) {
+      alert('File-based posts cannot be deleted from the admin. Remove the JSON file from the repository instead.');
+      return;
+    }
     try {
       await fetch(`/api/admin/blog/${postId}`, { method: 'DELETE' });
       fetchPosts();

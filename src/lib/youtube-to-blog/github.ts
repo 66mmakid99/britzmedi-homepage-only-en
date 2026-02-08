@@ -143,6 +143,7 @@ export function buildBlogPostJson(post: {
   return JSON.stringify({
     title: post.title,
     slug: post.slug,
+    status: 'published',
     content: post.content,
     excerpt: post.excerpt,
     metaDescription: post.meta_description,
