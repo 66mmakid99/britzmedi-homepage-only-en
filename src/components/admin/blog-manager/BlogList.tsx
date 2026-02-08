@@ -54,6 +54,7 @@ function getCategoryLabel(category: string): string {
     'product-updates': 'Product Updates',
     'technology': 'Technology',
     'clinical-studies': 'Clinical Studies',
+    'clinical-reviews': 'Clinical Reviews',
     'company-news': 'Company News',
     'education': 'Education',
   };
