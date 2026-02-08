@@ -74,7 +74,7 @@ export const products: Product[] = [
     description: "The core clinical significance of TORR RF lies in its ability to deliver powerful yet safe energy uniformly to the desired depth using low power, preventing surface burns while maximizing deep tissue heating. FDA 510(k) cleared (K212561) and designed for skin tightening, body contouring, and pain relief.",
     
     images: {
-      main: '/images/products/torr-rf/torrrf.webp',
+      main: '/images/products/torr-rf.png',
       logo: '/images/logos/torr-rf-logo.png',
       gallery: [
         '/images/products/torr-rf/torrrf-01.webp',
@@ -193,7 +193,7 @@ export const products: Product[] = [
     description: "The system allows for effective treatment without damaging the skin surface, featuring Dynamic Dual Wave technology for both superficial and deep tissue treatment.",
     
     images: {
-      main: '/images/products/ulblanc/ulblanc-02.webp',
+      main: '/images/products/ulblanc.png',
       gallery: [
         '/images/products/ulblanc/ulblanc-01.webp',
         '/images/products/ulblanc/ulblanc-02.webp',
@@ -283,7 +283,7 @@ export const products: Product[] = [
     description: "Combining RF tightening, EMS contouring, and ELP skin boosting technologies, NEWCHAE SHOT delivers clinical-grade results for home use.",
     
     images: {
-      main: '/images/products/newchae-shot/newchae-01-1.webp',
+      main: '/images/products/newchae-shot.jpg',
       gallery: [
         '/images/products/newchae-shot/newchae-01-1.webp',
         '/images/products/newchae-shot/newchae-01-4.webp',

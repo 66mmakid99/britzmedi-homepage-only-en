@@ -111,7 +111,7 @@ const breadcrumbSchema = {
 
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
         <!-- Product Image -->
-        <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl relative overflow-hidden">
+        <div class="aspect-square bg-[#f8fafc] rounded-2xl relative overflow-hidden">
           {product.images?.main ? (
             <img
               src={product.images.main}
@@ -121,7 +121,7 @@ const breadcrumbSchema = {
               loading="eager"
               fetchpriority="high"
               decoding="async"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-contain"
             />
           ) : (
             <div class="w-full h-full flex items-center justify-center">

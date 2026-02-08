@@ -1,10 +1,12 @@
 {
   "hero": {
-    "backgroundType": "image",
+    "backgroundType": "split",
     "backgroundImage": "/images/hero/herosection_torrrf_modelcut01.webp",
     "backgroundImageAlt": "BRITZMEDI Medical Devices",
     "backgroundVideo": "/videos/hero-bg.mp4",
     "backgroundVideoPoster": "/images/hero/herosection_torrrf_modelcut02.webp",
+    "heroImage": "/images/hero/hero-model.png",
+    "heroImageAlt": "BRITZMEDI aesthetic treatment model",
     "overlayOpacity": 50,
     "overlayColor": "dark",
     "badge": "FDA 510(k) Cleared Medical Devices",

@@ -6,11 +6,13 @@ export interface HeroCTA {
 }
 
 export interface HeroSection {
-  backgroundType: 'gradient' | 'image' | 'video';
+  backgroundType: 'gradient' | 'image' | 'video' | 'split';
   backgroundImage: string;
   backgroundImageAlt: string;
   backgroundVideo: string;
   backgroundVideoPoster: string;
+  heroImage?: string;
+  heroImageAlt?: string;
   overlayOpacity: number; // 0-100
   overlayColor: 'dark' | 'light' | 'primary';
   badge: string;

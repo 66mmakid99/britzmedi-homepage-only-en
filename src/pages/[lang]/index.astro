@@ -51,88 +51,28 @@ const langSeoDescriptions: Record<string, string> = {
   {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
     <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
   )}
+  {config.hero.backgroundType === 'split' && config.hero.heroImage && (
+    <link slot="head" rel="preload" as="image" href={config.hero.heroImage} />
+  )}
   <!-- Hero Section -->
-  <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
-    <!-- Background Layer -->
-    {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
-      <div class="absolute inset-0 z-0">
-        <video
-          autoplay
-          muted
-          loop
-          playsinline
-          poster={config.hero.backgroundVideoPoster}
-          class="w-full h-full object-cover"
-        >
-          <source src={config.hero.backgroundVideo} type="video/mp4" />
-        </video>
-      </div>
-    )}
+  {config.hero.backgroundType === 'split' ? (
+    <!-- Split Layout: Left text on dark bg + Right model image -->
+    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px]">
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700"></div>
 
-    {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
-      <div class="absolute inset-0 z-0">
-        <img
-          src={config.hero.backgroundImage}
-          alt={config.hero.backgroundImageAlt || 'Hero background'}
-          width="1920"
-          height="1080"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-          class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
-        />
-      </div>
-    )}
-
-    {config.hero.backgroundType === 'gradient' && (
-      <div class="absolute inset-0 z-0 bg-gradient-hero">
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
-        <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
-      </div>
-    )}
-
-    <!-- Overlay -->
-    {config.hero.backgroundType !== 'gradient' && (
-      <div
-        class:list={[
-          "absolute inset-0 z-10",
-          config.hero.overlayColor === 'dark' && "bg-slate-900",
-          config.hero.overlayColor === 'light' && "bg-white",
-          config.hero.overlayColor === 'primary' && "bg-primary-900"
-        ]}
-        style={`opacity: ${config.hero.overlayOpacity / 100}`}
-      />
-    )}
-
-    <!-- Content -->
-    <div class="container relative z-20">
-      <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <div class="order-2 lg:order-1">
-            <div class:list={[
-              "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
-              config.hero.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
-            ]}>
+      <div class="container relative z-10">
+        <div class="grid lg:grid-cols-2 gap-0 lg:gap-8 items-center min-h-[600px] lg:min-h-[700px]">
+          <div class="py-16 sm:py-20 lg:py-28 xl:py-32 order-2 lg:order-1">
+            <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
               {config.hero.badge}
             </div>
 
-            <h1 class:list={[
-              "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
-              config.hero.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
-            ]}>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1 !text-white drop-shadow-lg">
               {t('home.hero.title')}<br />
-              <span class:list={[
-                config.hero.backgroundType === 'gradient'
-                  ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
-                  : "text-primary-400"
-              ]}>BRITZMEDI</span>
+              <span class="text-primary-400">BRITZMEDI</span>
             </h1>
 
-            <p class:list={[
-              "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
-              config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
-            ]}>
+            <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
               {t('home.hero.subtitle')}
             </p>
 
@@ -143,25 +83,142 @@ const langSeoDescriptions: Record<string, string> = {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </a>
-              <a href={`/${lang}/contact`} class:list={[
-                "btn-secondary justify-center sm:justify-start",
-                config.hero.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
-              ]}>
+              <a href={`/${lang}/contact`} class="btn-secondary justify-center sm:justify-start !bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm">
                 {t('home.hero.ctaSecondary')}
               </a>
             </div>
           </div>
 
-          <div class="order-1 lg:order-2 hidden lg:block"></div>
+          <div class="order-1 lg:order-2 relative h-[300px] sm:h-[400px] lg:h-full lg:absolute lg:right-0 lg:top-0 lg:bottom-0 lg:w-1/2">
+            {config.hero.heroImage && (
+              <img
+                src={config.hero.heroImage}
+                alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+                width="1076"
+                height="1920"
+                fetchpriority="high"
+                loading="eager"
+                decoding="async"
+                class="w-full h-full object-cover object-top"
+              />
+            )}
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent lg:hidden"></div>
+            <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.8) 25%, rgb(15 23 42 / 0.3) 50%, transparent 70%)"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class:list={[
-      "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
-      config.hero.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
-    ]}></div>
-  </section>
+      <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/10 to-transparent z-20"></div>
+    </section>
+  ) : (
+    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+      {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
+        <div class="absolute inset-0 z-0">
+          <video
+            autoplay
+            muted
+            loop
+            playsinline
+            poster={config.hero.backgroundVideoPoster}
+            class="w-full h-full object-cover"
+          >
+            <source src={config.hero.backgroundVideo} type="video/mp4" />
+          </video>
+        </div>
+      )}
+
+      {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
+        <div class="absolute inset-0 z-0">
+          <img
+            src={config.hero.backgroundImage}
+            alt={config.hero.backgroundImageAlt || 'Hero background'}
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
+          />
+        </div>
+      )}
+
+      {config.hero.backgroundType === 'gradient' && (
+        <div class="absolute inset-0 z-0 bg-gradient-hero">
+          <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
+          <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
+        </div>
+      )}
+
+      {config.hero.backgroundType !== 'gradient' && (
+        <div
+          class:list={[
+            "absolute inset-0 z-10",
+            config.hero.overlayColor === 'dark' && "bg-slate-900",
+            config.hero.overlayColor === 'light' && "bg-white",
+            config.hero.overlayColor === 'primary' && "bg-primary-900"
+          ]}
+          style={`opacity: ${config.hero.overlayOpacity / 100}`}
+        />
+      )}
+
+      <div class="container relative z-20">
+        <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
+          <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div class="order-2 lg:order-1">
+              <div class:list={[
+                "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
+                config.hero.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
+              ]}>
+                {config.hero.badge}
+              </div>
+
+              <h1 class:list={[
+                "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
+                config.hero.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
+              ]}>
+                {t('home.hero.title')}<br />
+                <span class:list={[
+                  config.hero.backgroundType === 'gradient'
+                    ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
+                    : "text-primary-400"
+                ]}>BRITZMEDI</span>
+              </h1>
+
+              <p class:list={[
+                "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
+                config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
+              ]}>
+                {t('home.hero.subtitle')}
+              </p>
+
+              <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
+                <a href={`/${lang}/products`} class="btn-primary group justify-center sm:justify-start">
+                  {t('home.hero.cta')}
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
+                <a href={`/${lang}/contact`} class:list={[
+                  "btn-secondary justify-center sm:justify-start",
+                  config.hero.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
+                ]}>
+                  {t('home.hero.ctaSecondary')}
+                </a>
+              </div>
+            </div>
+
+            <div class="order-1 lg:order-2 hidden lg:block"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class:list={[
+        "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
+        config.hero.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
+      ]}></div>
+    </section>
+  )}
 
   <!-- Trust Badges Section -->
   <section class="py-16 lg:py-20 bg-white relative">
@@ -188,13 +245,13 @@ const langSeoDescriptions: Record<string, string> = {
         <h2 class="heading-2 mb-5">{t('home.products.subtitle')}</h2>
       </div>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {featuredProducts.map((product) => (
           <a
             href={`/${lang}/products/${product.id}`}
-            class="group card-premium p-6 lg:p-7"
+            class="group card-premium p-5 sm:p-6 lg:p-7"
           >
-            <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-xl mb-6 relative overflow-hidden">
+            <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-6 relative overflow-hidden" data-product={product.id}>
               {product.images?.main ? (
                 <img
                   src={product.images.main}
@@ -203,13 +260,25 @@ const langSeoDescriptions: Record<string, string> = {
                   height="600"
                   loading="lazy"
                   decoding="async"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 product-img"
                 />
-              ) : (
-                <div class="w-full h-full flex items-center justify-center">
-                  <span class="text-5xl font-light text-slate-300 group-hover:text-primary-300 transition-colors">{product.name.charAt(0)}</span>
-                </div>
-              )}
+              ) : null}
+              <div class:list={[
+                "product-fallback absolute inset-0 flex flex-col items-center justify-center gap-2",
+                product.images?.main ? "hidden" : "",
+                product.id === 'torr-rf' && "bg-gradient-to-br from-slate-800 to-blue-900",
+                product.id === 'ulblanc' && "bg-gradient-to-br from-sky-100 to-white",
+                product.id === 'newchae-shot' && "bg-gradient-to-br from-pink-100 to-white",
+                product.id === 'lumino-wave' && "bg-gradient-to-br from-slate-200 to-slate-100"
+              ]}>
+                <span class:list={[
+                  "text-2xl sm:text-3xl font-bold",
+                  product.id === 'torr-rf' ? "text-white" : "text-slate-500"
+                ]}>{product.name}</span>
+                {product.status === 'coming-soon' && (
+                  <span class="text-sm text-slate-400">Coming Soon</span>
+                )}
+              </div>
             </div>
 
             {product.featured && (
@@ -282,4 +351,14 @@ const langSeoDescriptions: Record<string, string> = {
       </div>
     </div>
   </section>
+
+  <script>
+    document.querySelectorAll('.product-img').forEach((img) => {
+      img.addEventListener('error', () => {
+        img.style.display = 'none';
+        const fallback = img.closest('[data-product]')?.querySelector('.product-fallback');
+        if (fallback) fallback.classList.remove('hidden');
+      });
+    });
+  </script>
 </BaseLayout>

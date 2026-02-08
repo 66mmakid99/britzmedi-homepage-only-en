@@ -25,6 +25,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
     <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
   )}
+  {config.hero.backgroundType === 'split' && config.hero.heroImage && (
+    <link slot="head" rel="preload" as="image" href={config.hero.heroImage} />
+  )}
   <!-- WebSite Schema -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
@@ -41,96 +44,31 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
     "inLanguage": ["en", "ja", "zh", "th", "vi", "es", "fr", "ru", "ar"]
   })} />
 
-  <!-- Hero Section with Video/Image/Gradient Background Support -->
-  <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
-    <!-- Background Layer -->
-    {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
-      <div class="absolute inset-0 z-0">
-        <video
-          autoplay
-          muted
-          loop
-          playsinline
-          poster={config.hero.backgroundVideoPoster}
-          class="w-full h-full object-cover"
-        >
-          <source src={config.hero.backgroundVideo} type="video/mp4" />
-        </video>
-      </div>
-    )}
+  <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
+  {config.hero.backgroundType === 'split' ? (
+    <!-- Split Layout: Left text on dark bg + Right model image -->
+    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px]">
+      <!-- Background -->
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700"></div>
 
-    {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
-      <div class="absolute inset-0 z-0">
-        <img
-          src={config.hero.backgroundImage}
-          alt={config.hero.backgroundImageAlt || 'Hero background'}
-          width="1920"
-          height="1080"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-          class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
-        />
-      </div>
-    )}
-
-    {config.hero.backgroundType === 'gradient' && (
-      <div class="absolute inset-0 z-0 bg-gradient-hero">
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
-        <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
-      </div>
-    )}
-
-    <!-- Overlay (for image/video backgrounds) -->
-    {config.hero.backgroundType !== 'gradient' && (
-      <div
-        class:list={[
-          "absolute inset-0 z-10",
-          config.hero.overlayColor === 'dark' && "bg-slate-900",
-          config.hero.overlayColor === 'light' && "bg-white",
-          config.hero.overlayColor === 'primary' && "bg-primary-900"
-        ]}
-        style={`opacity: ${config.hero.overlayOpacity / 100}`}
-      />
-    )}
-
-    <!-- Content -->
-    <div class="container relative z-20">
-      <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <div class="order-2 lg:order-1">
-            <!-- Premium Badge -->
-            <div class:list={[
-              "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
-              config.hero.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
-            ]}>
+      <div class="container relative z-10">
+        <div class="grid lg:grid-cols-2 gap-0 lg:gap-8 items-center min-h-[600px] lg:min-h-[700px]">
+          <!-- Left: Text Content -->
+          <div class="py-16 sm:py-20 lg:py-28 xl:py-32 order-2 lg:order-1">
+            <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
               {config.hero.badge}
             </div>
 
-            <!-- Heading -->
-            <h1 class:list={[
-              "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
-              config.hero.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
-            ]}>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1 !text-white drop-shadow-lg">
               {config.hero.headline}<br />
-              <span class:list={[
-                config.hero.backgroundType === 'gradient'
-                  ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
-                  : "text-primary-400"
-              ]}>{config.hero.highlightText}</span><br />
+              <span class="text-primary-400">{config.hero.highlightText}</span><br />
               {config.hero.subheadline}
             </h1>
 
-            <!-- Description -->
-            <p class:list={[
-              "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
-              config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
-            ]}>
+            <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
               {config.hero.description}
             </p>
 
-            <!-- CTAs -->
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
               <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
                 {config.hero.primaryCTA.text}
@@ -138,26 +76,154 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </a>
-              <a href={config.hero.secondaryCTA.href} class:list={[
-                "btn-secondary justify-center sm:justify-start",
-                config.hero.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
-              ]}>
+              <a href={config.hero.secondaryCTA.href} class="btn-secondary justify-center sm:justify-start !bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm">
                 {config.hero.secondaryCTA.text}
               </a>
             </div>
           </div>
 
-          <div class="order-1 lg:order-2 hidden lg:block"></div>
+          <!-- Right: Model Image -->
+          <div class="order-1 lg:order-2 relative h-[300px] sm:h-[400px] lg:h-full lg:absolute lg:right-0 lg:top-0 lg:bottom-0 lg:w-1/2">
+            {config.hero.heroImage && (
+              <img
+                src={config.hero.heroImage}
+                alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+                width="1076"
+                height="1920"
+                fetchpriority="high"
+                loading="eager"
+                decoding="async"
+                class="w-full h-full object-cover object-top"
+              />
+            )}
+            <!-- Gradient overlay for smooth blending -->
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent lg:hidden"></div>
+            <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.8) 25%, rgb(15 23 42 / 0.3) 50%, transparent 70%)"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Bottom gradient fade -->
-    <div class:list={[
-      "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
-      config.hero.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
-    ]}></div>
-  </section>
+      <!-- Bottom gradient fade -->
+      <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/10 to-transparent z-20"></div>
+    </section>
+  ) : (
+    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+      <!-- Background Layer -->
+      {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
+        <div class="absolute inset-0 z-0">
+          <video
+            autoplay
+            muted
+            loop
+            playsinline
+            poster={config.hero.backgroundVideoPoster}
+            class="w-full h-full object-cover"
+          >
+            <source src={config.hero.backgroundVideo} type="video/mp4" />
+          </video>
+        </div>
+      )}
+
+      {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
+        <div class="absolute inset-0 z-0">
+          <img
+            src={config.hero.backgroundImage}
+            alt={config.hero.backgroundImageAlt || 'Hero background'}
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
+          />
+        </div>
+      )}
+
+      {config.hero.backgroundType === 'gradient' && (
+        <div class="absolute inset-0 z-0 bg-gradient-hero">
+          <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
+          <div class="absolute top-1/2 -left-20 w-60 h-60 bg-primary-500/5 rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl"></div>
+        </div>
+      )}
+
+      <!-- Overlay (for image/video backgrounds) -->
+      {config.hero.backgroundType !== 'gradient' && (
+        <div
+          class:list={[
+            "absolute inset-0 z-10",
+            config.hero.overlayColor === 'dark' && "bg-slate-900",
+            config.hero.overlayColor === 'light' && "bg-white",
+            config.hero.overlayColor === 'primary' && "bg-primary-900"
+          ]}
+          style={`opacity: ${config.hero.overlayOpacity / 100}`}
+        />
+      )}
+
+      <!-- Content -->
+      <div class="container relative z-20">
+        <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
+          <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div class="order-2 lg:order-1">
+              <!-- Premium Badge -->
+              <div class:list={[
+                "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
+                config.hero.backgroundType !== 'gradient' && "!bg-white/20 !border-white/30 !text-white backdrop-blur-sm"
+              ]}>
+                {config.hero.badge}
+              </div>
+
+              <!-- Heading -->
+              <h1 class:list={[
+                "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1",
+                config.hero.backgroundType !== 'gradient' && "!text-white drop-shadow-lg"
+              ]}>
+                {config.hero.headline}<br />
+                <span class:list={[
+                  config.hero.backgroundType === 'gradient'
+                    ? "bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent"
+                    : "text-primary-400"
+                ]}>{config.hero.highlightText}</span><br />
+                {config.hero.subheadline}
+              </h1>
+
+              <!-- Description -->
+              <p class:list={[
+                "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
+                config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
+              ]}>
+                {config.hero.description}
+              </p>
+
+              <!-- CTAs -->
+              <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
+                <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
+                  {config.hero.primaryCTA.text}
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
+                <a href={config.hero.secondaryCTA.href} class:list={[
+                  "btn-secondary justify-center sm:justify-start",
+                  config.hero.backgroundType !== 'gradient' && "!bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm"
+                ]}>
+                  {config.hero.secondaryCTA.text}
+                </a>
+              </div>
+            </div>
+
+            <div class="order-1 lg:order-2 hidden lg:block"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom gradient fade -->
+      <div class:list={[
+        "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t z-20",
+        config.hero.backgroundType === 'gradient' ? "from-white to-transparent" : "from-slate-900/50 to-transparent"
+      ]}></div>
+    </section>
+  )}
 
   <!-- Trust Badges Section -->
   <section class="py-16 lg:py-20 bg-white relative">
@@ -189,14 +255,14 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
       </div>
 
       <!-- Products Grid -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {featuredProducts.map((product, index) => (
           <a
             href={`/products/${product.id}`}
-            class="group card-premium p-6 lg:p-7"
+            class="group card-premium p-5 sm:p-6 lg:p-7"
           >
             <!-- Product Image -->
-            <div class="aspect-[4/3] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 rounded-xl mb-6 relative overflow-hidden">
+            <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-6 relative overflow-hidden" data-product={product.id}>
               {product.images?.main ? (
                 <img
                   src={product.images.main}
@@ -205,13 +271,26 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
                   height="600"
                   loading="lazy"
                   decoding="async"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 product-img"
                 />
-              ) : (
-                <div class="w-full h-full flex items-center justify-center">
-                  <span class="text-5xl font-light text-slate-300 group-hover:text-primary-300 transition-colors">{product.name.charAt(0)}</span>
-                </div>
-              )}
+              ) : null}
+              <!-- Fallback (shown when no image or image fails to load) -->
+              <div class:list={[
+                "product-fallback absolute inset-0 flex flex-col items-center justify-center gap-2",
+                product.images?.main ? "hidden" : "",
+                product.id === 'torr-rf' && "bg-gradient-to-br from-slate-800 to-blue-900",
+                product.id === 'ulblanc' && "bg-gradient-to-br from-sky-100 to-white",
+                product.id === 'newchae-shot' && "bg-gradient-to-br from-pink-100 to-white",
+                product.id === 'lumino-wave' && "bg-gradient-to-br from-slate-200 to-slate-100"
+              ]}>
+                <span class:list={[
+                  "text-2xl sm:text-3xl font-bold",
+                  product.id === 'torr-rf' ? "text-white" : "text-slate-500"
+                ]}>{product.name}</span>
+                {product.status === 'coming-soon' && (
+                  <span class="text-sm text-slate-400">Coming Soon</span>
+                )}
+              </div>
               <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
 
@@ -306,20 +385,20 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
         <!-- Stats Card -->
         <div class="relative">
           <div class="absolute -inset-4 bg-gradient-to-br from-primary-500/5 to-accent-500/5 rounded-3xl blur-2xl"></div>
-          <div class="relative bg-white rounded-2xl border border-slate-200/80 p-8 lg:p-10 shadow-xl shadow-slate-200/50">
-            <h3 class="text-lg font-bold text-slate-900 mb-8">{config.whyBritzMedi.statsTitle}</h3>
+          <div class="relative bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-8 lg:p-10 shadow-xl shadow-slate-200/50">
+            <h3 class="text-lg font-bold text-slate-900 mb-6 sm:mb-8">{config.whyBritzMedi.statsTitle}</h3>
 
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
               {config.whyBritzMedi.stats.map((stat, i) => (
-                <div class:list={["flex items-center justify-between", i < config.whyBritzMedi.stats.length - 1 && "pb-6 border-b border-slate-100"]}>
-                  <span class="text-slate-600">{stat.label}</span>
+                <div class:list={["flex items-center justify-between gap-4", i < config.whyBritzMedi.stats.length - 1 && "pb-4 sm:pb-6 border-b border-slate-100"]}>
+                  <span class="text-sm sm:text-base text-slate-600">{stat.label}</span>
                   {stat.type === 'badge' ? (
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-full border border-green-200/50">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-full border border-green-200/50 shrink-0">
                       <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                       {stat.badgeText || stat.value}
                     </span>
                   ) : (
-                    <span class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">{stat.value}</span>
+                    <span class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent shrink-0">{stat.value}</span>
                   )}
                 </div>
               ))}
@@ -350,7 +429,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
         </p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
         {coreTechnologies.map((tech, index) => (
           <div class="card-premium p-7 lg:p-8 group">
             <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 rounded-2xl flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -415,4 +494,15 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
       </div>
     </div>
   </section>
+
+  <!-- Product image fallback script -->
+  <script>
+    document.querySelectorAll('.product-img').forEach((img) => {
+      img.addEventListener('error', () => {
+        img.style.display = 'none';
+        const fallback = img.closest('[data-product]')?.querySelector('.product-fallback');
+        if (fallback) fallback.classList.remove('hidden');
+      });
+    });
+  </script>
 </BaseLayout>
