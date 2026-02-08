@@ -1,0 +1,100 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  categoryLabel: string;
+  publishedAt: string;
+  featuredImage?: string | null;
+  dateLocale?: string;
+  readMoreText?: string;
+  basePath?: string;
+  staggerIndex?: number;
+}
+
+const {
+  slug,
+  title,
+  description,
+  category,
+  categoryLabel,
+  publishedAt,
+  featuredImage,
+  dateLocale = 'en-US',
+  readMoreText = 'Read More',
+  basePath = '/blog',
+  staggerIndex = 0,
+} = Astro.props;
+
+const categoryPlaceholders: Record<string, string> = {
+  'technology': '/images/blog/placeholder-technology.svg',
+  'clinical-studies': '/images/blog/placeholder-clinical-studies.svg',
+  'industry-news': '/images/blog/placeholder-industry-news.svg',
+  'product-updates': '/images/blog/placeholder-product-updates.svg',
+  'education': '/images/blog/placeholder-education.svg',
+};
+const placeholderSrc = categoryPlaceholders[category] || '/images/blog/placeholder-default.svg';
+const imageSrc = featuredImage || placeholderSrc;
+
+const categoryColors: Record<string, string> = {
+  'technology': 'bg-blue-100/90 text-blue-700',
+  'clinical-studies': 'bg-green-100/90 text-green-700',
+  'industry-news': 'bg-orange-100/90 text-orange-700',
+  'product-updates': 'bg-amber-100/90 text-amber-700',
+  'education': 'bg-purple-100/90 text-purple-700',
+  'medical-devices': 'bg-slate-100/90 text-slate-700',
+};
+const badgeColor = categoryColors[category] || 'bg-slate-100/90 text-slate-600';
+
+const formattedDate = new Date(publishedAt).toLocaleDateString(dateLocale, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+const staggerClass = staggerIndex > 0 ? `stagger-${Math.min(staggerIndex, 4)}` : '';
+---
+
+<article
+  class:list={['card-premium overflow-hidden group opacity-0 animate-fade-up', staggerClass]}
+  data-category={category}
+>
+  <a href={`${basePath}/${slug}`} class="block">
+    <div class="aspect-video relative overflow-hidden bg-slate-100">
+      <img
+        src={imageSrc}
+        alt={title}
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+      />
+      <!-- Blue gradient overlay on hover -->
+      <div class="absolute inset-0 bg-gradient-to-t from-primary-600/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <span class:list={['absolute top-3 left-3 text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-sm', badgeColor]}>
+        {categoryLabel}
+      </span>
+    </div>
+  </a>
+  <div class="p-5 flex flex-col flex-1">
+    <div class="flex items-center gap-2 mb-2">
+      <time datetime={publishedAt} class="text-xs font-medium uppercase tracking-wide text-slate-500">
+        {formattedDate}
+      </time>
+    </div>
+    <h3 class="heading-3 text-lg mb-2 group-hover:text-primary-600 transition-colors duration-300 line-clamp-2">
+      <a href={`${basePath}/${slug}`}>
+        {title}
+      </a>
+    </h3>
+    <p class="body-small line-clamp-2 mb-4 flex-1">{description}</p>
+    <a
+      href={`${basePath}/${slug}`}
+      class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 link-underline self-start"
+    >
+      {readMoreText}
+      <svg class="w-4 h-4 ml-1.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </a>
+  </div>
+</article>

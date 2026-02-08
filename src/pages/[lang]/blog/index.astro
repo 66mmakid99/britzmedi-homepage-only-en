@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogHero from '../../../components/blog/BlogHero.astro';
+import BlogCard from '../../../components/blog/BlogCard.astro';
+import CategoryFilter from '../../../components/blog/CategoryFilter.astro';
+import Pagination from '../../../components/blog/Pagination.astro';
 import { supportedLanguages, defaultLang, type Language } from '../../../i18n/config';
 import { useTranslations } from '../../../i18n';
 
@@ -43,13 +47,11 @@ const dynamicPosts = Object.values(dynamicPostModules).map((mod: any) => {
     slug: data.slug,
     title: data.title,
     description: data.excerpt || data.metaDescription || '',
-    tldr: '',
     author: data.author || 'BRITZMEDI Team',
     publishedAt: data.publishedAt,
     category: data.category || 'medical-devices',
     tags: data.tags || [],
     featuredImage: data.featuredImage || null,
-    featured: false,
   };
 });
 
@@ -59,44 +61,44 @@ const staticPosts = [
     slug: 'fda-510k-clearance-process',
     title: 'FDA 510(k) Clearance: The Complete Guide for Medical Device Distributors',
     description: 'Everything distributors need to know about FDA 510(k) clearance — from process steps and costs to why it matters for your business. Includes BRITZMEDI TORR RF case study.',
-    tldr: '',
     author: 'BRITZMEDI Team',
     publishedAt: '2025-12-15',
     category: 'education',
     tags: ['FDA', '510(k)', 'Regulatory Compliance'],
     featuredImage: '/images/blog/fda-510k.jpg',
-    featured: true,
   },
   {
     slug: 'rf-technology-aesthetic-medicine',
     title: 'RF Technology in Aesthetic Medicine: How Clinics Maximize ROI with Radiofrequency Devices',
     description: 'A comprehensive guide to RF technology for clinic owners and device buyers.',
-    tldr: '',
     author: 'BRITZMEDI Team',
     publishedAt: '2025-11-28',
     category: 'technology',
     tags: ['RF Technology', 'Aesthetic Medicine', 'TORR RF'],
     featuredImage: '/images/blog/rf-technology.jpg',
-    featured: true,
   },
   {
     slug: 'korean-beauty-device-market',
     title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
     description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry.',
-    tldr: '',
     author: 'BRITZMEDI Team',
     publishedAt: '2025-10-20',
     category: 'industry-news',
     tags: ['Korean Medical Devices', 'K-Beauty', 'Distribution Partnership'],
     featuredImage: '/images/blog/korean-market.jpg',
-    featured: true,
   },
 ];
 
-// Merge static and dynamic posts, sort by date
-const blogPosts = [...staticPosts, ...dynamicPosts].sort(
+// Merge and sort
+const allPosts = [...staticPosts, ...dynamicPosts].sort(
   (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
 );
+
+const POSTS_PER_PAGE = 9;
+const heroPost = allPosts[0];
+const remainingPosts = allPosts.slice(1);
+const totalGridPages = Math.ceil(remainingPosts.length / POSTS_PER_PAGE);
+const paginatedPosts = remainingPosts.slice(0, POSTS_PER_PAGE);
 
 const categories = [
   { value: 'all', label: t('blog.categories.all') },
@@ -130,7 +132,7 @@ const blogListSchema = {
       'url': 'https://britzmedi.com/images/logos/britzmedi-logo.png'
     }
   },
-  'blogPost': blogPosts.map(post => ({
+  'blogPost': allPosts.map(post => ({
     '@type': 'BlogPosting',
     'headline': getPostTitle(post.slug, post.title),
     'description': getPostDescription(post.slug, post.description),
@@ -142,6 +144,32 @@ const blogListSchema = {
     'url': `https://britzmedi.com/${lang}/blog/${post.slug}`
   }))
 };
+
+// Translated filter label
+const filterLabelMap: Record<string, string> = {
+  ja: '\u30c8\u30d4\u30c3\u30af\u3067\u7d5e\u308a\u8fbc\u307f',
+  zh: '\u6309\u4e3b\u9898\u7b5b\u9009',
+  th: '\u0e01\u0e23\u0e2d\u0e07\u0e15\u0e32\u0e21\u0e2b\u0e31\u0e27\u0e02\u0e49\u0e2d',
+  vi: 'L\u1ecdc theo ch\u1ee7 \u0111\u1ec1',
+  es: 'Filtrar por tema',
+  fr: 'Filtrer par sujet',
+  ru: '\u0424\u0438\u043b\u044c\u0442\u0440 \u043f\u043e \u0442\u0435\u043c\u0435',
+  ar: '\u062a\u0635\u0641\u064a\u0629 \u062d\u0633\u0628 \u0627\u0644\u0645\u0648\u0636\u0648\u0639',
+};
+const filterLabel = filterLabelMap[lang] || 'Filter by topic';
+
+// Translated "More Articles" label
+const moreArticlesMap: Record<string, string> = {
+  ja: '\u305d\u306e\u4ed6\u306e\u8a18\u4e8b',
+  zh: '\u66f4\u591a\u6587\u7ae0',
+  th: '\u0e1a\u0e17\u0e04\u0e27\u0e32\u0e21\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21',
+  vi: 'Th\u00eam b\u00e0i vi\u1ebft',
+  es: 'M\u00e1s art\u00edculos',
+  fr: 'Plus d\'articles',
+  ru: '\u0411\u043e\u043b\u044c\u0448\u0435 \u0441\u0442\u0430\u0442\u0435\u0439',
+  ar: '\u0645\u0632\u064a\u062f \u0645\u0646 \u0627\u0644\u0645\u0642\u0627\u0644\u0627\u062a',
+};
+const moreArticlesLabel = moreArticlesMap[lang] || 'More Articles';
 ---
 
 <BaseLayout
@@ -149,122 +177,82 @@ const blogListSchema = {
   description={t('blog.subtitle')}
   keywords={['medical device blog', 'RF technology insights', 'aesthetic medicine trends', 'FDA clearance process', 'K-beauty devices', 'TORR RF updates', 'medical device industry']}
 >
-  <!-- JSON-LD Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify(blogListSchema)} />
 
   <!-- Hero Section -->
-  <section class="bg-gradient-hero py-16 lg:py-24">
-    <div class="container">
+  <section class="relative overflow-hidden bg-gradient-hero py-20 lg:py-28">
+    <!-- Decorative blurred orbs -->
+    <div class="absolute top-0 right-0 w-72 h-72 bg-primary-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary-600/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3"></div>
+
+    <div class="container relative">
       <div class="max-w-3xl">
-        <span class="label mb-4">{t('blog.heroLabel')}</span>
-        <h1 class="heading-1 mb-6">
+        <span class="badge-premium mb-4 opacity-0 animate-fade-up">{t('blog.heroLabel')}</span>
+        <h1 class="heading-1 mb-6 opacity-0 animate-fade-up stagger-1">
           {t('blog.heroTitle')}
         </h1>
-        <p class="body-large max-w-2xl">
+        <p class="body-large max-w-2xl opacity-0 animate-fade-up stagger-2">
           {t('blog.heroDescription')}
         </p>
       </div>
     </div>
   </section>
 
-  <!-- Blog Posts -->
   <section class="section">
     <div class="container">
-      <!-- Category Filter -->
-      <div class="flex flex-wrap gap-2 mb-12">
-        {categories.map((cat) => (
-          <button
-            data-category={cat.value}
-            class:list={[
-              'px-4 py-2 rounded-full text-sm font-medium transition-all',
-              cat.value === 'all'
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            ]}
-          >
-            {cat.label}
-          </button>
+      <CategoryFilter categories={categories} filterLabel={filterLabel} />
+
+      {/* Hero Card - Latest Post */}
+      {heroPost && (
+        <div class="mb-12" id="blog-hero-card" data-hero-category={heroPost.category}>
+          <BlogHero
+            slug={heroPost.slug}
+            title={getPostTitle(heroPost.slug, heroPost.title)}
+            description={getPostDescription(heroPost.slug, heroPost.description)}
+            category={heroPost.category}
+            categoryLabel={getCategoryLabel(heroPost.category)}
+            publishedAt={heroPost.publishedAt}
+            featuredImage={heroPost.featuredImage}
+            dateLocale={dateLocale}
+            readMoreText={t('blog.readMore')}
+            basePath={`/${lang}/blog`}
+          />
+        </div>
+      )}
+
+      {/* More Articles section label */}
+      <div class="flex items-center gap-3 mb-8">
+        <span class="text-sm font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{moreArticlesLabel}</span>
+        <div class="divider-gradient flex-1"></div>
+      </div>
+
+      {/* Post Grid */}
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {paginatedPosts.map((post, index) => (
+          <BlogCard
+            slug={post.slug}
+            title={getPostTitle(post.slug, post.title)}
+            description={getPostDescription(post.slug, post.description)}
+            category={post.category}
+            categoryLabel={getCategoryLabel(post.category)}
+            publishedAt={post.publishedAt}
+            featuredImage={post.featuredImage}
+            dateLocale={dateLocale}
+            readMoreText={t('blog.readMore')}
+            basePath={`/${lang}/blog`}
+            staggerIndex={index % 3}
+          />
         ))}
       </div>
 
-      <!-- Featured Posts -->
-      <div class="mb-16">
-        <h2 class="heading-3 mb-8">{t('blog.featuredArticles')}</h2>
-        <div class="grid md:grid-cols-2 gap-8">
-          {blogPosts.filter(p => p.featured).map((post) => (
-            <article class="card-premium overflow-hidden group">
-              <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <span class="absolute top-4 left-4 badge-premium">{t('blog.featured')}</span>
-              </div>
-              <div class="p-6">
-                <div class="flex items-center gap-3 mb-3 text-sm text-slate-500">
-                  <span class="capitalize">{getCategoryLabel(post.category)}</span>
-                  <span>&bull;</span>
-                  <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })}</time>
-                </div>
-                <h3 class="heading-3 mb-3 group-hover:text-primary-600 transition-colors">
-                  <a href={`/${lang}/blog/${post.slug}`} class="hover:underline">
-                    {getPostTitle(post.slug, post.title)}
-                  </a>
-                </h3>
-                <p class="body-base mb-4 line-clamp-2">{getPostDescription(post.slug, post.description)}</p>
-                <div class="flex flex-wrap gap-2">
-                  {post.tags.slice(0, 3).map(tag => (
-                    <span class="text-xs px-2.5 py-1 bg-slate-100 rounded-full text-slate-600">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <!-- All Posts -->
-      <div>
-        <h2 class="heading-3 mb-8">{t('blog.allArticles')}</h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogPosts.map((post) => (
-            <article class="card-premium overflow-hidden group" data-category={post.category}>
-              <div class="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 relative">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
-              <div class="p-5">
-                <div class="flex items-center gap-3 mb-2 text-sm text-slate-500">
-                  <span class="capitalize">{getCategoryLabel(post.category)}</span>
-                  <span>&bull;</span>
-                  <time datetime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}</time>
-                </div>
-                <h3 class="text-lg font-semibold mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
-                  <a href={`/${lang}/blog/${post.slug}`} class="hover:underline">
-                    {getPostTitle(post.slug, post.title)}
-                  </a>
-                </h3>
-                <p class="body-small line-clamp-2 mb-3">{getPostDescription(post.slug, post.description)}</p>
-                <a
-                  href={`/${lang}/blog/${post.slug}`}
-                  class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"
-                >
-                  {t('blog.readMore')}
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
+      <Pagination
+        currentPage={1}
+        totalPages={totalGridPages}
+        basePath={`/${lang}/blog`}
+        previousText={t('blog.pagination.previous')}
+        nextText={t('blog.pagination.next')}
+        pageText={t('blog.pagination.page')}
+      />
     </div>
   </section>
 </BaseLayout>

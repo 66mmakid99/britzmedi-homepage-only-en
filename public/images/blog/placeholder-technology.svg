@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#EFF6FF"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#techGrad)" opacity="0.3"/>
+  <defs>
+    <linearGradient id="techGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <!-- Circuit pattern -->
+  <g stroke="#93C5FD" stroke-width="1.5" opacity="0.5">
+    <line x1="80" y1="60" x2="200" y2="60"/>
+    <line x1="200" y1="60" x2="200" y2="112"/>
+    <line x1="200" y1="112" x2="320" y2="112"/>
+    <line x1="120" y1="165" x2="280" y2="165"/>
+    <circle cx="80" cy="60" r="4" fill="#93C5FD"/>
+    <circle cx="200" cy="60" r="4" fill="#93C5FD"/>
+    <circle cx="320" cy="112" r="4" fill="#93C5FD"/>
+    <circle cx="120" cy="165" r="4" fill="#93C5FD"/>
+    <circle cx="280" cy="165" r="4" fill="#93C5FD"/>
+  </g>
+  <!-- Wave pattern -->
+  <path d="M40 140 Q100 100 160 140 T280 140 T400 140" stroke="#60A5FA" stroke-width="2" fill="none" opacity="0.4"/>
+  <path d="M0 160 Q60 130 120 160 T240 160 T360 160" stroke="#60A5FA" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <!-- Center icon -->
+  <g transform="translate(175, 85)">
+    <rect x="0" y="0" width="50" height="50" rx="10" fill="#3B82F6" opacity="0.15"/>
+    <path d="M15 25 L25 15 L35 25 L25 35 Z" stroke="#3B82F6" stroke-width="2" fill="none"/>
+    <circle cx="25" cy="25" r="5" fill="#3B82F6" opacity="0.3"/>
+  </g>
+</svg>

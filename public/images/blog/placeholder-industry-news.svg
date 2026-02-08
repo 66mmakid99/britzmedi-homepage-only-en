@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#FFF7ED"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#newsGrad)" opacity="0.2"/>
+  <defs>
+    <linearGradient id="newsGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+  </defs>
+  <!-- Globe -->
+  <g transform="translate(165, 60)">
+    <circle cx="35" cy="35" r="35" stroke="#FDBA74" stroke-width="2" fill="#FED7AA" fill-opacity="0.3"/>
+    <ellipse cx="35" cy="35" rx="15" ry="35" stroke="#FDBA74" stroke-width="1.5" fill="none"/>
+    <line x1="0" y1="35" x2="70" y2="35" stroke="#FDBA74" stroke-width="1.5"/>
+    <path d="M5 20 Q35 15 65 20" stroke="#FDBA74" stroke-width="1" fill="none"/>
+    <path d="M5 50 Q35 55 65 50" stroke="#FDBA74" stroke-width="1" fill="none"/>
+  </g>
+  <!-- Newspaper lines -->
+  <g opacity="0.4">
+    <rect x="80" y="150" width="100" height="4" rx="2" fill="#F97316"/>
+    <rect x="80" y="162" width="70" height="3" rx="1.5" fill="#FDBA74"/>
+    <rect x="220" y="150" width="100" height="4" rx="2" fill="#F97316"/>
+    <rect x="220" y="162" width="80" height="3" rx="1.5" fill="#FDBA74"/>
+  </g>
+  <!-- Signal waves -->
+  <g stroke="#F97316" fill="none" opacity="0.3" transform="translate(300, 50)">
+    <path d="M0 15 Q10 0 20 15" stroke-width="1.5"/>
+    <path d="M-5 15 Q10 -5 25 15" stroke-width="1.5"/>
+    <path d="M-10 15 Q10 -10 30 15" stroke-width="1.5"/>
+  </g>
+</svg>

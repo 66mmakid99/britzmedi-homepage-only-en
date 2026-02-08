@@ -256,6 +256,12 @@ export const th: TranslationKeys = {
     },
     contentNotice: 'บทความนี้เขียนเป็นภาษาอังกฤษ',
     readInEnglish: 'อ่านเป็นภาษาอังกฤษ',
+    pagination: {
+      previous: 'ก่อนหน้า',
+      next: 'ถัดไป',
+      page: 'หน้า',
+    },
+    noPostsFound: 'ไม่พบบทความในหมวดหมู่นี้',
   },
 
   // Contact / Lead Form

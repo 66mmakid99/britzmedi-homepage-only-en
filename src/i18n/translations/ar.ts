@@ -256,6 +256,12 @@ export const ar: TranslationKeys = {
     },
     contentNotice: 'هذا المقال مكتوب باللغة الإنجليزية.',
     readInEnglish: 'اقرأ بالإنجليزية',
+    pagination: {
+      previous: 'السابق',
+      next: 'التالي',
+      page: 'صفحة',
+    },
+    noPostsFound: 'لم يتم العثور على منشورات في هذه الفئة.',
   },
 
   // Contact / Lead Form

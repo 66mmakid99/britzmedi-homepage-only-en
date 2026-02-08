@@ -256,6 +256,12 @@ export const vi: TranslationKeys = {
     },
     contentNotice: 'Bài viết này được viết bằng tiếng Anh.',
     readInEnglish: 'Đọc bằng tiếng Anh',
+    pagination: {
+      previous: 'Trước',
+      next: 'Tiếp',
+      page: 'Trang',
+    },
+    noPostsFound: 'Không tìm thấy bài viết trong danh mục này.',
   },
 
   // Contact / Lead Form

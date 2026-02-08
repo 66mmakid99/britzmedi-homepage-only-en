@@ -256,6 +256,12 @@ export const ru: TranslationKeys = {
     },
     contentNotice: 'Эта статья написана на английском языке.',
     readInEnglish: 'Читать на английском',
+    pagination: {
+      previous: 'Назад',
+      next: 'Далее',
+      page: 'Страница',
+    },
+    noPostsFound: 'Публикации в этой категории не найдены.',
   },
 
   // Contact / Lead Form

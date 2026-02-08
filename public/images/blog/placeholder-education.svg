@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#FAF5FF"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#eduGrad)" opacity="0.15"/>
+  <defs>
+    <linearGradient id="eduGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#7E22CE"/>
+    </linearGradient>
+  </defs>
+  <!-- Book -->
+  <g transform="translate(150, 55)">
+    <path d="M50 0 L50 100 L0 90 L0 10 Z" fill="#E9D5FF" fill-opacity="0.5" stroke="#A855F7" stroke-width="1.5"/>
+    <path d="M50 0 L50 100 L100 90 L100 10 Z" fill="#E9D5FF" fill-opacity="0.5" stroke="#A855F7" stroke-width="1.5"/>
+    <line x1="50" y1="0" x2="50" y2="100" stroke="#A855F7" stroke-width="2"/>
+    <!-- Page lines -->
+    <line x1="15" y1="30" x2="42" y2="33" stroke="#C084FC" stroke-width="1" opacity="0.5"/>
+    <line x1="15" y1="42" x2="42" y2="45" stroke="#C084FC" stroke-width="1" opacity="0.5"/>
+    <line x1="15" y1="54" x2="42" y2="57" stroke="#C084FC" stroke-width="1" opacity="0.5"/>
+    <line x1="58" y1="33" x2="85" y2="30" stroke="#C084FC" stroke-width="1" opacity="0.5"/>
+    <line x1="58" y1="45" x2="85" y2="42" stroke="#C084FC" stroke-width="1" opacity="0.5"/>
+    <line x1="58" y1="57" x2="85" y2="54" stroke="#C084FC" stroke-width="1" opacity="0.5"/>
+  </g>
+  <!-- Graduation cap -->
+  <g transform="translate(170, 30)" opacity="0.4">
+    <polygon points="30,0 60,12 30,24 0,12" fill="#A855F7"/>
+    <line x1="55" y1="12" x2="55" y2="28" stroke="#A855F7" stroke-width="1.5"/>
+    <circle cx="55" cy="30" r="2" fill="#A855F7"/>
+  </g>
+  <!-- Light bulb hint -->
+  <g transform="translate(300, 80)" opacity="0.3">
+    <circle cx="15" cy="15" r="12" stroke="#A855F7" stroke-width="1.5" fill="#E9D5FF" fill-opacity="0.5"/>
+    <line x1="12" y1="28" x2="18" y2="28" stroke="#A855F7" stroke-width="1.5"/>
+    <line x1="15" y1="5" x2="15" y2="12" stroke="#A855F7" stroke-width="1.5"/>
+  </g>
+</svg>

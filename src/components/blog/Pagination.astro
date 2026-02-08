@@ -1,0 +1,105 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath: string;
+  previousText?: string;
+  nextText?: string;
+  pageText?: string;
+}
+
+const {
+  currentPage,
+  totalPages,
+  basePath,
+  previousText = 'Previous',
+  nextText = 'Next',
+  pageText = 'Page',
+} = Astro.props;
+
+const hasPrev = currentPage > 1;
+const hasNext = currentPage < totalPages;
+
+function getPageUrl(page: number): string {
+  if (page === 1) return basePath;
+  return `${basePath}/${page}`;
+}
+
+// Generate page numbers to show
+const pages: (number | '...')[] = [];
+if (totalPages <= 7) {
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
+} else {
+  pages.push(1);
+  if (currentPage > 3) pages.push('...');
+  for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+    pages.push(i);
+  }
+  if (currentPage < totalPages - 2) pages.push('...');
+  pages.push(totalPages);
+}
+---
+
+{totalPages > 1 && (
+  <div class="mt-16">
+    <div class="divider-gradient mb-8"></div>
+    <nav id="blog-pagination" class="flex items-center justify-center gap-2" aria-label={`${pageText} navigation`}>
+      {hasPrev ? (
+        <a
+          href={getPageUrl(currentPage - 1)}
+          class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:border-primary-300 hover:text-primary-600 transition-all duration-300"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {previousText}
+        </a>
+      ) : (
+        <span class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-300 bg-white border border-slate-100 rounded-xl cursor-not-allowed">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {previousText}
+        </span>
+      )}
+
+      <div class="flex items-center gap-1">
+        {pages.map(page => (
+          page === '...' ? (
+            <span class="w-10 h-10 flex items-center justify-center text-sm text-slate-400">...</span>
+          ) : page === currentPage ? (
+            <span class="w-10 h-10 flex items-center justify-center text-sm font-semibold text-white bg-primary-600 rounded-xl shadow-md shadow-primary-500/20">
+              {page}
+            </span>
+          ) : (
+            <a
+              href={getPageUrl(page)}
+              class="w-10 h-10 flex items-center justify-center text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:border-primary-300 hover:text-primary-600 transition-all duration-300"
+            >
+              {page}
+            </a>
+          )
+        ))}
+      </div>
+
+      {hasNext ? (
+        <a
+          href={getPageUrl(currentPage + 1)}
+          class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:border-primary-300 hover:text-primary-600 transition-all duration-300"
+        >
+          {nextText}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      ) : (
+        <span class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-slate-300 bg-white border border-slate-100 rounded-xl cursor-not-allowed">
+          {nextText}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      )}
+    </nav>
+  </div>
+)}

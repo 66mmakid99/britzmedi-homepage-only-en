@@ -256,6 +256,12 @@ export const ja: TranslationKeys = {
     },
     contentNotice: 'この記事は英語で書かれています。',
     readInEnglish: '英語で読む',
+    pagination: {
+      previous: '前へ',
+      next: '次へ',
+      page: 'ページ',
+    },
+    noPostsFound: 'このカテゴリーには記事がありません。',
   },
 
   // Contact / Lead Form

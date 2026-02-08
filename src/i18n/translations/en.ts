@@ -254,6 +254,12 @@ export const en = {
     },
     contentNotice: 'This article is written in English.',
     readInEnglish: 'Read in English',
+    pagination: {
+      previous: 'Previous',
+      next: 'Next',
+      page: 'Page',
+    },
+    noPostsFound: 'No posts found in this category.',
   },
 
   // Contact / Lead Form

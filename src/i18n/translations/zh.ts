@@ -256,6 +256,12 @@ export const zh: TranslationKeys = {
     },
     contentNotice: '本文以英文撰写。',
     readInEnglish: '阅读英文原文',
+    pagination: {
+      previous: '上一页',
+      next: '下一页',
+      page: '页',
+    },
+    noPostsFound: '此类别中没有文章。',
   },
 
   // Contact / Lead Form

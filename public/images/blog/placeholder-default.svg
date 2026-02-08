@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#F8FAFC"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#defGrad)" opacity="0.15"/>
+  <defs>
+    <linearGradient id="defGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#64748B"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+  <!-- Document icon -->
+  <g transform="translate(155, 45)">
+    <rect x="0" y="0" width="70" height="90" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+    <rect x="0" y="0" width="70" height="25" rx="8" fill="#E2E8F0"/>
+    <!-- Lines -->
+    <line x1="15" y1="40" x2="55" y2="40" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="15" y1="52" x2="45" y2="52" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="15" y1="64" x2="50" y2="64" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="15" y1="76" x2="35" y2="76" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <!-- Decorative dots -->
+  <g fill="#94A3B8" opacity="0.2">
+    <circle cx="100" cy="100" r="4"/>
+    <circle cx="300" cy="80" r="6"/>
+    <circle cx="110" cy="160" r="3"/>
+    <circle cx="290" cy="160" r="5"/>
+  </g>
+  <!-- BRITZMEDI text hint -->
+  <g opacity="0.15">
+    <rect x="130" y="165" width="140" height="20" rx="4" fill="#64748B"/>
+  </g>
+</svg>

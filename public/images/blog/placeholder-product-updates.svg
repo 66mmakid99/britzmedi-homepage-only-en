@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#FEFCE8"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#prodGrad)" opacity="0.15"/>
+  <defs>
+    <linearGradient id="prodGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#EAB308"/>
+      <stop offset="100%" stop-color="#A16207"/>
+    </linearGradient>
+  </defs>
+  <!-- Device outline -->
+  <g transform="translate(155, 45)">
+    <rect x="10" y="0" width="70" height="120" rx="12" stroke="#EAB308" stroke-width="2" fill="#FEF9C3" fill-opacity="0.5"/>
+    <rect x="25" y="15" width="40" height="50" rx="6" stroke="#EAB308" stroke-width="1.5" fill="white" fill-opacity="0.5"/>
+    <circle cx="45" cy="90" r="10" stroke="#EAB308" stroke-width="1.5" fill="#FDE047" fill-opacity="0.3"/>
+    <circle cx="45" cy="90" r="4" fill="#EAB308" opacity="0.3"/>
+  </g>
+  <!-- Star -->
+  <g transform="translate(285, 55)" opacity="0.5">
+    <polygon points="15,0 19,11 30,11 21,18 24,30 15,22 6,30 9,18 0,11 11,11" fill="#EAB308" opacity="0.4"/>
+  </g>
+  <!-- Sparkle dots -->
+  <g fill="#EAB308" opacity="0.3">
+    <circle cx="100" cy="80" r="3"/>
+    <circle cx="85" cy="140" r="2"/>
+    <circle cx="310" cy="140" r="4"/>
+    <circle cx="330" cy="100" r="2"/>
+  </g>
+  <!-- Update arrow -->
+  <g transform="translate(90, 160)" opacity="0.4">
+    <path d="M0 10 L20 10 L20 0 L35 15 L20 30 L20 20 L0 20 Z" fill="#EAB308"/>
+  </g>
+</svg>

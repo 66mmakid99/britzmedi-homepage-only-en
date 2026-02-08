@@ -256,6 +256,12 @@ export const es: TranslationKeys = {
     },
     contentNotice: 'Este artículo está escrito en inglés.',
     readInEnglish: 'Leer en inglés',
+    pagination: {
+      previous: 'Anterior',
+      next: 'Siguiente',
+      page: 'Página',
+    },
+    noPostsFound: 'No se encontraron publicaciones en esta categoría.',
   },
 
   // Contact / Lead Form
