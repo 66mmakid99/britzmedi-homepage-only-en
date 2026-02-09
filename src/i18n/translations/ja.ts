@@ -9,6 +9,7 @@ export const ja: TranslationKeys = {
     certifications: '認証',
     resources: 'リソース',
     blog: 'ブログ',
+    news: 'ニュース',
     faq: 'よくある質問',
     contact: 'お問い合わせ',
     contactUs: 'お問い合わせ',

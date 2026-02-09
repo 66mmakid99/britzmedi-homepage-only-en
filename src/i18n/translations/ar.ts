@@ -9,6 +9,7 @@ export const ar: TranslationKeys = {
     certifications: 'الشهادات',
     resources: 'الموارد',
     blog: 'مدونة',
+    news: 'أخبار',
     faq: 'الأسئلة الشائعة',
     contact: 'اتصل بنا',
     contactUs: 'اتصل بنا',

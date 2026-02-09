@@ -9,6 +9,7 @@ export const zh: TranslationKeys = {
     certifications: '认证',
     resources: '资源',
     blog: '博客',
+    news: '新闻',
     faq: '常见问题',
     contact: '联系我们',
     contactUs: '联系我们',

@@ -71,6 +71,14 @@ export interface CoreTechnologiesSection {
   description: string;
 }
 
+export interface LatestNewsSection {
+  enabled: boolean;
+  label: string;
+  title: string;
+  description: string;
+  displayCount: number;
+}
+
 export interface CTASection {
   title: string;
   description: string;
@@ -84,5 +92,6 @@ export interface HomepageConfig {
   featuredProducts: FeaturedProductsSection;
   whyBritzMedi: WhyBritzMediSection;
   coreTechnologies: CoreTechnologiesSection;
+  latestNews?: LatestNewsSection;
   cta: CTASection;
 }

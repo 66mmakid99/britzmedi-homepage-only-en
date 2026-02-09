@@ -9,6 +9,7 @@ export const th: TranslationKeys = {
     certifications: 'การรับรอง',
     resources: 'ทรัพยากร',
     blog: 'บล็อก',
+    news: 'ข่าวสาร',
     faq: 'คำถามที่พบบ่อย',
     contact: 'ติดต่อ',
     contactUs: 'ติดต่อเรา',

@@ -5,7 +5,7 @@
     "backgroundImageAlt": "BRITZMEDI Medical Devices",
     "backgroundVideo": "/videos/hero-bg.mp4",
     "backgroundVideoPoster": "/images/hero/herosection_torrrf_modelcut02.webp",
-    "heroImage": "/images/hero/hero-model.png",
+    "heroImage": "/images/hero/hero-image-1770616915121.webp",
     "heroImageAlt": "BRITZMEDI aesthetic treatment model",
     "overlayOpacity": 50,
     "overlayColor": "dark",
@@ -25,10 +25,26 @@
   },
   "trustBadges": {
     "badges": [
-      { "label": "FDA", "title": "510(k) Cleared", "subtitle": "U.S. Regulatory" },
-      { "label": "ISO", "title": "13485:2016", "subtitle": "Quality Management" },
-      { "label": "GMP", "title": "Certified", "subtitle": "Manufacturing" },
-      { "label": "11+", "title": "Patents", "subtitle": "Registered" }
+      {
+        "label": "FDA",
+        "title": "510(k) Cleared",
+        "subtitle": "U.S. Regulatory"
+      },
+      {
+        "label": "ISO",
+        "title": "13485:2016",
+        "subtitle": "Quality Management"
+      },
+      {
+        "label": "GMP",
+        "title": "Certified",
+        "subtitle": "Manufacturing"
+      },
+      {
+        "label": "11+",
+        "title": "Patents",
+        "subtitle": "Registered"
+      }
     ]
   },
   "featuredProducts": {
@@ -65,10 +81,27 @@
     ],
     "statsTitle": "Company at a Glance",
     "stats": [
-      { "label": "Established", "value": "2017", "type": "number" },
-      { "label": "Registered Patents", "value": "11+", "type": "number" },
-      { "label": "Product Lines", "value": "4", "type": "number" },
-      { "label": "Venture Enterprise", "value": "R&D Type", "type": "badge", "badgeText": "R&D Type" }
+      {
+        "label": "Established",
+        "value": "2017",
+        "type": "number"
+      },
+      {
+        "label": "Registered Patents",
+        "value": "11+",
+        "type": "number"
+      },
+      {
+        "label": "Product Lines",
+        "value": "4",
+        "type": "number"
+      },
+      {
+        "label": "Venture Enterprise",
+        "value": "R&D Type",
+        "type": "badge",
+        "badgeText": "R&D Type"
+      }
     ],
     "learnMoreText": "Learn more about us",
     "learnMoreHref": "/about"
@@ -77,6 +110,13 @@
     "label": "Innovation",
     "title": "Core Technologies",
     "description": "Our proprietary technologies power the next generation of aesthetic treatments."
+  },
+  "latestNews": {
+    "enabled": true,
+    "label": "News & Updates",
+    "title": "Latest News",
+    "description": "Stay up to date with the latest from BRITZMEDI.",
+    "displayCount": 3
   },
   "cta": {
     "title": "Ready to Partner with BRITZMEDI?",

@@ -23,7 +23,21 @@ interface Post {
   updated_at: string;
   youtube_url: string | null;
   doctor_name: string | null;
+  contentType?: 'blog' | 'news';
 }
+
+interface NewsItem {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  summary: string;
+  image: string | null;
+  featured: boolean;
+  published: boolean;
+}
+
+type ContentTypeFilter = 'all' | 'blog' | 'news';
 
 interface QualityInfo {
   id: string;
@@ -66,18 +80,47 @@ export default function ContentHub() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [search, setSearch] = useState('');
   const [detailLoading, setDetailLoading] = useState(false);
+  const [contentType, setContentType] = useState<ContentTypeFilter>('all');
+  const [newsItems, setNewsItems] = useState<Post[]>([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [postsRes, qualityRes] = await Promise.all([
+      const [postsRes, qualityRes, newsRes] = await Promise.all([
         fetch('/api/admin/blog/posts?limit=200'),
         fetch('/api/admin/content-hub/quality-check'),
+        fetch('/api/admin/content-hub/news'),
       ]);
 
       const postsData = await postsRes.json();
-      setPosts(postsData.posts || []);
+      const blogPosts = (postsData.posts || []).map((p: Post) => ({ ...p, contentType: 'blog' as const }));
       setCounts(postsData.counts || {});
+
+      // Fetch news items
+      let newsAsPosts: Post[] = [];
+      if (newsRes.ok) {
+        const nData: NewsItem[] = await newsRes.json();
+        newsAsPosts = nData.map(n => ({
+          id: `news:${n.id}`,
+          title: n.title,
+          slug: n.id,
+          excerpt: n.summary,
+          featured_image: n.image,
+          category: n.category,
+          tags: null,
+          status: n.published ? 'published' : 'draft',
+          scheduled_date: null,
+          published_at: n.date,
+          created_at: n.date,
+          updated_at: n.date,
+          youtube_url: null,
+          doctor_name: null,
+          contentType: 'news' as const,
+        }));
+        setNewsItems(newsAsPosts);
+      }
+
+      setPosts([...blogPosts, ...newsAsPosts]);
 
       if (qualityRes.ok) {
         const qData: QualityInfo[] = await qualityRes.json();
@@ -143,10 +186,14 @@ export default function ContentHub() {
 
   // Filtered posts for "All Content" tab
   const filteredPosts = posts.filter(p => {
+    if (contentType !== 'all' && p.contentType !== contentType) return false;
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  // Pipeline only shows blog posts (news has simpler workflow)
+  const pipelinePosts = posts.filter(p => p.contentType === 'blog' || !p.contentType);
 
   // Quality-sorted posts for "Quality" tab
   const qualitySorted = [...qualityData].sort((a, b) => a.score - b.score);
@@ -200,7 +247,7 @@ export default function ContentHub() {
             {/* Pipeline Tab */}
             {tab === 'pipeline' && (
               <PipelineView
-                posts={posts}
+                posts={pipelinePosts}
                 qualityMap={qualityMap}
                 selectedId={selectedPost?.id || null}
                 onSelectPost={handleSelectPost}
@@ -210,6 +257,27 @@ export default function ContentHub() {
             {/* All Content Tab */}
             {tab === 'all' && (
               <div>
+                {/* Content type filter */}
+                <div className="flex items-center gap-2 mb-3">
+                  {([
+                    { value: 'all' as ContentTypeFilter, label: 'All Types' },
+                    { value: 'blog' as ContentTypeFilter, label: 'Blog' },
+                    { value: 'news' as ContentTypeFilter, label: 'News' },
+                  ]).map(ct => (
+                    <button
+                      key={ct.value}
+                      onClick={() => setContentType(ct.value)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                        contentType === ct.value
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                      }`}
+                    >
+                      {ct.label}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Status filter */}
                 <div className="flex items-center gap-1 mb-4 bg-white rounded-xl border border-slate-200 p-1">
                   {STATUS_TABS.map(st => {
@@ -283,6 +351,11 @@ export default function ContentHub() {
                           <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-medium text-slate-900 truncate">{post.title}</h4>
                             <div className="flex items-center gap-2 mt-1">
+                              {post.contentType === 'news' ? (
+                                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-pink-100 text-pink-700">News</span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-sky-100 text-sky-700">Blog</span>
+                              )}
                               <BlogStatusBadge status={post.status} />
                               {q && <QualityGradeBadge grade={q.grade} score={q.score} />}
                               <span className="text-[10px] text-slate-400">
@@ -400,23 +473,36 @@ export default function ContentHub() {
                     <QualityPanel quality={selectedQuality} />
                   ) : null}
 
-                  {/* Transition Actions */}
-                  <div className="pt-2 border-t border-slate-100">
-                    <TransitionActions
-                      postId={selectedPost.id}
-                      currentStatus={selectedPost.status}
-                      qualityScore={selectedQuality?.score}
-                      onTransition={handleTransition}
-                    />
-                  </div>
+                  {/* Transition Actions (blog only) */}
+                  {selectedPost.contentType !== 'news' && (
+                    <div className="pt-2 border-t border-slate-100">
+                      <TransitionActions
+                        postId={selectedPost.id}
+                        currentStatus={selectedPost.status}
+                        qualityScore={selectedQuality?.score}
+                        onTransition={handleTransition}
+                      />
+                    </div>
+                  )}
 
-                  {/* Edit link */}
-                  <a
-                    href={`/admin/youtube-to-blog?edit=${selectedPost.id}`}
-                    className="block w-full text-center px-3 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
-                  >
-                    Open in Editor
-                  </a>
+                  {/* Edit / View link */}
+                  {selectedPost.contentType === 'news' ? (
+                    <a
+                      href={`/news/${selectedPost.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center px-3 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                    >
+                      View on Site
+                    </a>
+                  ) : (
+                    <a
+                      href={`/admin/youtube-to-blog?edit=${selectedPost.id}`}
+                      className="block w-full text-center px-3 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                    >
+                      Open in Editor
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
