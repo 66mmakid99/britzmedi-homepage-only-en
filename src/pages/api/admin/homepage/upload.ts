@@ -25,6 +25,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const mediaType = formData.get('type') as string | null; // 'image' | 'video' | 'poster'
+    const target = (formData.get('target') as string) || 'hero'; // 'hero' | 'product'
+    const productId = formData.get('productId') as string | null;
 
     if (!file || !mediaType) {
       return new Response(JSON.stringify({ error: 'Missing file or type' }), {
@@ -57,18 +59,26 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // Determine save path
+    // Determine save path based on target
     const ext = file.name.split('.').pop()?.toLowerCase() || (isVideo ? 'mp4' : 'webp');
     const timestamp = Date.now();
-    const safeName = `hero-${mediaType}-${timestamp}.${ext}`;
 
     let saveDir: string;
     let urlPath: string;
+    let safeName: string;
 
-    if (isVideo) {
+    if (target === 'product' && productId) {
+      // Product images: save as {productId}.webp
+      const safeId = productId.replace(/[^a-z0-9-]/gi, '');
+      safeName = `${safeId}.${ext}`;
+      saveDir = path.join(PUBLIC_DIR, 'images', 'products');
+      urlPath = `/images/products/${safeName}`;
+    } else if (isVideo) {
+      safeName = `hero-video-${timestamp}.${ext}`;
       saveDir = path.join(PUBLIC_DIR, 'videos');
       urlPath = `/videos/${safeName}`;
     } else {
+      safeName = `hero-${mediaType}-${timestamp}.${ext}`;
       saveDir = path.join(PUBLIC_DIR, 'images', 'hero');
       urlPath = `/images/hero/${safeName}`;
     }
@@ -81,7 +91,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const buffer = Buffer.from(arrayBuffer);
     fs.writeFileSync(path.join(saveDir, safeName), buffer);
 
-    console.log(`[Upload] Saved ${mediaType}: ${urlPath} (${(file.size / 1024).toFixed(1)}KB)`);
+    console.log(`[Upload] Saved ${target}/${mediaType}: ${urlPath} (${(file.size / 1024).toFixed(1)}KB)`);
 
     return new Response(JSON.stringify({
       success: true,

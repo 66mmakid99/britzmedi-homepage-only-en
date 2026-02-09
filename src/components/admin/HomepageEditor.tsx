@@ -1,9 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { HomepageConfig, TrustBadge, WhyFeature, CompanyStat } from '../../data/homepage.types';
+import ImageCropModal from './ImageCropModal';
+import { IMAGE_PRESETS, formatBytes, type OptimizeResult } from './imageUtils';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-// Collapsible section wrapper
+// Known products (from products.ts)
+const PRODUCTS = [
+  { id: 'torr-rf', name: 'TORR RF', image: '/images/products/torr-rf.webp' },
+  { id: 'ulblanc', name: 'ULBLANC', image: '/images/products/ulblanc.webp' },
+  { id: 'newchae-shot', name: 'NEWCHAE SHOT', image: '/images/products/newchae-shot.webp' },
+];
+
+// ─── Reusable UI Components ─────────────────────────────────
+
 function Section({
   title,
   defaultOpen = false,
@@ -36,7 +46,6 @@ function Section({
   );
 }
 
-// Reusable form fields
 function TextField({
   label,
   value,
@@ -133,35 +142,50 @@ function SelectField<T extends string>({
   );
 }
 
-// File upload component with drag & drop
+// ─── File Upload with Crop Support ──────────────────────────
+
+interface FileUploadProps {
+  label: string;
+  accept: string;
+  mediaType: 'image' | 'video' | 'poster';
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+  cropPreset?: string; // key from IMAGE_PRESETS
+  uploadTarget?: string; // 'hero' | 'product'
+  productId?: string;
+}
+
 function FileUpload({
   label,
   accept,
   mediaType,
   currentUrl,
   onUploaded,
-}: {
-  label: string;
-  accept: string;
-  mediaType: 'image' | 'video' | 'poster';
-  currentUrl: string;
-  onUploaded: (url: string) => void;
-}) {
+  cropPreset,
+  uploadTarget = 'hero',
+  productId,
+}: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [showCrop, setShowCrop] = useState(false);
+  const [optimizeInfo, setOptimizeInfo] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (file: File) => {
+  const preset = cropPreset ? IMAGE_PRESETS[cropPreset] : null;
+
+  const uploadFile = async (file: File) => {
     setUploading(true);
     setProgress(0);
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', mediaType);
+    formData.append('target', uploadTarget);
+    if (productId) formData.append('productId', productId);
 
     try {
-      // Simulate progress
       const progressInterval = setInterval(() => {
         setProgress((p) => Math.min(p + 10, 90));
       }, 100);
@@ -182,7 +206,7 @@ function FileUpload({
 
       const data = await res.json();
       onUploaded(data.url);
-    } catch (err) {
+    } catch {
       alert('Upload failed. Please try again.');
     } finally {
       setUploading(false);
@@ -190,78 +214,119 @@ function FileUpload({
     }
   };
 
+  const handleFileSelected = (file: File) => {
+    if (preset && file.type.startsWith('image/')) {
+      setPendingFile(file);
+      setShowCrop(true);
+    } else {
+      uploadFile(file);
+    }
+  };
+
+  const handleCropApply = (result: OptimizeResult) => {
+    setShowCrop(false);
+    setPendingFile(null);
+    setOptimizeInfo(
+      `${formatBytes(result.originalSize)} → ${formatBytes(result.optimizedSize)} (${result.width}x${result.height})`
+    );
+    uploadFile(result.file);
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file) handleUpload(file);
+    if (file) handleFileSelected(file);
   };
 
   return (
-    <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400'
-        }`}
-        onClick={() => inputRef.current?.click()}
-      >
-        {uploading ? (
-          <div className="space-y-2">
-            <div className="text-sm text-slate-600">Uploading...</div>
-            <div className="w-full bg-slate-200 rounded-full h-2">
-              <div
-                className="bg-blue-600 h-2 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
-              />
+    <>
+      <div>
+        <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          className={`relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+            dragOver ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400'
+          }`}
+          onClick={() => inputRef.current?.click()}
+        >
+          {uploading ? (
+            <div className="space-y-2">
+              <div className="text-sm text-slate-600">Uploading...</div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
-          </div>
-        ) : currentUrl ? (
-          <div className="space-y-2">
-            {mediaType === 'video' ? (
-              <div className="text-xs text-slate-500 truncate">{currentUrl}</div>
-            ) : (
-              <img
-                src={currentUrl}
-                alt="Preview"
-                className="max-h-24 mx-auto rounded object-cover"
-              />
-            )}
-            <div className="text-xs text-slate-400">Click or drag to replace</div>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            <svg className="w-8 h-8 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          ) : currentUrl ? (
+            <div className="space-y-2">
+              {mediaType === 'video' ? (
+                <div className="text-xs text-slate-500 truncate">{currentUrl}</div>
+              ) : (
+                <img
+                  src={currentUrl}
+                  alt="Preview"
+                  className="max-h-24 mx-auto rounded object-cover"
+                />
+              )}
+              <div className="text-xs text-slate-400">Click or drag to replace</div>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <svg className="w-8 h-8 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <div className="text-sm text-slate-600">Click or drag file</div>
+              <div className="text-xs text-slate-400">{accept}</div>
+            </div>
+          )}
+          <input
+            ref={inputRef}
+            type="file"
+            accept={accept}
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFileSelected(file);
+              if (inputRef.current) inputRef.current.value = '';
+            }}
+          />
+        </div>
+        {optimizeInfo && (
+          <div className="mt-1 text-xs text-green-600 flex items-center gap-1">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <div className="text-sm text-slate-600">Click or drag file</div>
-            <div className="text-xs text-slate-400">{accept}</div>
+            Optimized: {optimizeInfo}
           </div>
         )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleUpload(file);
-          }}
-        />
       </div>
-    </div>
+
+      {showCrop && pendingFile && preset && (
+        <ImageCropModal
+          file={pendingFile}
+          aspectRatio={preset.aspect}
+          maxWidth={preset.maxWidth}
+          maxHeight={preset.maxHeight}
+          onApply={handleCropApply}
+          onCancel={() => { setShowCrop(false); setPendingFile(null); }}
+        />
+      )}
+    </>
   );
 }
 
-// ─── Main Editor Component ────────────────────────────────────
+// ─── Main Editor Component ──────────────────────────────────
 
 export default function HomepageEditor() {
   const [config, setConfig] = useState<HomepageConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Load config on mount
@@ -279,6 +344,11 @@ export default function HomepageEditor() {
         console.error('Failed to load homepage config:', err);
         setLoading(false);
       });
+
+    // Initialize product images
+    const imgs: Record<string, string> = {};
+    PRODUCTS.forEach((p) => { imgs[p.id] = p.image; });
+    setProductImages(imgs);
   }, []);
 
   // Helper to update nested config
@@ -314,8 +384,6 @@ export default function HomepageEditor() {
       }
 
       setSaveStatus('saved');
-
-      // Reload iframe after a short delay (HMR + rebuild time)
       setTimeout(() => {
         iframeRef.current?.contentWindow?.location.reload();
       }, 500);
@@ -373,18 +441,30 @@ export default function HomepageEditor() {
 
         {/* Scrollable sections */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {/* Hero Section */}
+          {/* ── Hero Section ── */}
           <Section title="Hero Section" defaultOpen>
             <SelectField
               label="Background Type"
               value={config.hero.backgroundType}
               onChange={(v) => update('hero', { backgroundType: v })}
               options={[
-                { value: 'image', label: 'Image' },
+                { value: 'split', label: 'Model Image (Full-bleed)' },
+                { value: 'image', label: 'Background Image' },
                 { value: 'video', label: 'Video (MP4)' },
                 { value: 'gradient', label: 'Gradient' },
               ]}
             />
+
+            {config.hero.backgroundType === 'split' && (
+              <FileUpload
+                label="Hero Model Image (PNG/WebP, max 5MB)"
+                accept="image/webp,image/jpeg,image/png"
+                mediaType="image"
+                currentUrl={config.hero.heroImage || ''}
+                onUploaded={(url) => update('hero', { heroImage: url })}
+                cropPreset="hero"
+              />
+            )}
 
             {config.hero.backgroundType === 'image' && (
               <FileUpload
@@ -393,6 +473,7 @@ export default function HomepageEditor() {
                 mediaType="image"
                 currentUrl={config.hero.backgroundImage}
                 onUploaded={(url) => update('hero', { backgroundImage: url })}
+                cropPreset="hero"
               />
             )}
 
@@ -411,11 +492,12 @@ export default function HomepageEditor() {
                   mediaType="poster"
                   currentUrl={config.hero.backgroundVideoPoster}
                   onUploaded={(url) => update('hero', { backgroundVideoPoster: url })}
+                  cropPreset="hero"
                 />
               </>
             )}
 
-            {config.hero.backgroundType !== 'gradient' && (
+            {config.hero.backgroundType !== 'gradient' && config.hero.backgroundType !== 'split' && (
               <>
                 <NumberField
                   label="Overlay Opacity"
@@ -496,8 +578,8 @@ export default function HomepageEditor() {
             </div>
           </Section>
 
-          {/* Trust Badges */}
-          <Section title="Trust Badges">
+          {/* ── Trust Badges ── */}
+          <Section title="Trust Badges (FDA, ISO, GMP, Patents)">
             {config.trustBadges.badges.map((badge, i) => (
               <div key={i} className="p-3 bg-slate-50 rounded-lg space-y-2">
                 <div className="text-xs font-medium text-slate-500">Badge {i + 1}</div>
@@ -534,7 +616,7 @@ export default function HomepageEditor() {
             ))}
           </Section>
 
-          {/* Featured Products */}
+          {/* ── Featured Products ── */}
           <Section title="Featured Products">
             <TextField
               label="Section Label"
@@ -559,12 +641,30 @@ export default function HomepageEditor() {
               min={1}
               max={6}
             />
-            <p className="text-xs text-slate-400">
-              Product data comes from products.ts - edit there to change product details.
-            </p>
+
+            <div className="space-y-3 pt-2 border-t border-slate-200">
+              <div className="text-xs font-medium text-slate-600">Product Images</div>
+              {PRODUCTS.map((product) => (
+                <div key={product.id} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                  <div className="text-xs font-medium text-slate-700">{product.name}</div>
+                  <FileUpload
+                    label={`${product.name} Image (4:3, auto-optimized to WebP)`}
+                    accept="image/webp,image/jpeg,image/png"
+                    mediaType="image"
+                    currentUrl={productImages[product.id] || product.image}
+                    onUploaded={(url) => {
+                      setProductImages((prev) => ({ ...prev, [product.id]: url }));
+                    }}
+                    cropPreset="product-thumb"
+                    uploadTarget="product"
+                    productId={product.id}
+                  />
+                </div>
+              ))}
+            </div>
           </Section>
 
-          {/* Why BRITZMEDI */}
+          {/* ── Why BRITZMEDI ── */}
           <Section title="Why BRITZMEDI">
             <TextField
               label="Section Label"
@@ -572,7 +672,7 @@ export default function HomepageEditor() {
               onChange={(v) => update('whyBritzMedi', { label: v })}
             />
             <TextField
-              label="Section Title"
+              label="Section Title (use \\n for line breaks)"
               value={config.whyBritzMedi.title}
               onChange={(v) => update('whyBritzMedi', { title: v })}
               multiline
@@ -602,12 +702,21 @@ export default function HomepageEditor() {
                     }}
                     multiline
                   />
+                  <TextField
+                    label="Icon Path (SVG d attribute)"
+                    value={feat.iconPath}
+                    onChange={(v) => {
+                      const features = [...config.whyBritzMedi.features];
+                      features[i] = { ...features[i], iconPath: v };
+                      update('whyBritzMedi', { features });
+                    }}
+                  />
                 </div>
               ))}
             </div>
 
             <div className="space-y-3">
-              <div className="text-xs font-medium text-slate-600">Stats Card</div>
+              <div className="text-xs font-medium text-slate-600">Company Stats</div>
               <TextField
                 label="Stats Title"
                 value={config.whyBritzMedi.statsTitle}
@@ -615,7 +724,7 @@ export default function HomepageEditor() {
               />
               {config.whyBritzMedi.stats.map((stat, i) => (
                 <div key={i} className="p-3 bg-slate-50 rounded-lg">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <TextField
                       label="Label"
                       value={stat.label}
@@ -634,13 +743,51 @@ export default function HomepageEditor() {
                         update('whyBritzMedi', { stats });
                       }}
                     />
+                    <SelectField
+                      label="Type"
+                      value={stat.type}
+                      onChange={(v) => {
+                        const stats = [...config.whyBritzMedi.stats];
+                        stats[i] = { ...stats[i], type: v };
+                        update('whyBritzMedi', { stats });
+                      }}
+                      options={[
+                        { value: 'number', label: 'Number' },
+                        { value: 'badge', label: 'Badge' },
+                      ]}
+                    />
                   </div>
+                  {stat.type === 'badge' && (
+                    <div className="mt-2">
+                      <TextField
+                        label="Badge Text"
+                        value={stat.badgeText || ''}
+                        onChange={(v) => {
+                          const stats = [...config.whyBritzMedi.stats];
+                          stats[i] = { ...stats[i], badgeText: v };
+                          update('whyBritzMedi', { stats });
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
+              <div className="grid grid-cols-2 gap-2">
+                <TextField
+                  label="Learn More Text"
+                  value={config.whyBritzMedi.learnMoreText}
+                  onChange={(v) => update('whyBritzMedi', { learnMoreText: v })}
+                />
+                <TextField
+                  label="Learn More Link"
+                  value={config.whyBritzMedi.learnMoreHref}
+                  onChange={(v) => update('whyBritzMedi', { learnMoreHref: v })}
+                />
+              </div>
             </div>
           </Section>
 
-          {/* Core Technologies */}
+          {/* ── Core Technologies ── */}
           <Section title="Core Technologies">
             <TextField
               label="Section Label"
@@ -659,12 +806,12 @@ export default function HomepageEditor() {
               multiline
             />
             <p className="text-xs text-slate-400">
-              Technology data comes from company.ts - edit there to change technology details.
+              Individual technology data is managed in company.ts.
             </p>
           </Section>
 
-          {/* CTA Section */}
-          <Section title="CTA Section">
+          {/* ── CTA Section ── */}
+          <Section title="CTA Section (Ready to Partner)">
             <TextField
               label="Title"
               value={config.cta.title}
