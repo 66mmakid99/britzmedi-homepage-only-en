@@ -262,36 +262,16 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
             class="group card-premium p-5 sm:p-6 lg:p-7"
           >
             <!-- Product Image -->
-            <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-6 relative overflow-hidden" data-product={product.id}>
-              {product.images?.main ? (
-                <img
-                  src={product.images.main}
-                  alt={product.name}
-                  width="800"
-                  height="600"
-                  loading="lazy"
-                  decoding="async"
-                  class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 product-img"
-                />
-              ) : null}
-              <!-- Fallback (shown when no image or image fails to load) -->
-              <div class:list={[
-                "product-fallback absolute inset-0 flex flex-col items-center justify-center gap-2",
-                product.images?.main ? "hidden" : "",
-                product.id === 'torr-rf' && "bg-gradient-to-br from-slate-800 to-blue-900",
-                product.id === 'ulblanc' && "bg-gradient-to-br from-sky-100 to-white",
-                product.id === 'newchae-shot' && "bg-gradient-to-br from-pink-100 to-white",
-                product.id === 'lumino-wave' && "bg-gradient-to-br from-slate-200 to-slate-100"
-              ]}>
-                <span class:list={[
-                  "text-2xl sm:text-3xl font-bold",
-                  product.id === 'torr-rf' ? "text-white" : "text-slate-500"
-                ]}>{product.name}</span>
-                {product.status === 'coming-soon' && (
-                  <span class="text-sm text-slate-400">Coming Soon</span>
-                )}
-              </div>
-              <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="aspect-[4/3] rounded-xl mb-6 overflow-hidden bg-slate-100">
+              <img
+                src={product.images?.main || ''}
+                alt={product.name}
+                width="800"
+                height="600"
+                loading="eager"
+                decoding="async"
+                style="width:100%;height:100%;object-fit:cover;"
+              />
             </div>
 
             <!-- Badge -->
