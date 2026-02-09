@@ -1,9 +1,12 @@
 import type { APIRoute } from 'astro';
+import { sendSlackNotification, sendUrgentLeadAlert } from '../../../lib/slack';
+import { calculateLeadScore as calculateAdvancedScore } from '../../../lib/lead-score';
 
 export const prerender = false;
 
 interface Env {
   DB: D1Database;
+  SLACK_WEBHOOK_URL?: string;
 }
 
 // IP-based rate limiting for lead submissions
@@ -249,6 +252,32 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     console.log('[Leads API] Lead created:', result.meta?.last_row_id);
 
+    // Send Slack notification (non-blocking, failure won't affect response)
+    const slackUrl = (env as any)?.SLACK_WEBHOOK_URL as string | undefined;
+    if (slackUrl) {
+      const slackPayload = {
+        companyName: data.company_name || 'N/A',
+        contactName: data.contact_name || 'N/A',
+        email: data.email,
+        country: data.country || 'N/A',
+        jobTitle: data.job_title || 'N/A',
+        interestedProducts: data.interested_products || [],
+        leadScore: score,
+        leadGrade: grade,
+        message: data.message,
+        companyWebsite: data.company_website,
+      };
+      // Fire-and-forget: don't await to avoid slowing response
+      sendSlackNotification(slackPayload, slackUrl).catch(err =>
+        console.error('[Leads API] Slack notification failed:', err)
+      );
+      if (grade === 'A') {
+        sendUrgentLeadAlert(slackPayload, slackUrl).catch(err =>
+          console.error('[Leads API] Slack urgent alert failed:', err)
+        );
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true,
       lead: { id: result.meta?.last_row_id, ...data, lead_score: score, lead_grade: grade },
@@ -274,67 +303,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 };
 
-// Lead scoring algorithm
+// Lead scoring — delegates to the advanced 7-category algorithm in lead-score.ts
 function calculateLeadScore(data: any): { score: number; grade: string } {
-  let score = 0;
-
-  // Company website provided (+15)
-  if (data.company_website) score += 15;
-
-  // Job title scoring
-  const jobTitle = (data.job_title || '').toLowerCase();
-  if (jobTitle.includes('director') || jobTitle.includes('ceo') || jobTitle.includes('owner') || jobTitle.includes('president')) {
-    score += 25;
-  } else if (jobTitle.includes('manager') || jobTitle.includes('head')) {
-    score += 15;
-  } else if (jobTitle.includes('doctor') || jobTitle.includes('dr.') || jobTitle.includes('physician')) {
-    score += 20;
-  } else {
-    score += 5;
-  }
-
-  // Business email domain (+15)
-  const email = data.email || '';
-  const freeEmails = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
-  const domain = email.split('@')[1]?.toLowerCase();
-  if (domain && !freeEmails.includes(domain)) {
-    score += 15;
-  }
-
-  // Country scoring (key markets)
-  const country = (data.country || '').toUpperCase();
-  const tier1Countries = ['US', 'DE', 'GB', 'JP', 'FR', 'AU', 'CA'];
-  const tier2Countries = ['KR', 'CN', 'BR', 'MX', 'IT', 'ES', 'NL'];
-  if (tier1Countries.includes(country)) {
-    score += 20;
-  } else if (tier2Countries.includes(country)) {
-    score += 15;
-  } else {
-    score += 10;
-  }
-
-  // Number of interested products
-  const products = data.interested_products || [];
-  if (products.length >= 3) {
-    score += 15;
-  } else if (products.length >= 2) {
-    score += 10;
-  } else {
-    score += 5;
-  }
-
-  // Message provided (+10)
-  if (data.message && data.message.length > 50) {
-    score += 10;
-  }
-
-  // Determine grade
-  let grade = 'D';
-  if (score >= 80) grade = 'A';
-  else if (score >= 60) grade = 'B';
-  else if (score >= 40) grade = 'C';
-
-  return { score: Math.min(score, 100), grade };
+  const result = calculateAdvancedScore({
+    companyName: data.company_name || '',
+    companyWebsite: data.company_website || undefined,
+    contactName: data.contact_name || '',
+    jobTitle: data.job_title || '',
+    email: data.email || '',
+    country: data.country || '',
+    interestedProducts: Array.isArray(data.interested_products)
+      ? data.interested_products
+      : [],
+    message: data.message || undefined,
+  });
+  return { score: result.total, grade: result.grade };
 }
 
 // Sample data for development

@@ -196,6 +196,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     lead_grade: string;
     status: string;
     created_at: string;
+    ai_research?: string;
   }
 
   interface Stats {
@@ -357,6 +358,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center justify-center gap-1">
+              <button
+                class="research-btn p-2 rounded-lg transition-colors ${lead.ai_research ? 'text-green-500 hover:text-green-700 hover:bg-green-50' : 'text-slate-400 hover:text-violet-600 hover:bg-violet-50'}"
+                data-lead-id="${lead.id}"
+                data-has-research="${lead.ai_research ? 'true' : 'false'}"
+                title="${lead.ai_research ? 'View AI Research' : 'Run AI Research'}"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </button>
               <a href="mailto:${escapeHtml(lead.email)}" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100" title="Send Email">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -476,6 +487,126 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   // Refresh button
   document.getElementById('refresh-btn')?.addEventListener('click', loadData);
+
+  // --- AI Research Panel ---
+  const researchCache = new Map<number, any>();
+
+  async function runResearch(leadId: number): Promise<any> {
+    const response = await fetch('/api/admin/leads/research', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ leadId }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Research failed');
+    return data.research;
+  }
+
+  function renderResearchPanel(research: any): string {
+    const fitColor = research.partnershipFitScore >= 7 ? 'text-green-600 bg-green-100'
+      : research.partnershipFitScore >= 4 ? 'text-amber-600 bg-amber-100'
+      : 'text-red-600 bg-red-100';
+
+    return `
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-slate-400">Researched: ${new Date(research.researchedAt).toLocaleString()}</span>
+          <span class="px-2.5 py-1 text-sm font-bold rounded-full ${fitColor}">Fit: ${research.partnershipFitScore}/10</span>
+        </div>
+        <p class="text-sm text-slate-700 font-medium">${escapeHtml(research.summary)}</p>
+        <div class="grid grid-cols-1 gap-3 text-sm">
+          <div><span class="font-medium text-slate-500">Company Size:</span> <span class="text-slate-800">${escapeHtml(research.companySize)}</span></div>
+          <div><span class="font-medium text-slate-500">Est. Revenue:</span> <span class="text-slate-800">${escapeHtml(research.estimatedRevenue)}</span></div>
+          <div><span class="font-medium text-slate-500">Main Business:</span> <span class="text-slate-800">${escapeHtml(research.mainBusiness)}</span></div>
+          <div><span class="font-medium text-slate-500">Device Relevance:</span> <span class="text-slate-800">${escapeHtml(research.aestheticDeviceRelevance)}</span></div>
+          <div><span class="font-medium text-slate-500">Competitor Equipment:</span> <span class="text-slate-800">${escapeHtml(research.competitorEquipment)}</span></div>
+          <div><span class="font-medium text-slate-500">Decision Makers:</span> <span class="text-slate-800">${escapeHtml(research.decisionMakers)}</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function showResearchModal(leadId: number, lead: Lead) {
+    // Remove existing modal
+    document.getElementById('research-modal')?.remove();
+
+    const existing = lead.ai_research ? JSON.parse(lead.ai_research) : researchCache.get(leadId);
+    const hasExisting = !!existing;
+
+    const modal = document.createElement('div');
+    modal.id = 'research-modal';
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+      <div class="absolute inset-0 bg-black/40" id="research-backdrop"></div>
+      <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-auto p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-slate-900">AI Research: ${escapeHtml(lead.company_name)}</h3>
+          <button id="close-research" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="research-content">
+          ${hasExisting ? renderResearchPanel(existing) : '<p class="text-sm text-slate-500">No research yet. Click below to run AI analysis.</p>'}
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="run-research-btn" class="flex-1 px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors">
+            ${hasExisting ? 'Re-research' : 'Run AI Research'}
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('research-backdrop')?.addEventListener('click', () => modal.remove());
+    document.getElementById('close-research')?.addEventListener('click', () => modal.remove());
+
+    document.getElementById('run-research-btn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('run-research-btn') as HTMLButtonElement;
+      const content = document.getElementById('research-content')!;
+      btn.disabled = true;
+      btn.textContent = 'Researching...';
+      content.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-500"><svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>AI is analyzing this company... (10-20 seconds)</div>';
+
+      try {
+        const research = await runResearch(leadId);
+        researchCache.set(leadId, research);
+        content.innerHTML = renderResearchPanel(research);
+        btn.textContent = 'Re-research';
+        // Update the button icon color in the table
+        const tableBtn = document.querySelector(`.research-btn[data-lead-id="${leadId}"]`) as HTMLButtonElement;
+        if (tableBtn) {
+          tableBtn.classList.remove('text-slate-400');
+          tableBtn.classList.add('text-green-500');
+          tableBtn.dataset.hasResearch = 'true';
+        }
+      } catch (err: any) {
+        content.innerHTML = `<p class="text-sm text-red-600">Error: ${escapeHtml(err.message)}</p>`;
+        btn.textContent = 'Retry';
+      }
+      btn.disabled = false;
+    });
+  }
+
+  // Attach research button handlers after render
+  function attachResearchHandlers() {
+    document.querySelectorAll('.research-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const leadId = parseInt(target.dataset.leadId || '0');
+        const lead = allLeads.find(l => l.id === leadId);
+        if (lead) showResearchModal(leadId, lead);
+      });
+    });
+  }
+
+  // Patch renderLeads to attach research handlers after DOM update
+  const _originalRenderLeads = renderLeads;
+  renderLeads = function(leads: Lead[]) {
+    _originalRenderLeads(leads);
+    attachResearchHandlers();
+  };
 
   // Initial load
   loadData();

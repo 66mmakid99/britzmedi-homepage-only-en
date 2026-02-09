@@ -1,3 +1,6 @@
+// [INACTIVE] 현재 미사용. 향후 실시간 번역 기능 구현 시 활성화 예정.
+// 현재 다국어는 빌드타임 정적 번역 JSON으로 처리 중.
+//
 // DeepL Translation API Endpoint
 // POST /api/translate - Translate text to target language
 
