@@ -5,6 +5,8 @@ import type { SocialChannel } from '../../../../lib/social/types';
 import { getChannelPoster } from '../../../../lib/social/channels';
 import { generateContent } from '../../../../lib/social/content-generator';
 
+const VALID_CHANNELS = ['twitter', 'linkedin', 'facebook', 'instagram'];
+
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const runtime = (locals as any).runtime;
@@ -22,17 +24,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
       channel: SocialChannel;
       content?: string;
       postId?: string;
+      imageUrl?: string;
     };
 
     const { channel } = body;
-    if (!channel || !['twitter', 'linkedin', 'facebook'].includes(channel)) {
-      return new Response(JSON.stringify({ error: 'Valid channel required (twitter, linkedin, facebook)' }), {
+    if (!channel || !VALID_CHANNELS.includes(channel)) {
+      return new Response(JSON.stringify({ error: `Valid channel required (${VALID_CHANNELS.join(', ')})` }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
     let content = body.content;
+    let imageUrl = body.imageUrl || null;
 
     // If postId provided, generate content from blog post
     if (!content && body.postId) {
@@ -64,6 +68,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
         featuredImage: blogPost.featured_image,
         doctorName: blogPost.doctor_name,
       });
+
+      // Use blog featured image for Instagram if not explicitly provided
+      if (!imageUrl && blogPost.featured_image) {
+        imageUrl = blogPost.featured_image;
+      }
     }
 
     if (!content) {
@@ -83,9 +92,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const socialPostId = insertResult.meta.last_row_id;
 
-    // Post to channel
+    // Post to channel (pass metadata with image URL for Instagram)
     const poster = getChannelPoster(channel);
-    const result = await poster(content, env);
+    const metadata = imageUrl ? { imageUrl } : undefined;
+    const result = await poster(content, env, metadata);
 
     if (result.success) {
       await db.prepare(`

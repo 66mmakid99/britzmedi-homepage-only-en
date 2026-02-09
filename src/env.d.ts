@@ -110,6 +110,11 @@ interface CloudflareEnv {
   TWITTER_API_SECRET?: string;
   TWITTER_ACCESS_TOKEN?: string;
   TWITTER_ACCESS_TOKEN_SECRET?: string;
+  LINKEDIN_CLIENT_ID?: string;
+  LINKEDIN_CLIENT_SECRET?: string;
+  INSTAGRAM_APP_ID?: string;
+  INSTAGRAM_APP_SECRET?: string;
+  INSTAGRAM_ACCESS_TOKEN?: string;
 }
 
 // Extend Astro's Locals

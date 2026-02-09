@@ -53,10 +53,25 @@ export function generateFacebookContent(input: PostToSocialInput): string {
   return lines.join('\n');
 }
 
+export function generateInstagramContent(input: PostToSocialInput): string {
+  const url = buildPostUrl(input.slug);
+  const lines = [input.title, ''];
+  if (input.excerpt) {
+    lines.push(input.excerpt, '');
+  }
+  if (input.doctorName) {
+    lines.push(`Expert insight by ${input.doctorName}`, '');
+  }
+  lines.push(`Read more at britzmedi.com (link in bio)`, '');
+  lines.push('#BRITZMEDI #MedicalDevices #AestheticMedicine #RF #HealthTech #MedTech');
+  return lines.join('\n');
+}
+
 export function generateContent(channel: SocialChannel, input: PostToSocialInput): string {
   switch (channel) {
     case 'twitter': return generateTwitterContent(input);
     case 'linkedin': return generateLinkedInContent(input);
     case 'facebook': return generateFacebookContent(input);
+    case 'instagram': return generateInstagramContent(input);
   }
 }

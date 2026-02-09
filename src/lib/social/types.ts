@@ -1,4 +1,4 @@
-export type SocialChannel = 'twitter' | 'linkedin' | 'facebook';
+export type SocialChannel = 'twitter' | 'linkedin' | 'facebook' | 'instagram';
 export type SocialPostStatus = 'pending' | 'posted' | 'failed' | 'skipped';
 
 export interface SocialPost {
@@ -46,16 +46,22 @@ export interface SocialPostResult {
   error?: string;
 }
 
+export interface PostMetadata {
+  imageUrl?: string;
+}
+
 export const CHANNEL_LABELS: Record<SocialChannel, string> = {
   twitter: 'Twitter / X',
   linkedin: 'LinkedIn',
   facebook: 'Facebook',
+  instagram: 'Instagram',
 };
 
 export const CHANNEL_CHAR_LIMITS: Record<SocialChannel, number> = {
   twitter: 280,
   linkedin: 3000,
   facebook: 63206,
+  instagram: 2200,
 };
 
 export interface ChannelPosterEnv {
@@ -63,6 +69,12 @@ export interface ChannelPosterEnv {
   TWITTER_API_SECRET?: string;
   TWITTER_ACCESS_TOKEN?: string;
   TWITTER_ACCESS_TOKEN_SECRET?: string;
+  SESSION?: KVNamespace;
+  LINKEDIN_CLIENT_ID?: string;
+  LINKEDIN_CLIENT_SECRET?: string;
+  INSTAGRAM_ACCESS_TOKEN?: string;
+  INSTAGRAM_APP_ID?: string;
+  INSTAGRAM_APP_SECRET?: string;
 }
 
-export type ChannelPoster = (content: string, env: ChannelPosterEnv) => Promise<SocialPostResult>;
+export type ChannelPoster = (content: string, env: ChannelPosterEnv, metadata?: PostMetadata) => Promise<SocialPostResult>;

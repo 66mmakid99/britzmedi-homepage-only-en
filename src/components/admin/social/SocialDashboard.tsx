@@ -41,8 +41,23 @@ interface ChannelStatus {
 }
 
 type Tab = 'posts' | 'compose' | 'accounts';
-type ChannelFilter = 'all' | 'twitter' | 'linkedin' | 'facebook';
+type ChannelFilter = 'all' | 'twitter' | 'linkedin' | 'facebook' | 'instagram';
 type StatusFilter = 'all' | 'pending' | 'posted' | 'failed' | 'skipped';
+type ComposeChannel = 'twitter' | 'linkedin' | 'facebook' | 'instagram';
+
+const CHAR_LIMITS: Record<ComposeChannel, number> = {
+  twitter: 280,
+  linkedin: 3000,
+  facebook: 63206,
+  instagram: 2200,
+};
+
+const CHANNEL_NAMES: Record<ComposeChannel, string> = {
+  twitter: 'X',
+  linkedin: 'LinkedIn',
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+};
 
 export default function SocialDashboard() {
   const [tab, setTab] = useState<Tab>('posts');
@@ -57,18 +72,21 @@ export default function SocialDashboard() {
 
   // Compose state
   const [composeText, setComposeText] = useState('');
-  const [composeChannel, setComposeChannel] = useState<'twitter' | 'linkedin' | 'facebook'>('twitter');
+  const [composeChannel, setComposeChannel] = useState<ComposeChannel>('twitter');
+  const [composeImageUrl, setComposeImageUrl] = useState('');
   const [posting, setPosting] = useState(false);
   const [postResult, setPostResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Share blog state
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [selectedBlogId, setSelectedBlogId] = useState('');
+  const [shareBlogChannel, setShareBlogChannel] = useState<ComposeChannel>('twitter');
   const [sharingBlog, setSharingBlog] = useState(false);
 
   // Connection status
   const [channelStatuses, setChannelStatuses] = useState<Record<string, ChannelStatus>>({});
   const [statusLoading, setStatusLoading] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -130,6 +148,17 @@ export default function SocialDashboard() {
     setLoading(true);
     Promise.all([fetchPosts(), fetchAccounts(), fetchConnectionStatus(), fetchBlogPosts()])
       .finally(() => setLoading(false));
+
+    // Handle OAuth callback params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('linkedin_connected') === 'true') {
+      setPostResult({ success: true, message: 'LinkedIn connected successfully!' });
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('linkedin_error')) {
+      const err = params.get('linkedin_error');
+      setPostResult({ success: false, message: `LinkedIn connection failed: ${err}` });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, [fetchPosts, fetchAccounts, fetchConnectionStatus, fetchBlogPosts]);
 
   const handleRepost = async (id: number) => {
@@ -164,15 +193,20 @@ export default function SocialDashboard() {
     setPosting(true);
     setPostResult(null);
     try {
+      const payload: Record<string, string> = { channel: composeChannel, content: composeText };
+      if (composeChannel === 'instagram' && composeImageUrl.trim()) {
+        payload.imageUrl = composeImageUrl.trim();
+      }
       const res = await fetch('/api/admin/social/post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: composeChannel, content: composeText }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setPostResult({ success: true, message: `Posted to ${composeChannel}! ID: ${data.externalId || 'N/A'}` });
+        setPostResult({ success: true, message: `Posted to ${CHANNEL_NAMES[composeChannel]}! ID: ${data.externalId || 'N/A'}` });
         setComposeText('');
+        setComposeImageUrl('');
         await fetchPosts();
       } else {
         setPostResult({ success: false, message: data.error || 'Post failed' });
@@ -192,11 +226,11 @@ export default function SocialDashboard() {
       const res = await fetch('/api/admin/social/post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: 'twitter', postId: selectedBlogId }),
+        body: JSON.stringify({ channel: shareBlogChannel, postId: selectedBlogId }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setPostResult({ success: true, message: `Blog shared to X! Tweet ID: ${data.externalId || 'N/A'}` });
+        setPostResult({ success: true, message: `Blog shared to ${CHANNEL_NAMES[shareBlogChannel]}! ID: ${data.externalId || 'N/A'}` });
         setSelectedBlogId('');
         await fetchPosts();
       } else {
@@ -209,16 +243,37 @@ export default function SocialDashboard() {
     }
   };
 
+  const handleLinkedInDisconnect = async () => {
+    if (!confirm('Disconnect LinkedIn account?')) return;
+    setDisconnecting(true);
+    try {
+      const res = await fetch('/api/admin/social/linkedin/disconnect', { method: 'POST' });
+      if (res.ok) {
+        await fetchConnectionStatus();
+        await fetchAccounts();
+      } else {
+        alert('Failed to disconnect LinkedIn');
+      }
+    } catch {
+      alert('Network error');
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
   const postedCount = counts['posted'] || 0;
   const failedCount = counts['failed'] || 0;
   const pendingCount = counts['pending'] || 0;
 
   const twitterStatus = channelStatuses['twitter'];
+  const linkedinStatus = channelStatuses['linkedin'];
+  const instagramStatus = channelStatuses['instagram'];
 
   const CHANNEL_FILTERS: { value: ChannelFilter; label: string }[] = [
     { value: 'all', label: 'All Channels' },
     { value: 'twitter', label: 'Twitter / X' },
     { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'instagram', label: 'Instagram' },
     { value: 'facebook', label: 'Facebook' },
   ];
 
@@ -230,8 +285,28 @@ export default function SocialDashboard() {
   ];
 
   const charCount = composeText.length;
-  const charLimit = composeChannel === 'twitter' ? 280 : composeChannel === 'linkedin' ? 3000 : 63206;
+  const charLimit = CHAR_LIMITS[composeChannel];
   const isOverLimit = charCount > charLimit;
+
+  const renderChannelStatus = (channel: string, status: ChannelStatus | undefined) => {
+    if (statusLoading) {
+      return <span className="text-xs text-slate-400">Checking...</span>;
+    }
+    if (status?.connected) {
+      return (
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+          {status.account}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+        <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+        {status?.error || 'Not connected'}
+      </span>
+    );
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -241,31 +316,66 @@ export default function SocialDashboard() {
         <p className="text-sm text-slate-500 mt-1">Auto-posting and social media management</p>
       </div>
 
+      {/* Notification banner */}
+      {postResult && tab !== 'compose' && (
+        <div className={`mb-4 p-3 rounded-lg text-sm ${
+          postResult.success
+            ? 'bg-green-50 text-green-800 border border-green-200'
+            : 'bg-red-50 text-red-800 border border-red-200'
+        }`}>
+          {postResult.message}
+          <button onClick={() => setPostResult(null)} className="ml-2 font-medium underline">Dismiss</button>
+        </div>
+      )}
+
       {/* Connection Status Banner */}
       <div className="mb-6 bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <span className="text-sm font-medium text-slate-700">Connections:</span>
+
+            {/* Twitter */}
             <div className="flex items-center gap-2">
               <ChannelIcon channel="twitter" className="w-4 h-4" />
-              {statusLoading ? (
-                <span className="text-xs text-slate-400">Checking...</span>
-              ) : twitterStatus?.connected ? (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                  {twitterStatus.account}
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
-                  {twitterStatus?.error || 'Not connected'}
-                </span>
-              )}
+              {renderChannelStatus('twitter', twitterStatus)}
             </div>
+
+            {/* LinkedIn */}
             <div className="flex items-center gap-2">
               <ChannelIcon channel="linkedin" className="w-4 h-4" />
-              <span className="text-xs text-slate-400">Not configured</span>
+              {statusLoading ? (
+                <span className="text-xs text-slate-400">Checking...</span>
+              ) : linkedinStatus?.connected ? (
+                <>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                    {linkedinStatus.account}
+                  </span>
+                  <button
+                    onClick={handleLinkedInDisconnect}
+                    disabled={disconnecting}
+                    className="text-xs text-red-500 hover:text-red-700 font-medium ml-1"
+                  >
+                    {disconnecting ? '...' : 'Disconnect'}
+                  </button>
+                </>
+              ) : (
+                <a
+                  href="/api/admin/social/linkedin/authorize"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full hover:bg-blue-100 transition-colors"
+                >
+                  Connect LinkedIn
+                </a>
+              )}
             </div>
+
+            {/* Instagram */}
+            <div className="flex items-center gap-2">
+              <ChannelIcon channel="instagram" className="w-4 h-4" />
+              {renderChannelStatus('instagram', instagramStatus)}
+            </div>
+
+            {/* Facebook */}
             <div className="flex items-center gap-2">
               <ChannelIcon channel="facebook" className="w-4 h-4" />
               <span className="text-xs text-slate-400">Not configured</span>
@@ -336,7 +446,7 @@ export default function SocialDashboard() {
             {/* Filters */}
             <div className="p-4 border-b border-slate-200 flex flex-wrap items-center gap-3">
               {/* Channel filter */}
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-wrap">
                 {CHANNEL_FILTERS.map((f) => (
                   <button
                     key={f.value}
@@ -408,11 +518,12 @@ export default function SocialDashboard() {
                   <label className="block text-xs font-medium text-slate-600 mb-1">Channel</label>
                   <select
                     value={composeChannel}
-                    onChange={(e) => setComposeChannel(e.target.value as any)}
+                    onChange={(e) => setComposeChannel(e.target.value as ComposeChannel)}
                     className="w-full max-w-xs px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="twitter">Twitter / X</option>
                     <option value="linkedin">LinkedIn</option>
+                    <option value="instagram">Instagram</option>
                     <option value="facebook">Facebook</option>
                   </select>
                 </div>
@@ -422,7 +533,7 @@ export default function SocialDashboard() {
                     value={composeText}
                     onChange={(e) => setComposeText(e.target.value)}
                     rows={4}
-                    placeholder="Write your post..."
+                    placeholder={composeChannel === 'instagram' ? 'Write your caption...' : 'Write your post...'}
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   />
                   <div className="flex justify-end mt-1">
@@ -431,9 +542,27 @@ export default function SocialDashboard() {
                     </span>
                   </div>
                 </div>
+
+                {/* Image URL field for Instagram */}
+                {composeChannel === 'instagram' && (
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                      Image URL <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={composeImageUrl}
+                      onChange={(e) => setComposeImageUrl(e.target.value)}
+                      placeholder="https://britzmedi.com/images/..."
+                      className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">Instagram requires an image for every post. Use a public URL.</p>
+                  </div>
+                )}
+
                 <button
                   onClick={handleCompose}
-                  disabled={posting || !composeText.trim() || isOverLimit}
+                  disabled={posting || !composeText.trim() || isOverLimit || (composeChannel === 'instagram' && !composeImageUrl.trim())}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {posting ? (
@@ -447,7 +576,7 @@ export default function SocialDashboard() {
                   ) : (
                     <>
                       <ChannelIcon channel={composeChannel} className="w-4 h-4" />
-                      Post to {composeChannel === 'twitter' ? 'X' : composeChannel === 'linkedin' ? 'LinkedIn' : 'Facebook'}
+                      Post to {CHANNEL_NAMES[composeChannel]}
                     </>
                   )}
                 </button>
@@ -459,10 +588,10 @@ export default function SocialDashboard() {
 
             {/* Share Blog Post */}
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">Share Blog Post to X</h3>
-              <p className="text-xs text-slate-500 mb-3">Select a published blog post to share on X/Twitter with auto-generated content.</p>
-              <div className="flex gap-3 items-end">
-                <div className="flex-1">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Share Blog Post</h3>
+              <p className="text-xs text-slate-500 mb-3">Select a published blog post to share on social media with auto-generated content.</p>
+              <div className="flex gap-3 items-end flex-wrap">
+                <div className="flex-1 min-w-[200px]">
                   <label className="block text-xs font-medium text-slate-600 mb-1">Blog Post</label>
                   <select
                     value={selectedBlogId}
@@ -473,6 +602,19 @@ export default function SocialDashboard() {
                     {blogPosts.map((bp) => (
                       <option key={bp.id} value={bp.id}>{bp.title}</option>
                     ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Channel</label>
+                  <select
+                    value={shareBlogChannel}
+                    onChange={(e) => setShareBlogChannel(e.target.value as ComposeChannel)}
+                    className="px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="twitter">X</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
                   </select>
                 </div>
                 <button
@@ -490,8 +632,8 @@ export default function SocialDashboard() {
                     </>
                   ) : (
                     <>
-                      <ChannelIcon channel="twitter" className="w-4 h-4" />
-                      Share to X
+                      <ChannelIcon channel={shareBlogChannel} className="w-4 h-4" />
+                      Share to {CHANNEL_NAMES[shareBlogChannel]}
                     </>
                   )}
                 </button>
