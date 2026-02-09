@@ -45,6 +45,12 @@ export const GET: APIRoute = async ({ url, locals }) => {
     });
   } catch (err: any) {
     console.error('[Activity API] Error:', err);
+    // If table doesn't exist, return empty list gracefully
+    if (err.message?.includes('no such table')) {
+      return new Response(JSON.stringify({ activities: [] }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

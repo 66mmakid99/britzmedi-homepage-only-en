@@ -328,6 +328,7 @@ function FileUpload({
 export default function HomepageEditor() {
   const [config, setConfig] = useState<HomepageConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [productImages, setProductImages] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -339,7 +340,7 @@ export default function HomepageEditor() {
   useEffect(() => {
     fetch('/api/admin/homepage')
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to load');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -348,6 +349,7 @@ export default function HomepageEditor() {
       })
       .catch((err) => {
         console.error('Failed to load homepage config:', err);
+        setLoadError(err.message || 'Failed to load');
         setLoading(false);
       });
 
@@ -417,8 +419,25 @@ export default function HomepageEditor() {
 
   if (!config) {
     return (
-      <div className="flex items-center justify-center h-64 text-red-600">
-        Failed to load homepage configuration.
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 20px', textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <path d="M8 21h8" /><path d="M12 17v4" />
+          </svg>
+        </div>
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: '#0f172a', margin: '0 0 8px' }}>
+          Local Development Only
+        </h3>
+        <p style={{ fontSize: 14, color: '#64748b', maxWidth: 420, lineHeight: 1.6, margin: 0 }}>
+          The Homepage Visual Editor uses the local filesystem and is only available in the development environment.
+          To edit the homepage, clone the repository and run <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, fontSize: 13 }}>npm run dev</code> locally.
+        </p>
+        {loadError && (
+          <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12 }}>
+            Error: {loadError}
+          </p>
+        )}
       </div>
     );
   }

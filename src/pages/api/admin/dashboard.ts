@@ -19,14 +19,23 @@ export const GET: APIRoute = async ({ locals }) => {
 
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
+    // Helper: safely query a table (returns default if table doesn't exist)
+    const safeCount = async (sql: string, binds?: any[]) => {
+      try {
+        const stmt = binds ? db.prepare(sql).bind(...binds) : db.prepare(sql);
+        const row = await stmt.first<{ c: number }>();
+        return row?.c ?? 0;
+      } catch { return 0; }
+    };
+
     const [leads, weeklyLeads, hotLeads, posts, publishedPosts, subs, weeklySubs, activities] = await Promise.all([
-      db.prepare('SELECT COUNT(*) as c FROM leads').first<{ c: number }>(),
-      db.prepare('SELECT COUNT(*) as c FROM leads WHERE created_at >= ?').bind(weekAgo).first<{ c: number }>(),
-      db.prepare("SELECT COUNT(*) as c FROM leads WHERE lead_grade = 'A'").first<{ c: number }>(),
-      db.prepare('SELECT COUNT(*) as c FROM blog_posts').first<{ c: number }>(),
-      db.prepare("SELECT COUNT(*) as c FROM blog_posts WHERE status = 'published'").first<{ c: number }>(),
-      db.prepare('SELECT COUNT(*) as c FROM subscribers').first<{ c: number }>(),
-      db.prepare('SELECT COUNT(*) as c FROM subscribers WHERE subscribed_at >= ?').bind(weekAgo).first<{ c: number }>(),
+      safeCount('SELECT COUNT(*) as c FROM leads'),
+      safeCount('SELECT COUNT(*) as c FROM leads WHERE created_at >= ?', [weekAgo]),
+      safeCount("SELECT COUNT(*) as c FROM leads WHERE lead_grade = 'A'"),
+      safeCount('SELECT COUNT(*) as c FROM blog_posts'),
+      safeCount("SELECT COUNT(*) as c FROM blog_posts WHERE status = 'published'"),
+      safeCount('SELECT COUNT(*) as c FROM subscribers'),
+      safeCount('SELECT COUNT(*) as c FROM subscribers WHERE subscribed_at >= ?', [weekAgo]),
       db.prepare('SELECT id, type, detail, created_at FROM activity_log ORDER BY created_at DESC LIMIT 5').all().catch(() => ({ results: [] })),
     ]);
 
@@ -45,13 +54,13 @@ export const GET: APIRoute = async ({ locals }) => {
     }
 
     return new Response(JSON.stringify({
-      totalLeads: leads?.c ?? 0,
-      weeklyLeads: weeklyLeads?.c ?? 0,
-      hotLeads: hotLeads?.c ?? 0,
-      totalPosts: posts?.c ?? 0,
-      publishedPosts: publishedPosts?.c ?? 0,
-      totalSubscribers: subs?.c ?? 0,
-      weeklySubscribers: weeklySubs?.c ?? 0,
+      totalLeads: leads,
+      weeklyLeads: weeklyLeads,
+      hotLeads: hotLeads,
+      totalPosts: posts,
+      publishedPosts: publishedPosts,
+      totalSubscribers: subs,
+      weeklySubscribers: weeklySubs,
       recentActivities: activities.results || [],
       lastHealthStatus,
       lastHealthAt,

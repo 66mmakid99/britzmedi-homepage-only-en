@@ -51,21 +51,23 @@ const paginatedPosts = remainingPosts.slice(0, POSTS_PER_PAGE);
 
 const categories = [
   { value: 'all', label: 'All Posts' },
+  { value: 'technology-guide', label: 'Technology Guide' },
+  { value: 'clinical-reviews', label: 'Clinical Reviews' },
   { value: 'industry-news', label: 'Industry News' },
-  { value: 'product-updates', label: 'Product Updates' },
-  { value: 'technology', label: 'Technology' },
-  { value: 'clinical-studies', label: 'Clinical Studies' },
-  { value: 'education', label: 'Education' },
+  { value: 'industry-trends', label: 'Industry Trends' },
+  { value: 'buyer-guide', label: 'Buyer Guide' },
+  { value: 'medical-devices', label: 'Medical Devices' },
 ];
 
 const categoryLabels: Record<string, string> = {
-  'industry-news': 'Industry News',
-  'product-updates': 'Product Updates',
-  'technology': 'Technology',
-  'clinical-studies': 'Clinical Studies',
+  'technology-guide': 'Technology Guide',
   'clinical-reviews': 'Clinical Reviews',
-  'education': 'Education',
+  'industry-news': 'Industry News',
+  'industry-trends': 'Industry Trends',
+  'buyer-guide': 'Buyer Guide',
   'medical-devices': 'Medical Devices',
+  'product-updates': 'Product Updates',
+  'education': 'Education',
 };
 const getCategoryLabel = (cat: string) => categoryLabels[cat] || cat.replace('-', ' ');
 

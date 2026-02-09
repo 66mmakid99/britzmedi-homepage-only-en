@@ -26,22 +26,27 @@ const {
 } = Astro.props;
 
 const categoryPlaceholders: Record<string, string> = {
-  'technology': '/images/blog/placeholder-technology.svg',
-  'clinical-studies': '/images/blog/placeholder-clinical-studies.svg',
+  'technology-guide': '/images/blog/placeholder-technology.svg',
+  'clinical-reviews': '/images/blog/placeholder-clinical-studies.svg',
   'industry-news': '/images/blog/placeholder-industry-news.svg',
+  'industry-trends': '/images/blog/placeholder-industry-news.svg',
+  'buyer-guide': '/images/blog/placeholder-product-updates.svg',
   'product-updates': '/images/blog/placeholder-product-updates.svg',
+  'medical-devices': '/images/blog/placeholder-default.svg',
   'education': '/images/blog/placeholder-education.svg',
 };
 const placeholderSrc = categoryPlaceholders[category] || '/images/blog/placeholder-default.svg';
 const imageSrc = featuredImage || placeholderSrc;
 
 const categoryColors: Record<string, string> = {
-  'technology': 'bg-blue-100/90 text-blue-700',
-  'clinical-studies': 'bg-green-100/90 text-green-700',
+  'technology-guide': 'bg-blue-100/90 text-blue-700',
+  'clinical-reviews': 'bg-green-100/90 text-green-700',
   'industry-news': 'bg-orange-100/90 text-orange-700',
+  'industry-trends': 'bg-teal-100/90 text-teal-700',
+  'buyer-guide': 'bg-amber-100/90 text-amber-700',
   'product-updates': 'bg-amber-100/90 text-amber-700',
-  'education': 'bg-purple-100/90 text-purple-700',
   'medical-devices': 'bg-slate-100/90 text-slate-700',
+  'education': 'bg-purple-100/90 text-purple-700',
 };
 const badgeColor = categoryColors[category] || 'bg-slate-100/90 text-slate-600';
 

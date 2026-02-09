@@ -9,7 +9,7 @@ if (sessionToken) {
   // Verify token
   const validToken = import.meta.env.ADMIN_SESSION_SECRET;
   if (sessionToken === validToken) {
-    return Astro.redirect('/admin/leads');
+    return Astro.redirect('/admin');
   }
 }
 
