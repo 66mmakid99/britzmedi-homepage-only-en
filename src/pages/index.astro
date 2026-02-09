@@ -46,31 +46,29 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
-    <!-- Full-bleed Hero: Background image + gradient overlay -->
-    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
-      <!-- Full-bleed background image -->
+    <!-- Hero: Full-bleed background image + gradient overlay -->
+    <section class="relative overflow-hidden min-h-[70vh]">
+      <!-- Background image: right-aligned on desktop, centered on mobile -->
       {config.hero.heroImage && (
-        <div class="absolute inset-0 z-0">
-          <img
-            src={config.hero.heroImage}
-            alt={config.hero.heroImageAlt || 'BRITZMEDI'}
-            width="1076"
-            height="1920"
-            fetchpriority="high"
-            loading="eager"
-            decoding="async"
-            class="w-full h-full object-cover object-top"
-          />
-        </div>
+        <img
+          src={config.hero.heroImage}
+          alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+          width="1076"
+          height="1920"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
+          class="absolute inset-0 w-full h-full object-cover object-[center_top] lg:object-[right_top]"
+        />
       )}
 
-      <!-- Gradient overlay: left navy → right transparent (desktop) -->
-      <div class="absolute inset-0 z-10 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.9) 30%, rgb(15 23 42 / 0.5) 60%, rgb(15 23 42 / 0.2) 80%, transparent 100%)"></div>
-      <!-- Gradient overlay: darker for mobile readability -->
-      <div class="absolute inset-0 z-10 lg:hidden" style="background: linear-gradient(to bottom, rgb(15 23 42 / 0.85) 0%, rgb(15 23 42 / 0.6) 50%, rgb(15 23 42 / 0.8) 100%)"></div>
+      <!-- Gradient overlay: desktop (left navy → right transparent) -->
+      <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.95) 25%, rgb(15 23 42 / 0.7) 45%, rgb(15 23 42 / 0.3) 65%, transparent 100%)"></div>
+      <!-- Gradient overlay: mobile (full dark) -->
+      <div class="absolute inset-0 lg:hidden" style="background: rgb(15 23 42 / 0.8)"></div>
 
       <!-- Text content -->
-      <div class="container relative z-20">
+      <div class="container relative z-10">
         <div class="py-20 sm:py-24 lg:py-28 xl:py-32 max-w-2xl">
           <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
             {config.hero.badge}
@@ -99,9 +97,6 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
           </div>
         </div>
       </div>
-
-      <!-- Bottom gradient fade -->
-      <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/10 to-transparent z-20"></div>
     </section>
   ) : (
     <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
