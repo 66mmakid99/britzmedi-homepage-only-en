@@ -564,6 +564,15 @@ img {
   line-height: 1.6;
 }
 
+/* Mobile table scroll */
+@media (max-width: 639px) {
+  .blog-article table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .blog-article thead th {
   background: var(--color-slate-800);
   color: white;

@@ -3,6 +3,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TldrBox from '../../components/ui/TldrBox.astro';
 
 export function getStaticPaths() {
+  // Extract TL;DR text from HTML content
+  function extractTldrFromContent(content: string): string {
+    const match = content.match(/<h2>TL;DR<\/h2>\s*<p>([\s\S]*?)<\/p>/);
+    return match ? match[1].replace(/<[^>]*>/g, '').trim() : '';
+  }
   // Load dynamic blog posts from content/blog/*.json
   const dynamicPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
   const dynamicPosts = Object.values(dynamicPostModules)
@@ -12,7 +17,7 @@ export function getStaticPaths() {
         slug: data.slug,
         title: data.title,
         description: data.excerpt || data.metaDescription || '',
-        tldr: '',
+        tldr: data.tldr || extractTldrFromContent(data.content || ''),
         author: data.author || 'BRITZMEDI Team',
         publishedAt: data.publishedAt,
         updatedAt: data.updatedAt || data.publishedAt,
