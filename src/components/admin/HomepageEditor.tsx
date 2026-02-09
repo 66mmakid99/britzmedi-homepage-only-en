@@ -334,9 +334,7 @@ export default function HomepageEditor() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>('hero');
-  const [previewScale, setPreviewScale] = useState(0.5);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch('/api/admin/homepage')
@@ -358,21 +356,6 @@ export default function HomepageEditor() {
     setProductImages(imgs);
   }, []);
 
-  // Auto-calculate scale based on preview container width
-  useEffect(() => {
-    const container = previewRef.current;
-    if (!container) return;
-
-    const updateScale = () => {
-      const cw = container.clientWidth - 32; // 16px padding each side
-      setPreviewScale(Math.min(cw / IFRAME_WIDTH, 1));
-    };
-
-    updateScale();
-    const observer = new ResizeObserver(updateScale);
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
 
   const update = useCallback(
     <K extends keyof HomepageConfig>(section: K, partial: Partial<HomepageConfig[K]>) => {
@@ -441,24 +424,24 @@ export default function HomepageEditor() {
   }
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col">
+    <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* ── Top Bar ── */}
-      <div className="shrink-0 bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between">
-        <h2 className="font-semibold text-slate-900 text-sm">Homepage Editor</h2>
-        <div className="flex items-center gap-3">
+      <div style={{ flexShrink: 0, background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 style={{ fontWeight: 600, color: '#0f172a', fontSize: 14, margin: 0 }}>Homepage Editor</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {hasUnsavedChanges && (
-            <span className="text-xs text-amber-600 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            <span style={{ fontSize: 12, color: '#d97706', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 6, height: 6, background: '#f59e0b', borderRadius: '50%' }} />
               Unsaved changes
             </span>
           )}
           {lastSavedAt && !hasUnsavedChanges && (
-            <span className="text-xs text-slate-400">Saved at {formatTime(lastSavedAt)}</span>
+            <span style={{ fontSize: 12, color: '#94a3b8' }}>Saved at {formatTime(lastSavedAt)}</span>
           )}
           <button
             onClick={handleSave}
             disabled={saveStatus === 'saving'}
-            className="px-4 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded-lg transition-colors"
+            style={{ padding: '6px 16px', fontSize: 14, fontWeight: 500, color: '#fff', background: saveStatus === 'saving' ? '#93c5fd' : '#2563eb', border: 'none', borderRadius: 8, cursor: 'pointer' }}
           >
             {saveStatus === 'saving' ? 'Saving...' : 'Save'}
           </button>
@@ -466,20 +449,17 @@ export default function HomepageEditor() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
+            style={{ fontSize: 12, color: '#64748b', textDecoration: 'none' }}
           >
-            Back to Site
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
+            Back to Site ↗
           </a>
         </div>
       </div>
 
       {/* ── Main: Editor + Preview ── */}
-      <div className="flex-1 flex min-h-0">
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
         {/* Left: Editor Panel */}
-        <div className="w-[400px] shrink-0 overflow-y-auto bg-white border-r border-slate-200 p-4 space-y-3">
+        <div style={{ width: 400, flexShrink: 0, overflowY: 'auto', background: '#fff', borderRight: '1px solid #e2e8f0', padding: 16 }} className="space-y-3">
 
           {/* ── Hero Section ── */}
           <Section title="Hero Section" isOpen={openSection === 'hero'} onToggle={() => toggleSection('hero')}>
@@ -811,26 +791,36 @@ export default function HomepageEditor() {
           )}
         </div>
 
-        {/* Right: Preview Panel */}
-        <div ref={previewRef} className="flex-1 overflow-y-auto bg-slate-100 p-4 min-w-0">
-          <div
-            className="bg-white rounded-lg shadow-lg border border-slate-300 overflow-hidden"
-            style={{
-              width: IFRAME_WIDTH * previewScale,
-              height: IFRAME_HEIGHT * previewScale,
-            }}
-          >
+        {/* Right: Preview Panel — pure inline styles */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          background: '#f1f5f9',
+          padding: 16,
+          minWidth: 0,
+          position: 'relative',
+        }}>
+          <div style={{
+            width: IFRAME_WIDTH * 0.55,
+            height: IFRAME_HEIGHT * 0.55,
+            overflow: 'hidden',
+            background: '#fff',
+            borderRadius: 8,
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            border: '1px solid #cbd5e1',
+          }}>
             <iframe
               ref={iframeRef}
               src="/"
               title="Homepage Preview"
-              className="bg-white"
               style={{
                 width: IFRAME_WIDTH,
                 height: IFRAME_HEIGHT,
-                transform: `scale(${previewScale})`,
-                transformOrigin: 'top left',
                 border: 'none',
+                transform: 'scale(0.55)',
+                transformOrigin: 'top left',
+                display: 'block',
               }}
             />
           </div>
@@ -839,10 +829,7 @@ export default function HomepageEditor() {
 
       {/* ── Toast ── */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50">
-          <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
+        <div style={{ position: 'fixed', bottom: 24, right: 24, background: '#16a34a', color: '#fff', padding: '12px 16px', borderRadius: 8, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, zIndex: 50 }}>
           Saved! Preview updated.
         </div>
       )}
