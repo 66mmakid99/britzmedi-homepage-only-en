@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#F8FAFC"/>
+  <rect width="1200" height="630" fill="url(#bg1)" opacity="0.4"/>
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1200" y2="630">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E40AF"/>
+    </linearGradient>
+  </defs>
+  <!-- Grid pattern -->
+  <g stroke="#CBD5E1" stroke-width="0.5" opacity="0.3">
+    <line x1="100" y1="0" x2="100" y2="630"/><line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="300" y1="0" x2="300" y2="630"/><line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="500" y1="0" x2="500" y2="630"/><line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="700" y1="0" x2="700" y2="630"/><line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/><line x1="1000" y1="0" x2="1000" y2="630"/>
+    <line x1="1100" y1="0" x2="1100" y2="630"/>
+    <line x1="0" y1="90" x2="1200" y2="90"/><line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/><line x1="0" y1="360" x2="1200" y2="360"/>
+    <line x1="0" y1="450" x2="1200" y2="450"/><line x1="0" y1="540" x2="1200" y2="540"/>
+  </g>
+  <!-- Checklist icon -->
+  <g transform="translate(80, 140)">
+    <rect width="340" height="350" rx="20" fill="white" opacity="0.95" filter="url(#shadow1)"/>
+    <rect x="30" y="30" width="280" height="40" rx="8" fill="#E2E8F0"/>
+    <rect x="30" y="30" width="180" height="40" rx="8" fill="#3B82F6" opacity="0.8"/>
+    <text x="50" y="56" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white">Criteria 1</text>
+    <rect x="270" y="42" width="20" height="20" rx="4" fill="#22C55E"/>
+    <path d="M275 52 L279 56 L287 48" stroke="white" stroke-width="2.5" fill="none"/>
+
+    <rect x="30" y="85" width="280" height="40" rx="8" fill="#E2E8F0"/>
+    <rect x="30" y="85" width="220" height="40" rx="8" fill="#3B82F6" opacity="0.7"/>
+    <text x="50" y="111" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white">Criteria 2</text>
+    <rect x="270" y="97" width="20" height="20" rx="4" fill="#22C55E"/>
+    <path d="M275 107 L279 111 L287 103" stroke="white" stroke-width="2.5" fill="none"/>
+
+    <rect x="30" y="140" width="280" height="40" rx="8" fill="#E2E8F0"/>
+    <rect x="30" y="140" width="150" height="40" rx="8" fill="#3B82F6" opacity="0.6"/>
+    <text x="50" y="166" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white">Criteria 3</text>
+    <rect x="270" y="152" width="20" height="20" rx="4" fill="#22C55E"/>
+    <path d="M275 162 L279 166 L287 158" stroke="white" stroke-width="2.5" fill="none"/>
+
+    <rect x="30" y="195" width="280" height="40" rx="8" fill="#E2E8F0"/>
+    <rect x="30" y="195" width="200" height="40" rx="8" fill="#F59E0B" opacity="0.7"/>
+    <text x="50" y="221" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white">Criteria 4</text>
+
+    <rect x="30" y="250" width="280" height="40" rx="8" fill="#E2E8F0"/>
+    <rect x="30" y="250" width="120" height="40" rx="8" fill="#F59E0B" opacity="0.6"/>
+    <text x="50" y="276" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white">Criteria 5</text>
+
+    <rect x="30" y="305" width="100" height="8" rx="4" fill="#E2E8F0"/>
+    <rect x="140" y="305" width="60" height="8" rx="4" fill="#E2E8F0"/>
+  </g>
+  <!-- Right side: RF device silhouette -->
+  <g transform="translate(550, 100)">
+    <rect width="560" height="430" rx="24" fill="white" opacity="0.08"/>
+    <g transform="translate(120, 40)">
+      <!-- Device body -->
+      <rect x="60" y="30" width="180" height="280" rx="30" fill="#1E3A5F" opacity="0.9"/>
+      <rect x="80" y="60" width="140" height="100" rx="12" fill="#0F172A"/>
+      <!-- Screen -->
+      <rect x="90" y="70" width="120" height="80" rx="8" fill="#1E40AF"/>
+      <text x="110" y="105" font-family="Arial,sans-serif" font-size="14" fill="#93C5FD">RF Mode</text>
+      <text x="110" y="130" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="white">2.4 MHz</text>
+      <!-- Buttons -->
+      <circle cx="120" cy="190" r="15" fill="#334155"/>
+      <circle cx="180" cy="190" r="15" fill="#334155"/>
+      <circle cx="150" cy="230" r="22" fill="#3B82F6" opacity="0.8"/>
+      <text x="141" y="235" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="white">GO</text>
+      <!-- Handpiece -->
+      <rect x="100" y="310" width="100" height="30" rx="6" fill="#475569"/>
+      <rect x="130" y="340" width="40" height="60" rx="8" fill="#64748B"/>
+      <circle cx="150" cy="405" r="18" fill="#3B82F6" opacity="0.6"/>
+    </g>
+  </g>
+  <!-- Title area -->
+  <rect x="0" y="530" width="1200" height="100" fill="#0F172A" opacity="0.85"/>
+  <text x="60" y="575" font-family="Arial,sans-serif" font-size="28" font-weight="bold" fill="white">RF Device Buyer's Guide</text>
+  <text x="60" y="605" font-family="Arial,sans-serif" font-size="16" fill="#93C5FD">7 Critical Criteria for Clinic Owners | BRITZMEDI</text>
+  <defs>
+    <filter id="shadow1" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+</svg>
