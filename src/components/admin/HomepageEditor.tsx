@@ -4,23 +4,9 @@ import ImageCropModal from './ImageCropModal';
 import { IMAGE_PRESETS, formatBytes, type OptimizeResult } from './imageUtils';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-type ActiveTab = 'edit' | 'preview';
-type PreviewMode = 'desktop' | 'tablet' | 'mobile';
 
-const PREVIEW_VIEWPORTS: Record<PreviewMode, { label: string; maxWidth: string }> = {
-  desktop: { label: 'Desktop', maxWidth: '100%' },
-  tablet: { label: 'Tablet', maxWidth: '768px' },
-  mobile: { label: 'Mobile', maxWidth: '399px' },
-};
-
-const HOMEPAGE_SECTIONS = [
-  { id: 'section-hero', label: 'Hero' },
-  { id: 'section-badges', label: 'Badges' },
-  { id: 'section-products', label: 'Products' },
-  { id: 'section-why', label: 'Why Us' },
-  { id: 'section-tech', label: 'Technologies' },
-  { id: 'section-cta', label: 'CTA' },
-];
+const IFRAME_WIDTH = 1440;
+const IFRAME_HEIGHT = 5000;
 
 const PRODUCTS = [
   { id: 'torr-rf', name: 'TORR RF', image: '/images/products/torr-rf.webp' },
@@ -344,15 +330,14 @@ export default function HomepageEditor() {
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [productImages, setProductImages] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<ActiveTab>('edit');
-  const [previewMode, setPreviewMode] = useState<PreviewMode>('desktop');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>('hero');
+  const [previewScale, setPreviewScale] = useState(0.5);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
-  // Load config on mount
   useEffect(() => {
     fetch('/api/admin/homepage')
       .then((res) => {
@@ -373,7 +358,22 @@ export default function HomepageEditor() {
     setProductImages(imgs);
   }, []);
 
-  // Helper to update nested config
+  // Auto-calculate scale based on preview container width
+  useEffect(() => {
+    const container = previewRef.current;
+    if (!container) return;
+
+    const updateScale = () => {
+      const cw = container.clientWidth - 32; // 16px padding each side
+      setPreviewScale(Math.min(cw / IFRAME_WIDTH, 1));
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   const update = useCallback(
     <K extends keyof HomepageConfig>(section: K, partial: Partial<HomepageConfig[K]>) => {
       setConfig((prev) => {
@@ -386,7 +386,6 @@ export default function HomepageEditor() {
     []
   );
 
-  // Save handler
   const handleSave = async () => {
     if (!config) return;
     setSaveStatus('saving');
@@ -418,34 +417,12 @@ export default function HomepageEditor() {
     }
   };
 
-  // Switch to preview tab (with unsaved changes check)
-  const switchToPreview = () => {
-    if (hasUnsavedChanges) {
-      if (confirm('You have unsaved changes. Save before previewing?')) {
-        handleSave().then(() => setActiveTab('preview'));
-        return;
-      }
-    }
-    setActiveTab('preview');
-  };
-
-  // Scroll to section inside iframe
-  const scrollToSection = (sectionId: string) => {
-    try {
-      const el = iframeRef.current?.contentDocument?.getElementById(sectionId);
-      el?.scrollIntoView({ behavior: 'smooth' });
-    } catch {
-      // Cross-origin - ignored
-    }
-  };
-
   const toggleSection = (id: string) => {
     setOpenSection(openSection === id ? null : id);
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  };
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   if (loading) {
     return (
@@ -465,33 +442,9 @@ export default function HomepageEditor() {
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col">
-      {/* ── Fixed Top Bar ── */}
+      {/* ── Top Bar ── */}
       <div className="shrink-0 bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between">
-        {/* Tabs */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setActiveTab('edit')}
-            className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === 'edit'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            Edit
-          </button>
-          <button
-            onClick={switchToPreview}
-            className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === 'preview'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            Preview
-          </button>
-        </div>
-
-        {/* Status + Save */}
+        <h2 className="font-semibold text-slate-900 text-sm">Homepage Editor</h2>
         <div className="flex items-center gap-3">
           {hasUnsavedChanges && (
             <span className="text-xs text-amber-600 flex items-center gap-1.5">
@@ -502,9 +455,6 @@ export default function HomepageEditor() {
           {lastSavedAt && !hasUnsavedChanges && (
             <span className="text-xs text-slate-400">Saved at {formatTime(lastSavedAt)}</span>
           )}
-          {saveStatus === 'error' && (
-            <span className="text-xs text-red-600">Save failed</span>
-          )}
           <button
             onClick={handleSave}
             disabled={saveStatus === 'saving'}
@@ -512,474 +462,388 @@ export default function HomepageEditor() {
           >
             {saveStatus === 'saving' ? 'Saving...' : 'Save'}
           </button>
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
+          >
+            Back to Site
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
       </div>
 
-      {/* ── Content Area ── */}
-      <div className="flex-1 min-h-0">
-        {/* ════ Edit Tab ════ */}
-        {activeTab === 'edit' && (
-          <div className="h-full overflow-y-auto bg-slate-50">
-            <div className="max-w-[800px] mx-auto p-6 space-y-3">
+      {/* ── Main: Editor + Preview ── */}
+      <div className="flex-1 flex min-h-0">
+        {/* Left: Editor Panel */}
+        <div className="w-[400px] shrink-0 overflow-y-auto bg-white border-r border-slate-200 p-4 space-y-3">
 
-              {/* ── Hero Section ── */}
-              <Section title="Hero Section" isOpen={openSection === 'hero'} onToggle={() => toggleSection('hero')}>
+          {/* ── Hero Section ── */}
+          <Section title="Hero Section" isOpen={openSection === 'hero'} onToggle={() => toggleSection('hero')}>
+            <SelectField
+              label="Background Type"
+              value={config.hero.backgroundType}
+              onChange={(v) => update('hero', { backgroundType: v })}
+              options={[
+                { value: 'split', label: 'Model Image (Full-bleed)' },
+                { value: 'image', label: 'Background Image' },
+                { value: 'video', label: 'Video (MP4)' },
+                { value: 'gradient', label: 'Gradient' },
+              ]}
+            />
+
+            {config.hero.backgroundType === 'split' && (
+              <FileUpload
+                label="Hero Model Image (PNG/WebP, max 5MB)"
+                accept="image/webp,image/jpeg,image/png"
+                mediaType="image"
+                currentUrl={config.hero.heroImage || ''}
+                onUploaded={(url) => update('hero', { heroImage: url })}
+                cropPreset="hero"
+              />
+            )}
+
+            {config.hero.backgroundType === 'image' && (
+              <FileUpload
+                label="Background Image (WebP/JPG/PNG, max 5MB)"
+                accept="image/webp,image/jpeg,image/png"
+                mediaType="image"
+                currentUrl={config.hero.backgroundImage}
+                onUploaded={(url) => update('hero', { backgroundImage: url })}
+                cropPreset="hero"
+              />
+            )}
+
+            {config.hero.backgroundType === 'video' && (
+              <>
+                <FileUpload
+                  label="Background Video (MP4, max 50MB)"
+                  accept="video/mp4"
+                  mediaType="video"
+                  currentUrl={config.hero.backgroundVideo}
+                  onUploaded={(url) => update('hero', { backgroundVideo: url })}
+                />
+                <FileUpload
+                  label="Video Poster Image (optional)"
+                  accept="image/webp,image/jpeg,image/png"
+                  mediaType="poster"
+                  currentUrl={config.hero.backgroundVideoPoster}
+                  onUploaded={(url) => update('hero', { backgroundVideoPoster: url })}
+                  cropPreset="hero"
+                />
+              </>
+            )}
+
+            {config.hero.backgroundType !== 'gradient' && config.hero.backgroundType !== 'split' && (
+              <>
+                <NumberField
+                  label="Overlay Opacity"
+                  value={config.hero.overlayOpacity}
+                  onChange={(v) => update('hero', { overlayOpacity: v })}
+                />
                 <SelectField
-                  label="Background Type"
-                  value={config.hero.backgroundType}
-                  onChange={(v) => update('hero', { backgroundType: v })}
+                  label="Overlay Color"
+                  value={config.hero.overlayColor}
+                  onChange={(v) => update('hero', { overlayColor: v })}
                   options={[
-                    { value: 'split', label: 'Model Image (Full-bleed)' },
-                    { value: 'image', label: 'Background Image' },
-                    { value: 'video', label: 'Video (MP4)' },
-                    { value: 'gradient', label: 'Gradient' },
+                    { value: 'dark', label: 'Dark' },
+                    { value: 'light', label: 'Light' },
+                    { value: 'primary', label: 'Primary' },
                   ]}
                 />
+              </>
+            )}
 
-                {config.hero.backgroundType === 'split' && (
+            <TextField label="Badge Text" value={config.hero.badge} onChange={(v) => update('hero', { badge: v })} />
+            <TextField label="Headline" value={config.hero.headline} onChange={(v) => update('hero', { headline: v })} />
+            <TextField label="Highlight Text" value={config.hero.highlightText} onChange={(v) => update('hero', { highlightText: v })} />
+            <TextField label="Subheadline" value={config.hero.subheadline} onChange={(v) => update('hero', { subheadline: v })} />
+            <TextField label="Description" value={config.hero.description} onChange={(v) => update('hero', { description: v })} multiline />
+
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                label="Primary CTA Text"
+                value={config.hero.primaryCTA.text}
+                onChange={(v) => update('hero', { primaryCTA: { ...config.hero.primaryCTA, text: v } })}
+              />
+              <TextField
+                label="Primary CTA Link"
+                value={config.hero.primaryCTA.href}
+                onChange={(v) => update('hero', { primaryCTA: { ...config.hero.primaryCTA, href: v } })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                label="Secondary CTA Text"
+                value={config.hero.secondaryCTA.text}
+                onChange={(v) => update('hero', { secondaryCTA: { ...config.hero.secondaryCTA, text: v } })}
+              />
+              <TextField
+                label="Secondary CTA Link"
+                value={config.hero.secondaryCTA.href}
+                onChange={(v) => update('hero', { secondaryCTA: { ...config.hero.secondaryCTA, href: v } })}
+              />
+            </div>
+          </Section>
+
+          {/* ── Trust Badges ── */}
+          <Section title="Trust Badges (FDA, ISO, GMP, Patents)" isOpen={openSection === 'badges'} onToggle={() => toggleSection('badges')}>
+            {config.trustBadges.badges.map((badge, i) => (
+              <div key={i} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                <div className="text-xs font-medium text-slate-500">Badge {i + 1}</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <TextField
+                    label="Label"
+                    value={badge.label}
+                    onChange={(v) => {
+                      const badges = [...config.trustBadges.badges];
+                      badges[i] = { ...badges[i], label: v };
+                      update('trustBadges', { badges });
+                    }}
+                  />
+                  <TextField
+                    label="Title"
+                    value={badge.title}
+                    onChange={(v) => {
+                      const badges = [...config.trustBadges.badges];
+                      badges[i] = { ...badges[i], title: v };
+                      update('trustBadges', { badges });
+                    }}
+                  />
+                  <TextField
+                    label="Subtitle"
+                    value={badge.subtitle}
+                    onChange={(v) => {
+                      const badges = [...config.trustBadges.badges];
+                      badges[i] = { ...badges[i], subtitle: v };
+                      update('trustBadges', { badges });
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </Section>
+
+          {/* ── Featured Products ── */}
+          <Section title="Featured Products" isOpen={openSection === 'products'} onToggle={() => toggleSection('products')}>
+            <TextField label="Section Label" value={config.featuredProducts.label} onChange={(v) => update('featuredProducts', { label: v })} />
+            <TextField label="Section Title" value={config.featuredProducts.title} onChange={(v) => update('featuredProducts', { title: v })} />
+            <TextField label="Section Description" value={config.featuredProducts.description} onChange={(v) => update('featuredProducts', { description: v })} multiline />
+            <NumberField
+              label="Display Count"
+              value={config.featuredProducts.displayCount}
+              onChange={(v) => update('featuredProducts', { displayCount: v })}
+              min={1}
+              max={6}
+            />
+            <div className="space-y-3 pt-2 border-t border-slate-200">
+              <div className="text-xs font-medium text-slate-600">Product Images</div>
+              {PRODUCTS.map((product) => (
+                <div key={product.id} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                  <div className="text-xs font-medium text-slate-700">{product.name}</div>
                   <FileUpload
-                    label="Hero Model Image (PNG/WebP, max 5MB)"
+                    label={`${product.name} Image (4:3, auto-optimized to WebP)`}
                     accept="image/webp,image/jpeg,image/png"
                     mediaType="image"
-                    currentUrl={config.hero.heroImage || ''}
-                    onUploaded={(url) => update('hero', { heroImage: url })}
-                    cropPreset="hero"
+                    currentUrl={productImages[product.id] || product.image}
+                    onUploaded={(url) => {
+                      setProductImages((prev) => ({ ...prev, [product.id]: url }));
+                    }}
+                    cropPreset="product-thumb"
+                    uploadTarget="product"
+                    productId={product.id}
                   />
-                )}
+                </div>
+              ))}
+            </div>
+          </Section>
 
-                {config.hero.backgroundType === 'image' && (
-                  <FileUpload
-                    label="Background Image (WebP/JPG/PNG, max 5MB)"
-                    accept="image/webp,image/jpeg,image/png"
-                    mediaType="image"
-                    currentUrl={config.hero.backgroundImage}
-                    onUploaded={(url) => update('hero', { backgroundImage: url })}
-                    cropPreset="hero"
+          {/* ── Why BRITZMEDI ── */}
+          <Section title="Why BRITZMEDI" isOpen={openSection === 'why'} onToggle={() => toggleSection('why')}>
+            <TextField label="Section Label" value={config.whyBritzMedi.label} onChange={(v) => update('whyBritzMedi', { label: v })} />
+            <TextField label="Section Title (use \\n for line breaks)" value={config.whyBritzMedi.title} onChange={(v) => update('whyBritzMedi', { title: v })} multiline />
+
+            <div className="space-y-3">
+              <div className="text-xs font-medium text-slate-600">Features</div>
+              {config.whyBritzMedi.features.map((feat, i) => (
+                <div key={i} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                  <div className="text-xs font-medium text-slate-500">Feature {i + 1}</div>
+                  <TextField
+                    label="Title"
+                    value={feat.title}
+                    onChange={(v) => {
+                      const features = [...config.whyBritzMedi.features];
+                      features[i] = { ...features[i], title: v };
+                      update('whyBritzMedi', { features });
+                    }}
                   />
-                )}
+                  <TextField
+                    label="Description"
+                    value={feat.description}
+                    onChange={(v) => {
+                      const features = [...config.whyBritzMedi.features];
+                      features[i] = { ...features[i], description: v };
+                      update('whyBritzMedi', { features });
+                    }}
+                    multiline
+                  />
+                  <TextField
+                    label="Icon Path (SVG d attribute)"
+                    value={feat.iconPath}
+                    onChange={(v) => {
+                      const features = [...config.whyBritzMedi.features];
+                      features[i] = { ...features[i], iconPath: v };
+                      update('whyBritzMedi', { features });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
 
-                {config.hero.backgroundType === 'video' && (
-                  <>
-                    <FileUpload
-                      label="Background Video (MP4, max 50MB)"
-                      accept="video/mp4"
-                      mediaType="video"
-                      currentUrl={config.hero.backgroundVideo}
-                      onUploaded={(url) => update('hero', { backgroundVideo: url })}
+            <div className="space-y-3">
+              <div className="text-xs font-medium text-slate-600">Company Stats</div>
+              <TextField label="Stats Title" value={config.whyBritzMedi.statsTitle} onChange={(v) => update('whyBritzMedi', { statsTitle: v })} />
+              {config.whyBritzMedi.stats.map((stat, i) => (
+                <div key={i} className="p-3 bg-slate-50 rounded-lg">
+                  <div className="grid grid-cols-3 gap-2">
+                    <TextField
+                      label="Label"
+                      value={stat.label}
+                      onChange={(v) => {
+                        const stats = [...config.whyBritzMedi.stats];
+                        stats[i] = { ...stats[i], label: v };
+                        update('whyBritzMedi', { stats });
+                      }}
                     />
-                    <FileUpload
-                      label="Video Poster Image (optional)"
-                      accept="image/webp,image/jpeg,image/png"
-                      mediaType="poster"
-                      currentUrl={config.hero.backgroundVideoPoster}
-                      onUploaded={(url) => update('hero', { backgroundVideoPoster: url })}
-                      cropPreset="hero"
-                    />
-                  </>
-                )}
-
-                {config.hero.backgroundType !== 'gradient' && config.hero.backgroundType !== 'split' && (
-                  <>
-                    <NumberField
-                      label="Overlay Opacity"
-                      value={config.hero.overlayOpacity}
-                      onChange={(v) => update('hero', { overlayOpacity: v })}
+                    <TextField
+                      label="Value"
+                      value={stat.value}
+                      onChange={(v) => {
+                        const stats = [...config.whyBritzMedi.stats];
+                        stats[i] = { ...stats[i], value: v };
+                        update('whyBritzMedi', { stats });
+                      }}
                     />
                     <SelectField
-                      label="Overlay Color"
-                      value={config.hero.overlayColor}
-                      onChange={(v) => update('hero', { overlayColor: v })}
+                      label="Type"
+                      value={stat.type}
+                      onChange={(v) => {
+                        const stats = [...config.whyBritzMedi.stats];
+                        stats[i] = { ...stats[i], type: v };
+                        update('whyBritzMedi', { stats });
+                      }}
                       options={[
-                        { value: 'dark', label: 'Dark' },
-                        { value: 'light', label: 'Light' },
-                        { value: 'primary', label: 'Primary' },
+                        { value: 'number', label: 'Number' },
+                        { value: 'badge', label: 'Badge' },
                       ]}
                     />
-                  </>
-                )}
-
-                <TextField label="Badge Text" value={config.hero.badge} onChange={(v) => update('hero', { badge: v })} />
-                <TextField label="Headline" value={config.hero.headline} onChange={(v) => update('hero', { headline: v })} />
-                <TextField label="Highlight Text" value={config.hero.highlightText} onChange={(v) => update('hero', { highlightText: v })} />
-                <TextField label="Subheadline" value={config.hero.subheadline} onChange={(v) => update('hero', { subheadline: v })} />
-                <TextField label="Description" value={config.hero.description} onChange={(v) => update('hero', { description: v })} multiline />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField
-                    label="Primary CTA Text"
-                    value={config.hero.primaryCTA.text}
-                    onChange={(v) => update('hero', { primaryCTA: { ...config.hero.primaryCTA, text: v } })}
-                  />
-                  <TextField
-                    label="Primary CTA Link"
-                    value={config.hero.primaryCTA.href}
-                    onChange={(v) => update('hero', { primaryCTA: { ...config.hero.primaryCTA, href: v } })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField
-                    label="Secondary CTA Text"
-                    value={config.hero.secondaryCTA.text}
-                    onChange={(v) => update('hero', { secondaryCTA: { ...config.hero.secondaryCTA, text: v } })}
-                  />
-                  <TextField
-                    label="Secondary CTA Link"
-                    value={config.hero.secondaryCTA.href}
-                    onChange={(v) => update('hero', { secondaryCTA: { ...config.hero.secondaryCTA, href: v } })}
-                  />
-                </div>
-              </Section>
-
-              {/* ── Trust Badges ── */}
-              <Section title="Trust Badges (FDA, ISO, GMP, Patents)" isOpen={openSection === 'badges'} onToggle={() => toggleSection('badges')}>
-                {config.trustBadges.badges.map((badge, i) => (
-                  <div key={i} className="p-3 bg-slate-50 rounded-lg space-y-2">
-                    <div className="text-xs font-medium text-slate-500">Badge {i + 1}</div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <TextField
-                        label="Label"
-                        value={badge.label}
-                        onChange={(v) => {
-                          const badges = [...config.trustBadges.badges];
-                          badges[i] = { ...badges[i], label: v };
-                          update('trustBadges', { badges });
-                        }}
-                      />
-                      <TextField
-                        label="Title"
-                        value={badge.title}
-                        onChange={(v) => {
-                          const badges = [...config.trustBadges.badges];
-                          badges[i] = { ...badges[i], title: v };
-                          update('trustBadges', { badges });
-                        }}
-                      />
-                      <TextField
-                        label="Subtitle"
-                        value={badge.subtitle}
-                        onChange={(v) => {
-                          const badges = [...config.trustBadges.badges];
-                          badges[i] = { ...badges[i], subtitle: v };
-                          update('trustBadges', { badges });
-                        }}
-                      />
-                    </div>
                   </div>
-                ))}
-              </Section>
-
-              {/* ── Featured Products ── */}
-              <Section title="Featured Products" isOpen={openSection === 'products'} onToggle={() => toggleSection('products')}>
-                <TextField label="Section Label" value={config.featuredProducts.label} onChange={(v) => update('featuredProducts', { label: v })} />
-                <TextField label="Section Title" value={config.featuredProducts.title} onChange={(v) => update('featuredProducts', { title: v })} />
-                <TextField label="Section Description" value={config.featuredProducts.description} onChange={(v) => update('featuredProducts', { description: v })} multiline />
-                <NumberField
-                  label="Display Count"
-                  value={config.featuredProducts.displayCount}
-                  onChange={(v) => update('featuredProducts', { displayCount: v })}
-                  min={1}
-                  max={6}
-                />
-
-                <div className="space-y-3 pt-2 border-t border-slate-200">
-                  <div className="text-xs font-medium text-slate-600">Product Images</div>
-                  {PRODUCTS.map((product) => (
-                    <div key={product.id} className="p-3 bg-slate-50 rounded-lg space-y-2">
-                      <div className="text-xs font-medium text-slate-700">{product.name}</div>
-                      <FileUpload
-                        label={`${product.name} Image (4:3, auto-optimized to WebP)`}
-                        accept="image/webp,image/jpeg,image/png"
-                        mediaType="image"
-                        currentUrl={productImages[product.id] || product.image}
-                        onUploaded={(url) => {
-                          setProductImages((prev) => ({ ...prev, [product.id]: url }));
-                        }}
-                        cropPreset="product-thumb"
-                        uploadTarget="product"
-                        productId={product.id}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Section>
-
-              {/* ── Why BRITZMEDI ── */}
-              <Section title="Why BRITZMEDI" isOpen={openSection === 'why'} onToggle={() => toggleSection('why')}>
-                <TextField label="Section Label" value={config.whyBritzMedi.label} onChange={(v) => update('whyBritzMedi', { label: v })} />
-                <TextField label="Section Title (use \\n for line breaks)" value={config.whyBritzMedi.title} onChange={(v) => update('whyBritzMedi', { title: v })} multiline />
-
-                <div className="space-y-3">
-                  <div className="text-xs font-medium text-slate-600">Features</div>
-                  {config.whyBritzMedi.features.map((feat, i) => (
-                    <div key={i} className="p-3 bg-slate-50 rounded-lg space-y-2">
-                      <div className="text-xs font-medium text-slate-500">Feature {i + 1}</div>
+                  {stat.type === 'badge' && (
+                    <div className="mt-2">
                       <TextField
-                        label="Title"
-                        value={feat.title}
+                        label="Badge Text"
+                        value={stat.badgeText || ''}
                         onChange={(v) => {
-                          const features = [...config.whyBritzMedi.features];
-                          features[i] = { ...features[i], title: v };
-                          update('whyBritzMedi', { features });
-                        }}
-                      />
-                      <TextField
-                        label="Description"
-                        value={feat.description}
-                        onChange={(v) => {
-                          const features = [...config.whyBritzMedi.features];
-                          features[i] = { ...features[i], description: v };
-                          update('whyBritzMedi', { features });
-                        }}
-                        multiline
-                      />
-                      <TextField
-                        label="Icon Path (SVG d attribute)"
-                        value={feat.iconPath}
-                        onChange={(v) => {
-                          const features = [...config.whyBritzMedi.features];
-                          features[i] = { ...features[i], iconPath: v };
-                          update('whyBritzMedi', { features });
+                          const stats = [...config.whyBritzMedi.stats];
+                          stats[i] = { ...stats[i], badgeText: v };
+                          update('whyBritzMedi', { stats });
                         }}
                       />
                     </div>
-                  ))}
+                  )}
                 </div>
-
-                <div className="space-y-3">
-                  <div className="text-xs font-medium text-slate-600">Company Stats</div>
-                  <TextField label="Stats Title" value={config.whyBritzMedi.statsTitle} onChange={(v) => update('whyBritzMedi', { statsTitle: v })} />
-                  {config.whyBritzMedi.stats.map((stat, i) => (
-                    <div key={i} className="p-3 bg-slate-50 rounded-lg">
-                      <div className="grid grid-cols-3 gap-2">
-                        <TextField
-                          label="Label"
-                          value={stat.label}
-                          onChange={(v) => {
-                            const stats = [...config.whyBritzMedi.stats];
-                            stats[i] = { ...stats[i], label: v };
-                            update('whyBritzMedi', { stats });
-                          }}
-                        />
-                        <TextField
-                          label="Value"
-                          value={stat.value}
-                          onChange={(v) => {
-                            const stats = [...config.whyBritzMedi.stats];
-                            stats[i] = { ...stats[i], value: v };
-                            update('whyBritzMedi', { stats });
-                          }}
-                        />
-                        <SelectField
-                          label="Type"
-                          value={stat.type}
-                          onChange={(v) => {
-                            const stats = [...config.whyBritzMedi.stats];
-                            stats[i] = { ...stats[i], type: v };
-                            update('whyBritzMedi', { stats });
-                          }}
-                          options={[
-                            { value: 'number', label: 'Number' },
-                            { value: 'badge', label: 'Badge' },
-                          ]}
-                        />
-                      </div>
-                      {stat.type === 'badge' && (
-                        <div className="mt-2">
-                          <TextField
-                            label="Badge Text"
-                            value={stat.badgeText || ''}
-                            onChange={(v) => {
-                              const stats = [...config.whyBritzMedi.stats];
-                              stats[i] = { ...stats[i], badgeText: v };
-                              update('whyBritzMedi', { stats });
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-2 gap-2">
-                    <TextField label="Learn More Text" value={config.whyBritzMedi.learnMoreText} onChange={(v) => update('whyBritzMedi', { learnMoreText: v })} />
-                    <TextField label="Learn More Link" value={config.whyBritzMedi.learnMoreHref} onChange={(v) => update('whyBritzMedi', { learnMoreHref: v })} />
-                  </div>
-                </div>
-              </Section>
-
-              {/* ── Core Technologies ── */}
-              <Section title="Core Technologies" isOpen={openSection === 'tech'} onToggle={() => toggleSection('tech')}>
-                <TextField label="Section Label" value={config.coreTechnologies.label} onChange={(v) => update('coreTechnologies', { label: v })} />
-                <TextField label="Section Title" value={config.coreTechnologies.title} onChange={(v) => update('coreTechnologies', { title: v })} />
-                <TextField label="Section Description" value={config.coreTechnologies.description} onChange={(v) => update('coreTechnologies', { description: v })} multiline />
-                <p className="text-xs text-slate-400">
-                  Individual technology data is managed in company.ts.
-                </p>
-              </Section>
-
-              {/* ── CTA Section ── */}
-              <Section title="CTA Section (Ready to Partner)" isOpen={openSection === 'cta'} onToggle={() => toggleSection('cta')}>
-                <TextField label="Title" value={config.cta.title} onChange={(v) => update('cta', { title: v })} />
-                <TextField label="Description" value={config.cta.description} onChange={(v) => update('cta', { description: v })} multiline />
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField
-                    label="Primary CTA Text"
-                    value={config.cta.primaryCTA.text}
-                    onChange={(v) => update('cta', { primaryCTA: { ...config.cta.primaryCTA, text: v } })}
-                  />
-                  <TextField
-                    label="Primary CTA Link"
-                    value={config.cta.primaryCTA.href}
-                    onChange={(v) => update('cta', { primaryCTA: { ...config.cta.primaryCTA, href: v } })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField
-                    label="Secondary CTA Text"
-                    value={config.cta.secondaryCTA.text}
-                    onChange={(v) => update('cta', { secondaryCTA: { ...config.cta.secondaryCTA, text: v } })}
-                  />
-                  <TextField
-                    label="Secondary CTA Link"
-                    value={config.cta.secondaryCTA.href}
-                    onChange={(v) => update('cta', { secondaryCTA: { ...config.cta.secondaryCTA, href: v } })}
-                  />
-                </div>
-              </Section>
-
-              {/* Preview button */}
-              <div className="pt-4 flex justify-center">
-                <button
-                  onClick={switchToPreview}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  Preview Homepage
-                </button>
+              ))}
+              <div className="grid grid-cols-2 gap-2">
+                <TextField label="Learn More Text" value={config.whyBritzMedi.learnMoreText} onChange={(v) => update('whyBritzMedi', { learnMoreText: v })} />
+                <TextField label="Learn More Link" value={config.whyBritzMedi.learnMoreHref} onChange={(v) => update('whyBritzMedi', { learnMoreHref: v })} />
               </div>
-
-              {lastSavedAt && (
-                <div className="text-center text-xs text-slate-400 pb-4">
-                  Last saved at {formatTime(lastSavedAt)}
-                </div>
-              )}
             </div>
+          </Section>
+
+          {/* ── Core Technologies ── */}
+          <Section title="Core Technologies" isOpen={openSection === 'tech'} onToggle={() => toggleSection('tech')}>
+            <TextField label="Section Label" value={config.coreTechnologies.label} onChange={(v) => update('coreTechnologies', { label: v })} />
+            <TextField label="Section Title" value={config.coreTechnologies.title} onChange={(v) => update('coreTechnologies', { title: v })} />
+            <TextField label="Section Description" value={config.coreTechnologies.description} onChange={(v) => update('coreTechnologies', { description: v })} multiline />
+            <p className="text-xs text-slate-400">
+              Individual technology data is managed in company.ts.
+            </p>
+          </Section>
+
+          {/* ── CTA Section ── */}
+          <Section title="CTA Section (Ready to Partner)" isOpen={openSection === 'cta'} onToggle={() => toggleSection('cta')}>
+            <TextField label="Title" value={config.cta.title} onChange={(v) => update('cta', { title: v })} />
+            <TextField label="Description" value={config.cta.description} onChange={(v) => update('cta', { description: v })} multiline />
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                label="Primary CTA Text"
+                value={config.cta.primaryCTA.text}
+                onChange={(v) => update('cta', { primaryCTA: { ...config.cta.primaryCTA, text: v } })}
+              />
+              <TextField
+                label="Primary CTA Link"
+                value={config.cta.primaryCTA.href}
+                onChange={(v) => update('cta', { primaryCTA: { ...config.cta.primaryCTA, href: v } })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                label="Secondary CTA Text"
+                value={config.cta.secondaryCTA.text}
+                onChange={(v) => update('cta', { secondaryCTA: { ...config.cta.secondaryCTA, text: v } })}
+              />
+              <TextField
+                label="Secondary CTA Link"
+                value={config.cta.secondaryCTA.href}
+                onChange={(v) => update('cta', { secondaryCTA: { ...config.cta.secondaryCTA, href: v } })}
+              />
+            </div>
+          </Section>
+
+          {/* Footer */}
+          {lastSavedAt && (
+            <div className="text-center text-xs text-slate-400 pt-2 pb-4">
+              Last saved at {formatTime(lastSavedAt)}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Preview Panel */}
+        <div ref={previewRef} className="flex-1 overflow-y-auto bg-slate-100 p-4 min-w-0">
+          <div
+            className="bg-white rounded-lg shadow-lg border border-slate-300 overflow-hidden"
+            style={{
+              width: IFRAME_WIDTH * previewScale,
+              height: IFRAME_HEIGHT * previewScale,
+            }}
+          >
+            <iframe
+              ref={iframeRef}
+              src="/"
+              title="Homepage Preview"
+              className="bg-white"
+              style={{
+                width: IFRAME_WIDTH,
+                height: IFRAME_HEIGHT,
+                transform: `scale(${previewScale})`,
+                transformOrigin: 'top left',
+                border: 'none',
+              }}
+            />
           </div>
-        )}
-
-        {/* ════ Preview Tab ════ */}
-        {activeTab === 'preview' && (
-          <div className="h-full flex flex-col">
-            {/* Preview toolbar */}
-            <div className="shrink-0 flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200">
-              {/* Section shortcuts */}
-              <div className="flex items-center gap-1 overflow-x-auto">
-                <span className="text-xs text-slate-400 mr-1 shrink-0">Jump to:</span>
-                {HOMEPAGE_SECTIONS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => scrollToSection(s.id)}
-                    className="px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-100 rounded transition-colors shrink-0"
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-              {/* Viewport toggles + Refresh */}
-              <div className="flex items-center gap-1 shrink-0 ml-2">
-                {(['desktop', 'tablet', 'mobile'] as PreviewMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setPreviewMode(mode)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md transition-colors ${
-                      previewMode === mode
-                        ? 'bg-blue-100 text-blue-700 font-medium'
-                        : 'text-slate-500 hover:bg-slate-100'
-                    }`}
-                  >
-                    {mode === 'desktop' && (
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    )}
-                    {mode === 'tablet' && (
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                    )}
-                    {mode === 'mobile' && (
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                    )}
-                    {PREVIEW_VIEWPORTS[mode].label}
-                  </button>
-                ))}
-                <div className="w-px h-4 bg-slate-200 mx-1" />
-                <button
-                  onClick={() => iframeRef.current?.contentWindow?.location.reload()}
-                  className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            {/* iframe container */}
-            <div className="flex-1 overflow-hidden bg-slate-100 p-4">
-              <div
-                className={`h-full mx-auto ${
-                  previewMode === 'mobile'
-                    ? 'flex flex-col bg-slate-800 rounded-[2.5rem] p-3 shadow-2xl'
-                    : ''
-                }`}
-                style={{ maxWidth: PREVIEW_VIEWPORTS[previewMode].maxWidth }}
-              >
-                {/* Mobile notch */}
-                {previewMode === 'mobile' && (
-                  <div className="shrink-0 flex justify-center py-1.5">
-                    <div className="w-16 h-3.5 bg-slate-900 rounded-full" />
-                  </div>
-                )}
-                {/* iframe wrapper */}
-                <div className={`${
-                  previewMode === 'mobile'
-                    ? 'flex-1 min-h-0 rounded-[1.5rem] overflow-hidden'
-                    : 'h-full'
-                }`}>
-                  <iframe
-                    ref={iframeRef}
-                    src="/"
-                    title="Homepage Preview"
-                    className={`w-full h-full bg-white ${
-                      previewMode !== 'mobile' ? 'rounded-lg shadow-lg border border-slate-300' : ''
-                    }`}
-                    style={{ border: 'none' }}
-                  />
-                </div>
-                {/* Mobile home bar */}
-                {previewMode === 'mobile' && (
-                  <div className="shrink-0 flex justify-center py-1.5">
-                    <div className="w-10 h-1 bg-slate-600 rounded-full" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* ── Toast Notification ── */}
+      {/* ── Toast ── */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 animate-[fadeIn_0.2s_ease-out]">
+        <div className="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50">
           <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
-          Changes saved! Preview updated.
+          Saved! Preview updated.
         </div>
       )}
     </div>
