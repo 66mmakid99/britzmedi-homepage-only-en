@@ -6,6 +6,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { checkContentQuality } from '../../../../lib/content/quality-checker';
+import { logActivity } from '../../../../lib/activity-log';
 import { deleteFileFromGitHub } from '../../../../lib/youtube-to-blog/github';
 
 // Valid transitions: [currentStatus] -> [allowed target statuses]
@@ -153,6 +154,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     await db.prepare(
       `UPDATE blog_posts SET status = ?, updated_at = ? WHERE id = ?`
     ).bind(targetStatus, now, id).run();
+
+    logActivity(db, { type: 'content_transition', detail: `"${post.title}" ${post.status} → ${targetStatus}` }).catch(() => {});
 
     return new Response(JSON.stringify({
       success: true,

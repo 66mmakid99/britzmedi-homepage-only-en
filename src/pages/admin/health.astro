@@ -1,0 +1,182 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Health Check">
+  <div id="health-root">
+    <div style="display:flex; align-items:center; justify-content:center; height:200px; color:#94a3b8;">
+      Loading last report...
+    </div>
+  </div>
+
+  <style>
+    .health-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .health-summary { display: flex; gap: 16px; flex-wrap: wrap; }
+    .health-badge { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .health-badge.pass { background: #dcfce7; color: #16a34a; }
+    .health-badge.warn { background: #fef3c7; color: #d97706; }
+    .health-badge.fail { background: #fee2e2; color: #dc2626; }
+    .run-btn { padding: 10px 24px; font-size: 14px; font-weight: 600; color: #fff; background: #2563eb; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .run-btn:hover { background: #1d4ed8; }
+    .run-btn:disabled { background: #93c5fd; cursor: wait; }
+    .export-btn { padding: 8px 16px; font-size: 13px; font-weight: 500; color: #64748b; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; }
+    .export-btn:hover { background: #f8fafc; }
+    .category-section { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 16px; overflow: hidden; }
+    .category-header { padding: 14px 20px; font-size: 14px; font-weight: 600; color: #0f172a; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .check-row { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid #f1f5f9; gap: 12px; font-size: 13px; cursor: pointer; }
+    .check-row:last-child { border-bottom: none; }
+    .check-row:hover { background: #f8fafc; }
+    .check-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    .check-name { flex: 1; color: #334155; font-weight: 500; }
+    .check-detail { color: #94a3b8; font-size: 12px; max-width: 300px; text-align: right; }
+    .check-duration { color: #cbd5e1; font-size: 11px; width: 50px; text-align: right; }
+    .check-expand { display: none; padding: 12px 20px 12px 52px; background: #f8fafc; font-size: 12px; color: #64748b; border-bottom: 1px solid #f1f5f9; }
+    .check-expand.show { display: block; }
+    .meta-line { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+  </style>
+
+  <script is:inline>
+    const STATUS_ICONS = {
+      pass: '<svg class="check-icon" viewBox="0 0 20 20" fill="#16a34a"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>',
+      warn: '<svg class="check-icon" viewBox="0 0 20 20" fill="#d97706"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>',
+      fail: '<svg class="check-icon" viewBox="0 0 20 20" fill="#dc2626"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>',
+    };
+
+    const CATEGORY_ICONS = {
+      'Infrastructure': '📡',
+      'Environment': '🔑',
+      'Data': '📊',
+      'External': '🔗',
+    };
+
+    let currentReport = null;
+
+    async function loadLastReport() {
+      try {
+        const res = await fetch('/api/admin/health-check');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.results) {
+          currentReport = data;
+          renderReport(data);
+        } else {
+          renderEmpty();
+        }
+      } catch {
+        renderEmpty();
+      }
+    }
+
+    async function runHealthCheck() {
+      const btn = document.getElementById('runBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></span> Running...'; }
+
+      try {
+        const res = await fetch('/api/admin/health-check', { method: 'POST' });
+        const data = await res.json();
+        currentReport = data;
+        renderReport(data);
+      } catch {
+        alert('Health check failed. Please try again.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Run Health Check'; }
+      }
+    }
+
+    function exportReport() {
+      if (!currentReport) return;
+      const blob = new Blob([JSON.stringify(currentReport, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `health-report-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderEmpty() {
+      document.getElementById('health-root').innerHTML = `
+        <div class="health-header">
+          <h2 style="font-size:18px; font-weight:600; color:#0f172a; margin:0;">System Health Check</h2>
+          <button id="runBtn" class="run-btn" onclick="runHealthCheck()">Run Health Check</button>
+        </div>
+        <div style="text-align:center; padding:60px; color:#94a3b8;">
+          <svg style="width:48px;height:48px;margin:0 auto 16px;color:#cbd5e1;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <div style="font-size:15px; color:#64748b;">No health check has been run yet.</div>
+          <div style="font-size:13px; margin-top:4px;">Click "Run Health Check" to scan all systems.</div>
+        </div>
+      `;
+    }
+
+    function renderReport(report) {
+      const categories = {};
+      for (const r of report.results) {
+        if (!categories[r.category]) categories[r.category] = [];
+        categories[r.category].push(r);
+      }
+
+      let html = `
+        <div class="health-header">
+          <div>
+            <h2 style="font-size:18px; font-weight:600; color:#0f172a; margin:0 0 8px;">System Health Check</h2>
+            <div class="health-summary">
+              <span class="health-badge pass">✅ ${report.summary.pass} Pass</span>
+              <span class="health-badge warn">⚠️ ${report.summary.warn} Warn</span>
+              <span class="health-badge fail">❌ ${report.summary.fail} Fail</span>
+            </div>
+            <div class="meta-line">Checked: ${new Date(report.checkedAt).toLocaleString()} · Duration: ${report.duration}ms</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="export-btn" onclick="exportReport()">Export JSON</button>
+            <button id="runBtn" class="run-btn" onclick="runHealthCheck()">Run Health Check</button>
+          </div>
+        </div>
+      `;
+
+      for (const [cat, checks] of Object.entries(categories)) {
+        html += `<div class="category-section">
+          <div class="category-header">${CATEGORY_ICONS[cat] || '📋'} ${cat}</div>`;
+        for (let i = 0; i < checks.length; i++) {
+          const c = checks[i];
+          const id = `check-${cat}-${i}`;
+          html += `
+            <div class="check-row" onclick="document.getElementById('${id}').classList.toggle('show')">
+              ${STATUS_ICONS[c.status]}
+              <span class="check-name">${escapeHtml(c.name)}</span>
+              <span class="check-detail">${escapeHtml(c.detail)}</span>
+              ${c.duration ? `<span class="check-duration">${c.duration}ms</span>` : '<span class="check-duration"></span>'}
+            </div>
+            <div class="check-expand" id="${id}">
+              <strong>Status:</strong> ${c.status.toUpperCase()}<br>
+              <strong>Detail:</strong> ${escapeHtml(c.detail)}<br>
+              ${c.duration ? `<strong>Response time:</strong> ${c.duration}ms<br>` : ''}
+              ${c.status === 'fail' ? `<strong>Hint:</strong> ${getHint(c.name)}` : ''}
+            </div>`;
+        }
+        html += '</div>';
+      }
+
+      document.getElementById('health-root').innerHTML = html;
+    }
+
+    function getHint(name) {
+      const hints = {
+        'D1 Database': 'Check wrangler.jsonc d1_databases binding.',
+        'KV Namespace': 'Check wrangler.jsonc kv_namespaces binding.',
+        'R2 Bucket': 'Check wrangler.jsonc r2_buckets binding.',
+      };
+      if (name.startsWith('Table:')) return 'Run the migration SQL in D1 Console to create this table.';
+      return hints[name] || 'Check Cloudflare Dashboard settings for this resource.';
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str || '';
+      return d.innerHTML;
+    }
+
+    loadLastReport();
+  </script>
+</AdminLayout>

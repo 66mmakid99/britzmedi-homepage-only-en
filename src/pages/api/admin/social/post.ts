@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import type { SocialChannel } from '../../../../lib/social/types';
 import { getChannelPoster } from '../../../../lib/social/channels';
 import { generateContent } from '../../../../lib/social/content-generator';
+import { logActivity } from '../../../../lib/activity-log';
 
 const VALID_CHANNELS = ['twitter', 'linkedin', 'facebook', 'instagram'];
 
@@ -103,6 +104,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         WHERE id = ?
       `).bind(now, result.externalId || null, now, socialPostId).run();
 
+      logActivity(db, { type: 'social_posted', detail: `Social post to ${channel}: ${content.slice(0, 80)}...` }).catch(() => {});
+
       return new Response(JSON.stringify({
         success: true,
         externalId: result.externalId,
@@ -115,6 +118,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         UPDATE social_posts SET status = 'failed', error_message = ?, updated_at = ?
         WHERE id = ?
       `).bind(result.error || 'Post failed', now, socialPostId).run();
+
+      logActivity(db, { type: 'social_failed', detail: `Social post failed on ${channel}: ${result.error}` }).catch(() => {});
 
       return new Response(JSON.stringify({ error: result.error || 'Post failed' }), {
         status: 500,

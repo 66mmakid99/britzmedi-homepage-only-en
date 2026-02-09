@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { logActivity } from '../../../../lib/activity-log';
 
 export const prerender = false;
 
@@ -215,6 +216,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     console.log(`[Research API] Research completed for lead ${leadId}: fit score ${research.partnershipFitScore}/10`);
+
+    // Log activity
+    logActivity(db, { type: 'ai_research', detail: `AI research: ${lead.company_name} — Fit score ${research.partnershipFitScore}/10` }).catch(() => {});
 
     return new Response(JSON.stringify({ success: true, research }), {
       headers: { 'Content-Type': 'application/json' },

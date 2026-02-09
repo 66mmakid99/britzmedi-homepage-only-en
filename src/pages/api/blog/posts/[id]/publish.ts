@@ -7,6 +7,7 @@ import type { APIRoute } from 'astro';
 import { commitFileToGitHub, buildBlogPostJson } from '../../../../../lib/youtube-to-blog/github';
 import { generateArticleSchema, generateBreadcrumbSchema } from '../../../../../lib/youtube-to-blog/templates/schema-json-ld';
 import type { BlogPost } from '../../../../../lib/youtube-to-blog/schemas';
+import { logActivity } from '../../../../../lib/activity-log';
 
 export const POST: APIRoute = async ({ params, locals }) => {
   const { id } = params;
@@ -153,6 +154,8 @@ export const POST: APIRoute = async ({ params, locals }) => {
     } catch (socialError) {
       console.error('[Publish] Social auto-post error (non-blocking):', socialError);
     }
+
+    logActivity(db, { type: 'blog_published', detail: `Blog published: "${post.title}" (${post.slug})` }).catch(() => {});
 
     return new Response(JSON.stringify({
       success: true,

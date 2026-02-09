@@ -49,7 +49,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     return next();
   }
 
-  // Admin routes - use cookie session auth
+  // Admin page routes - use cookie session auth
   if (pathname.startsWith('/admin')) {
     const sessionToken = context.cookies.get('admin_session')?.value;
 
@@ -59,9 +59,30 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
     const valid = await isValidSession(context, sessionToken);
     if (!valid) {
-      // Clear invalid cookie
       context.cookies.delete('admin_session', { path: '/' });
       return context.redirect('/admin/login?error=expired');
+    }
+
+    return next();
+  }
+
+  // Admin API routes - cookie auth (returns 401 JSON instead of redirect)
+  if (pathname.startsWith('/api/admin/')) {
+    const sessionToken = context.cookies.get('admin_session')?.value;
+
+    if (!sessionToken) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const valid = await isValidSession(context, sessionToken);
+    if (!valid) {
+      return new Response(JSON.stringify({ error: 'Session expired' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     return next();

@@ -3,6 +3,7 @@
 
 import type { APIRoute } from 'astro';
 import { sendEmail } from '../../../lib/youtube-to-blog/email';
+import { logActivity } from '../../../lib/activity-log';
 
 export const prerender = false;
 
@@ -121,6 +122,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     } else {
       console.log('[Subscribe API] No RESEND_API_KEY - skipping confirmation email');
+    }
+
+    if (db) {
+      logActivity(db, { type: 'subscriber_added', detail: `New subscriber: ${email} (${lang})` }).catch(() => {});
     }
 
     return new Response(JSON.stringify({

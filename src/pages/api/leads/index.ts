@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { sendSlackNotification, sendUrgentLeadAlert } from '../../../lib/slack';
 import { calculateLeadScore as calculateAdvancedScore } from '../../../lib/lead-score';
+import { logActivity } from '../../../lib/activity-log';
 
 export const prerender = false;
 
@@ -251,6 +252,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     ).run();
 
     console.log('[Leads API] Lead created:', result.meta?.last_row_id);
+
+    // Log activity (non-blocking)
+    logActivity(db, {
+      type: 'lead_created',
+      detail: `New lead: ${data.company_name} (${data.country}) — Grade ${grade}, Score ${score}`,
+      ip: clientIP,
+    }).catch(() => {});
 
     // Send Slack notification (non-blocking, failure won't affect response)
     const slackUrl = (env as any)?.SLACK_WEBHOOK_URL as string | undefined;

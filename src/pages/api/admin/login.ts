@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { logActivity } from '../../../lib/activity-log';
 
 export const prerender = false;
 
@@ -154,7 +155,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => 
           maxAge: LOGIN_SECURITY.sessionMaxAge,
         });
         console.log('[Admin Auth] Login successful (fallback static token)');
-        return redirect('/admin/leads');
+        const fbDb = locals?.runtime?.env?.DB;
+        if (fbDb) logActivity(fbDb, { type: 'admin_login', detail: 'Admin login (fallback)', ip: clientIP }).catch(() => {});
+        return redirect('/admin');
       }
       return redirect('/admin/login?error=invalid');
     }
@@ -173,7 +176,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => 
       maxAge: LOGIN_SECURITY.sessionMaxAge,
     });
     console.log('[Admin Auth] Login successful (dev mode, static token)');
-    return redirect('/admin/leads');
+    return redirect('/admin');
   }
 
   // Set session cookie with random token
@@ -186,5 +189,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => 
   });
 
   console.log('[Admin Auth] Login successful (KV session)');
-  return redirect('/admin/leads');
+  const loginDb = locals?.runtime?.env?.DB;
+  if (loginDb) logActivity(loginDb, { type: 'admin_login', detail: 'Admin login', ip: clientIP }).catch(() => {});
+  return redirect('/admin');
 };

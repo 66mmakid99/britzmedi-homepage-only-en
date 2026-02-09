@@ -8,16 +8,71 @@ interface Props {
 const { title } = Astro.props;
 const currentPath = Astro.url.pathname;
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin/leads', icon: 'dashboard', external: false },
-  { label: 'Homepage', href: '/admin/homepage', icon: 'homepage', external: false },
-  { label: 'YouTube to Blog', href: '/admin/youtube-to-blog', icon: 'youtube', external: false },
-  { label: 'Content Hub', href: '/admin/content-hub', icon: 'blog', external: false },
-  { label: 'Subscribers', href: '/admin/subscribers', icon: 'subscribers', external: false },
-  { label: 'Social', href: '/admin/social', icon: 'social', external: false },
-  { label: 'Resources', href: '/admin/resources', icon: 'resources', external: false },
-  { label: 'Keystatic CMS', href: '/keystatic', icon: 'cms', external: true },
+const navGroups = [
+  {
+    label: '',
+    items: [
+      { label: 'Dashboard', href: '/admin', icon: 'dashboard' },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { label: 'Content Hub', href: '/admin/content-hub', icon: 'content-hub' },
+      { label: 'Homepage Editor', href: '/admin/homepage', icon: 'homepage' },
+      { label: 'Blog Posts', href: '/admin/blog-manager', icon: 'blog' },
+      { label: 'YouTube to Blog', href: '/admin/youtube-to-blog', icon: 'youtube' },
+    ],
+  },
+  {
+    label: 'Sales',
+    items: [
+      { label: 'Leads', href: '/admin/leads', icon: 'leads' },
+      { label: 'Subscribers', href: '/admin/subscribers', icon: 'subscribers' },
+      { label: 'Resources', href: '/admin/resources', icon: 'resources' },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { label: 'Social Media', href: '/admin/social', icon: 'social' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { label: 'Health Check', href: '/admin/health', icon: 'health' },
+      { label: 'Activity Log', href: '/admin/activity', icon: 'activity' },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [
+      { label: 'Keystatic CMS', href: '/keystatic', icon: 'cms', external: true },
+    ],
+  },
 ];
+
+function isActive(href: string): boolean {
+  if (href === '/admin') return currentPath === '/admin' || currentPath === '/admin/';
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+
+// SVG icon paths
+const icons: Record<string, string> = {
+  'dashboard': 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+  'content-hub': 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+  'homepage': 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+  'blog': 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+  'youtube': 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
+  'leads': 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+  'subscribers': 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+  'resources': 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+  'social': 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z',
+  'health': 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+  'activity': 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+  'cms': 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+};
 ---
 
 <!DOCTYPE html>
@@ -29,76 +84,180 @@ const navItems = [
   <title>{title} | BRITZMEDI Admin</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .admin-sidebar {
+      width: 240px;
+      min-width: 240px;
+      transition: width 0.2s, min-width 0.2s, transform 0.2s;
+    }
+    .admin-sidebar.collapsed {
+      width: 0;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .admin-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .nav-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      padding: 16px 16px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #cbd5e1;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 1px 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover { background: #334155; color: #fff; }
+    .nav-item.active { background: #1e40af; color: #fff; }
+    .nav-item svg { flex-shrink: 0; }
+
+    /* Mobile overlay */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 40;
+    }
+    .sidebar-overlay.show { display: block; }
+
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 50;
+        transform: translateX(-100%);
+      }
+      .admin-sidebar.mobile-open {
+        transform: translateX(0);
+        width: 240px;
+        min-width: 240px;
+      }
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-slate-100">
-  <!-- Admin Header -->
-  <header class="bg-slate-900 text-white sticky top-0 z-50">
-    <div class="container">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <div class="flex items-center gap-8">
-          <a href="/admin/leads" class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-sm">B</span>
-            </div>
-            <div>
-              <span class="font-semibold">BRITZMEDI</span>
-              <span class="ml-2 px-2 py-0.5 text-xs bg-slate-700 rounded">Admin</span>
-            </div>
-          </a>
+  <div style="display:flex; height:100vh; overflow:hidden;">
 
-          <!-- Navigation -->
-          <nav class="hidden md:flex items-center gap-1">
-            {navItems.map(item => (
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar bg-slate-900 flex flex-col" id="adminSidebar">
+      <!-- Logo -->
+      <div style="padding:16px; border-bottom:1px solid #334155; flex-shrink:0;">
+        <a href="/admin" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+          <div style="width:32px; height:32px; background:#2563eb; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+            <span style="color:#fff; font-weight:700; font-size:14px;">B</span>
+          </div>
+          <div>
+            <span style="color:#fff; font-weight:600; font-size:14px;">BRITZMEDI</span>
+            <span style="margin-left:6px; padding:2px 6px; font-size:10px; background:#334155; color:#94a3b8; border-radius:4px;">Admin</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Nav -->
+      <nav style="flex:1; overflow-y:auto; padding:8px 0;">
+        {navGroups.map(group => (
+          <div>
+            {group.label && <div class="nav-group-label">{group.label}</div>}
+            {group.items.map(item => (
               <a
                 href={item.href}
-                target={item.external ? '_blank' : undefined}
-                rel={item.external ? 'noopener noreferrer' : undefined}
-                class={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                  currentPath === item.href || currentPath.startsWith(item.href + '/')
-                    ? 'bg-slate-700 text-white'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                }`}
+                class={`nav-item ${isActive(item.href) ? 'active' : ''}`}
+                target={(item as any).external ? '_blank' : undefined}
+                rel={(item as any).external ? 'noopener noreferrer' : undefined}
               >
-                {item.label}
-                {item.external && (
-                  <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  {icons[item.icon].includes(' M') || icons[item.icon].includes(' m')
+                    ? <path stroke-linecap="round" stroke-linejoin="round" d={icons[item.icon]} />
+                    : <path stroke-linecap="round" stroke-linejoin="round" d={icons[item.icon]} />
+                  }
+                </svg>
+                <span>{item.label}</span>
+                {(item as any).external && (
+                  <svg style="width:12px; height:12px; opacity:0.5; margin-left:auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 )}
               </a>
             ))}
-          </nav>
-        </div>
+          </div>
+        ))}
+      </nav>
 
-        <!-- Right side -->
-        <div class="flex items-center gap-4">
-          <a
-            href="/"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-300 hover:text-white transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Site
-          </a>
-          <a
-            href="/api/admin/logout"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Logout
-          </a>
-        </div>
+      <!-- Bottom -->
+      <div style="padding:12px; border-top:1px solid #334155; flex-shrink:0;">
+        <a href="/" class="nav-item" style="margin:0 0 4px;">
+          <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Back to Site</span>
+        </a>
+        <a href="/api/admin/logout" class="nav-item" style="margin:0; color:#f87171;">
+          <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Logout</span>
+        </a>
       </div>
-    </div>
-  </header>
+    </aside>
 
-  <!-- Main Content -->
-  <main>
-    <slot />
-  </main>
+    <!-- Main Area -->
+    <div class="admin-main" style="display:flex; flex-direction:column; overflow:hidden;">
+      <!-- Top bar -->
+      <header style="height:48px; flex-shrink:0; background:#fff; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; padding:0 16px; gap:12px;">
+        <button
+          onclick="toggleSidebar()"
+          style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border:none; background:none; cursor:pointer; border-radius:6px; color:#64748b;"
+          onmouseover="this.style.background='#f1f5f9'"
+          onmouseout="this.style.background='none'"
+          title="Toggle sidebar"
+        >
+          <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <h1 style="font-size:15px; font-weight:600; color:#0f172a; margin:0;">{title}</h1>
+      </header>
+
+      <!-- Content -->
+      <main style="flex:1; overflow-y:auto; padding:24px;">
+        <slot />
+      </main>
+    </div>
+  </div>
+
+  <script is:inline>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('show');
+      } else {
+        sidebar.classList.toggle('collapsed');
+      }
+    }
+  </script>
 </body>
 </html>

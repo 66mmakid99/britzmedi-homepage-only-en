@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { logActivity } from '../../lib/activity-log';
 
 export const prerender = false;
 
@@ -31,34 +32,53 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const db = env?.DB;
 
     if (db) {
-      // Check if email already exists
-      const existing = await db.prepare('SELECT id, source FROM leads WHERE email = ?').bind(email).first();
+      // Check if email already exists in leads
+      const existingLead = await db.prepare('SELECT id, source FROM leads WHERE email = ?').bind(email).first();
 
-      if (existing) {
-        return new Response(JSON.stringify({
-          success: true,
-          message: "You're already subscribed! Thank you for your interest.",
-        }), {
-          headers: { 'Content-Type': 'application/json' },
-        });
+      if (!existingLead) {
+        await db.prepare(`
+          INSERT INTO leads (
+            company_name, contact_name, job_title, email, country,
+            interested_products, lead_score, lead_grade, source
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          'N/A',
+          'Newsletter Subscriber',
+          'N/A',
+          email,
+          'N/A',
+          '[]',
+          10,
+          'D',
+          'newsletter',
+        ).run();
       }
 
-      await db.prepare(`
-        INSERT INTO leads (
-          company_name, contact_name, job_title, email, country,
-          interested_products, lead_score, lead_grade, source
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        'N/A',
-        'Newsletter Subscriber',
-        'N/A',
-        email,
-        'N/A',
-        '[]',
-        10,
-        'D',
-        'newsletter',
-      ).run();
+      // Also save to subscribers table
+      const existingSub = await db.prepare('SELECT id, status FROM subscribers WHERE email = ?').bind(email).first<{ id: number; status: string }>();
+
+      if (existingSub) {
+        if (existingSub.status === 'active') {
+          return new Response(JSON.stringify({
+            success: true,
+            message: "You're already subscribed! Thank you for your interest.",
+          }), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        // Re-activate if unsubscribed or pending
+        await db.prepare(
+          "UPDATE subscribers SET status = 'active', confirmed_at = CURRENT_TIMESTAMP, unsubscribed_at = NULL WHERE id = ?"
+        ).bind(existingSub.id).run();
+      } else {
+        const unsubToken = crypto.randomUUID();
+        await db.prepare(`
+          INSERT INTO subscribers (email, name, language, categories, status, unsubscribe_token, confirmed_at)
+          VALUES (?, ?, 'en', '[]', 'active', ?, CURRENT_TIMESTAMP)
+        `).bind(email, 'Newsletter Subscriber', unsubToken).run();
+      }
+      // Log activity
+      logActivity(db, { type: 'subscriber_added', detail: `Newsletter subscription: ${email}` }).catch(() => {});
     } else {
       console.log('[Newsletter API] Dev mode - would save:', { email });
     }
