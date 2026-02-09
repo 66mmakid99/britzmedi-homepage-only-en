@@ -6,6 +6,7 @@ import { QualityPanel } from './QualityPanel';
 import { TransitionActions } from './TransitionActions';
 import { BlogStatusBadge } from '../blog-manager/BlogStatusBadge';
 import { QualityGradeBadge } from './QualityPanel';
+import { SnsPreviewPanel } from './SnsPreviewPanel';
 import type { QualityResult } from '../../../lib/content/quality-checker';
 
 interface Post {
@@ -503,6 +504,21 @@ export default function ContentHub() {
                       Open in Editor
                     </a>
                   )}
+
+                  {/* SNS Preview Panel */}
+                  <div className="pt-3 border-t border-slate-100">
+                    <SnsPreviewPanel
+                      postId={selectedPost.id}
+                      title={selectedPost.title}
+                      slug={selectedPost.slug}
+                      excerpt={selectedPost.excerpt}
+                      category={selectedPost.category}
+                      featuredImage={selectedPost.featured_image}
+                      doctorName={selectedPost.doctor_name}
+                      contentType={selectedPost.contentType || 'blog'}
+                      status={selectedPost.status}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
