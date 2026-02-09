@@ -66,7 +66,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
-    <section id="section-hero" class="relative overflow-hidden min-h-[70vh]">
+    <section id="section-hero" class="relative overflow-hidden min-h-[60vh] lg:min-h-[70vh]">
       <!-- Background image: right-aligned on desktop, centered on mobile -->
       {config.hero.heroImage && (
         <img
@@ -88,7 +88,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
       <!-- Text content -->
       <div class="container relative z-10">
-        <div class="py-20 sm:py-24 lg:py-28 xl:py-32 max-w-2xl">
+        <div class="py-12 sm:py-20 lg:py-28 xl:py-32 max-w-2xl">
           <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
             {config.hero.badge}
           </div>
@@ -99,7 +99,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
             {config.hero.subheadline}
           </h1>
 
-          <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
+          <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-5 sm:mb-8 lg:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
             {config.hero.description}
           </p>
 
@@ -237,7 +237,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   )}
 
   <!-- Trust Badges Section -->
-  <section id="section-badges" class="py-8 sm:py-12 lg:py-20 bg-white relative">
+  <section id="section-badges" class="py-6 sm:py-10 lg:py-20 bg-white relative">
     <div class="container">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
@@ -273,7 +273,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
             class="group card-premium p-5 sm:p-6 lg:p-7"
           >
             <!-- Product Image -->
-            <div class="aspect-[4/3] rounded-xl mb-6 overflow-hidden bg-slate-100">
+            <div class="aspect-[4/3] rounded-xl mb-4 sm:mb-6 overflow-hidden bg-slate-100">
               <img
                 src={product.images?.main || ''}
                 alt={product.name}
@@ -423,7 +423,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
         {coreTechnologies.map((tech, index) => (
           <div class="card-premium p-5 sm:p-7 lg:p-8 group">
-            <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 rounded-2xl flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
+            <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
               <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -526,7 +526,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
     <div class="container relative">
       <div class="text-center max-w-2xl mx-auto">
-        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-5">
+        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-3 lg:mb-5">
           {config.cta.title}
         </h2>
         <p class="text-lg text-primary-100 mb-6 lg:mb-10 leading-relaxed">
