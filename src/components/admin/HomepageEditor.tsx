@@ -4,6 +4,13 @@ import ImageCropModal from './ImageCropModal';
 import { IMAGE_PRESETS, formatBytes, type OptimizeResult } from './imageUtils';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+type PreviewMode = 'desktop' | 'tablet' | 'mobile';
+
+const PREVIEW_VIEWPORTS: Record<PreviewMode, { width: number; label: string }> = {
+  desktop: { width: 1440, label: 'Desktop' },
+  tablet: { width: 768, label: 'Tablet' },
+  mobile: { width: 375, label: 'Mobile' },
+};
 
 // Known products (from products.ts)
 const PRODUCTS = [
@@ -327,7 +334,11 @@ export default function HomepageEditor() {
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [productImages, setProductImages] = useState<Record<string, string>>({});
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('desktop');
+  const [showPreview, setShowPreview] = useState(true);
+  const [previewScale, setPreviewScale] = useState(0.5);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Load config on mount
   useEffect(() => {
@@ -350,6 +361,24 @@ export default function HomepageEditor() {
     PRODUCTS.forEach((p) => { imgs[p.id] = p.image; });
     setProductImages(imgs);
   }, []);
+
+  // Calculate preview scale based on container width
+  useEffect(() => {
+    if (!showPreview) return;
+    const container = previewContainerRef.current;
+    if (!container) return;
+
+    const updateScale = () => {
+      const cw = container.clientWidth - 32;
+      const vw = PREVIEW_VIEWPORTS[previewMode].width;
+      setPreviewScale(Math.min(cw / vw, 1));
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [showPreview, previewMode]);
 
   // Helper to update nested config
   const update = useCallback(
@@ -410,14 +439,18 @@ export default function HomepageEditor() {
     );
   }
 
+  const iframeW = PREVIEW_VIEWPORTS[previewMode].width;
+  const iframeH = Math.max(iframeW * 2.5, 2000);
+  const frameW = previewMode === 'mobile' ? iframeW * previewScale + 24 : iframeW * previewScale;
+
   return (
     <div className="flex h-[calc(100vh-64px)]">
       {/* Left: Editor Panel */}
-      <div className="w-[40%] min-w-[360px] border-r border-slate-200 flex flex-col bg-white">
+      <div className={`${showPreview ? 'w-[480px]' : 'flex-1'} shrink-0 border-r border-slate-200 flex flex-col bg-white`}>
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50">
           <h2 className="font-semibold text-slate-900 text-sm">Homepage Editor</h2>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {saveStatus === 'saved' && (
               <span className="text-xs text-green-600 flex items-center gap-1">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -429,6 +462,19 @@ export default function HomepageEditor() {
             {saveStatus === 'error' && (
               <span className="text-xs text-red-600">Save failed</span>
             )}
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className={`p-1.5 rounded-lg transition-colors ${showPreview ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:bg-slate-100'}`}
+              title={showPreview ? 'Hide Preview' : 'Show Preview'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {showPreview ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                )}
+              </svg>
+            </button>
             <button
               onClick={handleSave}
               disabled={saveStatus === 'saving'}
@@ -860,28 +906,97 @@ export default function HomepageEditor() {
       </div>
 
       {/* Right: Preview Panel */}
-      <div className="flex-1 bg-slate-200 flex flex-col">
-        <div className="flex items-center justify-between px-4 py-2 bg-slate-100 border-b border-slate-200">
-          <span className="text-xs font-medium text-slate-500">Live Preview</span>
-          <button
-            onClick={() => iframeRef.current?.contentWindow?.location.reload()}
-            className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
-          </button>
+      {showPreview && (
+        <div className="flex-1 bg-slate-100 flex flex-col min-w-0">
+          {/* Preview toolbar */}
+          <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200">
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-medium text-slate-500 mr-2">Preview</span>
+              {(['desktop', 'tablet', 'mobile'] as PreviewMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setPreviewMode(mode)}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md transition-colors ${
+                    previewMode === mode
+                      ? 'bg-blue-100 text-blue-700 font-medium'
+                      : 'text-slate-500 hover:bg-slate-100'
+                  }`}
+                  title={`${PREVIEW_VIEWPORTS[mode].label} (${PREVIEW_VIEWPORTS[mode].width}px)`}
+                >
+                  {mode === 'desktop' && (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {mode === 'tablet' && (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {mode === 'mobile' && (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {PREVIEW_VIEWPORTS[mode].label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">{Math.round(previewScale * 100)}%</span>
+              <button
+                onClick={() => iframeRef.current?.contentWindow?.location.reload()}
+                className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          {/* Preview viewport */}
+          <div ref={previewContainerRef} className="flex-1 overflow-auto p-4">
+            <div className="mx-auto" style={{ width: frameW }}>
+              <div className={previewMode === 'mobile' ? 'bg-slate-800 rounded-[2.5rem] p-3 shadow-2xl' : ''}>
+                {previewMode === 'mobile' && (
+                  <div className="flex justify-center py-1.5">
+                    <div className="w-16 h-3.5 bg-slate-900 rounded-full" />
+                  </div>
+                )}
+                <div
+                  className={`overflow-hidden ${
+                    previewMode === 'mobile'
+                      ? 'rounded-[1.5rem]'
+                      : 'rounded-lg shadow-lg border border-slate-300'
+                  }`}
+                  style={{ height: iframeH * previewScale }}
+                >
+                  <iframe
+                    ref={iframeRef}
+                    src="/"
+                    title="Homepage Preview"
+                    className="bg-white"
+                    style={{
+                      width: iframeW,
+                      height: iframeH,
+                      transform: `scale(${previewScale})`,
+                      transformOrigin: 'top left',
+                      border: 'none',
+                    }}
+                  />
+                </div>
+                {previewMode === 'mobile' && (
+                  <div className="flex justify-center py-1.5">
+                    <div className="w-10 h-1 bg-slate-600 rounded-full" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 p-4">
-          <iframe
-            ref={iframeRef}
-            src="/"
-            className="w-full h-full bg-white rounded-lg shadow-lg border border-slate-300"
-            title="Homepage Preview"
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
