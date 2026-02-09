@@ -12,6 +12,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
   scheduled: { label: 'Scheduled', bg: 'bg-blue-100', text: 'text-blue-700' },
   published: { label: 'Published', bg: 'bg-green-100', text: 'text-green-700' },
   unpublished: { label: 'Unpublished', bg: 'bg-red-100', text: 'text-red-700' },
+  archived: { label: 'Archived', bg: 'bg-slate-200', text: 'text-slate-600' },
 };
 
 export function BlogStatusBadge({ status, scheduledDate }: BlogStatusBadgeProps) {
