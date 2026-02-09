@@ -46,59 +46,56 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
-    <!-- Split Layout: Left text on dark bg + Right model image -->
-    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px]">
-      <!-- Background -->
-      <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700"></div>
+    <!-- Full-bleed Hero: Background image + gradient overlay -->
+    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+      <!-- Full-bleed background image -->
+      {config.hero.heroImage && (
+        <div class="absolute inset-0 z-0">
+          <img
+            src={config.hero.heroImage}
+            alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+            width="1076"
+            height="1920"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            class="w-full h-full object-cover object-top"
+          />
+        </div>
+      )}
 
-      <div class="container relative z-10">
-        <div class="grid lg:grid-cols-2 gap-0 lg:gap-8 items-center min-h-[600px] lg:min-h-[700px]">
-          <!-- Left: Text Content -->
-          <div class="py-16 sm:py-20 lg:py-28 xl:py-32 order-2 lg:order-1">
-            <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
-              {config.hero.badge}
-            </div>
+      <!-- Gradient overlay: left navy → right transparent (desktop) -->
+      <div class="absolute inset-0 z-10 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.9) 30%, rgb(15 23 42 / 0.5) 60%, rgb(15 23 42 / 0.2) 80%, transparent 100%)"></div>
+      <!-- Gradient overlay: darker for mobile readability -->
+      <div class="absolute inset-0 z-10 lg:hidden" style="background: linear-gradient(to bottom, rgb(15 23 42 / 0.85) 0%, rgb(15 23 42 / 0.6) 50%, rgb(15 23 42 / 0.8) 100%)"></div>
 
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1 !text-white drop-shadow-lg">
-              {config.hero.headline}<br />
-              <span class="text-primary-400">{config.hero.highlightText}</span><br />
-              {config.hero.subheadline}
-            </h1>
-
-            <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
-              {config.hero.description}
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
-              <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
-                {config.hero.primaryCTA.text}
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </a>
-              <a href={config.hero.secondaryCTA.href} class="btn-secondary justify-center sm:justify-start !bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm">
-                {config.hero.secondaryCTA.text}
-              </a>
-            </div>
+      <!-- Text content -->
+      <div class="container relative z-20">
+        <div class="py-20 sm:py-24 lg:py-28 xl:py-32 max-w-2xl">
+          <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
+            {config.hero.badge}
           </div>
 
-          <!-- Right: Model Image -->
-          <div class="order-1 lg:order-2 relative h-[300px] sm:h-[400px] lg:h-full lg:absolute lg:right-0 lg:top-0 lg:bottom-0 lg:w-1/2">
-            {config.hero.heroImage && (
-              <img
-                src={config.hero.heroImage}
-                alt={config.hero.heroImageAlt || 'BRITZMEDI'}
-                width="1076"
-                height="1920"
-                fetchpriority="high"
-                loading="eager"
-                decoding="async"
-                class="w-full h-full object-cover object-top"
-              />
-            )}
-            <!-- Gradient overlay for smooth blending -->
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent lg:hidden"></div>
-            <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.8) 25%, rgb(15 23 42 / 0.3) 50%, transparent 70%)"></div>
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1 !text-white drop-shadow-lg">
+            {config.hero.headline}<br />
+            <span class="text-primary-400">{config.hero.highlightText}</span><br />
+            {config.hero.subheadline}
+          </h1>
+
+          <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
+            {config.hero.description}
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
+            <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
+              {config.hero.primaryCTA.text}
+              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+            <a href={config.hero.secondaryCTA.href} class="btn-secondary justify-center sm:justify-start !bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm">
+              {config.hero.secondaryCTA.text}
+            </a>
           </div>
         </div>
       </div>
