@@ -37,7 +37,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
     const now = new Date().toISOString();
     const channel = post.channel as SocialChannel;
     const poster = getChannelPoster(channel);
-    const result = await poster(post.content);
+    const result = await poster(post.content, runtime.env);
 
     if (result.success) {
       await db.prepare(`

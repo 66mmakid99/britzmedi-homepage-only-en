@@ -1,10 +1,10 @@
-import type { PostToSocialInput, SocialChannel, SocialAccount } from './types';
+import type { PostToSocialInput, SocialChannel, SocialAccount, ChannelPosterEnv } from './types';
 import { generateContent } from './content-generator';
 import { getChannelPoster } from './channels';
 
 export async function triggerAutoPost(
   input: PostToSocialInput,
-  env: { db: D1Database },
+  env: { db: D1Database } & ChannelPosterEnv,
 ): Promise<void> {
   const { db } = env;
 
@@ -33,7 +33,7 @@ export async function triggerAutoPost(
 
     try {
       const poster = getChannelPoster(channel);
-      const result = await poster(content);
+      const result = await poster(content, env);
 
       if (result.success) {
         await db.prepare(`

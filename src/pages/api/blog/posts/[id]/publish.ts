@@ -149,7 +149,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
         category: post.category,
         featuredImage: post.featured_image,
         doctorName: post.doctor_name,
-      }, { db });
+      }, { db, ...runtime.env });
     } catch (socialError) {
       console.error('[Publish] Social auto-post error (non-blocking):', socialError);
     }

@@ -1,36 +1,44 @@
-// Social Media Channel Adapters - Placeholder implementations
-// Replace with actual API integrations when keys are configured
+// Social Media Channel Adapters
 
-import type { SocialChannel, SocialPostResult } from './types';
+import type { SocialChannel, SocialPostResult, ChannelPosterEnv, ChannelPoster } from './types';
+import { twitterPost } from './twitter';
+import { linkedinPost } from './linkedin';
+import { facebookPost } from './facebook';
 
-export async function postToTwitter(content: string): Promise<SocialPostResult> {
-  console.log('[Social:Twitter] Would post:', content.slice(0, 100));
+export async function postToTwitter(content: string, env: ChannelPosterEnv): Promise<SocialPostResult> {
+  if (!env.TWITTER_API_KEY || !env.TWITTER_API_SECRET || !env.TWITTER_ACCESS_TOKEN || !env.TWITTER_ACCESS_TOKEN_SECRET) {
+    console.log('[Social:Twitter] API keys not configured');
+    return {
+      channel: 'twitter',
+      success: false,
+      error: 'Twitter API keys not configured. Set TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET in environment.',
+    };
+  }
+
+  const result = await twitterPost(content, {
+    TWITTER_API_KEY: env.TWITTER_API_KEY,
+    TWITTER_API_SECRET: env.TWITTER_API_SECRET,
+    TWITTER_ACCESS_TOKEN: env.TWITTER_ACCESS_TOKEN,
+    TWITTER_ACCESS_TOKEN_SECRET: env.TWITTER_ACCESS_TOKEN_SECRET,
+  });
+
   return {
     channel: 'twitter',
-    success: true,
-    externalId: `tw_placeholder_${Date.now()}`,
+    success: result.success,
+    externalId: result.tweetId,
+    error: result.error,
   };
 }
 
-export async function postToLinkedIn(content: string): Promise<SocialPostResult> {
-  console.log('[Social:LinkedIn] Would post:', content.slice(0, 100));
-  return {
-    channel: 'linkedin',
-    success: true,
-    externalId: `li_placeholder_${Date.now()}`,
-  };
+export async function postToLinkedIn(content: string, env: ChannelPosterEnv): Promise<SocialPostResult> {
+  return linkedinPost(content, env);
 }
 
-export async function postToFacebook(content: string): Promise<SocialPostResult> {
-  console.log('[Social:Facebook] Would post:', content.slice(0, 100));
-  return {
-    channel: 'facebook',
-    success: true,
-    externalId: `fb_placeholder_${Date.now()}`,
-  };
+export async function postToFacebook(content: string, env: ChannelPosterEnv): Promise<SocialPostResult> {
+  return facebookPost(content, env);
 }
 
-export function getChannelPoster(channel: SocialChannel) {
+export function getChannelPoster(channel: SocialChannel): ChannelPoster {
   switch (channel) {
     case 'twitter': return postToTwitter;
     case 'linkedin': return postToLinkedIn;

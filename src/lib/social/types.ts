@@ -57,3 +57,12 @@ export const CHANNEL_CHAR_LIMITS: Record<SocialChannel, number> = {
   linkedin: 3000,
   facebook: 63206,
 };
+
+export interface ChannelPosterEnv {
+  TWITTER_API_KEY?: string;
+  TWITTER_API_SECRET?: string;
+  TWITTER_ACCESS_TOKEN?: string;
+  TWITTER_ACCESS_TOKEN_SECRET?: string;
+}
+
+export type ChannelPoster = (content: string, env: ChannelPosterEnv) => Promise<SocialPostResult>;
