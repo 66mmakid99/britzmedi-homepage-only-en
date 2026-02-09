@@ -237,9 +237,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   )}
 
   <!-- Trust Badges Section -->
-  <section id="section-badges" class="py-16 lg:py-20 bg-white relative">
+  <section id="section-badges" class="py-8 sm:py-12 lg:py-20 bg-white relative">
     <div class="container">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
           <a href="/certifications" class="text-center group block">
             <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -257,9 +257,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <section id="section-products" class="section bg-gradient-section">
     <div class="container">
       <!-- Section Header -->
-      <div class="max-w-2xl mb-14">
+      <div class="max-w-2xl mb-8 lg:mb-14">
         <span class="label mb-4">{config.featuredProducts.label}</span>
-        <h2 class="heading-2 mb-5">{config.featuredProducts.title}</h2>
+        <h2 class="heading-2 mb-3 lg:mb-5">{config.featuredProducts.title}</h2>
         <p class="body-large">
           {config.featuredProducts.description}
         </p>
@@ -328,7 +328,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
       </div>
 
       <!-- View All Link -->
-      <div class="mt-12 text-center">
+      <div class="mt-8 lg:mt-12 text-center">
         <a href="/products" class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
           View all products
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,21 +342,21 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <!-- Why BRITZMEDI Section -->
   <section id="section-why" class="section bg-white">
     <div class="container">
-      <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
         <!-- Content -->
         <div>
           <span class="label mb-4">{config.whyBritzMedi.label}</span>
-          <h2 class="heading-2 mb-6">
+          <h2 class="heading-2 mb-4 lg:mb-6">
             {config.whyBritzMedi.title.split('\n').map((line, i) => (
               <>{i > 0 && <br />}{line}</>
             ))}
           </h2>
-          <p class="body-large mb-10">
+          <p class="body-large mb-6 lg:mb-10">
             {config.whyBritzMedi.description || company.philosophy}
           </p>
 
           <!-- Features List -->
-          <div class="space-y-6">
+          <div class="space-y-4 lg:space-y-6">
             {config.whyBritzMedi.features.map((feature) => (
               <div class="flex gap-5 group">
                 <div class="shrink-0 w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -412,9 +412,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <!-- Core Technologies Section -->
   <section id="section-tech" class="section bg-gradient-section">
     <div class="container">
-      <div class="text-center max-w-2xl mx-auto mb-14">
+      <div class="text-center max-w-2xl mx-auto mb-8 lg:mb-14">
         <span class="label mb-4 justify-center">{config.coreTechnologies.label}</span>
-        <h2 class="heading-2 mb-5">{config.coreTechnologies.title}</h2>
+        <h2 class="heading-2 mb-3 lg:mb-5">{config.coreTechnologies.title}</h2>
         <p class="body-large">
           {config.coreTechnologies.description}
         </p>
@@ -422,7 +422,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
         {coreTechnologies.map((tech, index) => (
-          <div class="card-premium p-7 lg:p-8 group">
+          <div class="card-premium p-5 sm:p-7 lg:p-8 group">
             <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 rounded-2xl flex items-center justify-center mb-6 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
               <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -455,10 +455,10 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   {config.latestNews?.enabled && latestNews.length > 0 && (
     <section id="section-news" class="section bg-white">
       <div class="container">
-        <div class="flex items-end justify-between mb-14">
+        <div class="flex items-end justify-between mb-8 lg:mb-14">
           <div class="max-w-2xl">
             <span class="label mb-4">{config.latestNews.label}</span>
-            <h2 class="heading-2 mb-5">{config.latestNews.title}</h2>
+            <h2 class="heading-2 mb-3 lg:mb-5">{config.latestNews.title}</h2>
             <p class="body-large">{config.latestNews.description}</p>
           </div>
           <a href="/news" class="hidden sm:inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline shrink-0">
@@ -529,7 +529,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
         <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-5">
           {config.cta.title}
         </h2>
-        <p class="text-lg text-primary-100 mb-10 leading-relaxed">
+        <p class="text-lg text-primary-100 mb-6 lg:mb-10 leading-relaxed">
           {config.cta.description}
         </p>
         <div class="flex flex-wrap justify-center gap-4">
