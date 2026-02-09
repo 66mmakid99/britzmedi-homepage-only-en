@@ -57,7 +57,7 @@ const langSeoDescriptions: Record<string, string> = {
   <!-- Hero Section -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
-    <section class="relative overflow-hidden min-h-[70vh]">
+    <section id="section-hero" class="relative overflow-hidden min-h-[70vh]">
       <!-- Background image: right-aligned on desktop, centered on mobile -->
       {config.hero.heroImage && (
         <img
@@ -108,7 +108,7 @@ const langSeoDescriptions: Record<string, string> = {
       </div>
     </section>
   ) : (
-    <section class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+    <section id="section-hero" class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
       {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
         <div class="absolute inset-0 z-0">
           <video
@@ -218,7 +218,7 @@ const langSeoDescriptions: Record<string, string> = {
   )}
 
   <!-- Trust Badges Section -->
-  <section class="py-16 lg:py-20 bg-white relative">
+  <section id="section-badges" class="py-16 lg:py-20 bg-white relative">
     <div class="container">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
@@ -235,7 +235,7 @@ const langSeoDescriptions: Record<string, string> = {
   </section>
 
   <!-- Featured Products Section -->
-  <section class="section bg-gradient-section">
+  <section id="section-products" class="section bg-gradient-section">
     <div class="container">
       <div class="max-w-2xl mb-14">
         <span class="label mb-4">{t('home.products.title')}</span>
@@ -317,7 +317,7 @@ const langSeoDescriptions: Record<string, string> = {
   </section>
 
   <!-- CTA Section -->
-  <section class="section relative overflow-hidden">
+  <section id="section-cta" class="section relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800"></div>
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
 
