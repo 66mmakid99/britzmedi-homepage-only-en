@@ -258,9 +258,10 @@ const langSeoDescriptions: Record<string, string> = {
                   alt={product.name}
                   width="800"
                   height="600"
-                  loading="lazy"
+                  loading="eager"
                   decoding="async"
-                  class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 product-img"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 product-img"
+                  style="width:100%;height:100%;object-fit:cover;"
                 />
               ) : null}
               <div class:list={[
