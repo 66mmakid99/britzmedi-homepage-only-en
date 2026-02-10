@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import HomepageEditor from '../../../components/admin/HomepageEditor.tsx';
+---
+
+<AdminLayout title="Site Editor">
+  <HomepageEditor client:only="react" />
+</AdminLayout>

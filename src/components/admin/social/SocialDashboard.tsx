@@ -43,6 +43,9 @@ interface ChannelStatus {
   connected: boolean;
   account?: string;
   error?: string;
+  status?: 'healthy' | 'expiring' | 'expired' | 'disconnected';
+  expires_at?: number;
+  expires_in_days?: number;
 }
 
 type Tab = 'overview' | 'compose' | 'history' | 'accounts';
@@ -329,13 +332,48 @@ export default function SocialDashboard() {
   const linkedinStatus = channelStatuses['linkedin'];
   const instagramStatus = channelStatuses['instagram'];
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshToken = async (channel: string) => {
+    setRefreshing(true);
+    try {
+      const res = await fetch('/api/admin/social/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPostResult({ success: true, message: `${channel} token refreshed!` });
+        await fetchConnectionStatus();
+      } else {
+        setPostResult({ success: false, message: data.results?.[0]?.message || data.results?.[0]?.error || 'Refresh failed' });
+      }
+    } catch { setPostResult({ success: false, message: 'Network error' }); }
+    finally { setRefreshing(false); }
+  };
+
   const renderChannelStatus = (channel: string, status: ChannelStatus | undefined) => {
     if (statusLoading) return <span className="text-xs text-slate-400">Checking...</span>;
     if (status?.connected) {
+      const dotColor = status.status === 'expiring' ? 'bg-amber-400' : status.status === 'expired' ? 'bg-red-400' : 'bg-green-500';
+      const bgColor = status.status === 'expiring' ? 'bg-amber-50 text-amber-700' : status.status === 'expired' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700';
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-          {status.account}
+        <span className="inline-flex items-center gap-1.5">
+          <span className={`inline-flex items-center gap-1 text-xs font-medium ${bgColor} px-2 py-0.5 rounded-full`}>
+            <span className={`w-1.5 h-1.5 ${dotColor} rounded-full`} />
+            {status.account}
+            {status.expires_in_days != null && <span className="opacity-70">({status.expires_in_days}d)</span>}
+          </span>
+          {(status.status === 'expiring' || status.status === 'expired') && channel === 'instagram' && (
+            <button
+              onClick={() => handleRefreshToken('instagram')}
+              disabled={refreshing}
+              className="text-[10px] text-blue-600 hover:text-blue-800 font-medium"
+            >
+              {refreshing ? '...' : 'Refresh'}
+            </button>
+          )}
         </span>
       );
     }

@@ -6,7 +6,12 @@ const PRODUCTS = [
   { id: 'newchae-shot', name: 'NEWCHAE SHOT', tagline: 'Needle-Free Meso Solution', image: '/images/products/newchae-shot.webp' },
 ];
 
-export default function HomepagePreview({ config }: { config: HomepageConfig }) {
+interface PreviewProps {
+  config: HomepageConfig;
+  productImages?: Record<string, string>;
+}
+
+export default function HomepagePreview({ config, productImages }: PreviewProps) {
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", color: '#0f172a', fontSize: 14, lineHeight: 1.6 }}>
       {/* Hero */}
@@ -14,7 +19,7 @@ export default function HomepagePreview({ config }: { config: HomepageConfig }) 
       {/* Trust Badges */}
       <BadgesSection config={config} />
       {/* Products */}
-      <ProductsSection config={config} />
+      <ProductsSection config={config} productImages={productImages} />
       {/* Why BRITZMEDI */}
       <WhySection config={config} />
       {/* Core Technologies */}
@@ -156,7 +161,7 @@ function BadgesSection({ config }: { config: HomepageConfig }) {
   );
 }
 
-function ProductsSection({ config }: { config: HomepageConfig }) {
+function ProductsSection({ config, productImages }: { config: HomepageConfig; productImages?: Record<string, string> }) {
   const displayProducts = PRODUCTS.slice(0, config.featuredProducts.displayCount);
   return (
     <div style={{ padding: '24px 32px', background: '#f8fafc' }}>
@@ -181,7 +186,7 @@ function ProductsSection({ config }: { config: HomepageConfig }) {
           }}>
             <div style={{ aspectRatio: '4/3', background: '#f1f5f9', overflow: 'hidden' }}>
               <img
-                src={product.image}
+                src={productImages?.[product.id] || product.image}
                 alt={product.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

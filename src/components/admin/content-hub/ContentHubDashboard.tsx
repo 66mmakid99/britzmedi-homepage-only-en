@@ -105,32 +105,32 @@ const SOURCE_BADGE: Record<string, { label: string; className: string }> = {
   manual: { label: 'Manual', className: 'bg-slate-100 text-slate-600' },
 };
 
-const TRANSITION_ACTIONS: Record<string, { target: string; label: string; style: string; confirm?: string }[]> = {
+const TRANSITION_ACTIONS: Record<string, { action: string; label: string; style: string; confirm?: string }[]> = {
   brief: [
-    { target: 'generating', label: 'Start Generating', style: 'bg-yellow-600 hover:bg-yellow-700 text-white' },
-    { target: 'draft', label: 'Move to Draft', style: 'bg-blue-600 hover:bg-blue-700 text-white' },
+    { action: 'start_generate', label: 'Start Generating', style: 'bg-yellow-600 hover:bg-yellow-700 text-white' },
+    { action: 'move_to_draft', label: 'Move to Draft', style: 'bg-blue-600 hover:bg-blue-700 text-white' },
   ],
   generating: [
-    { target: 'draft', label: 'Move to Draft', style: 'bg-blue-600 hover:bg-blue-700 text-white' },
-    { target: 'brief', label: 'Back to Brief', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+    { action: 'complete_generate', label: 'Move to Draft', style: 'bg-blue-600 hover:bg-blue-700 text-white' },
+    { action: 'back_to_brief', label: 'Back to Brief', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
   ],
   draft: [
-    { target: 'review', label: 'Submit for Review', style: 'bg-orange-600 hover:bg-orange-700 text-white' },
+    { action: 'submit_review', label: 'Submit for Review', style: 'bg-orange-600 hover:bg-orange-700 text-white' },
   ],
   review: [
-    { target: 'approved', label: 'Approve', style: 'bg-green-600 hover:bg-green-700 text-white' },
-    { target: 'draft', label: 'Back to Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+    { action: 'approve', label: 'Approve', style: 'bg-green-600 hover:bg-green-700 text-white' },
+    { action: 'reject', label: 'Back to Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
   ],
   approved: [
-    { target: 'published', label: 'Publish', style: 'bg-emerald-600 hover:bg-emerald-700 text-white' },
-    { target: 'draft', label: 'Back to Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+    { action: 'publish', label: 'Publish', style: 'bg-emerald-600 hover:bg-emerald-700 text-white' },
+    { action: 'back_to_draft', label: 'Back to Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
   ],
   published: [
-    { target: 'archived', label: 'Archive', style: 'bg-slate-600 hover:bg-slate-700 text-white', confirm: 'Archive this content? It will be removed from the live site.' },
-    { target: 'draft', label: 'Unpublish', style: 'bg-red-100 hover:bg-red-200 text-red-700', confirm: 'Unpublish this content? It will be removed from the live site.' },
+    { action: 'archive', label: 'Archive', style: 'bg-slate-600 hover:bg-slate-700 text-white', confirm: 'Archive this content? It will be removed from the live site.' },
+    { action: 'unpublish', label: 'Unpublish', style: 'bg-red-100 hover:bg-red-200 text-red-700', confirm: 'Unpublish this content? It will be removed from the live site.' },
   ],
   archived: [
-    { target: 'draft', label: 'Reopen as Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+    { action: 'reopen', label: 'Reopen as Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
   ],
 };
 
@@ -223,6 +223,11 @@ export default function ContentHubDashboard() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [generatePrefill, setGeneratePrefill] = useState<{ keyword?: string; title?: string; content_type?: string; tier?: number } | undefined>(undefined);
   const [transitionLoading, setTransitionLoading] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<ContentItem | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ─── Data fetching ──────────────────────────────────────────
@@ -280,15 +285,15 @@ export default function ContentHubDashboard() {
     setSelectedItem(prev => prev?.id === item.id ? null : item);
   }, []);
 
-  const handleTransition = useCallback(async (itemId: number, targetStatus: string, confirm?: string) => {
-    if (confirm && !window.confirm(confirm)) return;
+  const handleTransition = useCallback(async (itemId: number, actionName: string, confirmMsg?: string) => {
+    if (confirmMsg && !window.confirm(confirmMsg)) return;
 
-    setTransitionLoading(targetStatus);
+    setTransitionLoading(actionName);
     try {
       const res = await fetch(`/api/admin/content-hub/items/${itemId}/transition`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: targetStatus }),
+        body: JSON.stringify({ action: actionName }),
       });
 
       if (!res.ok) {
@@ -302,6 +307,26 @@ export default function ContentHubDashboard() {
       alert(err instanceof Error ? err.message : 'Failed to transition');
     } finally {
       setTransitionLoading(null);
+    }
+  }, [fetchItems]);
+
+  const handleDelete = useCallback(async (item: ContentItem) => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/admin/content-hub/items/${item.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Delete failed');
+      }
+      setDeleteConfirm(null);
+      setSelectedItem(null);
+      fetchItems();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete');
+    } finally {
+      setDeleteLoading(false);
     }
   }, [fetchItems]);
 
@@ -329,6 +354,88 @@ export default function ContentHubDashboard() {
   const closeDetail = useCallback(() => {
     setSelectedItem(null);
   }, []);
+
+  // ─── Bulk Actions ──────────────────────────────────────────
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map(i => i.id)));
+    }
+  }, [items, selectedIds.size]);
+
+  const toggleSelectItem = useCallback((id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} item(s)? This cannot be undone.`)) return;
+    setBulkLoading(true);
+    try {
+      const promises = Array.from(selectedIds).map(id =>
+        fetch(`/api/admin/content-hub/items/${id}`, { method: 'DELETE' })
+      );
+      const results = await Promise.allSettled(promises);
+      const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.ok)).length;
+      if (failed > 0) alert(`${failed} item(s) could not be deleted (may be published).`);
+      setSelectedIds(new Set());
+      setSelectedItem(null);
+      fetchItems();
+    } catch { alert('Bulk delete failed'); }
+    finally { setBulkLoading(false); }
+  }, [selectedIds, fetchItems]);
+
+  const handleBulkUnpublish = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Unpublish ${selectedIds.size} item(s)?`)) return;
+    setBulkLoading(true);
+    try {
+      const promises = Array.from(selectedIds).map(id =>
+        fetch(`/api/admin/content-hub/items/${id}/transition`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'unpublish' }),
+        })
+      );
+      await Promise.allSettled(promises);
+      setSelectedIds(new Set());
+      setSelectedItem(null);
+      fetchItems();
+    } catch { alert('Bulk unpublish failed'); }
+    finally { setBulkLoading(false); }
+  }, [selectedIds, fetchItems]);
+
+  const handleDuplicate = useCallback(async (item: ContentItem) => {
+    try {
+      const suffix = Date.now().toString(36).slice(-4);
+      const res = await fetch('/api/admin/content-hub/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${item.title} (Copy)`,
+          slug: `${(item.slug || 'content')}-copy-${suffix}`,
+          source_type: item.source_type,
+          content: item.content || '',
+          excerpt: item.excerpt || '',
+          category: item.category || '',
+          tags: item.tags || '',
+          seo_keyword: item.seo_keyword || '',
+          author: item.author || 'Admin',
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to duplicate');
+      }
+      fetchItems();
+    } catch (err) { alert(err instanceof Error ? err.message : 'Failed to duplicate content'); }
+  }, [fetchItems]);
 
   // ─── Derived data ──────────────────────────────────────────
 
@@ -513,7 +620,7 @@ export default function ContentHubDashboard() {
 
             {/* ─── All Content Tab ─── */}
             {tab === 'all' && (
-              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 {items.length === 0 ? (
                   <div className="text-center py-12">
                     <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,14 +635,191 @@ export default function ContentHubDashboard() {
                     </button>
                   </div>
                 ) : (
-                  items.map(item => (
-                    <ContentItemCard
-                      key={item.id}
-                      item={item}
-                      selected={selectedItem?.id === item.id}
-                      onClick={() => handleSelectItem(item)}
-                    />
-                  ))
+                  <>
+                    {/* Table header */}
+                    <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <div className="w-6 flex-shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.size === items.length && items.length > 0}
+                          onChange={toggleSelectAll}
+                          className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">Title</div>
+                      <div className="w-20 text-center">Status</div>
+                      <div className="w-16 text-center">Source</div>
+                      <div className="w-20 text-right">Date</div>
+                      <div className="w-8" />
+                    </div>
+
+                    {/* Table rows */}
+                    <div className="divide-y divide-slate-100">
+                      {items.map(item => {
+                        const sourceBadge = SOURCE_BADGE[item.source_type] || SOURCE_BADGE.manual;
+                        const statusStyle = STATUS_BADGE[item.status] || STATUS_BADGE.draft;
+                        const isSelected = selectedIds.has(item.id);
+                        const isMenuOpen = openMenuId === item.id;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={`flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors ${
+                              selectedItem?.id === item.id ? 'bg-blue-50' : isSelected ? 'bg-blue-50/50' : ''
+                            }`}
+                          >
+                            {/* Checkbox */}
+                            <div className="w-6 flex-shrink-0">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleSelectItem(item.id)}
+                                className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 cursor-pointer"
+                              />
+                            </div>
+
+                            {/* Title (clickable for detail sidebar) */}
+                            <button
+                              onClick={() => handleSelectItem(item)}
+                              className="flex-1 min-w-0 text-left"
+                            >
+                              <h4 className="text-sm font-medium text-slate-900 truncate">{item.title}</h4>
+                              {item.seo_keyword && (
+                                <span className="text-[10px] text-purple-500 truncate block mt-0.5">{item.seo_keyword}</span>
+                              )}
+                            </button>
+
+                            {/* Status */}
+                            <div className="w-20 flex justify-center">
+                              <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${statusStyle}`}>
+                                {capitalize(item.status)}
+                              </span>
+                            </div>
+
+                            {/* Source */}
+                            <div className="w-16 flex justify-center">
+                              <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${sourceBadge.className}`}>
+                                {sourceBadge.label}
+                              </span>
+                            </div>
+
+                            {/* Date */}
+                            <div className="w-20 text-right text-xs text-slate-400">
+                              {formatDate(item.updated_at || item.created_at)}
+                            </div>
+
+                            {/* ⋮ Menu */}
+                            <div className="w-8 relative">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setOpenMenuId(isMenuOpen ? null : item.id); }}
+                                className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+                              >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                </svg>
+                              </button>
+
+                              {isMenuOpen && (
+                                <>
+                                  {/* Backdrop to close menu */}
+                                  <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                                  {/* Dropdown */}
+                                  <div className="absolute right-0 top-8 z-20 w-44 bg-white rounded-lg shadow-lg border border-slate-200 py-1">
+                                    {item.status !== 'brief' && (
+                                      <a
+                                        href={`/admin/content-hub/edit/${item.id}`}
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                      >
+                                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Edit
+                                      </a>
+                                    )}
+                                    {item.status === 'published' && item.slug && (
+                                      <a
+                                        href={`/blog/${item.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                      >
+                                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        View Post
+                                      </a>
+                                    )}
+                                    <button
+                                      onClick={() => { setOpenMenuId(null); handleDuplicate(item); }}
+                                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                    >
+                                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                      </svg>
+                                      Duplicate
+                                    </button>
+                                    {item.status === 'published' && (
+                                      <button
+                                        onClick={() => { setOpenMenuId(null); handleTransition(item.id, 'unpublish', 'Unpublish this content? It will be removed from the live site.'); }}
+                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-orange-600 hover:bg-orange-50"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                        </svg>
+                                        Unpublish
+                                      </button>
+                                    )}
+                                    {item.status !== 'published' && (
+                                      <button
+                                        onClick={() => { setOpenMenuId(null); setDeleteConfirm(item); }}
+                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Delete
+                                      </button>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Bulk action bar */}
+                    {selectedIds.size > 0 && (
+                      <div className="flex items-center justify-between px-4 py-3 bg-blue-50 border-t border-blue-200">
+                        <span className="text-sm text-blue-700 font-medium">
+                          {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleBulkUnpublish}
+                            disabled={bulkLoading}
+                            className="px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-100 hover:bg-orange-200 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            Unpublish
+                          </button>
+                          <button
+                            onClick={handleBulkDelete}
+                            disabled={bulkLoading}
+                            className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setSelectedIds(new Set())}
+                            className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-800 transition-colors"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -777,16 +1061,16 @@ export default function ContentHubDashboard() {
                   <div className="pt-2 border-t border-slate-100">
                     <h4 className="text-xs font-medium text-slate-500 mb-2">Actions</h4>
                     <div className="flex flex-wrap gap-2">
-                      {(TRANSITION_ACTIONS[selectedItem.status] || []).map(action => (
+                      {(TRANSITION_ACTIONS[selectedItem.status] || []).map(act => (
                         <button
-                          key={action.target}
-                          onClick={() => handleTransition(selectedItem.id, action.target, action.confirm)}
+                          key={act.action}
+                          onClick={() => handleTransition(selectedItem.id, act.action, act.confirm)}
                           disabled={!!transitionLoading}
-                          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${action.style} ${
-                            transitionLoading === action.target ? 'opacity-50' : ''
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${act.style} ${
+                            transitionLoading === act.action ? 'opacity-50' : ''
                           } disabled:opacity-50`}
                         >
-                          {transitionLoading === action.target ? 'Processing...' : action.label}
+                          {transitionLoading === act.action ? 'Processing...' : act.label}
                         </button>
                       ))}
                     </div>
@@ -794,7 +1078,7 @@ export default function ContentHubDashboard() {
 
                   {/* Links */}
                   <div className="space-y-2 pt-2 border-t border-slate-100">
-                    {selectedItem.slug && (
+                    {selectedItem.status !== 'brief' && (
                       <a
                         href={`/admin/content-hub/edit/${selectedItem.id}`}
                         className="block w-full text-center px-3 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
@@ -813,10 +1097,61 @@ export default function ContentHubDashboard() {
                       </a>
                     )}
                   </div>
+
+                  {/* Delete */}
+                  {selectedItem.status !== 'published' && (
+                    <div className="pt-2 border-t border-slate-100">
+                      <button
+                        onClick={() => setDeleteConfirm(selectedItem)}
+                        className="w-full text-center px-3 py-2 text-xs font-medium text-red-600 bg-white hover:bg-red-50 rounded-lg transition-colors border border-red-200"
+                      >
+                        Delete Content
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Delete Content</h3>
+                <p className="text-xs text-slate-500 mt-0.5">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+              Are you sure you want to delete <span className="font-medium">"{deleteConfirm.title}"</span>?
+              All revisions will also be removed.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm)}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

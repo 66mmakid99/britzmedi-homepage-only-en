@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AnalyticsDashboard from '../../components/admin/analytics/AnalyticsDashboard';
+---
+
+<AdminLayout title="Analytics">
+  <AnalyticsDashboard client:only="react" />
+</AdminLayout>

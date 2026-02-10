@@ -10,14 +10,18 @@ export const GET: APIRoute = async ({ locals }) => {
 
     if (!db) {
       return new Response(JSON.stringify({
-        totalLeads: 0, weeklyLeads: 0, hotLeads: 0,
+        totalLeads: 0, weeklyLeads: 0, hotLeads: 0, overdueLeads: 0,
         totalPosts: 0, publishedPosts: 0,
+        contentItems: 0, contentPublished: 0, contentDraft: 0,
         totalSubscribers: 0, weeklySubscribers: 0,
         recentActivities: [], lastHealthStatus: null, lastHealthAt: null,
+        leadsByStatus: {},
+        alerts: [],
       }), { headers: { 'Content-Type': 'application/json' } });
     }
 
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
     // Helper: safely query a table (returns default if table doesn't exist)
     const safeCount = async (sql: string, binds?: any[]) => {
@@ -28,16 +32,36 @@ export const GET: APIRoute = async ({ locals }) => {
       } catch { return 0; }
     };
 
-    const [leads, weeklyLeads, hotLeads, posts, publishedPosts, subs, weeklySubs, activities] = await Promise.all([
+    const [
+      leads, weeklyLeads, hotLeads, overdueLeads,
+      posts, publishedPosts,
+      contentItems, contentPublished, contentDraft,
+      subs, weeklySubs,
+      activities, leadsByStatusRaw,
+    ] = await Promise.all([
       safeCount('SELECT COUNT(*) as c FROM leads'),
       safeCount('SELECT COUNT(*) as c FROM leads WHERE created_at >= ?', [weekAgo]),
       safeCount("SELECT COUNT(*) as c FROM leads WHERE lead_grade = 'A'"),
+      safeCount(
+        "SELECT COUNT(*) as c FROM leads WHERE status NOT IN ('won','lost') AND COALESCE(last_contacted_at, created_at) < ?",
+        [twoDaysAgo],
+      ),
       safeCount('SELECT COUNT(*) as c FROM blog_posts'),
       safeCount("SELECT COUNT(*) as c FROM blog_posts WHERE status = 'published'"),
+      safeCount('SELECT COUNT(*) as c FROM content_items'),
+      safeCount("SELECT COUNT(*) as c FROM content_items WHERE status = 'published'"),
+      safeCount("SELECT COUNT(*) as c FROM content_items WHERE status = 'draft'"),
       safeCount('SELECT COUNT(*) as c FROM subscribers'),
       safeCount('SELECT COUNT(*) as c FROM subscribers WHERE subscribed_at >= ?', [weekAgo]),
-      db.prepare('SELECT id, type, detail, created_at FROM activity_log ORDER BY created_at DESC LIMIT 5').all().catch(() => ({ results: [] })),
+      db.prepare('SELECT id, type, detail, created_at FROM activity_log ORDER BY created_at DESC LIMIT 8').all().catch(() => ({ results: [] })),
+      db.prepare('SELECT status, COUNT(*) as c FROM leads GROUP BY status').all().catch(() => ({ results: [] })),
     ]);
+
+    // Parse leads by status
+    const leadsByStatus: Record<string, number> = {};
+    for (const row of (leadsByStatusRaw.results || []) as any[]) {
+      leadsByStatus[row.status] = row.c;
+    }
 
     // Get last health check from KV
     let lastHealthStatus: string | null = null;
@@ -53,17 +77,50 @@ export const GET: APIRoute = async ({ locals }) => {
       } catch {}
     }
 
+    // Build alerts
+    const alerts: Array<{ type: string; message: string; severity: 'info' | 'warning' | 'error' }> = [];
+
+    if (overdueLeads > 0) {
+      alerts.push({
+        type: 'overdue_leads',
+        message: `${overdueLeads} lead${overdueLeads > 1 ? 's' : ''} with no response for 48+ hours`,
+        severity: 'warning',
+      });
+    }
+
+    if (hotLeads > 0) {
+      alerts.push({
+        type: 'hot_leads',
+        message: `${hotLeads} hot lead${hotLeads > 1 ? 's' : ''} (A-grade) need attention`,
+        severity: 'info',
+      });
+    }
+
+    if (contentDraft > 3) {
+      alerts.push({
+        type: 'draft_content',
+        message: `${contentDraft} content items in draft — consider reviewing`,
+        severity: 'info',
+      });
+    }
+
     return new Response(JSON.stringify({
       totalLeads: leads,
-      weeklyLeads: weeklyLeads,
-      hotLeads: hotLeads,
+      weeklyLeads,
+      hotLeads,
+      overdueLeads,
       totalPosts: posts,
-      publishedPosts: publishedPosts,
+      publishedPosts,
+      contentItems,
+      contentPublished,
+      contentDraft,
       totalSubscribers: subs,
       weeklySubscribers: weeklySubs,
       recentActivities: activities.results || [],
       lastHealthStatus,
       lastHealthAt,
+      leadsByStatus,
+      alerts,
     }), { headers: { 'Content-Type': 'application/json' } });
   } catch (err: any) {
     console.error('[Dashboard API] Error:', err);

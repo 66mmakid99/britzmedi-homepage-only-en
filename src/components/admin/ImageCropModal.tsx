@@ -48,10 +48,22 @@ export default function ImageCropModal({
         cropH = cropW / aspectRatio;
       }
 
-      setCrop({
+      const x = (displayW - cropW) / 2;
+      const y = (displayH - cropH) / 2;
+      const initialCrop = {
+        unit: 'px' as const,
+        x,
+        y,
+        width: cropW,
+        height: cropH,
+      };
+
+      setCrop(initialCrop);
+      // Also set completedCrop so "Apply Crop" works without manual adjustment
+      setCompletedCrop({
         unit: 'px',
-        x: (displayW - cropW) / 2,
-        y: (displayH - cropH) / 2,
+        x,
+        y,
         width: cropW,
         height: cropH,
       });

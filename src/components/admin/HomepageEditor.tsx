@@ -172,6 +172,7 @@ function FileUpload({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [showCrop, setShowCrop] = useState(false);
   const [optimizeInfo, setOptimizeInfo] = useState<string | null>(null);
+  const [blobPreview, setBlobPreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const preset = cropPreset ? IMAGE_PRESETS[cropPreset] : null;
@@ -206,10 +207,12 @@ function FileUpload({
       }
 
       const data = await res.json();
-      onUploaded(data.url);
+      // Add cache-busting param so browser shows new image, not cached
+      onUploaded(`${data.url}?t=${Date.now()}`);
     } catch {
       alert('Upload failed. Please try again.');
     } finally {
+      setBlobPreview(null);
       setUploading(false);
       setProgress(0);
     }
@@ -230,6 +233,10 @@ function FileUpload({
     setOptimizeInfo(
       `${formatBytes(result.originalSize)} → ${formatBytes(result.optimizedSize)} (${result.width}x${result.height})`
     );
+    // Show cropped image immediately via blob URL
+    const blobUrl = URL.createObjectURL(result.blob);
+    setBlobPreview(blobUrl);
+    onUploaded(blobUrl);
     uploadFile(result.file);
   };
 
@@ -263,13 +270,13 @@ function FileUpload({
                 />
               </div>
             </div>
-          ) : currentUrl ? (
+          ) : (blobPreview || currentUrl) ? (
             <div className="space-y-2">
               {mediaType === 'video' ? (
                 <div className="text-xs text-slate-500 truncate">{currentUrl}</div>
               ) : (
                 <img
-                  src={currentUrl}
+                  src={blobPreview || currentUrl}
                   alt="Preview"
                   className="max-h-24 mx-auto rounded object-cover"
                 />
@@ -868,7 +875,7 @@ export default function HomepageEditor() {
               overflow: 'hidden',
               transition: 'width 0.3s ease',
             }}>
-              <HomepagePreview config={config} />
+              <HomepagePreview config={config} productImages={productImages} />
             </div>
           </div>
         </div>

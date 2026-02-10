@@ -44,11 +44,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
     <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
   )}
-  {config.hero.backgroundType === 'split' && (<>
-    <link slot="head" rel="preload" as="image" href="/images/hero-mobile.webp" media="(max-width: 640px)" />
-    <link slot="head" rel="preload" as="image" href="/images/hero-tablet.webp" media="(min-width: 641px) and (max-width: 1024px)" />
-    <link slot="head" rel="preload" as="image" href="/images/hero-desktop.webp" media="(min-width: 1025px)" />
-  </>)}
+  {config.hero.backgroundType === 'split' && (
+    <link slot="head" rel="preload" as="image" href={config.hero.heroImage || '/images/hero-desktop.webp'} />
+  )}
   <!-- WebSite Schema -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
@@ -69,11 +67,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
     <section id="section-hero" class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh] lg:min-h-[70vh]">
-      <!-- Background image: responsive versions for mobile/tablet/desktop -->
+      <!-- Background image from homepage config -->
       <img
-        src="/images/hero-desktop.webp"
-        srcset="/images/hero-mobile.webp 750w, /images/hero-tablet.webp 1200w, /images/hero-desktop.webp 1920w"
-        sizes="100vw"
+        src={config.hero.heroImage || '/images/hero-desktop.webp'}
         alt={config.hero.heroImageAlt || 'BRITZMEDI'}
         width="1920"
         height="1080"
@@ -83,10 +79,10 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
         class="absolute inset-0 w-full h-full object-cover object-[center_top] lg:object-[right_top]"
       />
 
-      <!-- Gradient overlay: desktop (left navy → right transparent) -->
-      <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.95) 25%, rgb(15 23 42 / 0.7) 45%, rgb(15 23 42 / 0.3) 65%, transparent 100%)"></div>
-      <!-- Gradient overlay: mobile (full dark) -->
-      <div class="absolute inset-0 lg:hidden" style="background: rgb(15 23 42 / 0.8)"></div>
+      <!-- Gradient overlay: desktop (text area only, right side clear for product visibility) -->
+      <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42 / 0.75) 0%, rgb(15 23 42 / 0.5) 30%, rgb(15 23 42 / 0.15) 50%, transparent 60%)"></div>
+      <!-- Gradient overlay: mobile (lighter to show product) -->
+      <div class="absolute inset-0 lg:hidden" style="background: linear-gradient(to bottom, rgb(15 23 42 / 0.55) 0%, rgb(15 23 42 / 0.3) 60%, transparent 100%)"></div>
 
       <!-- Text content -->
       <div class="container relative z-10">

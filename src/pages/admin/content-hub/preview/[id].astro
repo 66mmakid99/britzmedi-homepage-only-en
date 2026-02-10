@@ -1,0 +1,150 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { marked } from 'marked';
+import { isHtml } from '../../../../lib/html-to-markdown';
+
+const { id } = Astro.params;
+
+// Auth check (same as other admin pages)
+const sessionCookie = Astro.cookies.get('admin_session')?.value;
+if (!sessionCookie) {
+  return Astro.redirect('/admin/login');
+}
+
+const runtime = (Astro.locals as any).runtime;
+const env = runtime?.env;
+const db = env?.DB as D1Database | undefined;
+
+if (!db) {
+  return new Response('Database not available', { status: 503 });
+}
+
+// Verify session
+const session = await db.prepare(
+  'SELECT * FROM admin_sessions WHERE token = ? AND expires_at > ?'
+).bind(sessionCookie, new Date().toISOString()).first<any>();
+
+if (!session) {
+  return Astro.redirect('/admin/login');
+}
+
+// Load content item
+const item = await db.prepare(
+  'SELECT * FROM content_items WHERE id = ?'
+).bind(Number(id)).first<any>();
+
+if (!item) {
+  return Astro.redirect('/admin/content-hub');
+}
+
+// Convert markdown → HTML (or use as-is if already HTML)
+const htmlContent = isHtml(item.content || '') ? item.content : await marked(item.content || '');
+
+// Parse FAQ
+let faqs: Array<{ question: string; answer: string }> = [];
+try {
+  if (item.faq) faqs = JSON.parse(item.faq);
+} catch { /* ignore */ }
+
+// Parse tags
+let tags: string[] = [];
+try {
+  if (item.tags) tags = JSON.parse(item.tags);
+} catch { /* ignore */ }
+---
+
+<BaseLayout
+  title={`Preview: ${item.title}`}
+  description={item.excerpt || ''}
+>
+  <!-- Preview Banner -->
+  <div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#fbbf24;color:#78350f;text-align:center;padding:8px 16px;font-size:14px;font-weight:600;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+    Preview — Not Published
+    <a href={`/admin/content-hub/edit/${id}`} style="margin-left:16px;color:#92400e;text-decoration:underline;font-weight:500;">
+      Back to Editor
+    </a>
+  </div>
+
+  <!-- Spacer for fixed banner -->
+  <div style="height:40px;" />
+
+  <!-- Breadcrumb -->
+  <nav class="container py-4 text-sm">
+    <ol class="flex items-center gap-2 text-slate-500">
+      <li><span class="text-slate-400">Home</span></li>
+      <li>/</li>
+      <li><span class="text-slate-400">Blog</span></li>
+      <li>/</li>
+      <li class="text-slate-700 truncate max-w-[250px]">{item.title}</li>
+    </ol>
+  </nav>
+
+  <article class="blog-article">
+    <!-- Category & Date -->
+    <div class="blog-meta">
+      {item.category && (
+        <span class="category-badge">{item.category.replace(/-/g, ' ')}</span>
+      )}
+      <time datetime={item.created_at}>
+        {new Date(item.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      </time>
+    </div>
+
+    <!-- Title -->
+    <h1>{item.title}</h1>
+
+    <!-- Description -->
+    {item.excerpt && (
+      <p class="text-lg" style="color: var(--color-slate-600); line-height: 1.75; margin-bottom: 1.5rem;">
+        {item.excerpt}
+      </p>
+    )}
+
+    <!-- Featured Image -->
+    {item.featured_image && (
+      <div class="blog-featured-image">
+        <img src={item.featured_image} alt={item.title} />
+      </div>
+    )}
+
+    <!-- Author -->
+    <div class="blog-author-bar">
+      <div class="author-info">
+        <div class="author-avatar">B</div>
+        <div>
+          <p class="author-name">{item.author || 'BRITZMEDI Research Team'}</p>
+          <p class="author-org">BRITZMEDI Co., Ltd.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <div class="blog-content">
+      <Fragment set:html={htmlContent} />
+    </div>
+
+    <!-- FAQ Section -->
+    {faqs.length > 0 && (
+      <section class="blog-faq-section">
+        <h2>Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div class="blog-faq-item">
+            <h3>{faq.question}</h3>
+            <p>{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+    )}
+
+    <!-- Tags -->
+    {tags.length > 0 && (
+      <div class="blog-tags">
+        {tags.map(tag => (
+          <span class="tag">#{tag}</span>
+        ))}
+      </div>
+    )}
+  </article>
+</BaseLayout>

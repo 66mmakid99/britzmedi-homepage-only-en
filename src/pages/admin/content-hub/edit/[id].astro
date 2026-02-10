@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import ContentEditor from '../../../../components/admin/content-hub/ContentEditor.tsx';
+
+const { id } = Astro.params;
+---
+
+<AdminLayout title="Edit Content">
+  <ContentEditor client:only="react" contentId={Number(id)} />
+</AdminLayout>
