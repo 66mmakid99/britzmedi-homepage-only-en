@@ -10,7 +10,7 @@ interface Props {
 const { productContext, pageContext } = Astro.props;
 ---
 
-<div id="chatbot-container">
+<div id="chatbot-container" dir="ltr" style="direction: ltr; text-align: left;">
   <Chatbot
     client:idle
     productContext={productContext}
