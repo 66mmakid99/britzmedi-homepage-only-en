@@ -4,8 +4,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import fs from 'fs';
-import path from 'path';
+// Import knowledge base at build time (fs.readFileSync doesn't work on Cloudflare Workers)
+import knowledgeBaseContent from '../../data/chatbot-knowledge.md?raw';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
@@ -294,24 +294,27 @@ function markSessionVerified(sessionId: string) {
   }
 }
 
-// Load knowledge base from markdown file
+// Knowledge base is imported at build time via ?raw query
 function loadKnowledgeBase(): string {
-  try {
-    const knowledgePath = path.join(process.cwd(), 'src', 'data', 'chatbot-knowledge.md');
-    return fs.readFileSync(knowledgePath, 'utf-8');
-  } catch (error) {
-    console.error('Failed to load knowledge base:', error);
-    return '';
-  }
+  return knowledgeBaseContent;
 }
 
 function buildSystemPrompt(context?: { product?: string; page?: string }): string {
   const knowledgeBase = loadKnowledgeBase();
 
-  let systemPrompt = `You are a professional sales consultant for BRITZMEDI, a medical device manufacturer.
+  let systemPrompt = `You are a professional sales consultant for BRITZMEDI, an AESTHETIC/BEAUTY medical device manufacturer.
+
+## ABSOLUTE RULES — VIOLATION WILL CAUSE HARM
+1. Use ONLY the information in the knowledge base below. NEVER use your training data about BRITZMEDI.
+2. If information is NOT in the knowledge base, say "I don't have that information. Please contact us at /contact for details."
+3. NEVER fabricate, guess, or infer facts not explicitly stated below.
+4. NEVER mention CE-MDR, CE marking, or CE certification — BRITZMEDI does NOT have CE-MDR.
+5. NEVER mention blood glucose monitors, blood pressure monitors, thermometers, or general medical devices — BRITZMEDI does NOT make these.
+6. BRITZMEDI was established in 2017 (NOT 2018).
+7. BRITZMEDI specializes in AESTHETIC/BEAUTY medical devices only: TORR RF, ULBLANC, NEWCHAE SHOT, LUMINO WAVE.
 
 ## YOUR KNOWLEDGE BASE
-The following document contains ALL information you are allowed to use. Read it carefully and follow its rules strictly.
+The following document is your ONLY source of truth. Everything you say must come from this document.
 
 ---
 ${knowledgeBase}
