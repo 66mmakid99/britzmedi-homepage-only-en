@@ -44,9 +44,11 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
     <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
   )}
-  {config.hero.backgroundType === 'split' && config.hero.heroImage && (
-    <link slot="head" rel="preload" as="image" href={config.hero.heroImage} />
-  )}
+  {config.hero.backgroundType === 'split' && (<>
+    <link slot="head" rel="preload" as="image" href="/images/hero-mobile.webp" media="(max-width: 640px)" />
+    <link slot="head" rel="preload" as="image" href="/images/hero-tablet.webp" media="(min-width: 641px) and (max-width: 1024px)" />
+    <link slot="head" rel="preload" as="image" href="/images/hero-desktop.webp" media="(min-width: 1025px)" />
+  </>)}
   <!-- WebSite Schema -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
@@ -66,20 +68,20 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
-    <section id="section-hero" class="relative overflow-hidden min-h-[60vh] lg:min-h-[70vh]">
-      <!-- Background image: right-aligned on desktop, centered on mobile -->
-      {config.hero.heroImage && (
-        <img
-          src={config.hero.heroImage}
-          alt={config.hero.heroImageAlt || 'BRITZMEDI'}
-          width="1076"
-          height="1920"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-          class="absolute inset-0 w-full h-full object-cover object-[center_top] lg:object-[right_top]"
-        />
-      )}
+    <section id="section-hero" class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh] lg:min-h-[70vh]">
+      <!-- Background image: responsive versions for mobile/tablet/desktop -->
+      <img
+        src="/images/hero-desktop.webp"
+        srcset="/images/hero-mobile.webp 750w, /images/hero-tablet.webp 1200w, /images/hero-desktop.webp 1920w"
+        sizes="100vw"
+        alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+        width="1920"
+        height="1080"
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+        class="absolute inset-0 w-full h-full object-cover object-[center_top] lg:object-[right_top]"
+      />
 
       <!-- Gradient overlay: desktop (left navy → right transparent) -->
       <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.95) 25%, rgb(15 23 42 / 0.7) 45%, rgb(15 23 42 / 0.3) 65%, transparent 100%)"></div>
@@ -88,8 +90,8 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
       <!-- Text content -->
       <div class="container relative z-10">
-        <div class="py-12 sm:py-20 lg:py-28 xl:py-32 max-w-2xl">
-          <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
+        <div class="py-8 sm:py-16 lg:py-28 xl:py-32 max-w-2xl">
+          <div class="badge-premium mb-4 sm:mb-6 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
             {config.hero.badge}
           </div>
 
@@ -118,7 +120,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
       </div>
     </section>
   ) : (
-    <section id="section-hero" class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+    <section id="section-hero" class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh] lg:min-h-[70vh] flex items-center">
       <!-- Background Layer -->
       {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
         <div class="absolute inset-0 z-0">
@@ -173,7 +175,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
       <!-- Content -->
       <div class="container relative z-20">
-        <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
+        <div class="py-8 sm:py-16 lg:py-28 xl:py-32">
           <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div class="order-2 lg:order-1">
               <!-- Premium Badge -->
@@ -237,9 +239,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   )}
 
   <!-- Trust Badges Section -->
-  <section id="section-badges" class="py-6 sm:py-10 lg:py-20 bg-white relative">
+  <section id="section-badges" class="py-4 sm:py-8 lg:py-16 bg-white relative">
     <div class="container">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8 lg:gap-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
           <a href="/certifications" class="text-center group block">
             <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -254,23 +256,23 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   </section>
 
   <!-- Featured Products Section -->
-  <section id="section-products" class="py-8 sm:py-12 lg:py-20 bg-gradient-section">
+  <section id="section-products" class="py-4 sm:py-8 lg:py-16 bg-gradient-section">
     <div class="container">
       <!-- Section Header -->
-      <div class="max-w-2xl mb-8 lg:mb-14">
-        <span class="label mb-4">{config.featuredProducts.label}</span>
-        <h2 class="heading-2 mb-3 lg:mb-5">{config.featuredProducts.title}</h2>
+      <div class="max-w-2xl mb-4 sm:mb-8 lg:mb-14">
+        <span class="label mb-2 sm:mb-4">{config.featuredProducts.label}</span>
+        <h2 class="heading-2 mb-2 sm:mb-3 lg:mb-5">{config.featuredProducts.title}</h2>
         <p class="body-large">
           {config.featuredProducts.description}
         </p>
       </div>
 
       <!-- Products Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
         {featuredProducts.map((product, index) => (
           <a
             href={`/products/${product.id}`}
-            class="group card-premium p-5 sm:p-6 lg:p-7"
+            class="group card-premium p-4 sm:p-6 lg:p-7"
           >
             <!-- Product Image -->
             <div class="aspect-[4/3] rounded-xl mb-4 sm:mb-6 overflow-hidden bg-slate-100">
@@ -328,7 +330,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
       </div>
 
       <!-- View All Link -->
-      <div class="mt-8 lg:mt-12 text-center">
+      <div class="mt-4 sm:mt-8 lg:mt-12 text-center">
         <a href="/products" class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
           View all products
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,23 +342,23 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   </section>
 
   <!-- Why BRITZMEDI Section -->
-  <section id="section-why" class="py-8 sm:py-12 lg:py-20 bg-white">
+  <section id="section-why" class="py-4 sm:py-8 lg:py-16 bg-white">
     <div class="container">
-      <div class="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
+      <div class="grid lg:grid-cols-2 gap-4 sm:gap-8 lg:gap-20 items-center">
         <!-- Content -->
         <div>
-          <span class="label mb-4">{config.whyBritzMedi.label}</span>
-          <h2 class="heading-2 mb-4 lg:mb-6">
+          <span class="label mb-2 sm:mb-4">{config.whyBritzMedi.label}</span>
+          <h2 class="heading-2 mb-2 sm:mb-4 lg:mb-6">
             {config.whyBritzMedi.title.split('\n').map((line, i) => (
               <>{i > 0 && <br />}{line}</>
             ))}
           </h2>
-          <p class="body-large mb-6 lg:mb-10">
+          <p class="body-large mb-3 sm:mb-6 lg:mb-10">
             {config.whyBritzMedi.description || company.philosophy}
           </p>
 
           <!-- Features List -->
-          <div class="space-y-4 lg:space-y-6">
+          <div class="space-y-3 sm:space-y-4 lg:space-y-6">
             {config.whyBritzMedi.features.map((feature) => (
               <div class="flex gap-5 group">
                 <div class="shrink-0 w-14 h-14 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -410,19 +412,19 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   </section>
 
   <!-- Core Technologies Section -->
-  <section id="section-tech" class="py-8 sm:py-12 lg:py-20 bg-gradient-section">
+  <section id="section-tech" class="py-4 sm:py-8 lg:py-16 bg-gradient-section">
     <div class="container">
-      <div class="text-center max-w-2xl mx-auto mb-8 lg:mb-14">
-        <span class="label mb-4 justify-center">{config.coreTechnologies.label}</span>
-        <h2 class="heading-2 mb-3 lg:mb-5">{config.coreTechnologies.title}</h2>
+      <div class="text-center max-w-2xl mx-auto mb-4 sm:mb-8 lg:mb-14">
+        <span class="label mb-2 sm:mb-4 justify-center">{config.coreTechnologies.label}</span>
+        <h2 class="heading-2 mb-2 sm:mb-3 lg:mb-5">{config.coreTechnologies.title}</h2>
         <p class="body-large">
           {config.coreTechnologies.description}
         </p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
         {coreTechnologies.map((tech, index) => (
-          <div class="card-premium p-5 sm:p-7 lg:p-8 group">
+          <div class="card-premium p-4 sm:p-7 lg:p-8 group">
             <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
               <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -453,9 +455,9 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
   <!-- Latest News Section -->
   {config.latestNews?.enabled && latestNews.length > 0 && (
-    <section id="section-news" class="py-8 sm:py-12 lg:py-20 bg-white">
+    <section id="section-news" class="py-4 sm:py-8 lg:py-16 bg-white">
       <div class="container">
-        <div class="flex items-end justify-between mb-8 lg:mb-14">
+        <div class="flex items-end justify-between mb-4 sm:mb-8 lg:mb-14">
           <div class="max-w-2xl">
             <span class="label mb-4">{config.latestNews.label}</span>
             <h2 class="heading-2 mb-3 lg:mb-5">{config.latestNews.title}</h2>
@@ -469,7 +471,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
           </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
           {latestNews.map((item: any) => (
             <a href={`/news/${item.id}`} class="group card-premium overflow-hidden">
               <div class="aspect-[16/9] bg-slate-100 overflow-hidden">
@@ -519,17 +521,17 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   )}
 
   <!-- CTA Section -->
-  <section id="section-cta" class="py-8 sm:py-12 lg:py-20 relative overflow-hidden">
+  <section id="section-cta" class="py-4 sm:py-8 lg:py-16 relative overflow-hidden">
     <!-- Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800"></div>
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
 
     <div class="container relative">
       <div class="text-center max-w-2xl mx-auto">
-        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-3 lg:mb-5">
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-2 sm:mb-3 lg:mb-5">
           {config.cta.title}
         </h2>
-        <p class="text-lg text-primary-100 mb-6 lg:mb-10 leading-relaxed">
+        <p class="text-base sm:text-lg text-primary-100 mb-4 sm:mb-6 lg:mb-10 leading-relaxed">
           {config.cta.description}
         </p>
         <div class="flex flex-wrap justify-center gap-4">

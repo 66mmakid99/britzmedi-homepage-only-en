@@ -51,26 +51,28 @@ const langSeoDescriptions: Record<string, string> = {
   {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
     <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
   )}
-  {config.hero.backgroundType === 'split' && config.hero.heroImage && (
-    <link slot="head" rel="preload" as="image" href={config.hero.heroImage} />
-  )}
+  {config.hero.backgroundType === 'split' && (<>
+    <link slot="head" rel="preload" as="image" href="/images/hero-mobile.webp" media="(max-width: 640px)" />
+    <link slot="head" rel="preload" as="image" href="/images/hero-tablet.webp" media="(min-width: 641px) and (max-width: 1024px)" />
+    <link slot="head" rel="preload" as="image" href="/images/hero-desktop.webp" media="(min-width: 1025px)" />
+  </>)}
   <!-- Hero Section -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
-    <section id="section-hero" class="relative overflow-hidden min-h-[60vh] lg:min-h-[70vh]">
-      <!-- Background image: right-aligned on desktop, centered on mobile -->
-      {config.hero.heroImage && (
-        <img
-          src={config.hero.heroImage}
-          alt={config.hero.heroImageAlt || 'BRITZMEDI'}
-          width="1076"
-          height="1920"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-          class="absolute inset-0 w-full h-full object-cover object-[center_top] lg:object-[right_top]"
-        />
-      )}
+    <section id="section-hero" class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh] lg:min-h-[70vh]">
+      <!-- Background image: responsive versions for mobile/tablet/desktop -->
+      <img
+        src="/images/hero-desktop.webp"
+        srcset="/images/hero-mobile.webp 750w, /images/hero-tablet.webp 1200w, /images/hero-desktop.webp 1920w"
+        sizes="100vw"
+        alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+        width="1920"
+        height="1080"
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+        class="absolute inset-0 w-full h-full object-cover object-[center_top] lg:object-[right_top]"
+      />
 
       <!-- Gradient overlay: desktop (left navy → right transparent) -->
       <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42) 0%, rgb(15 23 42 / 0.95) 25%, rgb(15 23 42 / 0.7) 45%, rgb(15 23 42 / 0.3) 65%, transparent 100%)"></div>
@@ -79,8 +81,8 @@ const langSeoDescriptions: Record<string, string> = {
 
       <!-- Text content -->
       <div class="container relative z-10">
-        <div class="py-12 sm:py-20 lg:py-28 xl:py-32 max-w-2xl">
-          <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
+        <div class="py-8 sm:py-16 lg:py-28 xl:py-32 max-w-2xl">
+          <div class="badge-premium mb-4 sm:mb-6 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
             {config.hero.badge}
           </div>
 
@@ -108,7 +110,7 @@ const langSeoDescriptions: Record<string, string> = {
       </div>
     </section>
   ) : (
-    <section id="section-hero" class="relative overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
+    <section id="section-hero" class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh] lg:min-h-[70vh] flex items-center">
       {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
         <div class="absolute inset-0 z-0">
           <video
@@ -160,8 +162,8 @@ const langSeoDescriptions: Record<string, string> = {
       )}
 
       <div class="container relative z-20">
-        <div class="py-12 sm:py-20 lg:py-28 xl:py-32">
-          <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div class="py-8 sm:py-16 lg:py-28 xl:py-32">
+          <div class="grid lg:grid-cols-2 gap-4 sm:gap-8 lg:gap-12 items-center">
             <div class="order-2 lg:order-1">
               <div class:list={[
                 "badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex",
@@ -218,9 +220,9 @@ const langSeoDescriptions: Record<string, string> = {
   )}
 
   <!-- Trust Badges Section -->
-  <section id="section-badges" class="py-6 sm:py-10 lg:py-20 bg-white relative">
+  <section id="section-badges" class="py-4 sm:py-8 lg:py-16 bg-white relative">
     <div class="container">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8 lg:gap-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
           <div class="text-center group">
             <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -235,18 +237,18 @@ const langSeoDescriptions: Record<string, string> = {
   </section>
 
   <!-- Featured Products Section -->
-  <section id="section-products" class="py-8 sm:py-12 lg:py-20 bg-gradient-section">
+  <section id="section-products" class="py-4 sm:py-8 lg:py-16 bg-gradient-section">
     <div class="container">
-      <div class="max-w-2xl mb-8 lg:mb-14">
-        <span class="label mb-4">{t('home.products.title')}</span>
-        <h2 class="heading-2 mb-3 lg:mb-5">{t('home.products.subtitle')}</h2>
+      <div class="max-w-2xl mb-4 sm:mb-8 lg:mb-14">
+        <span class="label mb-2 sm:mb-4">{t('home.products.title')}</span>
+        <h2 class="heading-2 mb-2 sm:mb-3 lg:mb-5">{t('home.products.subtitle')}</h2>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
         {featuredProducts.map((product) => (
           <a
             href={`/${lang}/products/${product.id}`}
-            class="group card-premium p-5 sm:p-6 lg:p-7"
+            class="group card-premium p-4 sm:p-6 lg:p-7"
           >
             <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-4 sm:mb-6 relative overflow-hidden" data-product={product.id}>
               {product.images?.main ? (
@@ -305,7 +307,7 @@ const langSeoDescriptions: Record<string, string> = {
         ))}
       </div>
 
-      <div class="mt-8 lg:mt-12 text-center">
+      <div class="mt-4 sm:mt-8 lg:mt-12 text-center">
         <a href={`/${lang}/products`} class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
           {t('common.viewAll')}
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,16 +319,16 @@ const langSeoDescriptions: Record<string, string> = {
   </section>
 
   <!-- CTA Section -->
-  <section id="section-cta" class="py-8 sm:py-12 lg:py-20 relative overflow-hidden">
+  <section id="section-cta" class="py-4 sm:py-8 lg:py-16 relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800"></div>
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
 
     <div class="container relative">
       <div class="text-center max-w-2xl mx-auto">
-        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-3 lg:mb-5">
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-2 sm:mb-3 lg:mb-5">
           {t('nav.contactUs')}
         </h2>
-        <p class="text-lg text-primary-100 mb-6 lg:mb-10 leading-relaxed">
+        <p class="text-base sm:text-lg text-primary-100 mb-4 sm:mb-6 lg:mb-10 leading-relaxed">
           {t('contact.subtitle')}
         </p>
         <div class="flex flex-wrap justify-center gap-4">
