@@ -1,13 +1,12 @@
 import type { APIRoute } from 'astro';
-import fs from 'node:fs';
-import path from 'node:path';
+import { commitFileToGitHub } from '../../../lib/youtube-to-blog/github';
+import defaultConfig from '../../../data/homepage.json';
 
 export const prerender = false;
 
-const HOMEPAGE_JSON_PATH = path.join(process.cwd(), 'src', 'data', 'homepage.json');
+const KV_KEY = 'homepage-config';
 
-export const GET: APIRoute = async ({ cookies }) => {
-  // Auth check
+export const GET: APIRoute = async ({ cookies, locals }) => {
   const session = cookies.get('admin_session')?.value;
   if (!session) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -17,8 +16,22 @@ export const GET: APIRoute = async ({ cookies }) => {
   }
 
   try {
-    const data = fs.readFileSync(HOMEPAGE_JSON_PATH, 'utf-8');
-    return new Response(data, {
+    const runtime = (locals as any).runtime;
+    const kv = runtime?.env?.SESSION as KVNamespace | undefined;
+
+    // Try KV first, fallback to bundled default
+    if (kv) {
+      const kvData = await kv.get(KV_KEY);
+      if (kvData) {
+        return new Response(kvData, {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Fallback: return the static default from the repo
+    return new Response(JSON.stringify(defaultConfig, null, 2), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -31,8 +44,7 @@ export const GET: APIRoute = async ({ cookies }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request, cookies }) => {
-  // Auth check
+export const POST: APIRoute = async ({ request, cookies, locals }) => {
   const session = cookies.get('admin_session')?.value;
   if (!session) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -44,7 +56,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
 
-    // Basic validation - ensure required sections exist
+    // Validate required sections
     const requiredSections = ['hero', 'trustBadges', 'featuredProducts', 'whyBritzMedi', 'coreTechnologies', 'cta'];
     for (const section of requiredSections) {
       if (!body[section]) {
@@ -55,10 +67,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     }
 
-    // Write to file with pretty formatting
-    fs.writeFileSync(HOMEPAGE_JSON_PATH, JSON.stringify(body, null, 2), 'utf-8');
+    const jsonContent = JSON.stringify(body, null, 2);
+    const runtime = (locals as any).runtime;
+    const kv = runtime?.env?.SESSION as KVNamespace | undefined;
+    const githubToken = runtime?.env?.GITHUB_TOKEN as string | undefined;
+    const githubRepo = runtime?.env?.GITHUB_REPO as string | undefined;
 
-    console.log('[Homepage API] Config saved successfully');
+    // 1. Save to KV for immediate reads
+    if (kv) {
+      await kv.put(KV_KEY, jsonContent);
+      console.log('[Homepage API] Config saved to KV');
+    }
+
+    // 2. Commit to GitHub to trigger Cloudflare Pages rebuild
+    if (githubToken && githubRepo) {
+      try {
+        const result = await commitFileToGitHub(
+          githubToken,
+          githubRepo,
+          'src/data/homepage.json',
+          jsonContent + '\n',
+          'chore: update homepage config via editor'
+        );
+        console.log('[Homepage API] Committed to GitHub:', result.sha);
+      } catch (ghErr) {
+        // GitHub commit failure is non-fatal — KV already saved
+        console.error('[Homepage API] GitHub commit failed (non-fatal):', ghErr);
+      }
+    } else {
+      console.warn('[Homepage API] GITHUB_TOKEN or GITHUB_REPO not configured — skipping GitHub commit');
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

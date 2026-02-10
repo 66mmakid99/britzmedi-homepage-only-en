@@ -391,10 +391,7 @@ export default function HomepageEditor() {
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-      setTimeout(() => {
-        iframeRef.current?.contentWindow?.location.reload();
-      }, 500);
+      setTimeout(() => setShowToast(false), 5000);
     } catch (err: any) {
       console.error('Save failed:', err);
       setSaveStatus('error');
@@ -420,24 +417,29 @@ export default function HomepageEditor() {
   if (!config) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 20px', textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" />
-            <path d="M8 21h8" /><path d="M12 17v4" />
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4m0 4h.01" />
           </svg>
         </div>
         <h3 style={{ fontSize: 18, fontWeight: 600, color: '#0f172a', margin: '0 0 8px' }}>
-          Local Development Only
+          Failed to Load Configuration
         </h3>
         <p style={{ fontSize: 14, color: '#64748b', maxWidth: 420, lineHeight: 1.6, margin: 0 }}>
-          The Homepage Visual Editor uses the local filesystem and is only available in the development environment.
-          To edit the homepage, clone the repository and run <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, fontSize: 13 }}>npm run dev</code> locally.
+          Could not load homepage configuration. Please check your connection and try again.
         </p>
         {loadError && (
           <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12 }}>
             Error: {loadError}
           </p>
         )}
+        <button
+          onClick={() => window.location.reload()}
+          style={{ marginTop: 16, padding: '8px 20px', fontSize: 14, fontWeight: 500, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -849,7 +851,7 @@ export default function HomepageEditor() {
       {/* ── Toast ── */}
       {showToast && (
         <div style={{ position: 'fixed', bottom: 24, right: 24, background: '#16a34a', color: '#fff', padding: '12px 16px', borderRadius: 8, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, zIndex: 50 }}>
-          Saved! Preview updated.
+          Saved! Deployment will start automatically.
         </div>
       )}
     </div>
