@@ -2,9 +2,9 @@
 export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import ContentHub from '../../../components/admin/content-hub/ContentHub.tsx';
+import ContentHubDashboard from '../../../components/admin/content-hub/ContentHubDashboard.tsx';
 ---
 
 <AdminLayout title="Content Hub">
-  <ContentHub client:only="react" />
+  <ContentHubDashboard client:only="react" />
 </AdminLayout>
