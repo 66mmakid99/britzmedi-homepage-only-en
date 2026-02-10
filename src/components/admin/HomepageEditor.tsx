@@ -333,6 +333,7 @@ export default function HomepageEditor() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>('hero');
+  const [viewport, setViewport] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   useEffect(() => {
     fetch('/api/admin/homepage')
@@ -813,20 +814,62 @@ export default function HomepageEditor() {
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          overflowX: 'hidden',
+          overflowX: 'auto',
           background: '#f1f5f9',
-          padding: 16,
           minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
         }}>
+          {/* Viewport Switcher */}
           <div style={{
-            maxWidth: 800,
+            flexShrink: 0,
+            padding: '8px 16px',
             background: '#fff',
-            borderRadius: 8,
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            border: '1px solid #cbd5e1',
-            overflow: 'hidden',
+            borderBottom: '1px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
           }}>
-            <HomepagePreview config={config} />
+            <span style={{ fontSize: 12, color: '#94a3b8', marginRight: 8 }}>Preview</span>
+            {([
+              { key: 'mobile' as const, label: 'Mobile', width: 375, icon: '\u{1F4F1}' },
+              { key: 'tablet' as const, label: 'Tablet', width: 768, icon: '\u{1F4F1}' },
+              { key: 'desktop' as const, label: 'Desktop', width: '100%', icon: '\u{1F5A5}\uFE0F' },
+            ]).map((vp) => (
+              <button
+                key={vp.key}
+                onClick={() => setViewport(vp.key)}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: 12,
+                  fontWeight: viewport === vp.key ? 600 : 400,
+                  color: viewport === vp.key ? '#2563eb' : '#64748b',
+                  background: viewport === vp.key ? '#eff6ff' : 'transparent',
+                  border: viewport === vp.key ? '1px solid #bfdbfe' : '1px solid transparent',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {vp.icon} {vp.label} {typeof vp.width === 'number' ? `(${vp.width}px)` : ''}
+              </button>
+            ))}
+          </div>
+
+          {/* Preview Container */}
+          <div style={{ flex: 1, padding: 16, display: 'flex', justifyContent: 'center' }}>
+            <div style={{
+              width: viewport === 'mobile' ? 375 : viewport === 'tablet' ? 768 : '100%',
+              maxWidth: '100%',
+              background: '#fff',
+              borderRadius: 8,
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+              border: '1px solid #cbd5e1',
+              overflow: 'hidden',
+              transition: 'width 0.3s ease',
+            }}>
+              <HomepagePreview config={config} />
+            </div>
           </div>
         </div>
       </div>
