@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { HomepageConfig } from '../../data/homepage.types';
 import ImageCropModal from './ImageCropModal';
 import { IMAGE_PRESETS, formatBytes, type OptimizeResult } from './imageUtils';
+import HomepagePreview from './HomepagePreview';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-
-const IFRAME_WIDTH = 1440;
-const IFRAME_HEIGHT = 5000;
 
 const PRODUCTS = [
   { id: 'torr-rf', name: 'TORR RF', image: '/images/products/torr-rf.webp' },
@@ -335,7 +333,6 @@ export default function HomepageEditor() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>('hero');
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     fetch('/api/admin/homepage')
@@ -812,7 +809,7 @@ export default function HomepageEditor() {
           )}
         </div>
 
-        {/* Right: Preview Panel — pure inline styles */}
+        {/* Right: Live Preview Panel */}
         <div style={{
           flex: 1,
           overflowY: 'auto',
@@ -820,30 +817,16 @@ export default function HomepageEditor() {
           background: '#f1f5f9',
           padding: 16,
           minWidth: 0,
-          position: 'relative',
         }}>
           <div style={{
-            width: IFRAME_WIDTH * 0.55,
-            height: IFRAME_HEIGHT * 0.55,
-            overflow: 'hidden',
+            maxWidth: 800,
             background: '#fff',
             borderRadius: 8,
             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
             border: '1px solid #cbd5e1',
+            overflow: 'hidden',
           }}>
-            <iframe
-              ref={iframeRef}
-              src="/"
-              title="Homepage Preview"
-              style={{
-                width: IFRAME_WIDTH,
-                height: IFRAME_HEIGHT,
-                border: 'none',
-                transform: 'scale(0.55)',
-                transformOrigin: 'top left',
-                display: 'block',
-              }}
-            />
+            <HomepagePreview config={config} />
           </div>
         </div>
       </div>
