@@ -20,7 +20,7 @@ const currentLanguageInfo = languages[currentLang];
     </svg>
   </button>
 
-  <div class="language-dropdown absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 opacity-0 invisible transform translate-y-2 transition-all duration-200 z-50">
+  <div class="language-dropdown absolute end-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 opacity-0 invisible transform translate-y-2 transition-all duration-200 z-50">
     {Object.entries(languages).map(([code, info]) => {
       const isActive = code === currentLang;
       const href = addLanguageToPath(currentPath, code as Language);
@@ -40,7 +40,7 @@ const currentLanguageInfo = languages[currentLang];
           <span class="text-base">{info.flag}</span>
           <span>{info.name}</span>
           {isActive && (
-            <svg class="w-4 h-4 ml-auto text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-4 h-4 ms-auto text-primary-600" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
           )}

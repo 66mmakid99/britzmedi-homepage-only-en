@@ -112,7 +112,7 @@ const isActivePath = (href: string) => {
 
   <!-- Panel -->
   <div
-    class="absolute top-0 right-0 bottom-0 w-full max-w-[320px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-out pointer-events-none"
+    class="absolute top-0 end-0 bottom-0 w-full max-w-[320px] bg-white shadow-2xl transform translate-x-full rtl:-translate-x-full transition-transform duration-300 ease-out pointer-events-none"
     id="mobile-menu-panel"
   >
     <!-- Header -->
@@ -155,7 +155,7 @@ const isActivePath = (href: string) => {
             ]}
           >
             {t(item.key as any)}
-            <svg class="w-4 h-4 ml-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 ms-auto text-slate-400 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </a>
@@ -193,6 +193,8 @@ const isActivePath = (href: string) => {
   const mobileMenuPanel = document.getElementById('mobile-menu-panel');
   const mobileMenuClose = document.getElementById('mobile-menu-close');
 
+  const isRtl = document.documentElement.dir === 'rtl';
+
   function openMenu() {
     if (!mobileMenu || !mobileMenuOverlay || !mobileMenuPanel) return;
 
@@ -200,7 +202,7 @@ const isActivePath = (href: string) => {
     mobileMenu.setAttribute('aria-hidden', 'false');
     mobileMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
     mobileMenuOverlay.classList.add('opacity-100', 'pointer-events-auto');
-    mobileMenuPanel.classList.remove('translate-x-full', 'pointer-events-none');
+    mobileMenuPanel.classList.remove('translate-x-full', '-translate-x-full', 'pointer-events-none');
     mobileMenuPanel.classList.add('translate-x-0', 'pointer-events-auto');
     document.body.style.overflow = 'hidden';
   }
@@ -210,7 +212,8 @@ const isActivePath = (href: string) => {
 
     mobileMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
     mobileMenuOverlay.classList.remove('opacity-100', 'pointer-events-auto');
-    mobileMenuPanel.classList.add('translate-x-full', 'pointer-events-none');
+    const offscreenClass = isRtl ? '-translate-x-full' : 'translate-x-full';
+    mobileMenuPanel.classList.add(offscreenClass, 'pointer-events-none');
     mobileMenuPanel.classList.remove('translate-x-0', 'pointer-events-auto');
     document.body.style.overflow = '';
 
