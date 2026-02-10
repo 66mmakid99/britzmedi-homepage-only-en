@@ -57,7 +57,7 @@ const langSeoDescriptions: Record<string, string> = {
   <!-- Hero Section -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
-    <section id="section-hero" class="relative overflow-hidden min-h-[70vh]">
+    <section id="section-hero" class="relative overflow-hidden min-h-[60vh] lg:min-h-[70vh]">
       <!-- Background image: right-aligned on desktop, centered on mobile -->
       {config.hero.heroImage && (
         <img
@@ -79,7 +79,7 @@ const langSeoDescriptions: Record<string, string> = {
 
       <!-- Text content -->
       <div class="container relative z-10">
-        <div class="py-20 sm:py-24 lg:py-28 xl:py-32 max-w-2xl">
+        <div class="py-12 sm:py-20 lg:py-28 xl:py-32 max-w-2xl">
           <div class="badge-premium mb-6 sm:mb-8 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
             {config.hero.badge}
           </div>
@@ -89,7 +89,7 @@ const langSeoDescriptions: Record<string, string> = {
             <span class="text-primary-400">BRITZMEDI</span>
           </h1>
 
-          <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
+          <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-5 sm:mb-8 lg:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
             {t('home.hero.subtitle')}
           </p>
 
@@ -160,7 +160,7 @@ const langSeoDescriptions: Record<string, string> = {
       )}
 
       <div class="container relative z-20">
-        <div class="py-20 sm:py-24 lg:py-28 xl:py-32">
+        <div class="py-12 sm:py-20 lg:py-28 xl:py-32">
           <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div class="order-2 lg:order-1">
               <div class:list={[
@@ -183,7 +183,7 @@ const langSeoDescriptions: Record<string, string> = {
               </h1>
 
               <p class:list={[
-                "text-base sm:text-lg lg:text-xl max-w-xl mb-8 sm:mb-10 opacity-0 animate-fade-up stagger-2",
+                "text-base sm:text-lg lg:text-xl max-w-xl mb-5 sm:mb-8 lg:mb-10 opacity-0 animate-fade-up stagger-2",
                 config.hero.backgroundType !== 'gradient' && "!text-slate-200 drop-shadow-md"
               ]}>
                 {t('home.hero.subtitle')}
@@ -218,9 +218,9 @@ const langSeoDescriptions: Record<string, string> = {
   )}
 
   <!-- Trust Badges Section -->
-  <section id="section-badges" class="py-16 lg:py-20 bg-white relative">
+  <section id="section-badges" class="py-6 sm:py-10 lg:py-20 bg-white relative">
     <div class="container">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-8 lg:gap-12">
         {config.trustBadges.badges.map((badge) => (
           <div class="text-center group">
             <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-2xl group-hover:shadow-lg group-hover:shadow-primary-500/10 transition-shadow">
@@ -235,11 +235,11 @@ const langSeoDescriptions: Record<string, string> = {
   </section>
 
   <!-- Featured Products Section -->
-  <section id="section-products" class="section bg-gradient-section">
+  <section id="section-products" class="py-8 sm:py-12 lg:py-20 bg-gradient-section">
     <div class="container">
-      <div class="max-w-2xl mb-14">
+      <div class="max-w-2xl mb-8 lg:mb-14">
         <span class="label mb-4">{t('home.products.title')}</span>
-        <h2 class="heading-2 mb-5">{t('home.products.subtitle')}</h2>
+        <h2 class="heading-2 mb-3 lg:mb-5">{t('home.products.subtitle')}</h2>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -248,7 +248,7 @@ const langSeoDescriptions: Record<string, string> = {
             href={`/${lang}/products/${product.id}`}
             class="group card-premium p-5 sm:p-6 lg:p-7"
           >
-            <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-6 relative overflow-hidden" data-product={product.id}>
+            <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-4 sm:mb-6 relative overflow-hidden" data-product={product.id}>
               {product.images?.main ? (
                 <img
                   src={product.images.main}
@@ -305,7 +305,7 @@ const langSeoDescriptions: Record<string, string> = {
         ))}
       </div>
 
-      <div class="mt-12 text-center">
+      <div class="mt-8 lg:mt-12 text-center">
         <a href={`/${lang}/products`} class="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors link-underline">
           {t('common.viewAll')}
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,16 +317,16 @@ const langSeoDescriptions: Record<string, string> = {
   </section>
 
   <!-- CTA Section -->
-  <section id="section-cta" class="section relative overflow-hidden">
+  <section id="section-cta" class="py-8 sm:py-12 lg:py-20 relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800"></div>
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
 
     <div class="container relative">
       <div class="text-center max-w-2xl mx-auto">
-        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-5">
+        <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-3 lg:mb-5">
           {t('nav.contactUs')}
         </h2>
-        <p class="text-lg text-primary-100 mb-10 leading-relaxed">
+        <p class="text-lg text-primary-100 mb-6 lg:mb-10 leading-relaxed">
           {t('contact.subtitle')}
         </p>
         <div class="flex flex-wrap justify-center gap-4">
