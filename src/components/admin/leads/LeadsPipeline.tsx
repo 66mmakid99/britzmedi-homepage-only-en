@@ -113,6 +113,19 @@ function isOverdue(lead: Lead): boolean {
   return Date.now() - new Date(ref).getTime() > 48 * 60 * 60 * 1000;
 }
 
+// ---------- Toast Notification ----------
+function Toast({ message, type, onDismiss }: { message: string; type: 'error' | 'success'; onDismiss: () => void }) {
+  return (
+    <div className={`fixed top-4 right-4 z-[60] max-w-sm px-4 py-3 rounded-xl shadow-lg border flex items-start gap-3 animate-[slideIn_0.2s_ease-out] ${
+      type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800'
+    }`}>
+      <span className="text-sm">{type === 'error' ? '\u26a0\ufe0f' : '\u2705'}</span>
+      <p className="text-sm flex-1">{message}</p>
+      <button onClick={onDismiss} className="text-slate-400 hover:text-slate-600 shrink-0">&times;</button>
+    </div>
+  );
+}
+
 // ---------- Main Component ----------
 export default function LeadsPipeline() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -121,6 +134,8 @@ export default function LeadsPipeline() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
   const [search, setSearch] = useState('');
   const [gradeFilter, setGradeFilter] = useState('');
 
@@ -131,17 +146,33 @@ export default function LeadsPipeline() {
   const [lostReasonModal, setLostReasonModal] = useState<number | null>(null);
   const [lostReason, setLostReason] = useState('');
 
+  // Auto-dismiss toast after 4 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const showToast = (message: string, type: 'error' | 'success' = 'error') => {
+    setToast({ message, type });
+  };
+
   // Fetch leads
   const fetchLeads = useCallback(async () => {
     try {
+      setError(null);
       const params = new URLSearchParams();
       if (gradeFilter) params.set('grade', gradeFilter);
       if (search) params.set('search', search);
       params.set('limit', '200');
       const res = await fetch(`/api/leads?${params}`);
+      if (!res.ok) throw new Error(`Failed to load leads (${res.status})`);
       const data = await res.json();
       setLeads(data.leads || []);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load leads';
+      setError(msg);
       console.error('Failed to fetch leads:', err);
     }
   }, [gradeFilter, search]);
@@ -149,9 +180,11 @@ export default function LeadsPipeline() {
   const fetchStats = useCallback(async () => {
     try {
       const res = await fetch('/api/leads/stats');
-      const data = await res.json();
-      setStats(data);
-    } catch { /* ignore */ }
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch { /* non-critical */ }
   }, []);
 
   const loadAll = useCallback(async () => {
@@ -188,16 +221,18 @@ export default function LeadsPipeline() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setLeads(prev => prev.map(l => l.id === leadId ? { ...l, ...data.lead } : l));
-        if (selectedLead?.id === leadId) {
-          setSelectedLead(prev => prev ? { ...prev, ...data.lead } : null);
-          fetchActivities(leadId);
-        }
-        fetchStats();
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = await res.json();
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, ...data.lead } : l));
+      if (selectedLead?.id === leadId) {
+        setSelectedLead(prev => prev ? { ...prev, ...data.lead } : null);
+        fetchActivities(leadId);
       }
-    } catch (err) { console.error('Failed to move stage:', err); }
+      fetchStats();
+    } catch (err) {
+      console.error('Failed to move stage:', err);
+      showToast('Failed to update lead stage. Please try again.');
+    }
   };
 
   // Add activity
@@ -213,13 +248,15 @@ export default function LeadsPipeline() {
           description: activityDesc.trim() || undefined,
         }),
       });
-      if (res.ok) {
-        setActivityModal(null);
-        setActivityTitle('');
-        setActivityDesc('');
-        fetchActivities(activityModal.leadId);
-      }
-    } catch (err) { console.error('Failed to add activity:', err); }
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      setActivityModal(null);
+      setActivityTitle('');
+      setActivityDesc('');
+      fetchActivities(activityModal.leadId);
+    } catch (err) {
+      console.error('Failed to add activity:', err);
+      showToast('Failed to log activity. Please try again.');
+    }
   };
 
   // Delete lead
@@ -227,12 +264,14 @@ export default function LeadsPipeline() {
     if (!confirm('Delete this lead permanently?')) return;
     try {
       const res = await fetch(`/api/leads/${leadId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setLeads(prev => prev.filter(l => l.id !== leadId));
-        if (selectedLead?.id === leadId) setSelectedLead(null);
-        fetchStats();
-      }
-    } catch { /* ignore */ }
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      setLeads(prev => prev.filter(l => l.id !== leadId));
+      if (selectedLead?.id === leadId) setSelectedLead(null);
+      fetchStats();
+    } catch (err) {
+      console.error('Failed to delete lead:', err);
+      showToast('Failed to delete lead. Please try again.');
+    }
   };
 
   // Group leads by stage
@@ -244,6 +283,17 @@ export default function LeadsPipeline() {
   // ---------- Render ----------
   return (
     <div className="min-h-screen bg-slate-50">
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
+
+      {error && (
+        <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          <span>Failed to load leads. Please check your connection and try again.</span>
+          <button onClick={loadAll} className="ml-auto shrink-0 px-3 py-1 text-xs font-medium bg-red-100 hover:bg-red-200 rounded-lg">
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="Total Leads" value={stats?.total ?? 0} icon="users" color="primary" />
@@ -304,6 +354,14 @@ export default function LeadsPipeline() {
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
           Loading leads...
+        </div>
+      ) : !error && leads.length === 0 && !search && !gradeFilter ? (
+        <div className="text-center py-20">
+          <svg className="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <h3 className="text-lg font-semibold text-slate-700 mb-1">No leads yet</h3>
+          <p className="text-sm text-slate-500">Leads will appear here when visitors submit the contact form.</p>
         </div>
       ) : view === 'pipeline' ? (
         <PipelineView

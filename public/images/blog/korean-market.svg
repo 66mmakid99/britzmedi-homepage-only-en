@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#EFF6FF"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#marketGrad)" opacity="0.15"/>
+  <defs>
+    <linearGradient id="marketGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#0070C4"/>
+      <stop offset="100%" stop-color="#015A9F"/>
+    </linearGradient>
+  </defs>
+  <!-- Korean flag motif (taegeuk circle) -->
+  <g transform="translate(165, 45)">
+    <circle cx="35" cy="35" r="35" stroke="#93C5FD" stroke-width="2" fill="#DBEAFE" fill-opacity="0.4"/>
+    <path d="M35 0 A35 35 0 0 1 35 70 A17.5 17.5 0 0 1 35 35 A17.5 17.5 0 0 0 35 0" fill="#3B82F6" fill-opacity="0.3"/>
+    <path d="M35 70 A35 35 0 0 1 35 0 A17.5 17.5 0 0 1 35 35 A17.5 17.5 0 0 0 35 70" fill="#EF4444" fill-opacity="0.2"/>
+  </g>
+  <!-- Market chart bars -->
+  <g opacity="0.5" transform="translate(80, 130)">
+    <rect x="0" y="30" width="24" height="50" rx="3" fill="#93C5FD"/>
+    <rect x="34" y="15" width="24" height="65" rx="3" fill="#60A5FA"/>
+    <rect x="68" y="5" width="24" height="75" rx="3" fill="#3B82F6"/>
+    <rect x="102" y="20" width="24" height="60" rx="3" fill="#60A5FA"/>
+  </g>
+  <!-- Globe icon -->
+  <g transform="translate(240, 130)" opacity="0.4">
+    <circle cx="30" cy="30" r="28" stroke="#3B82F6" stroke-width="1.5" fill="none"/>
+    <ellipse cx="30" cy="30" rx="12" ry="28" stroke="#3B82F6" stroke-width="1.2" fill="none"/>
+    <line x1="2" y1="30" x2="58" y2="30" stroke="#3B82F6" stroke-width="1.2"/>
+    <path d="M6 18 Q30 14 54 18" stroke="#3B82F6" stroke-width="1" fill="none"/>
+    <path d="M6 42 Q30 46 54 42" stroke="#3B82F6" stroke-width="1" fill="none"/>
+  </g>
+  <!-- Trend arrow -->
+  <g stroke="#3B82F6" fill="none" opacity="0.35" stroke-width="2" transform="translate(130, 120)">
+    <path d="M0 40 L30 25 L60 30 L90 10" stroke-linecap="round"/>
+    <path d="M80 10 L90 10 L90 20" stroke-linecap="round"/>
+  </g>
+</svg>

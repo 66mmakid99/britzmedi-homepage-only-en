@@ -81,6 +81,42 @@ const differentiators = product.differentiators?.map((diff, i) => ({
 }));
 
 const pageDescription = `${product.name} - ${tagline}. ${overview}`;
+
+// Product JSON-LD Schema
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  'name': product.name,
+  'description': pageDescription,
+  'image': product.images?.main ? `https://britzmedi.com${product.images.main}` : undefined,
+  'brand': {
+    '@type': 'Brand',
+    'name': 'BRITZMEDI'
+  },
+  'manufacturer': {
+    '@type': 'Organization',
+    'name': 'BRITZMEDI Co., Ltd.',
+    'url': 'https://britzmedi.com'
+  },
+  'model': product.model,
+  'category': product.category === 'medical-device' ? 'Medical Device' : 'Medical Cosmetic',
+  'url': `https://britzmedi.com/${lang}/products/${product.id}`,
+  ...(product.certifications?.some((c: any) => c.name === 'FDA' && c.status === 'Cleared') ? {
+    'additionalProperty': [{
+      '@type': 'PropertyValue',
+      'name': 'FDA Status',
+      'value': 'FDA 510(k) Cleared'
+    }]
+  } : {}),
+  'offers': {
+    '@type': 'Offer',
+    'availability': product.status === 'coming-soon' ? 'https://schema.org/PreOrder' : 'https://schema.org/InStock',
+    'priceCurrency': 'USD',
+    'price': '0',
+    'priceValidUntil': '2027-12-31',
+    'url': `https://britzmedi.com/${lang}/contact?product=${product.id}`
+  }
+};
 ---
 
 <BaseLayout
@@ -89,6 +125,8 @@ const pageDescription = `${product.name} - ${tagline}. ${overview}`;
   ogType="product"
   ogImage={product.images?.main}
 >
+  <!-- Product Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify(productSchema)} />
   <!-- Hero Section -->
   <section class="relative bg-gradient-to-br from-slate-50 to-white py-12 lg:py-20">
     <div class="container">

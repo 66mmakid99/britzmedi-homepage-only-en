@@ -114,32 +114,46 @@ function TrafficTab() {
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
   const [notConfigured, setNotConfigured] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(7);
 
   const fetchTraffic = useCallback(async (d: number) => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/admin/analytics/traffic?days=${d}`);
-      if (res.ok) {
-        const json = await res.json();
-        setConnected(json.connected !== false);
-        if (json.data?.success) {
-          setData(json.data);
-          setNotConfigured(false);
-        } else if (json.data?.notConfigured) {
-          setNotConfigured(true);
-          setData(null);
-        } else {
-          setData(null);
-        }
+      if (!res.ok) throw new Error(`Failed to load traffic data (${res.status})`);
+      const json = await res.json();
+      setConnected(json.connected !== false);
+      if (json.data?.success) {
+        setData(json.data);
+        setNotConfigured(false);
+      } else if (json.data?.notConfigured) {
+        setNotConfigured(true);
+        setData(null);
+      } else {
+        setData(null);
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load traffic data');
+    }
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchTraffic(days); }, [days, fetchTraffic]);
 
   if (loading) return <LoadingSpinner />;
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <p className="text-sm text-red-700 mb-3">{error}</p>
+        <button onClick={() => fetchTraffic(days)} className="px-4 py-2 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   // Not configured state
   if (notConfigured || !connected) {
@@ -294,34 +308,50 @@ function SearchTab() {
   const [discovered, setDiscovered] = useState<DiscoveredKeyword[]>([]);
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const [progressRes, discoveredRes] = await Promise.all([
-          fetch('/api/admin/content-hub/seo/progress'),
-          fetch('/api/admin/content-hub/seo/discovered').catch(() => null),
-        ]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [progressRes, discoveredRes] = await Promise.all([
+        fetch('/api/admin/content-hub/seo/progress'),
+        fetch('/api/admin/content-hub/seo/discovered').catch(() => null),
+      ]);
 
-        if (progressRes.ok) {
-          const pData = await progressRes.json();
-          setData(pData.data || pData);
-          setConnected(pData.connected !== false);
-        }
+      if (progressRes.ok) {
+        const pData = await progressRes.json();
+        setData(pData.data || pData);
+        setConnected(pData.connected !== false);
+      } else {
+        throw new Error(`Failed to load search data (${progressRes.status})`);
+      }
 
-        if (discoveredRes?.ok) {
-          const dData = await discoveredRes.json();
-          setDiscovered(dData.data?.keywords || dData.keywords || []);
-        }
-      } catch { /* ignore */ }
-      setLoading(false);
+      if (discoveredRes?.ok) {
+        const dData = await discoveredRes.json();
+        setDiscovered(dData.data?.keywords || dData.keywords || []);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load search data');
     }
-    load();
+    setLoading(false);
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <p className="text-sm text-red-700 mb-3">{error}</p>
+        <button onClick={load} className="px-4 py-2 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const stats = data?.stats;
@@ -407,31 +437,46 @@ function SeoGrowthTab() {
   const [data, setData] = useState<SeoProgress | null>(null);
   const [weekly, setWeekly] = useState<WeeklyProgress | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const [progressRes, weeklyRes] = await Promise.all([
-          fetch('/api/admin/content-hub/seo/progress'),
-          fetch('/api/admin/content-hub/seo/progress?type=weekly'),
-        ]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [progressRes, weeklyRes] = await Promise.all([
+        fetch('/api/admin/content-hub/seo/progress'),
+        fetch('/api/admin/content-hub/seo/progress?type=weekly'),
+      ]);
 
-        if (progressRes.ok) {
-          const pData = await progressRes.json();
-          setData(pData.data || pData);
-        }
-        if (weeklyRes.ok) {
-          const wData = await weeklyRes.json();
-          setWeekly(wData.data || wData);
-        }
-      } catch { /* ignore */ }
-      setLoading(false);
+      if (!progressRes.ok) throw new Error(`Failed to load SEO data (${progressRes.status})`);
+
+      const pData = await progressRes.json();
+      setData(pData.data || pData);
+
+      if (weeklyRes.ok) {
+        const wData = await weeklyRes.json();
+        setWeekly(wData.data || wData);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load SEO data');
     }
-    load();
+    setLoading(false);
   }, []);
 
+  useEffect(() => { load(); }, [load]);
+
   if (loading) return <LoadingSpinner />;
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <p className="text-sm text-red-700 mb-3">{error}</p>
+        <button onClick={load} className="px-4 py-2 text-xs font-medium bg-red-100 hover:bg-red-200 text-red-700 rounded-lg">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const categories = data?.categories || [];
   const keywords = data?.keywords || [];

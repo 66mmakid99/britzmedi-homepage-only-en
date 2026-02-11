@@ -229,6 +229,17 @@ export default function ContentHubDashboard() {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
+
+  const showToast = (message: string, type: 'error' | 'success' = 'error') => setToast({ message, type });
 
   // ─── Data fetching ──────────────────────────────────────────
 
@@ -304,7 +315,7 @@ export default function ContentHubDashboard() {
       setSelectedItem(null);
       fetchItems();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to transition');
+      showToast(err instanceof Error ? err.message : 'Failed to transition');
     } finally {
       setTransitionLoading(null);
     }
@@ -324,7 +335,7 @@ export default function ContentHubDashboard() {
       setSelectedItem(null);
       fetchItems();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete');
+      showToast(err instanceof Error ? err.message : 'Failed to delete');
     } finally {
       setDeleteLoading(false);
     }
@@ -383,11 +394,11 @@ export default function ContentHubDashboard() {
       );
       const results = await Promise.allSettled(promises);
       const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.ok)).length;
-      if (failed > 0) alert(`${failed} item(s) could not be deleted (may be published).`);
+      if (failed > 0) showToast(`${failed} item(s) could not be deleted (may be published).`);
       setSelectedIds(new Set());
       setSelectedItem(null);
       fetchItems();
-    } catch { alert('Bulk delete failed'); }
+    } catch { showToast('Bulk delete failed'); }
     finally { setBulkLoading(false); }
   }, [selectedIds, fetchItems]);
 
@@ -407,7 +418,7 @@ export default function ContentHubDashboard() {
       setSelectedIds(new Set());
       setSelectedItem(null);
       fetchItems();
-    } catch { alert('Bulk unpublish failed'); }
+    } catch { showToast('Bulk unpublish failed'); }
     finally { setBulkLoading(false); }
   }, [selectedIds, fetchItems]);
 
@@ -434,7 +445,7 @@ export default function ContentHubDashboard() {
         throw new Error(data.error || 'Failed to duplicate');
       }
       fetchItems();
-    } catch (err) { alert(err instanceof Error ? err.message : 'Failed to duplicate content'); }
+    } catch (err) { showToast(err instanceof Error ? err.message : 'Failed to duplicate content'); }
   }, [fetchItems]);
 
   // ─── Derived data ──────────────────────────────────────────
@@ -454,6 +465,16 @@ export default function ContentHubDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {toast && (
+        <div className={`fixed top-4 right-4 z-[60] max-w-sm px-4 py-3 rounded-xl shadow-lg border flex items-start gap-3 ${
+          toast.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800'
+        }`}>
+          <span className="text-sm">{toast.type === 'error' ? '\u26a0\ufe0f' : '\u2705'}</span>
+          <p className="text-sm flex-1">{toast.message}</p>
+          <button onClick={() => setToast(null)} className="text-slate-400 hover:text-slate-600 shrink-0">&times;</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -235,18 +235,19 @@ export default function SocialDashboard() {
       if (res.ok) await fetchPosts();
       else {
         const data = await res.json();
-        alert(data.error || 'Repost failed');
+        setPostResult({ success: false, message: data.error || 'Repost failed' });
       }
-    } catch { alert('Network error'); }
+    } catch { setPostResult({ success: false, message: 'Network error. Please try again.' }); }
     finally { setRepostingId(null); }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this social post record?')) return;
     try {
-      await fetch(`/api/admin/social/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/social/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
       await fetchPosts();
-    } catch { alert('Failed to delete'); }
+    } catch { setPostResult({ success: false, message: 'Failed to delete post.' }); }
   };
 
   const handlePostToChannels = async () => {
@@ -319,8 +320,8 @@ export default function SocialDashboard() {
     try {
       const res = await fetch('/api/admin/social/linkedin/disconnect', { method: 'POST' });
       if (res.ok) { await fetchConnectionStatus(); await fetchAccounts(); }
-      else alert('Failed to disconnect LinkedIn');
-    } catch { alert('Network error'); }
+      else setPostResult({ success: false, message: 'Failed to disconnect LinkedIn.' });
+    } catch { setPostResult({ success: false, message: 'Network error. Please try again.' }); }
     finally { setDisconnecting(false); }
   };
 

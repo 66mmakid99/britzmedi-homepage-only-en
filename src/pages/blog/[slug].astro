@@ -200,6 +200,85 @@ Ready to explore a distribution partnership? [Contact BRITZMEDI](/contact) to di
 
 const { post } = Astro.props;
 
+// Reading time calculation
+const wordCount = post.content.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+// Extract TOC headings from content
+function extractTocHeadings(content: string, isDynamic: boolean): { id: string; text: string }[] {
+  const headings: { id: string; text: string }[] = [];
+  if (isDynamic) {
+    const matches = content.matchAll(/<h2[^>]*>(.*?)<\/h2>/gi);
+    for (const match of matches) {
+      const text = match[1].replace(/<[^>]*>/g, '').trim();
+      const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      headings.push({ id, text });
+    }
+  } else {
+    const lines = content.split('\n');
+    for (const line of lines) {
+      if (line.startsWith('## ')) {
+        const text = line.slice(3).trim();
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        headings.push({ id, text });
+      }
+    }
+  }
+  return headings;
+}
+
+const tocHeadings = extractTocHeadings(post.content, post.isDynamic);
+
+// Add id attributes to h2 headings in content for anchor links
+function addHeadingIds(content: string, isDynamic: boolean): string {
+  if (isDynamic) {
+    return content.replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (_match, attrs, text) => {
+      const plainText = text.replace(/<[^>]*>/g, '').trim();
+      const id = plainText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      return `<h2${attrs} id="${id}">${text}</h2>`;
+    });
+  }
+  return content;
+}
+
+const processedContent = addHeadingIds(post.content, post.isDynamic);
+
+// Related posts - re-load all posts for the related section
+const relatedPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
+const relatedDynamic = Object.values(relatedPostModules)
+  .map((mod: any) => {
+    const data = mod.default || mod;
+    return {
+      slug: data.slug,
+      title: data.title,
+      description: data.excerpt || data.metaDescription || '',
+      category: data.category || 'medical-devices',
+      publishedAt: data.publishedAt,
+      featuredImage: data.featuredImage || null,
+      status: data.status || 'published',
+      content: data.content || '',
+    };
+  })
+  .filter(p => p.status === 'published' && p.slug !== post.slug);
+
+const relatedStatic = post.slug !== 'korean-beauty-device-market' ? [{
+  slug: 'korean-beauty-device-market',
+  title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
+  description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry.',
+  category: 'industry-news',
+  publishedAt: '2025-10-20',
+  featuredImage: '/images/blog/korean-market.svg',
+  content: '',
+}] : [];
+
+const allRelatable = [...relatedStatic, ...relatedDynamic]
+  .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+// Same category first, then fill with others
+const sameCategory = allRelatable.filter(p => p.category === post.category);
+const otherPosts = allRelatable.filter(p => p.category !== post.category);
+const relatedPosts = [...sameCategory, ...otherPosts].slice(0, 3);
+
 // Article structured data
 const articleSchema: Record<string, any> = {
   '@context': 'https://schema.org',
@@ -282,6 +361,11 @@ const breadcrumbSchema = {
   title={post.title}
   description={post.description}
   keywords={post.tags}
+  ogType="article"
+  ogImage={post.featuredImage || '/og-image.jpg'}
+  publishedTime={post.publishedAt}
+  modifiedTime={post.updatedAt || post.publishedAt}
+  author={post.author}
 >
   <!-- Article Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
@@ -317,6 +401,7 @@ const breadcrumbSchema = {
           (Updated {new Date(post.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
         </span>
       )}
+      <span class="reading-time">{readingTime} min read</span>
     </div>
 
     <!-- Title -->
@@ -330,7 +415,7 @@ const breadcrumbSchema = {
     <!-- Featured Image -->
     {post.featuredImage && (
       <div class="blog-featured-image">
-        <img src={post.featuredImage} alt={post.title} />
+        <img src={post.featuredImage} alt={`Featured image for: ${post.title}`} width="800" height="450" />
       </div>
     )}
 
@@ -392,13 +477,31 @@ const breadcrumbSchema = {
       </div>
     </div>
 
+    <!-- Table of Contents -->
+    {tocHeadings.length > 2 && (
+      <nav class="blog-toc">
+        <details open>
+          <summary class="blog-toc-title">Table of Contents</summary>
+          <ol class="blog-toc-list">
+            {tocHeadings.map(h => (
+              <li><a href={`#${h.id}`}>{h.text}</a></li>
+            ))}
+          </ol>
+        </details>
+      </nav>
+    )}
+
     <!-- Article Content -->
     <div class="blog-content">
       {post.isDynamic ? (
-        <Fragment set:html={post.content} />
+        <Fragment set:html={processedContent} />
       ) : (
         <Fragment set:html={post.content.split('\n').map(line => {
-          if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+          if (line.startsWith('## ')) {
+            const text = line.slice(3).trim();
+            const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            return `<h2 id="${id}">${text}</h2>`;
+          }
           if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`;
           if (line.startsWith('**Q:')) return `<p class="font-semibold">${line}</p>`;
           if (line.startsWith('**A:')) return `<p>${line}</p>`;
@@ -439,10 +542,10 @@ const breadcrumbSchema = {
       <section class="blog-faq-section">
         <h2>Frequently Asked Questions</h2>
         {post.faqs.map((faq) => (
-          <div class="blog-faq-item">
-            <h3>{faq.question}</h3>
+          <details class="blog-faq-item">
+            <summary>{faq.question}</summary>
             <p>{faq.answer}</p>
-          </div>
+          </details>
         ))}
       </section>
     )}
@@ -453,6 +556,26 @@ const breadcrumbSchema = {
         <span class="tag">#{tag}</span>
       ))}
     </div>
+
+    <!-- Related Posts -->
+    {relatedPosts.length > 0 && (
+      <section class="blog-related-posts">
+        <h2>Related Articles</h2>
+        <div class="related-posts-grid">
+          {relatedPosts.map(rp => (
+            <a href={`/blog/${rp.slug}`} class="related-post-card">
+              {rp.featuredImage && (
+                <img src={rp.featuredImage} alt={`Featured image for: ${rp.title}`} width="320" height="180" loading="lazy" />
+              )}
+              <div class="related-post-info">
+                <h3>{rp.title}</h3>
+                <p>{rp.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
 
     <!-- Back to Blog -->
     <div style="margin-top: 2rem;">

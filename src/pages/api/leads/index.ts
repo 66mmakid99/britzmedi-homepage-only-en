@@ -2,12 +2,14 @@ import type { APIRoute } from 'astro';
 import { sendSlackNotification, sendUrgentLeadAlert } from '../../../lib/slack';
 import { calculateLeadScore as calculateAdvancedScore } from '../../../lib/lead-score';
 import { logActivity } from '../../../lib/activity-log';
+import { sendEmail } from '../../../lib/youtube-to-blog/email';
 
 export const prerender = false;
 
 interface Env {
   DB: D1Database;
   SLACK_WEBHOOK_URL?: string;
+  RESEND_API_KEY?: string;
 }
 
 // IP-based rate limiting for lead submissions
@@ -284,6 +286,53 @@ export const POST: APIRoute = async ({ request, locals }) => {
           console.error('[Leads API] Slack urgent alert failed:', err)
         );
       }
+    }
+
+    // Send confirmation email to lead via Resend (non-blocking)
+    const resendKey = (env as any)?.RESEND_API_KEY as string | undefined;
+    if (resendKey && data.email && source === 'website') {
+      const contactName = data.contact_name || 'there';
+      const products = Array.isArray(data.interested_products)
+        ? data.interested_products.join(', ')
+        : '';
+      const confirmHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #0070c4, #015a9f); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
+            <h2 style="color: white; margin: 0; font-size: 20px;">Thank You for Your Inquiry</h2>
+          </div>
+          <div style="border: 1px solid #e2e8f0; border-top: 0; padding: 24px; border-radius: 0 0 12px 12px;">
+            <p style="color: #1e293b; font-size: 16px; margin: 0 0 16px;">Dear ${contactName},</p>
+            <p style="color: #475569; line-height: 1.7; margin: 0 0 16px;">
+              Thank you for reaching out to BRITZMEDI. We have received your inquiry and our team will review it promptly.
+            </p>
+            <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin: 16px 0;">
+              <p style="color: #64748b; font-size: 14px; margin: 0 0 8px;"><strong>Company:</strong> ${data.company_name || 'N/A'}</p>
+              ${products ? `<p style="color: #64748b; font-size: 14px; margin: 0 0 8px;"><strong>Products of Interest:</strong> ${products}</p>` : ''}
+              <p style="color: #64748b; font-size: 14px; margin: 0;"><strong>Country:</strong> ${data.country || 'N/A'}</p>
+            </div>
+            <p style="color: #475569; line-height: 1.7; margin: 16px 0;">
+              A member of our international sales team will get back to you within <strong>1-2 business days</strong>.
+            </p>
+            <p style="color: #475569; line-height: 1.7; margin: 16px 0 0;">
+              In the meantime, feel free to explore our <a href="https://britzmedi.com/products" style="color: #0070c4; text-decoration: none;">product catalog</a> or <a href="https://britzmedi.com/blog" style="color: #0070c4; text-decoration: none;">industry insights blog</a>.
+            </p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+            <p style="color: #94a3b8; font-size: 12px; margin: 0; text-align: center;">
+              BRITZMEDI Co., Ltd. | Medical Aesthetic Device Manufacturer<br/>
+              <a href="https://britzmedi.com" style="color: #94a3b8;">britzmedi.com</a>
+            </p>
+          </div>
+        </div>
+      `;
+      sendEmail({
+        apiKey: resendKey,
+        to: data.email,
+        subject: 'Thank you for your inquiry - BRITZMEDI',
+        html: confirmHtml,
+        from: 'BRITZMEDI <noreply@britzmedi.com>',
+      }).catch(err =>
+        console.error('[Leads API] Confirmation email failed:', err)
+      );
     }
 
     return new Response(JSON.stringify({

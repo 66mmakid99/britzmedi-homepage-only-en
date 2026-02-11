@@ -21,6 +21,7 @@ export const GET: APIRoute = async ({ locals }) => {
     }
 
     const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
     // Helper: safely query a table (returns default if table doesn't exist)
@@ -33,7 +34,7 @@ export const GET: APIRoute = async ({ locals }) => {
     };
 
     const [
-      leads, weeklyLeads, hotLeads, overdueLeads,
+      leads, weeklyLeads, hotLeads, overdueLeads, newLeadsToday,
       posts, publishedPosts,
       contentItems, contentPublished, contentDraft,
       subs, weeklySubs,
@@ -46,6 +47,7 @@ export const GET: APIRoute = async ({ locals }) => {
         "SELECT COUNT(*) as c FROM leads WHERE status NOT IN ('won','lost') AND COALESCE(last_contacted_at, created_at) < ?",
         [twoDaysAgo],
       ),
+      safeCount("SELECT COUNT(*) as c FROM leads WHERE status = 'new' AND created_at >= ?", [dayAgo]),
       safeCount('SELECT COUNT(*) as c FROM blog_posts'),
       safeCount("SELECT COUNT(*) as c FROM blog_posts WHERE status = 'published'"),
       safeCount('SELECT COUNT(*) as c FROM content_items'),
@@ -80,6 +82,14 @@ export const GET: APIRoute = async ({ locals }) => {
     // Build alerts
     const alerts: Array<{ type: string; message: string; severity: 'info' | 'warning' | 'error' }> = [];
 
+    if (newLeadsToday > 0) {
+      alerts.push({
+        type: 'new_leads',
+        message: `${newLeadsToday} new lead${newLeadsToday > 1 ? 's' : ''} in the last 24 hours`,
+        severity: 'info',
+      });
+    }
+
     if (overdueLeads > 0) {
       alerts.push({
         type: 'overdue_leads',
@@ -109,6 +119,7 @@ export const GET: APIRoute = async ({ locals }) => {
       weeklyLeads,
       hotLeads,
       overdueLeads,
+      newLeadsToday,
       totalPosts: posts,
       publishedPosts,
       contentItems,
@@ -124,7 +135,7 @@ export const GET: APIRoute = async ({ locals }) => {
     }), { headers: { 'Content-Type': 'application/json' } });
   } catch (err: any) {
     console.error('[Dashboard API] Error:', err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: 'Something went wrong loading dashboard data' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
