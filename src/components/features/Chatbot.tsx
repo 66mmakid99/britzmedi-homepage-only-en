@@ -27,11 +27,9 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [requireVerification, setRequireVerification] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [fixedHeight, setFixedHeight] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Check if mobile viewport
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
   // Lock/unlock body scroll for mobile
   const lockBodyScroll = useCallback((lock: boolean) => {
@@ -51,13 +49,16 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   }, []);
 
-  // Handle open/close with body scroll lock on mobile
+  // Capture fixed height on open (before keyboard appears)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mobile = window.innerWidth < 640;
     if (isOpen && !isMinimized && mobile) {
+      // Capture 80% of viewport ONCE when opening — this won't change with keyboard
+      setFixedHeight(Math.round(window.innerHeight * 0.8));
       lockBodyScroll(true);
-    } else {
+    } else if (!isOpen || isMinimized) {
+      setFixedHeight(null);
       lockBodyScroll(false);
     }
     return () => lockBodyScroll(false);
@@ -167,13 +168,13 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   };
 
-  const handleVerification = async () => {
+  const handleVerification = useCallback(() => {
     setRequireVerification(false);
     if (pendingMessage) {
-      await sendMessage(pendingMessage, 'human-verified');
+      sendMessage(pendingMessage, 'human-verified');
       setPendingMessage(null);
     }
-  };
+  }, [pendingMessage]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -188,10 +189,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     { label: 'Distributor', message: 'How can I become a distributor?' },
     { label: 'Contact', message: 'How can I contact your sales team?' }
   ];
-
-  const handleQuickAction = (message: string) => {
-    sendMessage(message);
-  };
 
   const handleClose = () => {
     setIsOpen(false);
@@ -212,6 +209,11 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     );
   }
 
+  // Mobile: use captured fixedHeight (px), Desktop: use Tailwind classes
+  const mobileStyle = fixedHeight
+    ? { height: `${fixedHeight}px`, maxHeight: `${fixedHeight}px` }
+    : undefined;
+
   return (
     <>
       {/* Mobile backdrop overlay */}
@@ -221,22 +223,20 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       />
 
       <div
-        className={`fixed z-[9999] bg-white flex flex-col transition-all duration-300 ${
+        className={`fixed z-[9999] bg-white flex flex-col ${
           isMinimized
             ? 'bottom-6 right-6 w-80 h-16 rounded-2xl shadow-2xl border border-slate-200'
             : [
-                // Mobile: bottom sheet
-                'inset-x-0 bottom-0 h-[80vh] rounded-t-2xl shadow-2xl',
+                // Mobile: bottom sheet (height set via inline style)
+                'inset-x-0 bottom-0 rounded-t-2xl shadow-2xl',
                 // Desktop: floating popup
                 'sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96 sm:h-[32rem] sm:rounded-2xl sm:border sm:border-slate-200'
               ].join(' ')
         }`}
-        style={isMinimized ? undefined : { maxHeight: 'calc(100dvh - 1rem)' }}
+        style={isMinimized ? undefined : mobileStyle}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 shrink-0 ${
-          isMinimized ? 'rounded-t-2xl' : 'rounded-t-2xl'
-        }`}>
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 shrink-0 rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,24 +319,30 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                 </div>
               )}
 
-              {requireVerification && !isLoading && (
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleVerification}
-                    className="flex items-center gap-2 px-4 py-3 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 transition-colors"
-                  >
-                    <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-sm font-medium text-primary-700">
-                      I'm not a robot
-                    </span>
-                  </button>
-                </div>
-              )}
-
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Verification button — OUTSIDE scroll area for reliable touch */}
+            {requireVerification && !isLoading && (
+              <div className="px-4 py-3 border-t border-slate-100 shrink-0 bg-white">
+                <button
+                  onClick={handleVerification}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    handleVerification();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-50 border border-primary-200 rounded-xl active:bg-primary-200 transition-colors cursor-pointer select-none"
+                  style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-primary-700">
+                    I'm not a robot
+                  </span>
+                </button>
+              </div>
+            )}
 
             {/* Quick Actions */}
             {messages.length === 1 && (
@@ -346,7 +352,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                   {quickActions.map((action, index) => (
                     <button
                       key={index}
-                      onClick={() => handleQuickAction(action.message)}
+                      onClick={() => sendMessage(action.message)}
                       className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
                     >
                       {action.label}

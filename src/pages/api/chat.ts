@@ -33,6 +33,7 @@ const spamDetection = new Map<string, {
   lastActivity: number;
   messageCount: number;
   verified: boolean;
+  sessionStart: number;
 }>();
 
 // Rate limiting store (IP-based)
@@ -252,8 +253,14 @@ function checkSuspiciousPatterns(message: string): { suspicious: boolean; reason
 function checkRepeatedQuestions(sessionId: string, message: string): { blocked: boolean; count: number; requireVerification: boolean } {
   cleanOldSessions();
 
+  const now = Date.now();
   const normalized = normalizeMessage(message);
-  const session = spamDetection.get(sessionId) || { messages: [], lastActivity: Date.now(), messageCount: 0, verified: false };
+  const session = spamDetection.get(sessionId) || { messages: [], lastActivity: now, messageCount: 0, verified: false, sessionStart: now };
+
+  // Ensure sessionStart exists (for legacy sessions)
+  if (!session.sessionStart) {
+    session.sessionStart = now;
+  }
 
   // Count consecutive identical messages from the end
   let consecutiveCount = 0;
@@ -268,7 +275,7 @@ function checkRepeatedQuestions(sessionId: string, message: string): { blocked: 
   // Add current message
   session.messages.push(normalized);
   session.messageCount = (session.messageCount || 0) + 1;
-  session.lastActivity = Date.now();
+  session.lastActivity = now;
 
   // Keep only last 10 messages
   if (session.messages.length > 10) {
@@ -277,8 +284,12 @@ function checkRepeatedQuestions(sessionId: string, message: string): { blocked: 
 
   spamDetection.set(sessionId, session);
 
-  // Require verification after 10 messages if not verified
-  const requireVerification = session.messageCount >= 10 && !session.verified;
+  // Time-based exemption: skip verification if session started less than 5 minutes ago
+  const sessionAge = now - session.sessionStart;
+  const fiveMinutes = 5 * 60 * 1000;
+
+  // Require verification after 30 messages if not verified AND session is older than 5 minutes
+  const requireVerification = session.messageCount >= 30 && !session.verified && sessionAge > fiveMinutes;
 
   // Block if 3 or more consecutive identical messages
   return { blocked: consecutiveCount >= 2, count: consecutiveCount + 1, requireVerification };
