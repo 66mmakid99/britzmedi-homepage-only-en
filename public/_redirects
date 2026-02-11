@@ -1,8 +1,16 @@
 # Cloudflare Pages Redirects
 # Format: from  to  status
 
+# www → non-www (requires www.britzmedi.com added as custom domain in Pages)
+https://www.britzmedi.com/*  https://britzmedi.com/:splat  301
+
 # Normalize trailing index.html
 /index.html  /  301
+
+# Korean path redirect (ko not in supported languages — redirect to English)
+/ko  /  301
+/ko/  /  301
+/ko/*  /:splat  301
 
 # Common old URL patterns (exact matches first, then splats)
 /home  /  301

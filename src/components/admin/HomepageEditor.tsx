@@ -212,7 +212,9 @@ function FileUpload({
     } catch {
       alert('Upload failed. Please try again.');
     } finally {
-      setBlobPreview(null);
+      // Keep blobPreview — the server URL still serves the old cached image
+      // until the GitHub commit triggers a rebuild. The blob preview is the
+      // only way to show the cropped image immediately in the editor.
       setUploading(false);
       setProgress(0);
     }
@@ -656,7 +658,15 @@ export default function HomepageEditor() {
                     mediaType="image"
                     currentUrl={productImages[product.id] || product.image}
                     onUploaded={(url) => {
-                      setProductImages((prev) => ({ ...prev, [product.id]: url }));
+                      setProductImages((prev) => {
+                        // Keep blob URL if already set — it shows the cropped image immediately.
+                        // The server URL (/images/products/...) still serves the OLD cached image
+                        // until GitHub rebuild completes, so we must not overwrite the blob.
+                        if (prev[product.id]?.startsWith('blob:') && !url.startsWith('blob:')) {
+                          return prev;
+                        }
+                        return { ...prev, [product.id]: url };
+                      });
                     }}
                     cropPreset="product-thumb"
                     uploadTarget="product"
