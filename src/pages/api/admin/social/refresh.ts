@@ -3,8 +3,8 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { refreshInstagramToken } from '../../../../lib/social/instagram';
 
-type RefreshChannel = 'instagram' | 'linkedin' | 'all';
-const VALID_CHANNELS: RefreshChannel[] = ['instagram', 'linkedin', 'all'];
+type RefreshChannel = 'instagram' | 'linkedin' | 'twitter' | 'all' | 'auto';
+const VALID_CHANNELS: RefreshChannel[] = ['instagram', 'linkedin', 'twitter', 'all', 'auto'];
 
 interface RefreshResult {
   channel: string;
@@ -33,14 +33,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const results: RefreshResult[] = [];
 
     // Instagram refresh
-    if (channel === 'instagram' || channel === 'all') {
-      const igResult = await refreshInstagramToken(env || {});
-      results.push({
-        channel: 'instagram',
-        success: igResult.success,
-        message: igResult.success ? 'Token refreshed successfully' : undefined,
-        error: igResult.error,
-      });
+    if (channel === 'instagram' || channel === 'all' || channel === 'auto') {
+      // For 'auto' mode, only refresh if token is expiring (< 14 days)
+      let shouldRefresh = channel !== 'auto';
+      if (channel === 'auto' && env?.SESSION) {
+        try {
+          const igCreds = await env.SESSION.get('instagram_credentials', { type: 'json' }) as { expires_at?: number } | null;
+          if (igCreds?.expires_at) {
+            const daysLeft = (igCreds.expires_at - Date.now()) / (1000 * 60 * 60 * 24);
+            shouldRefresh = daysLeft < 14 && daysLeft > 0; // Only refresh if expiring but not yet expired
+          }
+        } catch { /* ignore */ }
+      }
+
+      if (shouldRefresh) {
+        const igResult = await refreshInstagramToken(env || {});
+        results.push({
+          channel: 'instagram',
+          success: igResult.success,
+          message: igResult.success ? 'Token refreshed successfully' : undefined,
+          error: igResult.error,
+        });
+      } else if (channel === 'auto') {
+        results.push({
+          channel: 'instagram',
+          success: true,
+          message: 'Token is healthy, no refresh needed',
+        });
+      }
     }
 
     // LinkedIn — does not support token refresh
@@ -48,7 +68,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
       results.push({
         channel: 'linkedin',
         success: false,
-        message: 'LinkedIn uses OAuth 2.0 authorization code flow and does not support token refresh. Please re-authorize via Admin > Social > LinkedIn Connect.',
+        message: 'LinkedIn requires re-authorization. Go to Social > Accounts and click "Reconnect LinkedIn".',
+      });
+    }
+
+    // Twitter — static OAuth 1.0a tokens, no refresh needed
+    if (channel === 'twitter' || channel === 'all') {
+      results.push({
+        channel: 'twitter',
+        success: true,
+        message: 'Twitter uses static OAuth 1.0a tokens that do not expire.',
       });
     }
 
@@ -56,7 +85,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const anySuccess = results.some((r) => r.success);
 
     return new Response(JSON.stringify({
-      success: channel === 'all' ? anySuccess : allSuccess,
+      success: channel === 'all' || channel === 'auto' ? anySuccess : allSuccess,
       results,
     }), {
       status: 200,

@@ -332,10 +332,10 @@ export default function SocialDashboard() {
   const linkedinStatus = channelStatuses['linkedin'];
   const instagramStatus = channelStatuses['instagram'];
 
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState<string | null>(null);
 
   const handleRefreshToken = async (channel: string) => {
-    setRefreshing(true);
+    setRefreshing(channel);
     try {
       const res = await fetch('/api/admin/social/refresh', {
         method: 'POST',
@@ -344,45 +344,82 @@ export default function SocialDashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        setPostResult({ success: true, message: `${channel} token refreshed!` });
+        setPostResult({ success: true, message: `${CHANNEL_NAMES[channel] || channel} token refreshed!` });
         await fetchConnectionStatus();
       } else {
         setPostResult({ success: false, message: data.results?.[0]?.message || data.results?.[0]?.error || 'Refresh failed' });
       }
     } catch { setPostResult({ success: false, message: 'Network error' }); }
-    finally { setRefreshing(false); }
+    finally { setRefreshing(null); }
   };
 
-  const renderChannelStatus = (channel: string, status: ChannelStatus | undefined) => {
-    if (statusLoading) return <span className="text-xs text-slate-400">Checking...</span>;
-    if (status?.connected) {
-      const dotColor = status.status === 'expiring' ? 'bg-amber-400' : status.status === 'expired' ? 'bg-red-400' : 'bg-green-500';
-      const bgColor = status.status === 'expiring' ? 'bg-amber-50 text-amber-700' : status.status === 'expired' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700';
+  // Auto-refresh expiring tokens on load
+  useEffect(() => {
+    if (Object.keys(channelStatuses).length === 0) return;
+    const hasExpiring = Object.values(channelStatuses).some(
+      s => s.connected && s.status === 'expiring'
+    );
+    if (hasExpiring) {
+      fetch('/api/admin/social/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel: 'auto' }),
+      }).then(res => res.json()).then(data => {
+        const refreshed = data.results?.filter((r: any) => r.success && r.message?.includes('refreshed'));
+        if (refreshed?.length > 0) {
+          fetchConnectionStatus();
+        }
+      }).catch(() => {});
+    }
+  }, [channelStatuses]);
+
+  const getStatusConfig = (status?: ChannelStatus['status']) => {
+    switch (status) {
+      case 'healthy':
+        return { dot: 'bg-green-500', bg: 'bg-green-50 border-green-200', text: 'text-green-700', label: 'Connected' };
+      case 'expiring':
+        return { dot: 'bg-amber-400', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', label: 'Expiring' };
+      case 'expired':
+        return { dot: 'bg-red-500', bg: 'bg-red-50 border-red-200', text: 'text-red-700', label: 'Expired' };
+      default:
+        return { dot: 'bg-slate-300', bg: 'bg-slate-50 border-slate-200', text: 'text-slate-500', label: 'Disconnected' };
+    }
+  };
+
+  const renderChannelAction = (channel: string, status: ChannelStatus | undefined) => {
+    const st = status?.status;
+    if (channel === 'twitter') {
+      if (!status?.connected) return <span className="text-[10px] text-slate-400">Set env vars to connect</span>;
+      return null;
+    }
+    if (channel === 'linkedin') {
+      if (st === 'healthy') {
+        return (
+          <button onClick={handleLinkedInDisconnect} disabled={disconnecting} className="text-[10px] text-red-500 hover:text-red-700 font-medium">
+            {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+          </button>
+        );
+      }
       return (
-        <span className="inline-flex items-center gap-1.5">
-          <span className={`inline-flex items-center gap-1 text-xs font-medium ${bgColor} px-2 py-0.5 rounded-full`}>
-            <span className={`w-1.5 h-1.5 ${dotColor} rounded-full`} />
-            {status.account}
-            {status.expires_in_days != null && <span className="opacity-70">({status.expires_in_days}d)</span>}
-          </span>
-          {(status.status === 'expiring' || status.status === 'expired') && channel === 'instagram' && (
-            <button
-              onClick={() => handleRefreshToken('instagram')}
-              disabled={refreshing}
-              className="text-[10px] text-blue-600 hover:text-blue-800 font-medium"
-            >
-              {refreshing ? '...' : 'Refresh'}
-            </button>
-          )}
-        </span>
+        <a href="/api/admin/social/linkedin/authorize" className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors">
+          {st === 'expired' || st === 'expiring' ? 'Reconnect' : 'Connect'}
+        </a>
       );
     }
-    return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-        <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
-        {status?.error || 'Not connected'}
-      </span>
-    );
+    if (channel === 'instagram') {
+      if (st === 'expiring') {
+        return (
+          <button onClick={() => handleRefreshToken('instagram')} disabled={refreshing === 'instagram'} className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-md transition-colors">
+            {refreshing === 'instagram' ? 'Refreshing...' : 'Refresh Token'}
+          </button>
+        );
+      }
+      if (st === 'expired' || !status?.connected) {
+        return <span className="text-[10px] text-slate-400">Re-auth required (env var)</span>;
+      }
+      return null;
+    }
+    return null;
   };
 
   const filteredContent = contentItems.filter(c => {
@@ -412,42 +449,65 @@ export default function SocialDashboard() {
         </div>
       )}
 
-      {/* Connection Banner */}
-      <div className="mb-6 bg-white rounded-xl border border-slate-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-medium text-slate-700">Connections:</span>
-            <div className="flex items-center gap-2">
-              <ChannelIcon channel="twitter" className="w-4 h-4" />
-              {renderChannelStatus('twitter', twitterStatus)}
-            </div>
-            <div className="flex items-center gap-2">
-              <ChannelIcon channel="linkedin" className="w-4 h-4" />
-              {statusLoading ? (
-                <span className="text-xs text-slate-400">Checking...</span>
-              ) : linkedinStatus?.connected ? (
-                <>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                    {linkedinStatus.account}
+      {/* Connection Status Cards */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+        {(['twitter', 'linkedin', 'instagram'] as const).map(ch => {
+          const st = channelStatuses[ch];
+          const cfg = getStatusConfig(st?.status);
+          return (
+            <div key={ch} className={`rounded-xl border p-4 ${cfg.bg}`}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <ChannelIcon channel={ch} className="w-5 h-5" />
+                  <span className="text-sm font-semibold text-slate-900">{CHANNEL_NAMES[ch]}</span>
+                </div>
+                {statusLoading ? (
+                  <span className="text-[10px] text-slate-400 animate-pulse">Checking...</span>
+                ) : (
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${cfg.text}`}>
+                    <span className={`w-2 h-2 ${cfg.dot} rounded-full ${st?.status === 'expiring' ? 'animate-pulse' : ''}`} />
+                    {cfg.label}
                   </span>
-                  <button onClick={handleLinkedInDisconnect} disabled={disconnecting} className="text-xs text-red-500 hover:text-red-700 font-medium ml-1">
-                    {disconnecting ? '...' : 'Disconnect'}
-                  </button>
-                </>
-              ) : (
-                <a href="/api/admin/social/linkedin/authorize" className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full hover:bg-blue-100 transition-colors">
-                  Connect LinkedIn
-                </a>
+                )}
+              </div>
+              {!statusLoading && (
+                <div className="space-y-1.5">
+                  {st?.account && (
+                    <p className="text-xs text-slate-600">{st.account}</p>
+                  )}
+                  {st?.expires_in_days != null && (
+                    <p className={`text-[11px] ${(st.expires_in_days ?? 0) < 7 ? 'text-amber-600 font-medium' : 'text-slate-400'}`}>
+                      Token expires in {st.expires_in_days} day{st.expires_in_days !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                  {ch === 'twitter' && st?.connected && (
+                    <p className="text-[11px] text-slate-400">Static tokens (no expiry)</p>
+                  )}
+                  {st?.error && !st.connected && (
+                    <p className="text-[11px] text-red-500">{st.error}</p>
+                  )}
+                  <div className="pt-1">
+                    {renderChannelAction(ch, st)}
+                  </div>
+                </div>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <ChannelIcon channel="instagram" className="w-4 h-4" />
-              {renderChannelStatus('instagram', instagramStatus)}
-            </div>
-          </div>
-          <button onClick={fetchConnectionStatus} disabled={statusLoading} className="text-xs text-blue-600 hover:text-blue-800 font-medium">Refresh</button>
-        </div>
+          );
+        })}
+      </div>
+
+      {/* Refresh All Button */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={fetchConnectionStatus}
+          disabled={statusLoading}
+          className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+        >
+          <svg className={`w-3.5 h-3.5 ${statusLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {statusLoading ? 'Checking...' : 'Refresh Status'}
+        </button>
       </div>
 
       {/* Stats */}
@@ -499,21 +559,31 @@ export default function SocialDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {(['twitter', 'linkedin', 'instagram'] as const).map(ch => {
                 const st = channelStatuses[ch];
+                const cfg = getStatusConfig(st?.status);
                 const chPosts = posts.filter(p => p.channel === ch);
                 const posted = chPosts.filter(p => p.status === 'posted').length;
                 const failed = chPosts.filter(p => p.status === 'failed').length;
                 const last = chPosts.find(p => p.status === 'posted');
                 return (
                   <div key={ch} className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <ChannelIcon channel={ch} className="w-5 h-5" />
-                      <span className="text-sm font-semibold text-slate-900">{CHANNEL_NAMES[ch]}</span>
-                      {st?.connected ? (
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                      ) : (
-                        <span className="w-2 h-2 bg-red-400 rounded-full" />
-                      )}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <ChannelIcon channel={ch} className="w-5 h-5" />
+                        <span className="text-sm font-semibold text-slate-900">{CHANNEL_NAMES[ch]}</span>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${cfg.text}`}>
+                        <span className={`w-1.5 h-1.5 ${cfg.dot} rounded-full`} />
+                        {cfg.label}
+                      </span>
                     </div>
+                    {st?.account && (
+                      <p className="text-[11px] text-slate-500 mb-2">{st.account}</p>
+                    )}
+                    {st?.expires_in_days != null && (
+                      <p className={`text-[10px] mb-2 ${(st.expires_in_days ?? 0) < 7 ? 'text-amber-600 font-medium' : 'text-slate-400'}`}>
+                        Expires in {st.expires_in_days}d
+                      </p>
+                    )}
                     <div className="space-y-1 text-xs text-slate-500">
                       <div className="flex justify-between">
                         <span>Posted</span>
@@ -527,6 +597,11 @@ export default function SocialDashboard() {
                         <div className="pt-2 border-t border-slate-100 mt-2">
                           <span className="text-[10px] text-slate-400">Last post:</span>
                           <p className="text-slate-600 truncate mt-0.5">{last.content.slice(0, 60)}...</p>
+                        </div>
+                      )}
+                      {!st?.connected && (
+                        <div className="pt-2 border-t border-slate-100 mt-2">
+                          {renderChannelAction(ch, st)}
                         </div>
                       )}
                     </div>
