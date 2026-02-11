@@ -2,12 +2,13 @@
 export const prerender = false;
 
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import TldrBox from '../../../../components/ui/TldrBox.astro';
 import { marked } from 'marked';
 import { isHtml } from '../../../../lib/html-to-markdown';
 
 const { id } = Astro.params;
 
-// Auth check (same as other admin pages)
+// Auth check
 const sessionCookie = Astro.cookies.get('admin_session')?.value;
 if (!sessionCookie) {
   return Astro.redirect('/admin/login');
@@ -42,6 +43,13 @@ if (!item) {
 // Convert markdown → HTML (or use as-is if already HTML)
 const htmlContent = isHtml(item.content || '') ? item.content : await marked(item.content || '');
 
+// Extract TL;DR from content if present
+function extractTldr(content: string): string {
+  const match = content.match(/<h2>TL;DR<\/h2>\s*<p>([\s\S]*?)<\/p>/);
+  return match ? match[1].replace(/<[^>]*>/g, '').trim() : '';
+}
+const tldr = extractTldr(htmlContent);
+
 // Parse FAQ
 let faqs: Array<{ question: string; answer: string }> = [];
 try {
@@ -53,22 +61,38 @@ let tags: string[] = [];
 try {
   if (item.tags) tags = JSON.parse(item.tags);
 } catch { /* ignore */ }
+
+// Parse keywords
+let keywords: string[] = [];
+try {
+  if (item.seo_secondary_keywords) keywords = JSON.parse(item.seo_secondary_keywords);
+} catch { /* ignore */ }
+if (item.seo_keyword && !keywords.includes(item.seo_keyword)) {
+  keywords.unshift(item.seo_keyword);
+}
+
+const publishDate = item.published_at || item.created_at;
+const isPublished = item.status === 'published';
 ---
 
 <BaseLayout
   title={`Preview: ${item.title}`}
   description={item.excerpt || ''}
+  keywords={tags}
 >
   <!-- Preview Banner -->
-  <div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#fbbf24;color:#78350f;text-align:center;padding:8px 16px;font-size:14px;font-weight:600;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-    Preview — Not Published
-    <a href={`/admin/content-hub/edit/${id}`} style="margin-left:16px;color:#92400e;text-decoration:underline;font-weight:500;">
+  <div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#f59e0b,#f97316);color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;gap:12px;">
+    <svg style="width:18px;height:18px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+    </svg>
+    <span>Preview — {isPublished ? 'Published Version' : 'Not Published'}</span>
+    <a href={`/admin/content-hub/edit/${id}`} style="color:#fff;text-decoration:underline;font-weight:500;margin-left:8px;opacity:0.9;">
       Back to Editor
     </a>
   </div>
 
   <!-- Spacer for fixed banner -->
-  <div style="height:40px;" />
+  <div style="height:44px;" />
 
   <!-- Breadcrumb -->
   <nav class="container py-4 text-sm">
@@ -87,8 +111,8 @@ try {
       {item.category && (
         <span class="category-badge">{item.category.replace(/-/g, ' ')}</span>
       )}
-      <time datetime={item.created_at}>
-        {new Date(item.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      <time datetime={publishDate}>
+        {new Date(publishDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
       </time>
     </div>
 
@@ -109,7 +133,12 @@ try {
       </div>
     )}
 
-    <!-- Author -->
+    <!-- TL;DR Box -->
+    {tldr && (
+      <TldrBox summary={tldr} />
+    )}
+
+    <!-- Author and Share -->
     <div class="blog-author-bar">
       <div class="author-info">
         <div class="author-avatar">B</div>
@@ -117,6 +146,29 @@ try {
           <p class="author-name">{item.author || 'BRITZMEDI Research Team'}</p>
           <p class="author-org">BRITZMEDI Co., Ltd.</p>
         </div>
+      </div>
+      <div class="share-links">
+        <span>Share:</span>
+        <a
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=https://britzmedi.com/blog/${item.slug}&title=${encodeURIComponent(item.title)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share on LinkedIn"
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </a>
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(item.title)}&url=https://britzmedi.com/blog/${item.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share on Twitter"
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
       </div>
     </div>
 
@@ -146,5 +198,19 @@ try {
         ))}
       </div>
     )}
+
+    <!-- Back to Blog -->
+    <div style="margin-top: 2rem;">
+      <a
+        href="/admin/content-hub"
+        class="inline-flex items-center text-primary-600 font-medium hover:text-primary-700"
+        style="text-decoration: none;"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Content Hub
+      </a>
+    </div>
   </article>
 </BaseLayout>

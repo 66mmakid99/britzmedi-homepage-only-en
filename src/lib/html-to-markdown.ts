@@ -11,20 +11,38 @@ export function isHtml(text: string): boolean {
 
 /**
  * Convert HTML content to Markdown using regex replacements.
- * Handles: h2, h3, h4, p, ul, ol, li, strong, em, a, blockquote, br, div
+ * Handles: h1-h6, p, ul, ol, li, strong, b, em, i, a, blockquote, br,
+ *          div, img, code, pre, table, hr, span
  */
 export function htmlToMarkdown(html: string): string {
   if (!html) return '';
 
   let md = html;
 
-  // Remove wrapper divs
-  md = md.replace(/<\/?div[^>]*>/gi, '');
+  // Remove wrapper divs / spans / sections
+  md = md.replace(/<\/?(?:div|span|section|article|header|footer)[^>]*>/gi, '');
 
-  // Headings
+  // Headings (h1-h6)
+  md = md.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n# $1\n');
   md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n## $1\n');
   md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n### $1\n');
   md = md.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '\n#### $1\n');
+  md = md.replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, '\n##### $1\n');
+  md = md.replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, '\n###### $1\n');
+
+  // Code blocks (pre > code)
+  md = md.replace(/<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi, '\n```\n$1\n```\n');
+
+  // Inline code
+  md = md.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '`$1`');
+
+  // Images
+  md = md.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/gi, '![$2]($1)');
+  md = md.replace(/<img[^>]*alt="([^"]*)"[^>]*src="([^"]*)"[^>]*\/?>/gi, '![$1]($2)');
+  md = md.replace(/<img[^>]*src="([^"]*)"[^>]*\/?>/gi, '![]($1)');
+
+  // Horizontal rules
+  md = md.replace(/<hr\s*\/?>/gi, '\n---\n');
 
   // Blockquotes
   md = md.replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, content) => {
@@ -35,11 +53,30 @@ export function htmlToMarkdown(html: string): string {
   // Links
   md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
 
-  // Bold and italic
-  md = md.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
-  md = md.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*');
+  // Bold and italic (strong/b/em/i)
+  md = md.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**');
+  md = md.replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*');
 
-  // Lists — process ol/ul blocks
+  // Tables
+  md = md.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (_, tableContent) => {
+    const rows: string[] = [];
+    const rowMatches = tableContent.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
+    rowMatches.forEach((row: string, ri: number) => {
+      const cells: string[] = [];
+      const cellMatches = row.match(/<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/gi) || [];
+      cellMatches.forEach((cell: string) => {
+        const text = cell.replace(/<[^>]*>/g, '').trim();
+        cells.push(text);
+      });
+      rows.push('| ' + cells.join(' | ') + ' |');
+      if (ri === 0) {
+        rows.push('| ' + cells.map(() => '---').join(' | ') + ' |');
+      }
+    });
+    return '\n' + rows.join('\n') + '\n';
+  });
+
+  // Lists — process ol/ul blocks (handle nested by processing inner content)
   md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
     let i = 0;
     return '\n' + items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, text: string) => {
@@ -70,6 +107,7 @@ export function htmlToMarkdown(html: string): string {
   md = md.replace(/&quot;/g, '"');
   md = md.replace(/&#39;/g, "'");
   md = md.replace(/&nbsp;/g, ' ');
+  md = md.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
 
   // Clean up excessive blank lines
   md = md.replace(/\n{3,}/g, '\n\n');

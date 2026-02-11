@@ -44,6 +44,15 @@ BRITZMEDI products:
 
 Always write in professional, authoritative English. Include clinical evidence and data where relevant. Naturally mention BRITZMEDI products when contextually appropriate (don't force it).
 
+CRITICAL FORMATTING RULES:
+- Write ALL content in clean Markdown. NEVER use HTML tags.
+- Use ## for h2, ### for h3, #### for h4
+- Use - for unordered lists, 1. for ordered lists
+- Use **bold** and *italic* for emphasis
+- Use [text](url) for links
+- Use > for blockquotes
+- NEVER output <p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>, <em>, <a>, <div>, <span>, or any other HTML tags
+
 IMPORTANT: Return your response as a single valid JSON object. Do NOT wrap it in markdown code fences. Do NOT include any text before or after the JSON.`;
 
 // ── Claude API streaming call ───────────────────────────────────
@@ -157,6 +166,56 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Convert any HTML tags in content to Markdown equivalents.
+ * Used as a safety net when Claude ignores the "no HTML" instruction.
+ */
+function ensureMarkdown(text: string): string {
+  if (!text) return '';
+  // Quick check — if no HTML tags, return as-is
+  if (!/<[a-z][^>]*>/i.test(text)) return text;
+
+  let md = text;
+  // Headings
+  md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n## $1\n');
+  md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n### $1\n');
+  md = md.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '\n#### $1\n');
+  // Bold / italic
+  md = md.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
+  md = md.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
+  md = md.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*');
+  md = md.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '*$1*');
+  // Links
+  md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
+  // Ordered lists
+  md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
+    let i = 0;
+    return '\n' + items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, t: string) => {
+      i++;
+      return `${i}. ${t.replace(/<[^>]*>/g, '').trim()}\n`;
+    }) + '\n';
+  });
+  // Unordered lists
+  md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) => {
+    return '\n' + items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, t: string) => {
+      return `- ${t.replace(/<[^>]*>/g, '').trim()}\n`;
+    }) + '\n';
+  });
+  // Blockquotes
+  md = md.replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, c) => {
+    return '\n> ' + c.replace(/<\/?p[^>]*>/gi, '').trim().split('\n').join('\n> ') + '\n';
+  });
+  // Paragraphs
+  md = md.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '\n$1\n');
+  // Line breaks
+  md = md.replace(/<br\s*\/?>/gi, '\n');
+  // Strip remaining tags
+  md = md.replace(/<\/?(?:div|span|section|article|header|footer)[^>]*>/gi, '');
+  // Clean excessive blank lines
+  md = md.replace(/\n{3,}/g, '\n\n');
+  return md.trim();
+}
+
 function countWords(html: string): number {
   const text = stripHtml(html);
   if (!text) return 0;
@@ -232,7 +291,7 @@ function buildUserPrompt(req: GenerateRequest): string {
   parts.push('- title: SEO-optimized title (50-70 characters)');
   parts.push('- slug: URL-friendly slug derived from the title');
   parts.push('- meta_description: compelling description under 160 characters');
-  parts.push('- content: full article in clean Markdown (## for h2, ### for h3, - for lists, **bold**, *italic* — NO HTML tags)');
+  parts.push('- content: full article in clean Markdown ONLY (## for h2, ### for h3, - for unordered lists, 1. for ordered lists, **bold**, *italic*, [text](url) for links). ABSOLUTELY NO HTML tags — no <p>, <h2>, <li>, <strong>, <a>, <div> etc.');
   parts.push('- excerpt: 2-3 sentence summary for previews');
   parts.push('- faq: array of {question, answer} objects (empty array if FAQ not requested)');
   parts.push('- schema_type: recommended schema.org type (e.g. "Article", "FAQPage", "HowTo")');
@@ -298,7 +357,8 @@ export async function generateSEOContent(
   }
 
   // Extract and validate fields with sensible defaults
-  const content = (parsed.content as string) || '';
+  // Safety net: convert any HTML to Markdown if Claude ignored the instruction
+  const content = ensureMarkdown((parsed.content as string) || '');
   const wordCount = countWords(content);
   const slug = (parsed.slug as string) || generateSlug((parsed.title as string) || req.title);
 

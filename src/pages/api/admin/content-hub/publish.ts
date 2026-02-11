@@ -147,7 +147,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           url: 'https://britzmedi.com',
         },
       } : null,
-      faq: faqData,
+      faqs: faqData || [],
       sourceType: item.source_type,
       seoKeyword: item.seo_keyword,
     }, null, 2);
