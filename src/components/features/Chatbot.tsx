@@ -1,5 +1,5 @@
 // BRITZMEDI AI Chatbot Component
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,7 +15,6 @@ interface ChatbotProps {
 export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -31,6 +30,39 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Check if mobile viewport
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
+  // Lock/unlock body scroll for mobile
+  const lockBodyScroll = useCallback((lock: boolean) => {
+    if (typeof document === 'undefined') return;
+    if (lock) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+  }, []);
+
+  // Handle open/close with body scroll lock on mobile
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mobile = window.innerWidth < 640;
+    if (isOpen && !isMinimized && mobile) {
+      lockBodyScroll(true);
+    } else {
+      lockBodyScroll(false);
+    }
+    return () => lockBodyScroll(false);
+  }, [isOpen, isMinimized, lockBodyScroll]);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,7 +71,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   // Focus input when chat opens
   useEffect(() => {
     if (isOpen && !isMinimized) {
-      inputRef.current?.focus();
+      setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen, isMinimized]);
 
@@ -60,9 +92,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     setIsLoading(true);
 
     try {
-      console.log('[Chatbot] Sending message:', userMessage.content);
-
-      // Ensure only serializable data is sent
       const historyData = messages.slice(-10).map(m => ({
         role: String(m.role),
         content: String(m.content)
@@ -84,11 +113,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         body: JSON.stringify(requestBody)
       });
 
-      console.log('[Chatbot] Response status:', response.status);
       const data = await response.json();
-      console.log('[Chatbot] Response data:', data);
 
-      // Handle rate limit (429)
       if (response.status === 429) {
         const retryAfter = data.retryAfter || 60;
         setMessages(prev => [...prev, {
@@ -100,7 +126,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         return;
       }
 
-      // Handle verification requirement
       if (data.requireVerification) {
         setPendingMessage(userMessage.content);
         setRequireVerification(true);
@@ -121,7 +146,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Update suggestions from API response
       if (data.suggestions && Array.isArray(data.suggestions)) {
         setSuggestions(data.suggestions);
       } else {
@@ -142,7 +166,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const handleVerification = async () => {
     setRequireVerification(false);
     if (pendingMessage) {
-      // Re-send the pending message with verification token
       await sendMessage(pendingMessage, 'human-verified');
       setPendingMessage(null);
     }
@@ -155,7 +178,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   };
 
-  // Quick action buttons
   const quickActions = [
     { label: 'Products', message: 'Tell me about your products' },
     { label: 'FDA Status', message: 'What FDA certifications do you have?' },
@@ -167,8 +189,11 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     sendMessage(message);
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   if (!isOpen) {
-    // Floating chat button
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -184,199 +209,201 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   }
 
   return (
-    <div
-      className={`fixed z-[100] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col transition-all duration-300 ${
-        isMinimized
-          ? 'bottom-6 right-6 w-80 h-16'
-          : isExpanded
-            ? 'bottom-3 right-3 left-3 sm:left-auto sm:w-96 h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-1.5rem)]'
-            : 'bottom-6 right-6 w-96 h-[32rem]'
-      }`}
-      style={{ maxHeight: isExpanded ? undefined : 'calc(100vh - 6rem)' }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 rounded-t-2xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">BRITZMEDI Assistant</h3>
-            <p className="text-xs text-white/80">AI-powered support</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          {!isMinimized && (
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              aria-label={isExpanded ? 'Shrink chat' : 'Expand chat'}
-            >
-              {isExpanded ? (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9L4 4m0 0v4m0-4h4m6 6l5 5m0 0v-4m0 4h-4" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h6m0 0v6m0-6l-7 7M9 21H3m0 0v-6m0 6l7-7" />
-                </svg>
-              )}
-            </button>
-          )}
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-            aria-label={isMinimized ? 'Expand chat' : 'Minimize chat'}
-          >
-            {isMinimized ? (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+    <>
+      {/* Mobile backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-black/40 z-[9998] sm:hidden"
+        onClick={handleClose}
+      />
+
+      <div
+        className={`fixed z-[9999] bg-white flex flex-col transition-all duration-300 ${
+          isMinimized
+            ? 'bottom-6 right-6 w-80 h-16 rounded-2xl shadow-2xl border border-slate-200'
+            : [
+                // Mobile: bottom sheet
+                'inset-x-0 bottom-0 h-[80vh] rounded-t-2xl shadow-2xl',
+                // Desktop: floating popup
+                'sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96 sm:h-[32rem] sm:rounded-2xl sm:border sm:border-slate-200'
+              ].join(' ')
+        }`}
+        style={isMinimized ? undefined : { maxHeight: 'calc(100dvh - 1rem)' }}
+      >
+        {/* Header */}
+        <div className={`flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 shrink-0 ${
+          isMinimized ? 'rounded-t-2xl' : 'rounded-t-2xl'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            )}
-          </button>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-            aria-label="Close chat"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {!isMinimized && (
-        <>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-primary-600 text-white rounded-br-md'
-                      : 'bg-slate-100 text-slate-800 rounded-bl-md'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-white/60' : 'text-slate-400'}`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Verification Button */}
-            {requireVerification && !isLoading && (
-              <div className="flex justify-center">
-                <button
-                  onClick={handleVerification}
-                  className="flex items-center gap-2 px-4 py-3 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 transition-colors"
-                >
-                  <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm font-medium text-primary-700">
-                    I'm not a robot
-                  </span>
-                </button>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-white text-sm sm:text-base">BRITZMEDI Assistant</h3>
+              <p className="text-xs text-white/80">AI-powered support</p>
+            </div>
           </div>
-
-          {/* Quick Actions (shown when no messages from user yet) */}
-          {messages.length === 1 && (
-            <div className="px-4 pb-2">
-              <p className="text-xs text-slate-500 mb-2">Quick questions:</p>
-              <div className="flex flex-wrap gap-2">
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickAction(action.message)}
-                    className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Follow-up Suggestions (shown after assistant responses) */}
-          {suggestions.length > 0 && messages.length > 1 && !isLoading && !requireVerification && (
-            <div className="px-4 pb-2">
-              <p className="text-xs text-slate-500 mb-2">You might also ask:</p>
-              <div className="flex flex-col gap-1.5">
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setSuggestions([]);
-                      sendMessage(suggestion);
-                    }}
-                    className="px-3 py-2 text-xs text-left font-medium bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-colors border border-primary-100"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Input */}
-          <div className="p-4 border-t border-slate-200">
-            <div className="flex items-center gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                disabled={isLoading}
-                className="flex-1 px-4 py-2.5 text-sm bg-slate-100 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-slate-800 placeholder-slate-400 disabled:opacity-50"
-              />
+          <div className="flex items-center gap-1 shrink-0">
+            {!isMinimized && (
               <button
-                onClick={() => sendMessage()}
-                disabled={isLoading || !inputValue.trim()}
-                className="p-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
-                aria-label="Send message"
+                onClick={() => setIsMinimized(true)}
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors hidden sm:block"
+                aria-label="Minimize chat"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-            </div>
-            <p className="text-xs text-slate-400 mt-2 text-center">
-              Powered by Claude AI
-            </p>
+            )}
+            {isMinimized && (
+              <button
+                onClick={() => setIsMinimized(false)}
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                aria-label="Expand chat"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={handleClose}
+              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Close chat"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-        </>
-      )}
-    </div>
+        </div>
+
+        {!isMinimized && (
+          <>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4 min-h-0">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                      message.role === 'user'
+                        ? 'bg-primary-600 text-white rounded-br-md'
+                        : 'bg-slate-100 text-slate-800 rounded-bl-md'
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-white/60' : 'text-slate-400'}`}>
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {requireVerification && !isLoading && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleVerification}
+                    className="flex items-center gap-2 px-4 py-3 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-medium text-primary-700">
+                      I'm not a robot
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Quick Actions */}
+            {messages.length === 1 && (
+              <div className="px-4 pb-2 shrink-0">
+                <p className="text-xs text-slate-500 mb-2">Quick questions:</p>
+                <div className="flex flex-wrap gap-2">
+                  {quickActions.map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuickAction(action.message)}
+                      className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Follow-up Suggestions */}
+            {suggestions.length > 0 && messages.length > 1 && !isLoading && !requireVerification && (
+              <div className="px-4 pb-2 shrink-0">
+                <p className="text-xs text-slate-500 mb-2">You might also ask:</p>
+                <div className="flex flex-col gap-1.5">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSuggestions([]);
+                        sendMessage(suggestion);
+                      }}
+                      className="px-3 py-2 text-xs text-left font-medium bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-colors border border-primary-100"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Input - fixed at bottom */}
+            <div className="p-3 sm:p-4 border-t border-slate-200 shrink-0 bg-white rounded-b-none sm:rounded-b-2xl">
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your message..."
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2.5 text-sm bg-slate-100 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-slate-800 placeholder-slate-400 disabled:opacity-50"
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={isLoading || !inputValue.trim()}
+                  className="p-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors shrink-0"
+                  aria-label="Send message"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                Powered by Claude AI
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
