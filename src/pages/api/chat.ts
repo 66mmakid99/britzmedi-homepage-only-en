@@ -490,7 +490,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const apiKey = env?.ANTHROPIC_API_KEY || import.meta.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      // Return a fallback response when API key is not configured
+      console.error('[CHAT] ANTHROPIC_API_KEY not configured - using fallback');
       const fallbackMessage = getFallbackResponse(body.message, body.context);
       const suggestions = generateFollowUpSuggestions(body.message, fallbackMessage, body.context);
       return new Response(JSON.stringify({
@@ -533,7 +533,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Claude API error:', error);
+      console.error(`[CHAT] Claude API error (${response.status}):`, error);
 
       // Return fallback on API error
       const fallbackMessage = getFallbackResponse(body.message, body.context);
@@ -541,7 +541,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return new Response(JSON.stringify({
         message: fallbackMessage,
         suggestions,
-        fallback: true
+        fallback: true,
+        error: `API error: ${response.status}`
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -651,45 +652,97 @@ function generateFollowUpSuggestions(
   return [...new Set(suggestions)].slice(0, 3);
 }
 
+// Detect if message is Korean
+function isKorean(message: string): boolean {
+  return /[\uAC00-\uD7AF\u1100-\u11FF]/.test(message);
+}
+
 // Fallback responses when API is not available
 function getFallbackResponse(message: string, context?: { product?: string }): string {
   const lowerMessage = message.toLowerCase();
+  const korean = isKorean(message);
 
-  // Product inquiries
-  if (lowerMessage.includes('torr') || lowerMessage.includes('rf')) {
-    return "TORR RF (MTX-C1) is our flagship FDA 510(k) cleared Multi-Wave RF system. It features patented Auto Circular Motion technology for even energy distribution, real-time temperature control, and the Vibro-Comfort system for patient comfort. Would you like to learn more about its specifications or discuss partnership opportunities?";
+  // Product inquiries (EN + KO)
+  if (lowerMessage.includes('torr') || lowerMessage.includes('rf') || lowerMessage.includes('토르') || lowerMessage.includes('고주파')) {
+    return korean
+      ? "TORR RF (MTX-C1)는 FDA 510(k) 인증을 받은 멀티웨이브 RF 시스템입니다. 특허받은 Auto Circular Motion 기술로 균일한 에너지 분포를 제공하며, 실시간 온도 제어와 Vibro-Comfort 시스템으로 환자 편의성을 높였습니다. 자세한 내용은 /contact 페이지에서 문의해 주세요."
+      : "TORR RF (MTX-C1) is our flagship FDA 510(k) cleared Multi-Wave RF system. It features patented Auto Circular Motion technology for even energy distribution, real-time temperature control, and the Vibro-Comfort system for patient comfort. Would you like to learn more about its specifications or discuss partnership opportunities?";
   }
 
-  if (lowerMessage.includes('ulblanc') || lowerMessage.includes('ultrasound')) {
-    return "ULBLANC (i-Booster) is our dual-frequency ultrasound system featuring Dynamic Dual Wave technology (1MHz + 3MHz) and i-Booster sonophoresis for enhanced product absorption. It's MFDS certified and excellent for skin elasticity treatments. Would you like more details?";
+  if (lowerMessage.includes('ulblanc') || lowerMessage.includes('ultrasound') || lowerMessage.includes('울블랑') || lowerMessage.includes('초음파')) {
+    return korean
+      ? "ULBLANC (i-Booster)은 이중 주파수 초음파 시스템으로, 1MHz + 3MHz Dynamic Dual Wave 기술과 i-Booster 소노포레시스를 지원합니다. MFDS 인증을 받았으며 피부 탄력 시술에 탁월합니다. /contact에서 문의해 주세요."
+      : "ULBLANC (i-Booster) is our dual-frequency ultrasound system featuring Dynamic Dual Wave technology (1MHz + 3MHz) and i-Booster sonophoresis for enhanced product absorption. It's MFDS certified and excellent for skin elasticity treatments. Would you like more details?";
   }
 
-  if (lowerMessage.includes('newchae') || lowerMessage.includes('home device')) {
-    return "NEWCHAE SHOT is our innovative 3-in-1 home beauty device combining RF, EMS, and ELP technologies. Clinical studies show +128% skin density improvement and -26% pore size reduction. Perfect for at-home professional skincare routines!";
+  if (lowerMessage.includes('newchae') || lowerMessage.includes('home device') || lowerMessage.includes('뉴채') || lowerMessage.includes('홈디바이스') || lowerMessage.includes('홈케어')) {
+    return korean
+      ? "NEWCHAE SHOT은 RF, EMS, ELP 3가지 기술을 결합한 혁신적인 홈뷰티 디바이스입니다. 임상 결과 피부 밀도 +128% 향상, 모공 크기 -26% 감소 효과를 입증했습니다. /contact에서 문의해 주세요."
+      : "NEWCHAE SHOT is our innovative 3-in-1 home beauty device combining RF, EMS, and ELP technologies. Clinical studies show +128% skin density improvement and -26% pore size reduction. Perfect for at-home professional skincare routines!";
   }
 
-  if (lowerMessage.includes('lumino') || lowerMessage.includes('laser')) {
-    return "LUMINO WAVE (LSR-10) is our upcoming convergence device combining ultrasound and laser technologies. It's currently under MFDS review and scheduled for release in H2 2026. Sign up for updates on our contact page!";
+  if (lowerMessage.includes('lumino') || lowerMessage.includes('laser') || lowerMessage.includes('루미노') || lowerMessage.includes('레이저')) {
+    return korean
+      ? "LUMINO WAVE (LSR-10)는 초음파와 레이저 기술을 융합한 차세대 디바이스입니다. 현재 MFDS 인증 심사 중이며 2026년 하반기 출시 예정입니다. /contact에서 업데이트를 받아보세요."
+      : "LUMINO WAVE (LSR-10) is our upcoming convergence device combining ultrasound and laser technologies. It's currently under MFDS review and scheduled for release in H2 2026. Sign up for updates on our contact page!";
   }
 
-  // Company inquiries
-  if (lowerMessage.includes('fda') || lowerMessage.includes('certification') || lowerMessage.includes('certified')) {
-    return "BRITZMEDI holds FDA 510(k) clearance (K212561) for TORR RF, ISO 13485:2016 certification, GMP certification, and MFDS licensing. Our products meet the highest international regulatory standards.";
+  // CEO / representative (KO + EN)
+  if (lowerMessage.includes('대표') || lowerMessage.includes('ceo') || lowerMessage.includes('사장') || lowerMessage.includes('who leads') || lowerMessage.includes('founder')) {
+    return korean
+      ? "BRITZMEDI의 대표이사는 이신재입니다. 2017년 10월에 회사를 설립했으며, RF 및 초음파 기반 의료미용기기 전문 기업으로 성장시켰습니다. 추가 문의는 /contact에서 해주세요."
+      : "BRITZMEDI's CEO is Shinjae Lee, who founded the company in October 2017. Under his leadership, BRITZMEDI has grown into a specialized manufacturer of RF and ultrasound-based aesthetic medical devices. For more info, visit /contact.";
   }
 
-  if (lowerMessage.includes('distributor') || lowerMessage.includes('partnership') || lowerMessage.includes('dealer')) {
-    return "We're actively seeking distribution partners worldwide. Submit your inquiry at /contact with your company details, region of interest, and current portfolio - our team responds within 24-48 hours.";
+  // Location (KO + EN)
+  if (lowerMessage.includes('어디') || lowerMessage.includes('위치') || lowerMessage.includes('주소') || lowerMessage.includes('location') || lowerMessage.includes('address') || lowerMessage.includes('where')) {
+    return korean
+      ? "BRITZMEDI는 경기도 성남시 중원구 둔촌대로 388, 1211호에 위치하고 있습니다. 전화번호는 070-4348-7244입니다. /contact 페이지에서 문의하실 수 있습니다."
+      : "BRITZMEDI is located at 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, South Korea. You can reach us at +82-70-4348-7244 or through our contact form at /contact.";
   }
 
-  if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('quote')) {
-    return "Pricing varies by region and order volume. Reach out through our contact form at /contact and we'll put together a customized quote for you.";
+  // Products overview (KO)
+  if (lowerMessage.includes('제품') || lowerMessage.includes('뭐 만') || lowerMessage.includes('뭐 팔') || lowerMessage.includes('어떤 제품') || lowerMessage.includes('products')) {
+    return korean
+      ? "BRITZMEDI의 주요 제품은 4가지입니다: TORR RF (FDA 인증 멀티웨이브 RF), ULBLANC (이중주파수 초음파), NEWCHAE SHOT (홈뷰티 디바이스), LUMINO WAVE (초음파+레이저 융합, 출시 예정). 자세한 내용은 /products 또는 /contact에서 확인하세요."
+      : "Thanks for reaching out! We specialize in aesthetic medical devices - TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, NEWCHAE SHOT home device, and LUMINO WAVE (coming soon). What would you like to know? Visit /contact for inquiries.";
   }
 
-  // General greetings
-  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-    return "Hello! Welcome to BRITZMEDI. I'm here to help you learn about our aesthetic medical devices. What would you like to know about? We offer FDA-cleared RF devices, ultrasound systems, and innovative home beauty devices.";
+  // Company inquiries (EN + KO)
+  if (lowerMessage.includes('fda') || lowerMessage.includes('certification') || lowerMessage.includes('certified') || lowerMessage.includes('인증') || lowerMessage.includes('허가')) {
+    return korean
+      ? "BRITZMEDI는 FDA 510(k) 인증 (K212561, TORR RF), ISO 13485:2016, GMP, MFDS 인허가를 보유하고 있습니다. 국제 최고 수준의 인증 기준을 충족합니다. /contact에서 문의해 주세요."
+      : "BRITZMEDI holds FDA 510(k) clearance (K212561) for TORR RF, ISO 13485:2016 certification, GMP certification, and MFDS licensing. Our products meet the highest international regulatory standards.";
   }
 
-  // Default response
-  return "Thanks for reaching out! We specialize in aesthetic medical devices - TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, and NEWCHAE SHOT home device. What would you like to know? For quotes or partnerships, you can reach us at /contact.";
+  if (lowerMessage.includes('distributor') || lowerMessage.includes('partnership') || lowerMessage.includes('dealer') || lowerMessage.includes('유통') || lowerMessage.includes('파트너') || lowerMessage.includes('대리점') || lowerMessage.includes('총판')) {
+    return korean
+      ? "전 세계 유통 파트너를 모집하고 있습니다. /contact에서 회사 정보, 관심 지역, 현재 포트폴리오를 알려주시면 24-48시간 내에 답변드립니다."
+      : "We're actively seeking distribution partners worldwide. Submit your inquiry at /contact with your company details, region of interest, and current portfolio - our team responds within 24-48 hours.";
+  }
+
+  if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('quote') || lowerMessage.includes('가격') || lowerMessage.includes('비용') || lowerMessage.includes('견적') || lowerMessage.includes('얼마')) {
+    return korean
+      ? "가격은 지역과 주문 수량에 따라 다릅니다. /contact 페이지에서 문의해 주시면 맞춤 견적을 보내드리겠습니다."
+      : "Pricing varies by region and order volume. Reach out through our contact form at /contact and we'll put together a customized quote for you.";
+  }
+
+  // General greetings (EN + KO)
+  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('안녕') || lowerMessage.includes('하이')) {
+    return korean
+      ? "안녕하세요! BRITZMEDI에 오신 것을 환영합니다. RF, 초음파, 홈뷰티 디바이스 등 의료미용기기에 대해 궁금한 점을 물어보세요. 가격이나 파트너십 문의는 /contact에서 해주세요."
+      : "Hello! Welcome to BRITZMEDI. I'm here to help you learn about our aesthetic medical devices. What would you like to know about? We offer FDA-cleared RF devices, ultrasound systems, and innovative home beauty devices.";
+  }
+
+  // Company overview (KO)
+  if (lowerMessage.includes('회사') || lowerMessage.includes('브리츠') || lowerMessage.includes('소개') || lowerMessage.includes('설립') || lowerMessage.includes('about')) {
+    return korean
+      ? "BRITZMEDI(브리츠메디)는 2017년 10월 이신재 대표가 설립한 의료미용기기 전문 기업입니다. 경기도 성남시에 위치하며, FDA 510(k) 인증 TORR RF를 포함한 4개 제품 라인업을 보유하고 있습니다. /contact에서 자세히 문의하세요."
+      : "BRITZMEDI was founded in October 2017 by CEO Shinjae Lee. Based in Seongnam-si, South Korea, we design and manufacture aesthetic medical devices including the FDA 510(k) cleared TORR RF system. Learn more at /about or contact us at /contact.";
+  }
+
+  // Default response (language-aware)
+  return korean
+    ? "문의해 주셔서 감사합니다! BRITZMEDI는 TORR RF (FDA 인증), ULBLANC 초음파, NEWCHAE SHOT 홈뷰티 디바이스를 전문으로 하는 의료미용기기 기업입니다. 궁금한 점이 있으시면 말씀해 주세요. 자세한 상담은 /contact에서 문의 가능합니다."
+    : "Thanks for reaching out! We specialize in aesthetic medical devices - TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, and NEWCHAE SHOT home device. What would you like to know? For quotes or partnerships, you can reach us at /contact.";
 }

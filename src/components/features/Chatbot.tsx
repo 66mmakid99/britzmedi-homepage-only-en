@@ -138,6 +138,10 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         return;
       }
 
+      if (data.fallback) {
+        console.warn('[Chatbot] Using fallback response (AI unavailable)', data.error || '');
+      }
+
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.message || "I apologize, but I couldn't process your request. Please try again.",
@@ -152,7 +156,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         setSuggestions([]);
       }
     } catch (error) {
-      console.error('[Chatbot] Error:', error);
+      console.error('[Chatbot] Fetch error:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: "I'm having trouble connecting. Please try again or contact us at contact@britzmedi.co.kr",
