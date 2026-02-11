@@ -86,8 +86,8 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image + gradient overlay -->
-    <section id="section-hero" class="relative overflow-hidden h-[400px] md:h-[500px] lg:h-[600px]">
-      <!-- Background image from homepage config -->
+    <section id="section-hero" class="relative overflow-hidden">
+      <!-- Background image: mobile = in-flow 250px block, desktop = absolute fullcover -->
       <img
         src={heroImageUrl}
         alt={config.hero.heroImageAlt || 'BRITZMEDI'}
@@ -96,41 +96,42 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
         fetchpriority="high"
         loading="eager"
         decoding="sync"
-        class="absolute inset-0 w-full h-full object-cover object-center"
+        class="w-full h-[250px] object-cover object-center sm:absolute sm:inset-0 sm:h-full"
       />
 
-      <!-- Gradient overlay: desktop (text area left, product visible right) -->
+      <!-- Gradient overlays: desktop/tablet only (mobile has solid bg below) -->
       <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42 / 0.7) 0%, rgb(15 23 42 / 0.4) 35%, rgb(15 23 42 / 0.1) 55%, transparent 65%)"></div>
-      <!-- Gradient overlay: mobile (top-down for text readability) -->
-      <div class="absolute inset-0 lg:hidden" style="background: linear-gradient(to bottom, rgb(15 23 42 / 0.5) 0%, rgb(15 23 42 / 0.25) 50%, transparent 100%)"></div>
+      <div class="absolute inset-0 hidden sm:block lg:hidden" style="background: linear-gradient(to bottom, rgb(15 23 42 / 0.5) 0%, rgb(15 23 42 / 0.25) 50%, transparent 100%)"></div>
 
-      <!-- Text content -->
-      <div class="container relative z-10 h-full flex items-center">
-        <div class="py-8 sm:py-12 lg:py-0 max-w-2xl">
-          <div class="badge-premium mb-4 sm:mb-6 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
-            {config.hero.badge}
-          </div>
+      <!-- Text content: solid dark bg on mobile, transparent overlay on desktop -->
+      <div class="relative z-10 bg-slate-900 sm:bg-transparent sm:h-[500px] lg:h-[600px] sm:flex sm:items-center">
+        <div class="container py-8 pb-10 sm:py-12 lg:py-0">
+          <div class="max-w-2xl">
+            <div class="badge-premium mb-4 sm:mb-6 opacity-0 animate-fade-up inline-flex !bg-white/20 !border-white/30 !text-white backdrop-blur-sm">
+              {config.hero.badge}
+            </div>
 
-          <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1 !text-white drop-shadow-lg">
-            {config.hero.headline}<br />
-            <span class="text-primary-400">{config.hero.highlightText}</span><br />
-            {config.hero.subheadline}
-          </h1>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6 opacity-0 animate-fade-up stagger-1 !text-white drop-shadow-lg">
+              {config.hero.headline}<br />
+              <span class="text-primary-400">{config.hero.highlightText}</span><br />
+              {config.hero.subheadline}
+            </h1>
 
-          <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-5 sm:mb-8 lg:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200 drop-shadow-md">
-            {config.hero.description}
-          </p>
+            <p class="text-base sm:text-lg lg:text-xl max-w-xl mb-5 sm:mb-8 lg:mb-10 opacity-0 animate-fade-up stagger-2 !text-slate-200">
+              {config.hero.description}
+            </p>
 
-          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
-            <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
-              {config.hero.primaryCTA.text}
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </a>
-            <a href={config.hero.secondaryCTA.href} class="btn-secondary justify-center sm:justify-start !bg-white/10 !border-white/30 !text-white hover:!bg-white/20 backdrop-blur-sm">
-              {config.hero.secondaryCTA.text}
-            </a>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 opacity-0 animate-fade-up stagger-3">
+              <a href={config.hero.primaryCTA.href} class="btn-primary group justify-center sm:justify-start">
+                {config.hero.primaryCTA.text}
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+              <a href={config.hero.secondaryCTA.href} class="btn-secondary justify-center sm:justify-start sm:!bg-white/10 sm:!border-white/30 sm:!text-white sm:hover:!bg-white/20 sm:backdrop-blur-sm">
+                {config.hero.secondaryCTA.text}
+              </a>
+            </div>
           </div>
         </div>
       </div>
