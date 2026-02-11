@@ -80,28 +80,209 @@ export default function AnalyticsDashboard() {
   );
 }
 
-// ---------- Traffic Tab (GA4 placeholder) ----------
+// ---------- Traffic Tab (GA4 real data) ----------
+interface TrafficData {
+  summary: {
+    activeUsers: number;
+    sessions: number;
+    pageviews: number;
+    bounceRate: number;
+    avgDuration: number;
+    pagesPerSession: number;
+  };
+  daily: Array<{
+    date: string;
+    activeUsers: number;
+    sessions: number;
+    pageviews: number;
+  }>;
+  topPages: Array<{
+    path: string;
+    pageviews: number;
+    activeUsers: number;
+    avgDuration: number;
+  }>;
+  trafficSources: Array<{
+    source: string;
+    sessions: number;
+    activeUsers: number;
+  }>;
+}
+
 function TrafficTab() {
+  const [data, setData] = useState<TrafficData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [connected, setConnected] = useState(false);
+  const [notConfigured, setNotConfigured] = useState(false);
+  const [days, setDays] = useState(7);
+
+  const fetchTraffic = useCallback(async (d: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/analytics/traffic?days=${d}`);
+      if (res.ok) {
+        const json = await res.json();
+        setConnected(json.connected !== false);
+        if (json.data?.success) {
+          setData(json.data);
+          setNotConfigured(false);
+        } else if (json.data?.notConfigured) {
+          setNotConfigured(true);
+          setData(null);
+        } else {
+          setData(null);
+        }
+      }
+    } catch { /* ignore */ }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchTraffic(days); }, [days, fetchTraffic]);
+
+  if (loading) return <LoadingSpinner />;
+
+  // Not configured state
+  if (notConfigured || !connected) {
+    return (
+      <div>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <KpiCard label="Users" value="--" sub={`Last ${days} days`} />
+          <KpiCard label="Sessions" value="--" sub={`Last ${days} days`} />
+          <KpiCard label="Pageviews" value="--" sub={`Last ${days} days`} />
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+          <div className="text-4xl mb-3">&#x1F4CA;</div>
+          <h3 className="text-base font-semibold text-slate-600 mb-2">
+            {notConfigured ? 'GA4 Not Configured' : 'Analytics API Unreachable'}
+          </h3>
+          <p className="text-sm text-slate-400 max-w-md mx-auto">
+            {notConfigured
+              ? 'Set GA4_PROPERTY_ID in SEO Workers and grant the service account Viewer access to your GA4 property.'
+              : 'The SEO Workers API is not reachable. Check that britzmedi-seo is deployed.'}
+          </p>
+          <div className="mt-6 text-left max-w-lg mx-auto bg-slate-50 rounded-lg p-4 text-xs text-slate-600 space-y-2">
+            <p className="font-semibold text-slate-700">Setup Steps:</p>
+            <ol className="list-decimal pl-4 space-y-1">
+              <li>Enable Analytics Data API in Google Cloud Console</li>
+              <li>Add service account as Viewer in GA4 Admin &rarr; Property Access</li>
+              <li>Find your GA4 Property ID in Admin &rarr; Property Settings</li>
+              <li>Set <code className="bg-slate-200 px-1 rounded">GA4_PROPERTY_ID=properties/XXXXXXXXX</code> in wrangler.toml</li>
+              <li>Deploy: <code className="bg-slate-200 px-1 rounded">wrangler deploy</code></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const s = data?.summary;
+  const formatDuration = (sec: number) => {
+    if (!sec) return '0s';
+    const m = Math.floor(sec / 60);
+    const ss = Math.round(sec % 60);
+    return m > 0 ? `${m}m ${ss}s` : `${ss}s`;
+  };
+
   return (
     <div>
+      {/* Period selector */}
+      <div className="flex items-center gap-2 mb-4">
+        {[7, 14, 30].map(d => (
+          <button
+            key={d}
+            onClick={() => setDays(d)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              days === d ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            {d}d
+          </button>
+        ))}
+      </div>
+
+      {/* KPI Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <KpiCard label="Users" value="--" sub="Last 7 days" />
-        <KpiCard label="Sessions" value="--" sub="Last 7 days" />
-        <KpiCard label="Pageviews" value="--" sub="Last 7 days" />
+        <KpiCard label="Active Users" value={s?.activeUsers?.toLocaleString() || '0'} sub={`Last ${days} days`} />
+        <KpiCard label="Sessions" value={s?.sessions?.toLocaleString() || '0'} sub={`Last ${days} days`} />
+        <KpiCard label="Pageviews" value={s?.pageviews?.toLocaleString() || '0'} sub={`Last ${days} days`} />
       </div>
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <KpiCard label="Bounce Rate" value="--" sub="Last 7 days" />
-        <KpiCard label="Avg Duration" value="--" sub="Last 7 days" />
-        <KpiCard label="Pages/Session" value="--" sub="Last 7 days" />
+        <KpiCard label="Bounce Rate" value={s?.bounceRate ? `${(s.bounceRate * 100).toFixed(1)}%` : '--'} sub={`Last ${days} days`} />
+        <KpiCard label="Avg Duration" value={formatDuration(s?.avgDuration || 0)} sub={`Last ${days} days`} />
+        <KpiCard label="Pages/Session" value={s?.pagesPerSession?.toFixed(1) || '--'} sub={`Last ${days} days`} />
       </div>
-      <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-        <div className="text-4xl mb-3">&#x1F4CA;</div>
-        <h3 className="text-base font-semibold text-slate-600 mb-2">GA4 Integration Coming Soon</h3>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">
-          Connect Google Analytics 4 via service account to see real traffic data here.
-          This requires GA4 Data API setup in the SEO Workers.
-        </p>
-        <p className="text-xs text-slate-300 mt-4">Phase 6 &mdash; requires GA4 Data API + service account permissions</p>
+
+      {/* Daily Trend */}
+      {data?.daily && data.daily.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+          <h3 className="text-sm font-semibold text-slate-800 mb-4">Daily Trend</h3>
+          <div className="overflow-x-auto">
+            <div className="flex items-end gap-1" style={{ minHeight: 120 }}>
+              {data.daily.map(d => {
+                const maxPV = Math.max(...data.daily.map(x => x.pageviews), 1);
+                const h = Math.max(4, (d.pageviews / maxPV) * 100);
+                const dateStr = d.date.length === 8
+                  ? `${d.date.slice(4, 6)}/${d.date.slice(6, 8)}`
+                  : d.date.slice(5);
+                return (
+                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1 min-w-[32px]" title={`${dateStr}: ${d.pageviews} PV, ${d.activeUsers} users`}>
+                    <span className="text-[9px] text-slate-400">{d.pageviews}</span>
+                    <div className="w-full bg-blue-500 rounded-t" style={{ height: `${h}px` }} />
+                    <span className="text-[9px] text-slate-400">{dateStr}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Pages */}
+        {data?.topPages && data.topPages.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-800">Top Pages</h3>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {data.topPages.map((p, i) => (
+                <div key={i} className="px-5 py-3 flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-800 truncate">{p.path}</p>
+                    <p className="text-[10px] text-slate-400">{p.activeUsers} users &middot; {formatDuration(p.avgDuration / Math.max(p.activeUsers, 1))}/user</p>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700 ml-3">{p.pageviews.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Traffic Sources */}
+        {data?.trafficSources && data.trafficSources.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-800">Traffic Sources</h3>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {data.trafficSources.map((s, i) => {
+                const maxSessions = Math.max(...data.trafficSources.map(x => x.sessions), 1);
+                const pct = (s.sessions / maxSessions) * 100;
+                return (
+                  <div key={i} className="px-5 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-slate-800">{s.source}</span>
+                      <span className="text-sm font-medium text-slate-700">{s.sessions.toLocaleString()}</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
