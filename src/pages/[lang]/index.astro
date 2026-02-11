@@ -31,6 +31,11 @@ if (!supportedLanguages.includes(lang as Language) || lang === defaultLang) {
 const validLang = lang as Language;
 const t = useTranslations(validLang);
 const langInfo = languages[validLang];
+// Strip cache-busting query params from image URLs (filename already has unique timestamp)
+const stripQueryParams = (url: string | undefined) => url?.split('?')[0];
+const heroImageUrl = stripQueryParams(config.hero.heroImage) || '/images/hero-desktop.webp';
+const bgImageUrl = stripQueryParams(config.hero.backgroundImage);
+
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
 
 // SEO for this language
@@ -61,11 +66,11 @@ const langSeoDescriptions: Record<string, string> = {
   title={langSeoTitles[lang] || 'Home'}
   description={langSeoDescriptions[lang]}
 >
-  {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
-    <link slot="head" rel="preload" as="image" href={config.hero.backgroundImage} />
+  {config.hero.backgroundType === 'image' && bgImageUrl && (
+    <link slot="head" rel="preload" as="image" href={bgImageUrl} fetchpriority="high" type="image/webp" />
   )}
   {config.hero.backgroundType === 'split' && (
-    <link slot="head" rel="preload" as="image" href={config.hero.heroImage || '/images/hero-desktop.webp'} />
+    <link slot="head" rel="preload" as="image" href={heroImageUrl} fetchpriority="high" type="image/webp" />
   )}
   <!-- Hero Section -->
   {config.hero.backgroundType === 'split' ? (
@@ -73,14 +78,14 @@ const langSeoDescriptions: Record<string, string> = {
     <section id="section-hero" class="relative overflow-hidden h-[400px] md:h-[500px] lg:h-[600px]">
       <!-- Background image from homepage config -->
       <img
-        src={config.hero.heroImage || '/images/hero-desktop.webp'}
+        src={heroImageUrl}
         alt={config.hero.heroImageAlt || 'BRITZMEDI'}
         width="1920"
         height="1080"
         fetchpriority="high"
         loading="eager"
-        decoding="async"
-        class="absolute inset-0 w-full h-full object-cover object-[center_top]"
+        decoding="sync"
+        class="absolute inset-0 w-full h-full object-cover object-center"
       />
 
       <!-- Gradient overlay: desktop (text area left, product visible right) -->
@@ -119,7 +124,7 @@ const langSeoDescriptions: Record<string, string> = {
       </div>
     </section>
   ) : (
-    <section id="section-hero" class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh] lg:min-h-[70vh] flex items-center">
+    <section id="section-hero" class="relative overflow-hidden h-[400px] md:h-[500px] lg:h-[600px] flex items-center">
       {config.hero.backgroundType === 'video' && config.hero.backgroundVideo && (
         <div class="absolute inset-0 z-0">
           <video
@@ -135,17 +140,17 @@ const langSeoDescriptions: Record<string, string> = {
         </div>
       )}
 
-      {config.hero.backgroundType === 'image' && config.hero.backgroundImage && (
+      {config.hero.backgroundType === 'image' && bgImageUrl && (
         <div class="absolute inset-0 z-0">
           <img
-            src={config.hero.backgroundImage}
+            src={bgImageUrl}
             alt={config.hero.backgroundImageAlt || 'Hero background'}
             width="1920"
             height="1080"
             fetchpriority="high"
             loading="eager"
-            decoding="async"
-            class="w-full h-full object-cover object-[center_20%] sm:object-[center_30%] lg:object-[center_25%]"
+            decoding="sync"
+            class="w-full h-full object-cover object-center"
           />
         </div>
       )}
