@@ -12,3 +12,13 @@
 /inquiry  /contact  301
 /enquiry  /contact  301
 /product/*  /products/:splat  301
+
+# Admin legacy redirects
+/admin/blog-manager  /admin/content-hub  301
+/admin/blog-manager/*  /admin/content-hub  301
+/admin/youtube-to-blog  /admin/content-hub  301
+/admin/subscribers  /admin/content-hub  301
+/admin/homepage  /admin/settings/site-editor  301
+/admin/health  /admin  301
+/admin/activity  /admin  301
+/admin/resources  /admin/content-hub  301
