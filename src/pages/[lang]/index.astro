@@ -1,23 +1,36 @@
 ---
+export const prerender = false;
+
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { company, coreTechnologies } from '../../content/company';
 import { products } from '../../content/products';
-import homepageConfig from '../../data/homepage.json';
+import defaultHomepageConfig from '../../data/homepage.json';
 import type { HomepageConfig } from '../../data/homepage.types';
 import { supportedLanguages, languages, defaultLang, type Language } from '../../i18n/config';
 import { useTranslations } from '../../i18n';
 
-export function getStaticPaths() {
-  // Generate paths for all non-default languages
-  return supportedLanguages
-    .filter(lang => lang !== defaultLang)
-    .map(lang => ({ params: { lang } }));
+// Read config: KV (latest from Site Editor) → fallback to bundled JSON
+let config: HomepageConfig;
+try {
+  const runtime = (Astro.locals as any).runtime;
+  const kv = runtime?.env?.SESSION as KVNamespace | undefined;
+  if (kv) {
+    const kvData = await kv.get('homepage-config');
+    config = kvData ? JSON.parse(kvData) : (defaultHomepageConfig as HomepageConfig);
+  } else {
+    config = defaultHomepageConfig as HomepageConfig;
+  }
+} catch {
+  config = defaultHomepageConfig as HomepageConfig;
 }
-
-const config = homepageConfig as HomepageConfig;
-const { lang } = Astro.params as { lang: Language };
-const t = useTranslations(lang);
-const langInfo = languages[lang];
+const { lang } = Astro.params as { lang: string };
+// Validate language parameter
+if (!supportedLanguages.includes(lang as Language) || lang === defaultLang) {
+  return Astro.redirect('/404', 404);
+}
+const validLang = lang as Language;
+const t = useTranslations(validLang);
+const langInfo = languages[validLang];
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
 
 // SEO for this language

@@ -1,13 +1,28 @@
 ---
+export const prerender = false;
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { company, milestones, coreTechnologies } from '../content/company';
 import { products, getFeaturedProducts } from '../content/products';
 import { certifications, qualitySummary } from '../content/certifications';
-import homepageConfig from '../data/homepage.json';
+import defaultHomepageConfig from '../data/homepage.json';
 import type { HomepageConfig } from '../data/homepage.types';
 import newsData from '../data/news.json';
 
-const config = homepageConfig as HomepageConfig;
+// Read config: KV (latest from Site Editor) → fallback to bundled JSON
+let config: HomepageConfig;
+try {
+  const runtime = (Astro.locals as any).runtime;
+  const kv = runtime?.env?.SESSION as KVNamespace | undefined;
+  if (kv) {
+    const kvData = await kv.get('homepage-config');
+    config = kvData ? JSON.parse(kvData) : (defaultHomepageConfig as HomepageConfig);
+  } else {
+    config = defaultHomepageConfig as HomepageConfig;
+  }
+} catch {
+  config = defaultHomepageConfig as HomepageConfig;
+}
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
 
 // Latest news
