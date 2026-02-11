@@ -352,6 +352,12 @@ export default function HomepageEditor() {
       })
       .then((data) => {
         setConfig(data);
+        // Load saved product image overrides from config, fallback to defaults
+        const imgs: Record<string, string> = {};
+        PRODUCTS.forEach((p) => {
+          imgs[p.id] = data.featuredProducts?.imageOverrides?.[p.id] || p.image;
+        });
+        setProductImages(imgs);
         setLoading(false);
       })
       .catch((err) => {
@@ -359,10 +365,6 @@ export default function HomepageEditor() {
         setLoadError(err.message || 'Failed to load');
         setLoading(false);
       });
-
-    const imgs: Record<string, string> = {};
-    PRODUCTS.forEach((p) => { imgs[p.id] = p.image; });
-    setProductImages(imgs);
   }, []);
 
 
@@ -383,10 +385,25 @@ export default function HomepageEditor() {
     setSaveStatus('saving');
 
     try {
+      // Merge product image overrides into config so they persist to KV + GitHub
+      const configToSave = {
+        ...config,
+        featuredProducts: {
+          ...config.featuredProducts,
+          imageOverrides: {
+            ...config.featuredProducts.imageOverrides,
+            ...Object.fromEntries(
+              Object.entries(productImages)
+                .filter(([, url]) => !url.startsWith('blob:')) // skip transient blob URLs
+            ),
+          },
+        },
+      };
+
       const res = await fetch('/api/admin/homepage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(configToSave),
       });
 
       if (!res.ok) {
@@ -658,15 +675,7 @@ export default function HomepageEditor() {
                     mediaType="image"
                     currentUrl={productImages[product.id] || product.image}
                     onUploaded={(url) => {
-                      setProductImages((prev) => {
-                        // Keep blob URL if already set — it shows the cropped image immediately.
-                        // The server URL (/images/products/...) still serves the OLD cached image
-                        // until GitHub rebuild completes, so we must not overwrite the blob.
-                        if (prev[product.id]?.startsWith('blob:') && !url.startsWith('blob:')) {
-                          return prev;
-                        }
-                        return { ...prev, [product.id]: url };
-                      });
+                      setProductImages((prev) => ({ ...prev, [product.id]: url }));
                     }}
                     cropPreset="product-thumb"
                     uploadTarget="product"

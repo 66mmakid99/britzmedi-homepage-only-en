@@ -29,6 +29,7 @@ const heroImageUrl = stripQueryParams(config.hero.heroImage) || '/images/hero-de
 const bgImageUrl = stripQueryParams(config.hero.backgroundImage);
 
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
+const productImageOverrides = config.featuredProducts.imageOverrides || {};
 
 // Latest news
 const latestNews = (newsData as any[])
@@ -294,7 +295,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
             <!-- Product Image -->
             <div class="aspect-[4/3] rounded-xl mb-4 sm:mb-6 overflow-hidden bg-slate-100">
               <img
-                src={product.images?.main || ''}
+                src={stripQueryParams(productImageOverrides[product.id]) || product.images?.main || ''}
                 alt={product.name}
                 width="800"
                 height="600"

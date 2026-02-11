@@ -372,9 +372,14 @@ YouTube/File → Blog 작업 큐.
 | `LINKEDIN_CLIENT_SECRET` | LinkedIn secret |
 | `LINKEDIN_PERSON_URN` | LinkedIn person URN |
 | `INSTAGRAM_USER_ID` | Instagram user ID |
+| `INSTAGRAM_APP_ID` | Instagram/Meta app ID |
+| `INSTAGRAM_APP_SECRET` | Instagram/Meta app secret |
 | `INSTAGRAM_ACCESS_TOKEN` | Instagram long-lived token |
+| `FACEBOOK_PAGE_TOKEN` | Facebook page token (placeholder) |
+| `FACEBOOK_PAGE_ID` | Facebook page ID (placeholder) |
 | `GA4_PROPERTY_ID` | Google Analytics 4 속성 ID |
 | `GA4_CREDENTIALS` | GA4 서비스 계정 JSON |
+| `LINKEDIN_PERSON_URN` | LinkedIn person URN (포스팅 author) |
 
 ---
 

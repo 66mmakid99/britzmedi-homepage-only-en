@@ -37,6 +37,7 @@ const heroImageUrl = stripQueryParams(config.hero.heroImage) || '/images/hero-de
 const bgImageUrl = stripQueryParams(config.hero.backgroundImage);
 
 const featuredProducts = products.filter(p => p.status === 'available').slice(0, config.featuredProducts.displayCount);
+const productImageOverrides = config.featuredProducts.imageOverrides || {};
 
 // SEO for this language
 const langSeoTitles: Record<string, string> = {
@@ -266,9 +267,9 @@ const langSeoDescriptions: Record<string, string> = {
             class="group card-premium p-4 sm:p-6 lg:p-7"
           >
             <div class="aspect-[4/3] bg-[#f8fafc] rounded-xl mb-4 sm:mb-6 relative overflow-hidden" data-product={product.id}>
-              {product.images?.main ? (
+              {(productImageOverrides[product.id] || product.images?.main) ? (
                 <img
-                  src={product.images.main}
+                  src={stripQueryParams(productImageOverrides[product.id]) || product.images?.main || ''}
                   alt={product.name}
                   width="800"
                   height="600"

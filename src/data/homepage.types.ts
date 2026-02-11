@@ -39,6 +39,7 @@ export interface FeaturedProductsSection {
   title: string;
   description: string;
   displayCount: number;
+  imageOverrides?: Record<string, string>; // productId → image URL (from Site Editor uploads)
 }
 
 export interface WhyFeature {

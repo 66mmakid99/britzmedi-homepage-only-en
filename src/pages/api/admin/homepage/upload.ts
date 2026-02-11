@@ -63,8 +63,8 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
     if (target === 'product' && productId) {
       const safeId = productId.replace(/[^a-z0-9-]/gi, '');
-      r2Key = `homepage/products/${safeId}.${ext}`;
-      urlPath = `/images/products/${safeId}.${ext}`;
+      r2Key = `homepage/products/${safeId}-${timestamp}.${ext}`;
+      urlPath = `/images/products/${safeId}-${timestamp}.${ext}`;
     } else if (isVideo) {
       r2Key = `homepage/videos/hero-video-${timestamp}.${ext}`;
       urlPath = `/videos/hero-video-${timestamp}.${ext}`;
