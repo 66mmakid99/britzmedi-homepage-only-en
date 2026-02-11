@@ -8,27 +8,14 @@ import { isHtml } from '../../../../lib/html-to-markdown';
 
 const { id } = Astro.params;
 
-// Auth check
-const sessionCookie = Astro.cookies.get('admin_session')?.value;
-if (!sessionCookie) {
-  return Astro.redirect('/admin/login');
-}
-
+// Auth is handled by middleware (validates KV session).
+// No duplicate check needed here.
 const runtime = (Astro.locals as any).runtime;
 const env = runtime?.env;
 const db = env?.DB as D1Database | undefined;
 
 if (!db) {
   return new Response('Database not available', { status: 503 });
-}
-
-// Verify session
-const session = await db.prepare(
-  'SELECT * FROM admin_sessions WHERE token = ? AND expires_at > ?'
-).bind(sessionCookie, new Date().toISOString()).first<any>();
-
-if (!session) {
-  return Astro.redirect('/admin/login');
 }
 
 // Load content item
