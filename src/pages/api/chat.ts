@@ -326,6 +326,8 @@ function buildSystemPrompt(context?: { product?: string; page?: string }): strin
 8. BRITZMEDI certifications are: FDA 510(k), ISO 13485, GMP, MFDS. No other certifications exist.
 9. Do NOT mention export countries or partner names unless explicitly listed in the knowledge base.
 10. When uncertain about ANY detail, direct users to /contact. Never guess.
+11. 질문에 대한 정확한 정보가 없으면, 솔직하게 "죄송합니다, 해당 정보는 제가 안내드리기 어렵습니다. 자세한 내용은 /contact 페이지를 통해 직접 문의해 주세요."라고 답변하세요. 절대로 모르는 정보를 추측하거나 관련 없는 답변으로 대체하지 마세요.
+12. Examples of questions you CANNOT answer (must redirect to /contact): employee count, revenue, specific client names, internal processes, salary, org structure, investor info, financial details.
 
 ## YOUR KNOWLEDGE BASE
 The following document is your ONLY source of truth. Everything you say must come from this document.
@@ -752,8 +754,8 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
       : "BRITZMEDI was founded in October 2017 by CEO Shinjae Lee. Based in Seongnam-si, South Korea, we design and manufacture aesthetic medical devices including the FDA 510(k) cleared TORR RF system. Learn more at /about or contact us at /contact.";
   }
 
-  // Default response (language-aware)
+  // Default response — honest "I don't know" instead of generic product intro
   return korean
-    ? "문의해 주셔서 감사합니다! BRITZMEDI는 TORR RF (FDA 인증), ULBLANC 초음파, NEWCHAE SHOT 홈뷰티 디바이스를 전문으로 하는 의료미용기기 기업입니다. 궁금한 점이 있으시면 말씀해 주세요. 자세한 상담은 /contact에서 문의 가능합니다."
-    : "Thanks for reaching out! We specialize in aesthetic medical devices - TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, and NEWCHAE SHOT home device. What would you like to know? For quotes or partnerships, you can reach us at /contact.";
+    ? "죄송합니다, 해당 내용은 안내가 어렵습니다. britzmedi.com/contact 에서 직접 문의해 주세요."
+    : "I'm sorry, I don't have that information. Please contact us at britzmedi.com/contact for assistance.";
 }

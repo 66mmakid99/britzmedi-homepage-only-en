@@ -27,9 +27,11 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [requireVerification, setRequireVerification] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [fixedHeight, setFixedHeight] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  // Store height in ref — never causes re-render, never recalculated
+  const capturedHeightRef = useRef<number>(0);
 
   // Lock/unlock body scroll for mobile
   const lockBodyScroll = useCallback((lock: boolean) => {
@@ -49,19 +51,32 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   }, []);
 
-  // Capture fixed height on open (before keyboard appears)
+  // Handle open/close: set height ONCE via DOM, lock body scroll
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mobile = window.innerWidth < 640;
+
     if (isOpen && !isMinimized && mobile) {
-      // Capture 80% of viewport ONCE when opening — this won't change with keyboard
-      setFixedHeight(Math.round(window.innerHeight * 0.8));
+      // Capture height ONCE — store in ref, apply directly to DOM
+      if (capturedHeightRef.current === 0) {
+        capturedHeightRef.current = Math.round(window.innerHeight * 0.8);
+      }
+      // Apply height directly to DOM element — no state, no re-render
+      if (chatContainerRef.current) {
+        const h = capturedHeightRef.current + 'px';
+        chatContainerRef.current.style.height = h;
+        chatContainerRef.current.style.maxHeight = h;
+      }
       lockBodyScroll(true);
-    } else if (!isOpen || isMinimized) {
-      setFixedHeight(null);
+    } else if (!isOpen) {
+      capturedHeightRef.current = 0; // Reset for next open
+      lockBodyScroll(false);
+    } else if (isMinimized) {
       lockBodyScroll(false);
     }
-    return () => lockBodyScroll(false);
+    return () => {
+      if (!isOpen) lockBodyScroll(false);
+    };
   }, [isOpen, isMinimized, lockBodyScroll]);
 
   // Auto-scroll to bottom when messages change
@@ -209,11 +224,6 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     );
   }
 
-  // Mobile: use captured fixedHeight (px), Desktop: use Tailwind classes
-  const mobileStyle = fixedHeight
-    ? { height: `${fixedHeight}px`, maxHeight: `${fixedHeight}px` }
-    : undefined;
-
   return (
     <>
       {/* Mobile backdrop overlay */}
@@ -222,18 +232,21 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         onClick={handleClose}
       />
 
+      {/*
+        Mobile: height/maxHeight set via DOM ref (never re-renders).
+        Desktop: sm:h-[32rem] from Tailwind.
+        No inline style for height — it's all done via ref.
+      */}
       <div
+        ref={chatContainerRef}
         className={`fixed z-[9999] bg-white flex flex-col ${
           isMinimized
             ? 'bottom-6 right-6 w-80 h-16 rounded-2xl shadow-2xl border border-slate-200'
             : [
-                // Mobile: bottom sheet (height set via inline style)
                 'inset-x-0 bottom-0 rounded-t-2xl shadow-2xl',
-                // Desktop: floating popup
                 'sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96 sm:h-[32rem] sm:rounded-2xl sm:border sm:border-slate-200'
               ].join(' ')
         }`}
-        style={isMinimized ? undefined : mobileStyle}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-primary-600 to-primary-700 shrink-0 rounded-t-2xl">
