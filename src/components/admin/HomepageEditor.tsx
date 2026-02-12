@@ -10,6 +10,7 @@ const PRODUCTS = [
   { id: 'torr-rf', name: 'TORR RF', image: '/images/products/torr-rf.webp' },
   { id: 'ulblanc', name: 'ULBLANC', image: '/images/products/ulblanc.webp' },
   { id: 'newchae-shot', name: 'NEWCHAE SHOT', image: '/images/products/newchae-shot.webp' },
+  { id: 'lumino-wave', name: 'LUMINO WAVE', image: '' },
 ];
 
 // ─── Reusable UI Components ─────────────────────────────────
@@ -338,6 +339,8 @@ export default function HomepageEditor() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [productImages, setProductImages] = useState<Record<string, string>>({});
+  const [detailImages, setDetailImages] = useState<Record<string, string>>({});
+  const [detailStatus, setDetailStatus] = useState<Record<string, 'idle' | 'uploading' | 'applying' | 'done' | 'error'>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -365,6 +368,20 @@ export default function HomepageEditor() {
         setLoadError(err.message || 'Failed to load');
         setLoading(false);
       });
+
+    // Fetch product detail images
+    fetch('/api/admin/products/images')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.products) {
+          const imgs: Record<string, string> = {};
+          for (const p of data.products) {
+            if (p.mainImageUrl) imgs[p.id] = p.mainImageUrl;
+          }
+          setDetailImages(imgs);
+        }
+      })
+      .catch((err) => console.error('Failed to load product detail images:', err));
   }, []);
 
 
@@ -521,14 +538,26 @@ export default function HomepageEditor() {
             />
 
             {config.hero.backgroundType === 'split' && (
-              <FileUpload
-                label="Hero Model Image (PNG/WebP, max 5MB)"
-                accept="image/webp,image/jpeg,image/png"
-                mediaType="image"
-                currentUrl={config.hero.heroImage || ''}
-                onUploaded={(url) => update('hero', { heroImage: url })}
-                cropPreset="hero"
-              />
+              <>
+                <FileUpload
+                  label="Hero Image or Video (WebP/JPG/PNG/MP4, max 10MB)"
+                  accept="image/webp,image/jpeg,image/png,video/mp4"
+                  mediaType={config.hero.heroImage?.split('?')[0]?.endsWith('.mp4') ? 'video' : 'image'}
+                  currentUrl={config.hero.heroImage || ''}
+                  onUploaded={(url) => update('hero', { heroImage: url })}
+                  cropPreset="hero"
+                />
+                {config.hero.heroImage?.split('?')[0]?.endsWith('.mp4') && (
+                  <FileUpload
+                    label="Video Poster Image (shown while loading)"
+                    accept="image/webp,image/jpeg,image/png"
+                    mediaType="poster"
+                    currentUrl={config.hero.backgroundVideoPoster || ''}
+                    onUploaded={(url) => update('hero', { backgroundVideoPoster: url })}
+                    cropPreset="hero"
+                  />
+                )}
+              </>
             )}
 
             {config.hero.backgroundType === 'image' && (
@@ -666,7 +695,7 @@ export default function HomepageEditor() {
             />
             <div className="space-y-3 pt-2 border-t border-slate-200">
               <div className="text-xs font-medium text-slate-600">Product Images</div>
-              {PRODUCTS.map((product) => (
+              {PRODUCTS.filter((p) => p.image).map((product) => (
                 <div key={product.id} className="p-3 bg-slate-50 rounded-lg space-y-2">
                   <div className="text-xs font-medium text-slate-700">{product.name}</div>
                   <FileUpload
@@ -683,6 +712,86 @@ export default function HomepageEditor() {
                   />
                 </div>
               ))}
+            </div>
+
+            {/* ── Product Detail Images (Product Pages) ── */}
+            <div className="space-y-3 pt-3 border-t border-slate-200">
+              <div className="text-xs font-medium text-slate-600">Product Detail Images (Product Pages)</div>
+              <p className="text-xs text-slate-400">
+                Main images shown on each product detail page. Upload applies immediately via GitHub commit (separate from Save).
+              </p>
+              {PRODUCTS.map((product) => {
+                const status = detailStatus[product.id] || 'idle';
+                const isComingSoon = product.id === 'lumino-wave';
+
+                if (isComingSoon) {
+                  return (
+                    <div key={product.id} className="p-3 bg-slate-50 rounded-lg flex items-center justify-between">
+                      <div className="text-xs font-medium text-slate-700">{product.name}</div>
+                      <span className="text-xs text-slate-400 italic">Coming Soon</span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={product.id} className="p-3 bg-slate-50 rounded-lg space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-medium text-slate-700">{product.name}</div>
+                      {status === 'done' && (
+                        <span className="text-xs text-green-600 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Applied
+                        </span>
+                      )}
+                      {status === 'applying' && (
+                        <span className="text-xs text-blue-600">Applying to GitHub...</span>
+                      )}
+                      {status === 'error' && (
+                        <span className="text-xs text-red-600">Failed</span>
+                      )}
+                    </div>
+                    <FileUpload
+                      label={`${product.name} Detail (4:3, 1200x900, auto-optimized)`}
+                      accept="image/webp,image/jpeg,image/png"
+                      mediaType="image"
+                      currentUrl={detailImages[product.id] || ''}
+                      onUploaded={async (url) => {
+                        // Skip blob URLs from crop preview — wait for the actual upload
+                        if (url.startsWith('blob:')) return;
+
+                        setDetailStatus((prev) => ({ ...prev, [product.id]: 'applying' }));
+
+                        try {
+                          const res = await fetch('/api/admin/products/images', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ productId: product.id, imageUrl: url }),
+                          });
+
+                          if (!res.ok) {
+                            const err = await res.json();
+                            throw new Error(err.error || 'Failed');
+                          }
+
+                          setDetailImages((prev) => ({ ...prev, [product.id]: `${url}?t=${Date.now()}` }));
+                          setDetailStatus((prev) => ({ ...prev, [product.id]: 'done' }));
+                          setTimeout(() => {
+                            setDetailStatus((prev) => ({ ...prev, [product.id]: 'idle' }));
+                          }, 5000);
+                        } catch (err: any) {
+                          console.error(`[Detail Image] ${product.id} update failed:`, err);
+                          setDetailStatus((prev) => ({ ...prev, [product.id]: 'error' }));
+                        }
+                      }}
+                      cropPreset="product-detail"
+                      uploadTarget="product"
+                      productId={product.id}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </Section>
 

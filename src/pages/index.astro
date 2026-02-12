@@ -65,7 +65,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   {config.hero.backgroundType === 'image' && bgImageUrl && (
     <link slot="head" rel="preload" as="image" href={bgImageUrl} fetchpriority="high" type="image/webp" />
   )}
-  {config.hero.backgroundType === 'split' && (
+  {config.hero.backgroundType === 'split' && !heroImageUrl.endsWith('.mp4') && (
     <link slot="head" rel="preload" as="image" href={heroImageUrl} fetchpriority="high" type="image/webp" />
   )}
   <!-- WebSite Schema -->
@@ -86,19 +86,33 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
 
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
-    <!-- Hero: Full-bleed background image + gradient overlay -->
+    <!-- Hero: Full-bleed background image/video + gradient overlay -->
     <section id="section-hero" class="relative overflow-hidden">
-      <!-- Background image: mobile = in-flow 250px block, desktop = absolute fullcover -->
-      <img
-        src={heroImageUrl}
-        alt={config.hero.heroImageAlt || 'BRITZMEDI'}
-        width="1920"
-        height="1080"
-        fetchpriority="high"
-        loading="eager"
-        decoding="sync"
-        class="w-full h-[250px] object-cover object-center sm:absolute sm:inset-0 sm:h-full"
-      />
+      <!-- Background: mobile = in-flow 250px block, desktop = absolute fullcover -->
+      {heroImageUrl.endsWith('.mp4') ? (
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster={config.hero.backgroundVideoPoster || undefined}
+          class="w-full h-[250px] object-cover object-center sm:absolute sm:inset-0 sm:h-full"
+        >
+          <source src={heroImageUrl} type="video/mp4" />
+        </video>
+      ) : (
+        <img
+          src={heroImageUrl}
+          alt={config.hero.heroImageAlt || 'BRITZMEDI'}
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          loading="eager"
+          decoding="sync"
+          class="w-full h-[250px] object-cover object-center sm:absolute sm:inset-0 sm:h-full"
+        />
+      )}
 
       <!-- Gradient overlays: desktop/tablet only (mobile has solid bg below) -->
       <div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, rgb(15 23 42 / 0.7) 0%, rgb(15 23 42 / 0.4) 35%, rgb(15 23 42 / 0.1) 55%, transparent 65%)"></div>

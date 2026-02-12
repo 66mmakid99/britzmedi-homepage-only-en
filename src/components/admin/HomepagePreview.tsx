@@ -30,11 +30,17 @@ export default function HomepagePreview({ config, productImages }: PreviewProps)
   );
 }
 
+function isVideoUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  return url.split('?')[0].endsWith('.mp4');
+}
+
 function HeroSection({ config }: { config: HomepageConfig }) {
   const hero = config.hero;
-  const bgImage = hero.backgroundType === 'split'
+  const bgMedia = hero.backgroundType === 'split'
     ? (hero.heroImage || '/images/hero-desktop.webp')
     : hero.backgroundImage;
+  const isVideo = hero.backgroundType === 'video' || isVideoUrl(bgMedia);
 
   return (
     <div style={{
@@ -45,12 +51,37 @@ function HeroSection({ config }: { config: HomepageConfig }) {
       alignItems: 'center',
     }}>
       {/* Background */}
-      {hero.backgroundType !== 'gradient' && bgImage && (
-        <img
-          src={bgImage}
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
-        />
+      {hero.backgroundType === 'video' && hero.backgroundVideo && (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={hero.backgroundVideoPoster || undefined}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        >
+          <source src={hero.backgroundVideo} type="video/mp4" />
+        </video>
+      )}
+      {hero.backgroundType !== 'gradient' && hero.backgroundType !== 'video' && bgMedia && (
+        isVideoUrl(bgMedia) ? (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={hero.backgroundVideoPoster || undefined}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          >
+            <source src={bgMedia} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={bgMedia}
+            alt=""
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+          />
+        )
       )}
       {hero.backgroundType === 'gradient' && (
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }} />

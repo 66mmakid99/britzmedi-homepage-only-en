@@ -8,6 +8,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { logActivity } from '../../../../../lib/activity-log';
 import { deleteFileFromGitHub } from '../../../../../lib/youtube-to-blog/github';
+import { countWords } from '../../../../../lib/claude-api';
 
 interface Env {
   DB: D1Database;
@@ -146,19 +147,30 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 
     // Save revision before updating
     try {
+      const latestVer = await db.prepare(
+        'SELECT MAX(version) as max_ver FROM content_revisions WHERE content_id = ?'
+      ).bind(currentItem.id).first<any>();
+      const nextVersion = (latestVer?.max_ver || 0) + 1;
+
+      let score: number | null = null;
+      if (currentItem.analysis_data) {
+        try { score = JSON.parse(currentItem.analysis_data).overall_score || null; } catch {}
+      }
+
       await db.prepare(
-        `INSERT INTO content_revisions (
-          content_id, title, content, excerpt, status, changed_by, change_note, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO content_revisions (content_id, version, content, title, meta_description, faqs, change_summary, word_count, score, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         currentItem.id,
+        nextVersion,
+        currentItem.content || '',
         currentItem.title,
-        currentItem.content || null,
         currentItem.excerpt || null,
-        currentItem.status,
-        body._changed_by || 'admin',
+        currentItem.faq || null,
         body._change_note || 'Content updated',
-        now,
+        countWords(currentItem.content || ''),
+        score,
+        body._changed_by || 'admin',
       ).run();
     } catch (revErr: any) {
       console.warn('[Content Hub Item API] Failed to save revision:', revErr.message);
