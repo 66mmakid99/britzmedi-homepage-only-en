@@ -51,7 +51,12 @@
     "label": "Our Products",
     "title": "Medical Device Excellence",
     "description": "From our flagship FDA-cleared TORR RF to innovative ultrasound solutions, discover technology designed for superior clinical outcomes.",
-    "displayCount": 3
+    "displayCount": 3,
+    "imageOverrides": {
+      "torr-rf": "/images/products/torr-rf.webp",
+      "ulblanc": "/images/products/ulblanc-1770854887776.webp?t=1770854892040",
+      "newchae-shot": "/images/products/newchae-shot.webp"
+    }
   },
   "whyBritzMedi": {
     "label": "Why Choose Us",
