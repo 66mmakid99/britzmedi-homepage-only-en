@@ -8,7 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [2026-02-12]
 
 ### Fixed
-- Site Editor 제품 썸네일 이미지 교체 후 미반영 버그 (blob preview 유지 + productImages 덮어쓰기 방지)
+- Site Editor 제품 이미지 프로덕션 미반영 (KV config에 imageOverrides 저장 + 타임스탬프 파일명)
 - Hero 섹션 모바일 스택 레이아웃 (이미지 상단 + 텍스트 하단 분리, iPhone 14 Pro 기준)
 - Content Preview 빈 페이지 (D1 세션 체크 중복 제거, KV 미들웨어 통일)
 - www → non-www 301 리다이렉트 (`_redirects` + Cloudflare Page Rule)
