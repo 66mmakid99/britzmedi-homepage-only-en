@@ -1,0 +1,71 @@
+{
+  "name": "NEWCHAE SHOT",
+  "model": "NEWCHAE SHOT",
+  "tagline": "3-in-1 Personal Beauty Device",
+  "category": "cosmetic",
+  "status": "available",
+  "featured": false,
+  "mainImage": "newchae-shot.webp",
+  "logo": null,
+  "gallery": [
+    "/images/products/newchae-shot/newchae-01-1.webp",
+    "/images/products/newchae-shot/newchae-01-4.webp",
+    "/images/products/newchae-shot/newchae-pack-1.webp",
+    "/images/products/newchae-shot/newchae-pack-2.webp"
+  ],
+  "handpieceImages": [],
+  "overview": "NEWCHAE SHOT is a home-care beauty device integrating professional-grade medical technologies into a compact form factor with multi-channel energy delivery.",
+  "description": "Combining RF tightening, EMS contouring, and ELP skin boosting technologies, NEWCHAE SHOT delivers clinical-grade results for home use.",
+  "keyTechnologies": [
+    {
+      "name": "RF Mode (Tightening)",
+      "description": "Multi-Channel RF Stack technology delivers heat deep into the dermis, promoting collagen regeneration."
+    },
+    {
+      "name": "EMS Mode (V-Line)",
+      "description": "Electrical Muscle Stimulation for facial contouring and toning."
+    },
+    {
+      "name": "ELP Mode (Skin Boost)",
+      "description": "Electroporation technology enhances absorption of skincare products."
+    }
+  ],
+  "indications": [
+    "Skin Tightening - RF energy stimulates collagen for firmer skin",
+    "Face Contouring - EMS tones facial muscles for V-line effect",
+    "Product Absorption - ELP enhances skincare penetration",
+    "Anti-Aging - Reduces fine lines and improves skin texture"
+  ],
+  "specifications": [
+    { "label": "RF Frequency", "value": "1 MHz", "note": "Multi-channel stack" },
+    { "label": "EMS Frequency", "value": "1-100 Hz", "note": "Adjustable" },
+    { "label": "ELP Frequency", "value": "100-1000 Hz", "note": "Electroporation" },
+    { "label": "Treatment Modes", "value": "RF / EMS / ELP / Combined" },
+    { "label": "Vibration", "value": "10,000 times/min", "note": "3D vibration" },
+    { "label": "Dimensions", "value": "65mm × 65mm × 170mm" },
+    { "label": "Weight", "value": "180g" },
+    { "label": "Battery", "value": "Li-ion, USB-C Charging" }
+  ],
+  "handpieces": [],
+  "certifications": [],
+  "clinicalBenefits": [
+    "Skin Density improved by 128.48%",
+    "Pore Size reduced by 26.74%",
+    "Improved surface and deep elasticity",
+    "Enhanced skin radiance"
+  ],
+  "differentiators": [
+    {
+      "feature": "Automated Shot System",
+      "description": "Concentrates energy output for precise delivery at optimal intervals"
+    },
+    {
+      "feature": "3D Vibration Technology",
+      "description": "Vibrates 10,000 times/min to assist energy penetration and comfort"
+    },
+    {
+      "feature": "Clinical-Grade Home Care",
+      "description": "Professional technology miniaturized for convenient daily home use"
+    }
+  ]
+}

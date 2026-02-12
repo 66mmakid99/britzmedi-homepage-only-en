@@ -112,19 +112,19 @@ export default config({
       label: 'Products',
       slugField: 'name',
       path: 'src/content/products/*/',
-      format: { data: 'yaml' },
+      format: { data: 'json' },
       schema: {
-        name: fields.slug({ 
-          name: { 
+        name: fields.slug({
+          name: {
             label: 'Product Name',
             validation: { isRequired: true }
-          } 
+          }
         }),
-        model: fields.text({ 
+        model: fields.text({
           label: 'Model Number',
           validation: { isRequired: true }
         }),
-        tagline: fields.text({ 
+        tagline: fields.text({
           label: 'Tagline',
           validation: { isRequired: true }
         }),
@@ -152,18 +152,32 @@ export default config({
           label: 'Main Product Image',
           directory: 'public/images/products',
           publicPath: '/images/products/',
-          description: 'Primary hero image for the product'
+          description: 'Primary hero image for the product (drag & drop to upload)'
+        }),
+        logo: fields.text({
+          label: 'Logo Image Path',
+          description: 'Full path e.g. /images/logos/torr-rf-logo.png'
         }),
         gallery: fields.array(
-          fields.image({
-            label: 'Gallery Image',
-            directory: 'public/images/products',
-            publicPath: '/images/products/',
+          fields.text({
+            label: 'Image Path',
+            description: 'Full path e.g. /images/products/torr-rf/torrrf-01.webp',
           }),
           {
             label: 'Product Gallery',
-            itemLabel: (props) => props.value?.filename || 'Image',
-            description: 'Additional product images for gallery view'
+            itemLabel: props => props.value?.split('/').pop() || 'Image',
+            description: 'Additional product images (full paths)'
+          }
+        ),
+        handpieceImages: fields.array(
+          fields.object({
+            key: fields.text({ label: 'Image Key', description: 'e.g. body-deep, face-super, eye' }),
+            path: fields.text({ label: 'Image Path', description: 'Full path e.g. /images/products/torr-rf/body-handpiece-deep.webp' }),
+          }),
+          {
+            label: 'Handpiece Images',
+            itemLabel: props => props.fields.key.value || 'Image',
+            description: 'Key-path pairs for handpiece-specific images'
           }
         ),
         overview: fields.text({
@@ -171,14 +185,9 @@ export default config({
           multiline: true,
           validation: { isRequired: true }
         }),
-        description: fields.markdoc({
+        description: fields.text({
           label: 'Detailed Description',
-          options: {
-            image: {
-              directory: 'public/images/products',
-              publicPath: '/images/products/',
-            }
-          }
+          multiline: true,
         }),
         keyTechnologies: fields.array(
           fields.object({
@@ -208,6 +217,18 @@ export default config({
             itemLabel: props => props.fields.label.value || 'Spec'
           }
         ),
+        handpieces: fields.array(
+          fields.object({
+            name: fields.text({ label: 'Handpiece Name' }),
+            tipSize: fields.text({ label: 'Tip Size' }),
+            depth: fields.text({ label: 'Treatment Depth' }),
+            feature: fields.text({ label: 'Key Feature', multiline: true }),
+          }),
+          {
+            label: 'Handpieces',
+            itemLabel: props => props.fields.name.value || 'Handpiece'
+          }
+        ),
         certifications: fields.array(
           fields.object({
             name: fields.text({ label: 'Certification Name' }),
@@ -224,6 +245,16 @@ export default config({
           {
             label: 'Clinical Benefits',
             itemLabel: props => props.value || 'Benefit'
+          }
+        ),
+        differentiators: fields.array(
+          fields.object({
+            feature: fields.text({ label: 'Feature Name' }),
+            description: fields.text({ label: 'Description', multiline: true })
+          }),
+          {
+            label: 'Differentiators',
+            itemLabel: props => props.fields.feature.value || 'Differentiator'
           }
         ),
       }

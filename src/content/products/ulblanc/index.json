@@ -1,0 +1,79 @@
+{
+  "name": "ULBLANC",
+  "model": "i-Booster",
+  "tagline": "Multi-Frequency Ultrasound Workstation",
+  "category": "medical-device",
+  "status": "available",
+  "featured": false,
+  "mainImage": "ulblanc.webp",
+  "logo": null,
+  "gallery": [
+    "/images/products/ulblanc/ulblanc-01.webp",
+    "/images/products/ulblanc/ulblanc-02.webp"
+  ],
+  "handpieceImages": [],
+  "overview": "ULBLANC is a comprehensive skincare workstation combining dual-frequency ultrasound for tightening with acoustic cavitation for transdermal drug delivery.",
+  "description": "The system allows for effective treatment without damaging the skin surface, featuring Dynamic Dual Wave technology for both superficial and deep tissue treatment.",
+  "keyTechnologies": [
+    {
+      "name": "Sono-I (Dynamic Dual Wave™)",
+      "description": "Alternates between different ultrasound frequencies to target both epidermis and dermis. 1/3 MHz for deep dermal tightening, 3/10 MHz for epidermal soothing."
+    },
+    {
+      "name": "i-Booster (Sonophoresis)",
+      "description": "Utilizes 28kHz ultrasound to generate acoustic cavitation (micro-jet effect), opening micro-pathways for deep transdermal delivery of active ingredients."
+    }
+  ],
+  "indications": [
+    "Skin firming and tightening",
+    "Wrinkle reduction",
+    "Enhanced absorption of active ingredients",
+    "Skin soothing (suitable for ACNE/Flushing)"
+  ],
+  "specifications": [
+    { "label": "Sono-I Frequency", "value": "1/3 MHz, 3/10 MHz", "note": "Dual frequency modes" },
+    { "label": "i-Booster Frequency", "value": "28 kHz", "note": "For sonophoresis" },
+    { "label": "Output Power", "value": "0.5 ~ 2.0 W/cm²", "note": "Adjustable intensity" },
+    { "label": "Treatment Modes", "value": "Tightening / Soothing / Boosting" },
+    { "label": "Display", "value": "7\" LCD Touch Screen" },
+    { "label": "Dimensions", "value": "280mm (W) × 350mm (D) × 180mm (H)" },
+    { "label": "Weight", "value": "4.5 kg" }
+  ],
+  "handpieces": [
+    {
+      "name": "Sono-I Handpiece (Face)",
+      "tipSize": "Ø 25mm",
+      "depth": "Epidermis to Dermis",
+      "feature": "Dual-wave technology for comprehensive facial treatment"
+    },
+    {
+      "name": "i-Booster Handpiece",
+      "tipSize": "Ø 30mm",
+      "depth": "Transdermal",
+      "feature": "28kHz ultrasound for enhanced active ingredient delivery"
+    }
+  ],
+  "certifications": [
+    { "name": "Korea MFDS", "status": "Certified", "detail": "No. 21-4685" }
+  ],
+  "clinicalBenefits": [
+    "No downtime - Pain-free, infection-free",
+    "Suitable for daily use",
+    "Versatile treatment range from soothing to lifting",
+    "Enhanced product absorption efficiency"
+  ],
+  "differentiators": [
+    {
+      "feature": "Dynamic Dual Wave™",
+      "description": "Alternating frequency technology targets both superficial and deep tissue layers in a single treatment session"
+    },
+    {
+      "feature": "Sonophoresis Integration",
+      "description": "28kHz acoustic cavitation creates micro-pathways for 10x better absorption of active ingredients"
+    },
+    {
+      "feature": "ACNE/Flushing Safe",
+      "description": "Gentle enough for sensitive skin conditions while delivering effective results"
+    }
+  ]
+}

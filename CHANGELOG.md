@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [2026-02-12]
 
+### Changed
+- 제품 데이터를 `products.ts` 하드코딩에서 Keystatic CMS 콘텐츠 파일로 마이그레이션
+  - 4개 제품 JSON 파일 생성 (`src/content/products/*/index.json`)
+  - `products.ts`가 `import.meta.glob`으로 JSON 읽도록 변경 (SSR 호환)
+  - Keystatic 스키마에 handpieces, differentiators, handpieceImages 필드 추가
+  - `/keystatic` 관리자에서 제품 이미지+텍스트 편집 가능
+
 ### Fixed
 - Site Editor 제품 이미지 프로덕션 미반영 (KV config에 imageOverrides 저장 + 타임스탬프 파일명)
 - Hero 섹션 모바일 스택 레이아웃 (이미지 상단 + 텍스트 하단 분리, iPhone 14 Pro 기준)
