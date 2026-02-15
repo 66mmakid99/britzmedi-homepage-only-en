@@ -1,10 +1,11 @@
 // Content Hub Dashboard — enhanced main component with Pipeline, All Content, SEO Briefs, Progress, and Quality tabs
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ContentItemCard } from './ContentItemCard';
 import { SEOBriefCard } from './SEOBriefCard';
 import { GenerateModal } from './GenerateModal';
 import { ProgressTracker } from './ProgressTracker';
+import { YouTubeImportModal } from './YouTubeImportModal';
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -221,6 +222,9 @@ export default function ContentHubDashboard() {
   const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [showYouTubeModal, setShowYouTubeModal] = useState(false);
+  const [showNewMenu, setShowNewMenu] = useState(false);
+  const newMenuRef = useRef<HTMLDivElement>(null);
   const [generatePrefill, setGeneratePrefill] = useState<{ keyword?: string; title?: string; content_type?: string; tier?: number } | undefined>(undefined);
   const [transitionLoading, setTransitionLoading] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ContentItem | null>(null);
@@ -487,15 +491,45 @@ export default function ContentHubDashboard() {
           <span className="text-sm text-slate-500">
             <span className="font-medium">{totalCount}</span> items
           </span>
-          <button
-            onClick={handleNewContent}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Content
-          </button>
+          <div className="relative" ref={newMenuRef}>
+            <button
+              onClick={() => setShowNewMenu(prev => !prev)}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              New Content
+              <svg className="w-3.5 h-3.5 ml-0.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showNewMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowNewMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 z-20 w-52 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 overflow-hidden">
+                  <button
+                    onClick={() => { setShowNewMenu(false); handleNewContent(); }}
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    From Keyword AI
+                  </button>
+                  <button
+                    onClick={() => { setShowNewMenu(false); setShowYouTubeModal(true); }}
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z" />
+                    </svg>
+                    From YouTube
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1182,6 +1216,16 @@ export default function ContentHubDashboard() {
         onClose={() => setShowGenerateModal(false)}
         onGenerated={handleGenerated}
         prefill={generatePrefill}
+      />
+
+      {/* YouTube Import Modal */}
+      <YouTubeImportModal
+        isOpen={showYouTubeModal}
+        onClose={() => setShowYouTubeModal(false)}
+        onComplete={(contentId) => {
+          setShowYouTubeModal(false);
+          fetchItems();
+        }}
       />
     </div>
   );
