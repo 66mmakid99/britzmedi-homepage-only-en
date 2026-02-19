@@ -87,7 +87,8 @@ const langSeoDescriptions: Record<string, string> = {
           playsinline
           preload="auto"
           poster={config.hero.backgroundVideoPoster || undefined}
-          class="w-full h-[300px] object-contain sm:absolute sm:inset-0 sm:h-full opacity-0 transition-opacity duration-700"
+          class="w-full h-[300px] sm:absolute sm:inset-0 sm:h-full opacity-0 transition-opacity duration-700"
+          style="object-fit: contain; background: #0f172a;"
         >
           <source src={heroImageUrl} type="video/mp4" />
         </video>
