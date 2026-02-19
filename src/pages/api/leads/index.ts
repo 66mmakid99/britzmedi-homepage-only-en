@@ -274,18 +274,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ip: clientIP,
     }).catch(() => {});
 
-    // Email + dashboard notification (non-blocking)
-    notifyNewLead(env, {
-      type: source === 'newsletter' ? 'newsletter' : 'contact_form',
-      company: data.company_name,
-      name: data.contact_name,
-      email: data.email,
-      country: data.country,
-      product_interest: Array.isArray(data.interested_products) ? data.interested_products.join(', ') : data.interested_products,
-      message: data.message,
-      lead_score: score,
-      lead_grade: grade,
-    }).catch(e => console.error('[NOTIFY]', e));
+    // Email + dashboard notification (awaited to prevent CF Worker early termination)
+    try {
+      await notifyNewLead(env, {
+        type: source === 'newsletter' ? 'newsletter' : 'contact_form',
+        company: data.company_name,
+        name: data.contact_name,
+        email: data.email,
+        country: data.country,
+        product_interest: Array.isArray(data.interested_products) ? data.interested_products.join(', ') : data.interested_products,
+        message: data.message,
+        lead_score: score,
+        lead_grade: grade,
+      });
+    } catch (e) {
+      console.error('[NOTIFY]', e);
+    }
 
     // Send Slack notification (non-blocking, failure won't affect response)
     const slackUrl = (env as any)?.SLACK_WEBHOOK_URL as string | undefined;
