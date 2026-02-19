@@ -27,6 +27,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [requireVerification, setRequireVerification] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -120,6 +122,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
           product: productContext ? String(productContext) : undefined,
           page: pageContext ? String(pageContext) : undefined
         },
+        sessionId: chatSessionId || undefined,
+        conversationId: conversationId || undefined,
         verificationToken: verificationToken ? String(verificationToken) : undefined
       };
 
@@ -153,6 +157,10 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
         }]);
         return;
       }
+
+      // Track session and conversation IDs from server
+      if (data.sessionId) setChatSessionId(data.sessionId);
+      if (data.conversationId) setConversationId(data.conversationId);
 
       if (data.fallback) {
         console.warn('[Chatbot] Using fallback response (AI unavailable)', data.error || '');
@@ -190,6 +198,20 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       setPendingMessage(null);
     }
   }, [pendingMessage]);
+
+  // Detect clicks on /contact links in messages → mark as lead converted
+  const handleMessageClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'A' && target.getAttribute('href')?.includes('/contact')) {
+      if (conversationId) {
+        fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: '_lead_converted', sessionId: chatSessionId, conversationId, leadConverted: true })
+        }).catch(() => {});
+      }
+    }
+  }, [conversationId, chatSessionId]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

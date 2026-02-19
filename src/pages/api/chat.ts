@@ -9,6 +9,7 @@ import knowledgeBaseContent from '../../data/chatbot-knowledge.md?raw';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
+  DB?: D1Database;
 }
 
 interface ChatMessage {
@@ -24,7 +25,9 @@ interface ChatRequest {
     page?: string;
   };
   sessionId?: string;
+  conversationId?: number;
   verificationToken?: string; // For "I'm not a robot" verification
+  leadConverted?: boolean;
 }
 
 // Simple in-memory store for spam detection (resets on server restart)
@@ -399,6 +402,58 @@ When mentioning the contact form, say something like "You can reach us through o
   return systemPrompt;
 }
 
+// --- D1 Conversation Persistence ---
+async function getOrCreateConversation(
+  db: D1Database,
+  sessionId: string,
+  conversationId: number | undefined,
+  clientIP: string,
+  country: string | null,
+  language: string | null,
+): Promise<number> {
+  // If conversationId provided, verify it exists
+  if (conversationId) {
+    const existing = await db.prepare(
+      'SELECT id FROM chat_conversations WHERE id = ? AND session_id = ?'
+    ).bind(conversationId, sessionId).first<{ id: number }>();
+    if (existing) return existing.id;
+  }
+
+  // Check for recent active conversation with same session
+  const recent = await db.prepare(
+    "SELECT id FROM chat_conversations WHERE session_id = ? AND status = 'active' AND last_message_at > datetime('now', '-30 minutes') ORDER BY id DESC LIMIT 1"
+  ).bind(sessionId).first<{ id: number }>();
+  if (recent) return recent.id;
+
+  // Create new conversation
+  const result = await db.prepare(
+    'INSERT INTO chat_conversations (session_id, visitor_ip, visitor_country, visitor_language) VALUES (?, ?, ?, ?)'
+  ).bind(sessionId, clientIP, country, language).run();
+  return result.meta.last_row_id as number;
+}
+
+async function saveMessage(
+  db: D1Database,
+  conversationId: number,
+  role: string,
+  content: string,
+  tokensUsed: number = 0,
+) {
+  await db.prepare(
+    'INSERT INTO chat_messages (conversation_id, role, content, tokens_used) VALUES (?, ?, ?, ?)'
+  ).bind(conversationId, role, content, tokensUsed).run();
+
+  await db.prepare(
+    "UPDATE chat_conversations SET message_count = message_count + 1, last_message_at = datetime('now') WHERE id = ?"
+  ).bind(conversationId).run();
+}
+
+async function markLeadConverted(db: D1Database, conversationId: number) {
+  await db.prepare(
+    'UPDATE chat_conversations SET lead_converted = 1 WHERE id = ?'
+  ).bind(conversationId).run();
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json() as ChatRequest;
@@ -412,7 +467,23 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Generate session ID from request if not provided
     const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('cf-connecting-ip') || 'unknown';
-    const sessionId = body.sessionId || `${clientIP}-${request.headers.get('user-agent')?.slice(0, 50) || 'unknown'}`;
+    const sessionId = body.sessionId || `${clientIP}-${Date.now()}`;
+
+    // Get D1 database for conversation persistence
+    const runtime = (locals as any).runtime;
+    const env = runtime?.env as Env | undefined;
+    const db = env?.DB as D1Database | undefined;
+    const visitorCountry = request.headers.get('cf-ipcountry') || null;
+    const visitorLanguage = request.headers.get('accept-language')?.split(',')[0] || null;
+
+    // Handle lead conversion signal (early return)
+    if (body.leadConverted && body.conversationId && db) {
+      try { await markLeadConverted(db, body.conversationId); } catch (e) { /* non-critical */ }
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     // Clean up old rate limit records periodically (1% chance per request)
     if (Math.random() < 0.01) {
@@ -498,18 +569,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // Get API key from environment
-    const runtime = (locals as any).runtime;
-    const env = runtime?.env as Env | undefined;
     const apiKey = env?.ANTHROPIC_API_KEY || import.meta.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
       console.error('[CHAT] ANTHROPIC_API_KEY not configured - using fallback');
       const fallbackMessage = getFallbackResponse(body.message, body.context);
       const suggestions = generateFollowUpSuggestions(body.message, fallbackMessage, body.context);
+      // Save fallback to D1 too
+      let conversationId = body.conversationId;
+      if (db) {
+        try {
+          conversationId = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
+          await saveMessage(db, conversationId, 'user', body.message, 0);
+          await saveMessage(db, conversationId, 'assistant', fallbackMessage, 0);
+        } catch (e) { /* non-critical */ }
+      }
       return new Response(JSON.stringify({
         message: fallbackMessage,
         suggestions,
-        fallback: true
+        fallback: true,
+        sessionId,
+        conversationId,
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -566,10 +646,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const assistantMessage = data.content?.[0]?.text || 'I apologize, but I encountered an issue. Please try again.';
 
     // Log API usage for cost monitoring
+    const inputTokens = data.usage?.input_tokens || 0;
+    const outputTokens = data.usage?.output_tokens || 0;
     if (data.usage) {
-      const inputTokens = data.usage.input_tokens || 0;
-      const outputTokens = data.usage.output_tokens || 0;
       logRequestUsage(inputTokens, outputTokens);
+    }
+
+    // Save conversation to D1 (non-blocking, don't fail the response)
+    let conversationId = body.conversationId;
+    if (db) {
+      try {
+        conversationId = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
+        await saveMessage(db, conversationId, 'user', body.message, 0);
+        await saveMessage(db, conversationId, 'assistant', assistantMessage, inputTokens + outputTokens);
+      } catch (e) {
+        console.error('[CHAT DB] Failed to save conversation:', e);
+      }
     }
 
     // Generate context-aware follow-up suggestions
@@ -578,7 +670,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(JSON.stringify({
       message: assistantMessage,
       suggestions,
-      fallback: false
+      fallback: false,
+      sessionId,
+      conversationId,
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

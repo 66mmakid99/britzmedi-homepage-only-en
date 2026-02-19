@@ -1,0 +1,17 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Chatbot Conversations">
+  <div id="chat-admin-root">
+    <div style="padding:24px; text-align:center; color:#64748b;">Loading...</div>
+  </div>
+  <script>
+    import { createElement } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import ChatAdmin from '../../components/admin/ChatAdmin';
+    const el = document.getElementById('chat-admin-root');
+    if (el) createRoot(el).render(createElement(ChatAdmin));
+  </script>
+</AdminLayout>
