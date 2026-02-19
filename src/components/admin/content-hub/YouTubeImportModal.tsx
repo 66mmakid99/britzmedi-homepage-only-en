@@ -115,25 +115,26 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
 
         for (const line of lines) {
           if (!line.startsWith('data:')) continue;
+          let parsed;
           try {
-            const data = JSON.parse(line.slice(5).trim());
-            if (data.type === 'progress' && data.percent) {
-              setOverallProgress(Math.min(data.percent, STEP_PROGRESS[stepName][1]));
-            }
-            if (data.type === 'done') {
-              result = data;
-            }
-            if (data.type === 'error') {
-              throw new Error(data.message || 'Generation error');
-            }
-          } catch (e) {
-            if (e instanceof Error && e.message !== 'Generation error' && !e.message.includes('Generation')) {
-              // JSON parse error — ignore partial data
-            } else {
-              throw e;
-            }
+            parsed = JSON.parse(line.slice(5).trim());
+          } catch {
+            continue; // Skip unparseable SSE lines
+          }
+          if (parsed.type === 'progress' && parsed.percent) {
+            setOverallProgress(Math.min(parsed.percent, STEP_PROGRESS[stepName][1]));
+          }
+          if (parsed.type === 'done') {
+            result = parsed;
+          }
+          if (parsed.type === 'error') {
+            throw new Error(parsed.message || 'Generation failed');
           }
         }
+      }
+
+      if (!result) {
+        throw new Error('Generate step completed without returning a result');
       }
 
       setOverallProgress(STEP_PROGRESS[stepName][1]);
