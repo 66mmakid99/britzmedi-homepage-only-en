@@ -21,7 +21,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const contentId = params.id;
 
     const revisions = await db.prepare(
-      `SELECT id, version, change_summary, word_count, score, created_by, created_at
+      `SELECT id, version, content, title, meta_description, faqs, change_summary, word_count, score, created_by, created_at
        FROM content_revisions
        WHERE content_id = ?
        ORDER BY version DESC`

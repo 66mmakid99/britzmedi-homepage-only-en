@@ -28,6 +28,32 @@ interface ContentItem {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  research_data: string | null;
+  analysis_data: string | null;
+}
+
+type EditorTab = 'write' | 'research' | 'analysis' | 'revisions';
+
+interface AnalysisData {
+  scores: Record<string, { score: number; max: number; details: string[] }>;
+  overall_score: number;
+  critical_issues: string[];
+  suggestions: Array<{ priority: string; title: string; description: string; auto_fixable: boolean }>;
+  publish_recommendation: string;
+}
+
+interface RevisionItem {
+  id: number;
+  version: number;
+  content: string;
+  title: string | null;
+  meta_description: string | null;
+  faqs: string | null;
+  change_summary: string | null;
+  word_count: number | null;
+  score: number | null;
+  created_by: string;
+  created_at: string;
 }
 
 interface FAQItem {
@@ -170,6 +196,23 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<EditorTab>('write');
+
+  // Analysis tab
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
+  const [rewriteResult, setRewriteResult] = useState<any>(null);
+  const [suggestType, setSuggestType] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestResult, setSuggestResult] = useState<string | null>(null);
+
+  // Revisions tab
+  const [revisions, setRevisions] = useState<RevisionItem[]>([]);
+  const [revisionsLoading, setRevisionsLoading] = useState(false);
+  const [viewingRevision, setViewingRevision] = useState<RevisionItem | null>(null);
+
   // Editable fields
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -250,6 +293,10 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
             const parsed = JSON.parse(ci.faq);
             if (Array.isArray(parsed)) setFaqs(parsed);
           } catch { /* ignore */ }
+        }
+
+        if (ci.analysis_data) {
+          try { setAnalysisData(JSON.parse(ci.analysis_data)); } catch { /* ignore */ }
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load');
@@ -416,6 +463,121 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
     }
   }, [contentId]);
 
+  // ─── Tab handlers ─────────────────────────────────────────
+
+  const handleAnalyze = useCallback(async () => {
+    setAnalyzing(true);
+    try {
+      const res = await fetch('/api/admin/content-hub/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content_id: contentId }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Analysis failed');
+      }
+      const data = await res.json();
+      setAnalysisData(data);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Analysis failed');
+    } finally {
+      setAnalyzing(false);
+    }
+  }, [contentId]);
+
+  const handleRewrite = useCallback(async (instructions?: string) => {
+    setRewriting(true);
+    setRewriteResult(null);
+    try {
+      const res = await fetch('/api/admin/content-hub/rewrite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content_id: contentId, mode: 'full', instructions }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Rewrite failed');
+      }
+      setRewriteResult(await res.json());
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Rewrite failed');
+    } finally {
+      setRewriting(false);
+    }
+  }, [contentId]);
+
+  const applyRewrite = useCallback((result: any) => {
+    if (result.content) setContent(result.content);
+    if (result.title) setTitle(result.title);
+    if (result.meta_description) setExcerpt(result.meta_description);
+    if (result.faqs && Array.isArray(result.faqs)) setFaqs(result.faqs);
+    setRewriteResult(null);
+    setActiveTab('write');
+  }, []);
+
+  const handleSuggestSection = useCallback(async (type: string) => {
+    setSuggesting(true);
+    setSuggestResult(null);
+    try {
+      const res = await fetch('/api/admin/content-hub/suggest-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content_id: contentId, suggestion_type: type }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Suggestion failed');
+      }
+      const data = await res.json();
+      setSuggestResult(data.section || data.content || '');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Suggestion failed');
+    } finally {
+      setSuggesting(false);
+    }
+  }, [contentId]);
+
+  const applySuggest = useCallback((markdown: string) => {
+    setContent(prev => prev + '\n\n' + markdown);
+    setSuggestResult(null);
+    setActiveTab('write');
+  }, []);
+
+  const loadRevisions = useCallback(async () => {
+    setRevisionsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/content-hub/items/${contentId}/revisions`);
+      if (res.ok) {
+        const data = await res.json();
+        setRevisions(data.revisions || []);
+      }
+    } catch { /* silent */ }
+    finally { setRevisionsLoading(false); }
+  }, [contentId]);
+
+  const handleRestoreRevision = useCallback(async (rev: RevisionItem) => {
+    if (!window.confirm(`Restore version ${rev.version}? Current content will be saved as a new revision first.`)) return;
+    // Save current as revision
+    await fetch(`/api/admin/content-hub/items/${contentId}/revisions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ change_summary: `Before restore to v${rev.version}` }),
+    });
+    // Apply revision content
+    if (rev.content) setContent(rev.content);
+    if (rev.title) setTitle(rev.title);
+    if (rev.meta_description) setExcerpt(rev.meta_description);
+    if (rev.faqs) {
+      try {
+        const parsed = JSON.parse(rev.faqs);
+        if (Array.isArray(parsed)) setFaqs(parsed);
+      } catch { /* ignore */ }
+    }
+    setActiveTab('write');
+    loadRevisions();
+  }, [contentId, loadRevisions]);
+
   // ─── Loading / Error states ─────────────────────────────────
 
   if (loading) {
@@ -530,57 +692,106 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
             className="w-full text-2xl font-bold text-slate-900 border-0 border-b border-slate-200 pb-3 mb-4 focus:outline-none focus:border-blue-500 bg-transparent"
           />
 
-          {/* Editor / Preview toggle */}
-          <div className="flex items-center gap-2 mb-3">
-            <button
-              type="button"
-              onClick={() => setShowPreview(false)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${!showPreview ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowPreview(true)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${showPreview ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'}`}
-            >
-              Split View
-            </button>
-          </div>
-
-          {/* Markdown Editor + Preview */}
-          <div className={`bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 ${showPreview ? 'flex' : ''}`}>
-            {/* Textarea side */}
-            <div className={showPreview ? 'w-1/2 border-r border-slate-200 flex flex-col' : 'flex flex-col'}>
-              <MarkdownToolbar onInsert={handleInsert} />
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="Write your content in Markdown..."
-                className="flex-1 min-h-[500px] px-4 py-3 text-sm font-mono text-slate-800 resize-none focus:outline-none"
-                style={{ tabSize: 2 }}
-              />
-            </div>
-
-            {/* Preview side */}
-            {showPreview && (
-              <div className="w-1/2 overflow-y-auto" style={{ maxHeight: '600px' }}>
-                <div className="px-2 py-1.5 border-b border-slate-200 bg-slate-50">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Preview</span>
-                </div>
-                <div
-                  className="prose prose-sm max-w-none px-5 py-4"
-                  dangerouslySetInnerHTML={{ __html: previewHtml }}
-                />
-              </div>
+          {/* Tab bar */}
+          <div className="flex items-center gap-1 mb-3 border-b border-slate-200 pb-0">
+            {(['write', 'research', 'analysis', 'revisions'] as EditorTab[]).map(tab => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab);
+                  if (tab === 'revisions') loadRevisions();
+                }}
+                className={`px-4 py-2 text-xs font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${
+                  activeTab === tab
+                    ? 'border-blue-600 text-blue-700 bg-white'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {tab === 'write' ? 'Write' : tab === 'research' ? 'Research' : tab === 'analysis' ? 'AI Analysis' : 'Revisions'}
+                {tab === 'analysis' && analysisData && (
+                  <span className={`ml-1.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full ${
+                    analysisData.overall_score >= 80 ? 'bg-green-100 text-green-700' :
+                    analysisData.overall_score >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                  }`}>{analysisData.overall_score}</span>
+                )}
+              </button>
+            ))}
+            {activeTab === 'write' && (
+              <button
+                type="button"
+                onClick={() => setShowPreview(!showPreview)}
+                className="ml-auto px-3 py-1.5 text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showPreview ? 'Hide Preview' : 'Show Preview'}
+              </button>
             )}
           </div>
 
-          {/* FAQ Editor */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <FAQEditor faqs={faqs} onChange={setFaqs} />
-          </div>
+          {/* ═══ Write Tab ═══ */}
+          {activeTab === 'write' && (
+            <>
+              <div className={`bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 ${showPreview ? 'flex' : ''}`}>
+                <div className={showPreview ? 'w-1/2 border-r border-slate-200 flex flex-col' : 'flex flex-col'}>
+                  <MarkdownToolbar onInsert={handleInsert} />
+                  <textarea
+                    ref={textareaRef}
+                    value={content}
+                    onChange={e => setContent(e.target.value)}
+                    placeholder="Write your content in Markdown..."
+                    className="flex-1 min-h-[500px] px-4 py-3 text-sm font-mono text-slate-800 resize-none focus:outline-none"
+                    style={{ tabSize: 2 }}
+                  />
+                </div>
+                {showPreview && (
+                  <div className="w-1/2 overflow-y-auto" style={{ maxHeight: '600px' }}>
+                    <div className="px-2 py-1.5 border-b border-slate-200 bg-slate-50">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Preview</span>
+                    </div>
+                    <div className="prose prose-sm max-w-none px-5 py-4" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+                  </div>
+                )}
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <FAQEditor faqs={faqs} onChange={setFaqs} />
+              </div>
+            </>
+          )}
+
+          {/* ═══ Research Tab ═══ */}
+          {activeTab === 'research' && <ResearchTab item={item} />}
+
+          {/* ═══ AI Analysis Tab ═══ */}
+          {activeTab === 'analysis' && (
+            <AnalysisTab
+              contentId={contentId}
+              analysisData={analysisData}
+              analyzing={analyzing}
+              onAnalyze={handleAnalyze}
+              onRewrite={handleRewrite}
+              onSuggestSection={handleSuggestSection}
+              rewriting={rewriting}
+              rewriteResult={rewriteResult}
+              onApplyRewrite={applyRewrite}
+              onCloseRewrite={() => setRewriteResult(null)}
+              suggestType={suggestType}
+              setSuggestType={setSuggestType}
+              suggesting={suggesting}
+              suggestResult={suggestResult}
+              onApplySuggest={applySuggest}
+              onCloseSuggest={() => setSuggestResult(null)}
+            />
+          )}
+
+          {/* ═══ Revisions Tab ═══ */}
+          {activeTab === 'revisions' && (
+            <RevisionsTab
+              revisions={revisions}
+              loading={revisionsLoading}
+              onRestore={handleRestoreRevision}
+              onView={setViewingRevision}
+            />
+          )}
         </div>
 
         {/* ─── Sidebar ─── */}
@@ -646,6 +857,64 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
             </div>
           </div>
 
+          {/* Content Score Widget */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Content Score</h4>
+            {analysisData ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('analysis')}
+                className="w-full text-left group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
+                    analysisData.overall_score >= 80 ? 'bg-green-100 text-green-700' :
+                    analysisData.overall_score >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {analysisData.overall_score}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-slate-500">/100</div>
+                    <div className={`text-[10px] font-medium ${
+                      analysisData.publish_recommendation === 'auto_publish' ? 'text-green-600' :
+                      analysisData.publish_recommendation === 'needs_rewrite' ? 'text-orange-600' : 'text-red-600'
+                    }`}>
+                      {analysisData.publish_recommendation === 'auto_publish' ? 'Ready to publish' :
+                       analysisData.publish_recommendation === 'needs_rewrite' ? 'Needs improvement' : 'Manual review'}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 space-y-1">
+                  {Object.entries(analysisData.scores).map(([key, val]) => (
+                    <div key={key} className="flex items-center gap-2">
+                      <span className="text-[10px] text-slate-400 w-16 truncate capitalize">{key.replace('_', ' ')}</span>
+                      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${
+                          (val.score / val.max) >= 0.8 ? 'bg-green-500' :
+                          (val.score / val.max) >= 0.6 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`} style={{ width: `${(val.score / val.max) * 100}%` }} />
+                      </div>
+                      <span className="text-[10px] text-slate-500 w-8 text-right">{val.score}/{val.max}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-blue-500 mt-2 group-hover:underline">View details</p>
+              </button>
+            ) : (
+              <div className="text-center py-2">
+                <p className="text-xs text-slate-400 mb-2">Not analyzed</p>
+                <button
+                  type="button"
+                  onClick={handleAnalyze}
+                  disabled={analyzing}
+                  className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 disabled:opacity-50"
+                >
+                  {analyzing ? 'Analyzing...' : 'Run Analysis'}
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Info */}
           <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-2 text-xs text-slate-500">
             <div>Source: <span className="text-slate-700 capitalize">{item.source_type}</span></div>
@@ -674,6 +943,30 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
           </div>
         </div>
       </div>
+
+      {/* Revision View Modal */}
+      {viewingRevision && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setViewingRevision(null)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Version {viewingRevision.version}</h3>
+                <p className="text-xs text-slate-500">{viewingRevision.change_summary} &middot; {new Date(viewingRevision.created_at).toLocaleString()}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => { handleRestoreRevision(viewingRevision); setViewingRevision(null); }} className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200">Restore</button>
+                <button onClick={() => setViewingRevision(null)} className="p-1.5 text-slate-400 hover:text-slate-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {viewingRevision.title && <h2 className="text-lg font-bold text-slate-900 mb-3">{viewingRevision.title}</h2>}
+              <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: (() => { try { return marked(viewingRevision.content || '', { breaks: true }) as string; } catch { return viewingRevision.content || ''; } })() }} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
@@ -705,6 +998,452 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ─── Research Tab Component ──────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+
+function ResearchTab({ item }: { item: ContentItem }) {
+  const research = item.research_data ? (() => { try { return JSON.parse(item.research_data!); } catch { return null; } })() : null;
+
+  if (!research) {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+        <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <h3 className="text-sm font-medium text-slate-600 mb-1">No Research Data</h3>
+        <p className="text-xs text-slate-400">Generate content with research enabled to see keyword analysis, competitor data, and sources here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Keyword Analysis */}
+      {research.keyword_analysis && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Keyword Analysis</h3>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="text-[10px] text-blue-600 font-medium uppercase">Primary</div>
+              <div className="text-sm font-semibold text-blue-900 mt-1">{research.keyword_analysis.primary || 'N/A'}</div>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-3">
+              <div className="text-[10px] text-slate-500 font-medium uppercase">Intent</div>
+              <div className="text-sm font-medium text-slate-700 mt-1 capitalize">{research.keyword_analysis.search_intent || 'N/A'}</div>
+            </div>
+            <div className="bg-slate-50 rounded-lg p-3">
+              <div className="text-[10px] text-slate-500 font-medium uppercase">Secondary Keywords</div>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {(research.keyword_analysis.secondary || []).map((kw: string, i: number) => (
+                  <span key={i} className="px-2 py-0.5 bg-white border border-slate-200 rounded text-[11px] text-slate-600">{kw}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Competitors */}
+      {research.competitors?.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Competitor Analysis</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-2 px-2 text-slate-500 font-medium">Title</th>
+                  <th className="text-left py-2 px-2 text-slate-500 font-medium w-20">Words</th>
+                  <th className="text-left py-2 px-2 text-slate-500 font-medium">Strengths</th>
+                  <th className="text-left py-2 px-2 text-slate-500 font-medium">Gaps</th>
+                </tr>
+              </thead>
+              <tbody>
+                {research.competitors.map((c: any, i: number) => (
+                  <tr key={i} className="border-b border-slate-100">
+                    <td className="py-2 px-2">
+                      {c.url ? <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{c.title || c.url}</a> : (c.title || 'N/A')}
+                    </td>
+                    <td className="py-2 px-2 text-slate-500">{c.word_count?.toLocaleString() || '-'}</td>
+                    <td className="py-2 px-2 text-slate-600">{c.strengths || '-'}</td>
+                    <td className="py-2 px-2 text-orange-600">{c.gaps || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Strategy */}
+      {research.strategy && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Content Strategy</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-emerald-50 rounded-lg p-3">
+              <div className="text-[10px] text-emerald-600 font-medium uppercase">Angle</div>
+              <p className="text-sm text-emerald-900 mt-1">{research.strategy.angle || 'N/A'}</p>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-3">
+              <div className="text-[10px] text-purple-600 font-medium uppercase">Differentiator</div>
+              <p className="text-sm text-purple-900 mt-1">{research.strategy.differentiator || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sources */}
+      {research.sources?.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Sources ({research.sources.length})</h3>
+          <div className="space-y-2">
+            {research.sources.map((s: any, i: number) => (
+              <div key={i} className="flex items-start gap-2 text-xs">
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium flex-shrink-0 ${
+                  s.type === 'pubmed' ? 'bg-blue-100 text-blue-700' :
+                  s.type === 'internal' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                }`}>{s.type || 'web'}</span>
+                {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{s.title || s.url}</a> : <span className="text-slate-600">{s.title || 'Unnamed'}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PubMed Articles (alternate data shape) */}
+      {research.pubmed_articles?.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">PubMed Sources ({research.pubmed_articles.length})</h3>
+          <div className="space-y-3">
+            {research.pubmed_articles.map((a: any, i: number) => (
+              <div key={i} className="bg-slate-50 rounded-lg p-3">
+                <div className="text-xs font-medium text-slate-800">{a.title}</div>
+                <div className="text-[10px] text-slate-500 mt-1">{a.authors} &middot; {a.journal} ({a.year})</div>
+                {a.pmid && <div className="text-[10px] text-blue-500 mt-0.5">PMID: {a.pmid}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Topics Coverage */}
+      {research.topics_to_cover?.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Topic Coverage</h3>
+          <div className="space-y-1.5">
+            {research.topics_to_cover.map((t: any, i: number) => (
+              <div key={i} className="flex items-center gap-2 text-xs">
+                <span className={`flex-shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] ${
+                  t.covered ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
+                }`}>{t.covered ? '\u2713' : '\u2717'}</span>
+                <span className={t.covered ? 'text-slate-600' : 'text-slate-800 font-medium'}>{t.topic}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ─── AI Analysis Tab Component ───────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+
+const SUGGEST_TYPES = [
+  { value: 'britzmedi_perspective', label: 'BRITZMEDI Perspective' },
+  { value: 'clinical_evidence', label: 'Clinical Evidence' },
+  { value: 'faq_expansion', label: 'FAQ Expansion' },
+  { value: 'comparison', label: 'Product Comparison' },
+];
+
+function AnalysisTab({
+  contentId, analysisData, analyzing, onAnalyze, onRewrite, onSuggestSection,
+  rewriting, rewriteResult, onApplyRewrite, onCloseRewrite,
+  suggestType, setSuggestType, suggesting, suggestResult, onApplySuggest, onCloseSuggest,
+}: {
+  contentId: number;
+  analysisData: AnalysisData | null;
+  analyzing: boolean;
+  onAnalyze: () => void;
+  onRewrite: (instructions?: string) => void;
+  onSuggestSection: (type: string) => void;
+  rewriting: boolean;
+  rewriteResult: any;
+  onApplyRewrite: (result: any) => void;
+  onCloseRewrite: () => void;
+  suggestType: string;
+  setSuggestType: (t: string) => void;
+  suggesting: boolean;
+  suggestResult: string | null;
+  onApplySuggest: (md: string) => void;
+  onCloseSuggest: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {/* Run Analysis button */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onAnalyze}
+          disabled={analyzing}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+        >
+          {analyzing && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+          {analyzing ? 'Analyzing...' : 'Run AI Analysis'}
+        </button>
+        {analysisData && <span className="text-xs text-slate-400">Last analysis available</span>}
+      </div>
+
+      {/* Analysis Results */}
+      {analysisData && (
+        <>
+          {/* Overall Score */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <div className="flex items-center gap-6">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold border-4 ${
+                analysisData.overall_score >= 80 ? 'border-green-400 bg-green-50 text-green-700' :
+                analysisData.overall_score >= 60 ? 'border-yellow-400 bg-yellow-50 text-yellow-700' : 'border-red-400 bg-red-50 text-red-700'
+              }`}>
+                {analysisData.overall_score}
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-slate-900 mb-2">Overall Quality Score</div>
+                <div className="space-y-1.5">
+                  {Object.entries(analysisData.scores).map(([key, val]) => (
+                    <div key={key} className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-500 w-24 capitalize">{key.replace('_', ' ')}</span>
+                      <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            (val.score / val.max) >= 0.8 ? 'bg-green-500' :
+                            (val.score / val.max) >= 0.6 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${(val.score / val.max) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-slate-700 w-12 text-right">{val.score}/{val.max}</span>
+                      <span className="text-[11px]">
+                        {(val.score / val.max) >= 0.8 ? '\u2705' : (val.score / val.max) >= 0.6 ? '\u26a0\ufe0f' : '\u274c'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Score Details */}
+          {Object.entries(analysisData.scores).some(([, val]) => val.details?.length > 0) && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Score Details</h3>
+              <div className="space-y-3">
+                {Object.entries(analysisData.scores).map(([key, val]) => val.details?.length > 0 && (
+                  <div key={key}>
+                    <div className="text-[11px] font-medium text-slate-600 capitalize mb-1">{key.replace('_', ' ')}</div>
+                    <ul className="space-y-0.5">
+                      {val.details.map((d, i) => (
+                        <li key={i} className="text-xs text-slate-500 pl-3 relative before:content-['\u2022'] before:absolute before:left-0 before:text-slate-300">{d}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Critical Issues */}
+          {analysisData.critical_issues?.length > 0 && (
+            <div className="bg-red-50 rounded-xl border border-red-200 p-4">
+              <h3 className="text-xs font-semibold text-red-700 uppercase tracking-wider mb-2">Critical Issues</h3>
+              <ul className="space-y-1">
+                {analysisData.critical_issues.map((issue, i) => (
+                  <li key={i} className="text-xs text-red-700 flex items-start gap-1.5">
+                    <span className="flex-shrink-0 mt-0.5">{'\u274c'}</span>
+                    {issue}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Suggestions */}
+          {analysisData.suggestions?.length > 0 && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Improvement Suggestions</h3>
+              <div className="space-y-2">
+                {[...analysisData.suggestions].sort((a, b) => {
+                  const order: Record<string, number> = { high: 0, medium: 1, low: 2 };
+                  return (order[a.priority] ?? 2) - (order[b.priority] ?? 2);
+                }).map((s, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase flex-shrink-0 ${
+                      s.priority === 'high' ? 'bg-red-100 text-red-700' :
+                      s.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-200 text-slate-600'
+                    }`}>{s.priority}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium text-slate-800">{s.title}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">{s.description}</div>
+                    </div>
+                    {s.auto_fixable && (
+                      <button
+                        onClick={() => onRewrite(s.description)}
+                        disabled={rewriting}
+                        className="px-2 py-1 text-[10px] font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 flex-shrink-0 disabled:opacity-50"
+                      >
+                        Apply Fix
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Actions: Full Rewrite + Suggest Section */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">AI Actions</h3>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={() => onRewrite()}
+            disabled={rewriting}
+            className="px-4 py-2 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {rewriting && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            {rewriting ? 'Rewriting...' : 'Full Rewrite'}
+          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={suggestType}
+              onChange={e => setSuggestType(e.target.value)}
+              className="text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option value="">Suggest Section...</option>
+              {SUGGEST_TYPES.map(t => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => suggestType && onSuggestSection(suggestType)}
+              disabled={!suggestType || suggesting}
+              className="px-3 py-2 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 disabled:opacity-50"
+            >
+              {suggesting ? 'Generating...' : 'Generate'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Rewrite Result */}
+      {rewriteResult && (
+        <div className="bg-white rounded-xl border-2 border-purple-300 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-purple-700 uppercase tracking-wider">Rewrite Result</h3>
+            <div className="flex items-center gap-2">
+              <button onClick={() => onApplyRewrite(rewriteResult)} className="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg">Apply to Editor</button>
+              <button onClick={onCloseRewrite} className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Dismiss</button>
+            </div>
+          </div>
+          <div className="prose prose-sm max-w-none max-h-[400px] overflow-y-auto bg-slate-50 rounded-lg p-4" dangerouslySetInnerHTML={{ __html: (() => { try { return marked(rewriteResult.content || '', { breaks: true }) as string; } catch { return rewriteResult.content || ''; } })() }} />
+        </div>
+      )}
+
+      {/* Suggest Result */}
+      {suggestResult && (
+        <div className="bg-white rounded-xl border-2 border-emerald-300 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Suggested Section</h3>
+            <div className="flex items-center gap-2">
+              <button onClick={() => onApplySuggest(suggestResult)} className="px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Add to Editor</button>
+              <button onClick={onCloseSuggest} className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Dismiss</button>
+            </div>
+          </div>
+          <div className="prose prose-sm max-w-none max-h-[400px] overflow-y-auto bg-slate-50 rounded-lg p-4" dangerouslySetInnerHTML={{ __html: (() => { try { return marked(suggestResult, { breaks: true }) as string; } catch { return suggestResult; } })() }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ─── Revisions Tab Component ─────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+
+function RevisionsTab({
+  revisions, loading, onRestore, onView,
+}: {
+  revisions: RevisionItem[];
+  loading: boolean;
+  onRestore: (rev: RevisionItem) => void;
+  onView: (rev: RevisionItem) => void;
+}) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full" />
+      </div>
+    );
+  }
+
+  if (revisions.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+        <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 className="text-sm font-medium text-slate-600 mb-1">No Revisions Yet</h3>
+        <p className="text-xs text-slate-400">Revisions are created automatically when you save or rewrite content.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200">
+            <th className="text-left py-2.5 px-4 text-slate-500 font-medium">Version</th>
+            <th className="text-left py-2.5 px-4 text-slate-500 font-medium">Change</th>
+            <th className="text-left py-2.5 px-4 text-slate-500 font-medium">Words</th>
+            <th className="text-left py-2.5 px-4 text-slate-500 font-medium">Score</th>
+            <th className="text-left py-2.5 px-4 text-slate-500 font-medium">By</th>
+            <th className="text-left py-2.5 px-4 text-slate-500 font-medium">Date</th>
+            <th className="text-right py-2.5 px-4 text-slate-500 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {revisions.map((rev, i) => (
+            <tr key={rev.id} className={`border-b border-slate-100 ${i === 0 ? 'bg-blue-50/30' : 'hover:bg-slate-50'}`}>
+              <td className="py-2.5 px-4">
+                <span className="font-medium text-slate-800">v{rev.version}</span>
+                {i === 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-medium rounded">Latest</span>}
+              </td>
+              <td className="py-2.5 px-4 text-slate-600 max-w-[200px] truncate">{rev.change_summary || '-'}</td>
+              <td className="py-2.5 px-4 text-slate-500">{rev.word_count?.toLocaleString() || '-'}</td>
+              <td className="py-2.5 px-4">
+                {rev.score != null ? (
+                  <span className={`font-medium ${rev.score >= 80 ? 'text-green-600' : rev.score >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    {rev.score}
+                  </span>
+                ) : '-'}
+              </td>
+              <td className="py-2.5 px-4 text-slate-500 capitalize">{rev.created_by}</td>
+              <td className="py-2.5 px-4 text-slate-400">{new Date(rev.created_at).toLocaleDateString()}</td>
+              <td className="py-2.5 px-4 text-right">
+                <div className="flex items-center justify-end gap-1.5">
+                  <button onClick={() => onView(rev)} className="px-2 py-1 text-[10px] font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded">View</button>
+                  {i > 0 && <button onClick={() => onRestore(rev)} className="px-2 py-1 text-[10px] font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded">Restore</button>}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
