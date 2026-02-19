@@ -5,7 +5,7 @@
     "backgroundImageAlt": "BRITZMEDI Medical Devices",
     "backgroundVideo": "/videos/hero-bg.mp4",
     "backgroundVideoPoster": "/images/hero/herosection_torrrf_modelcut02.webp",
-    "heroImage": "/images/hero/hero-image-1770809689445.webp?t=1770809691256",
+    "heroImage": "/videos/hero-video-1771469365922.mp4?t=1771469371319",
     "heroImageAlt": "BRITZMEDI aesthetic treatment model",
     "overlayOpacity": 50,
     "overlayColor": "dark",
@@ -55,7 +55,8 @@
     "imageOverrides": {
       "torr-rf": "/images/products/torr-rf.webp",
       "ulblanc": "/images/products/ulblanc-1770854887776.webp?t=1770854892040",
-      "newchae-shot": "/images/products/newchae-shot.webp"
+      "newchae-shot": "/images/products/newchae-shot.webp",
+      "lumino-wave": ""
     }
   },
   "whyBritzMedi": {
