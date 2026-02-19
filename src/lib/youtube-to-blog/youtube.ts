@@ -114,11 +114,22 @@ async function fetchPlayerResponseWeb(youtubeId: string): Promise<any> {
     throw new Error('Could not extract ytInitialPlayerResponse from YouTube page');
   }
 
-  // Check playability
+  // Check playability — but be lenient for LOGIN_REQUIRED since
+  // caption tracks may still be present even when playback is blocked
   const status = playerData?.playabilityStatus?.status;
-  if (status === 'ERROR' || status === 'LOGIN_REQUIRED') {
+  if (status === 'ERROR') {
     const reason = playerData?.playabilityStatus?.reason || 'Video unavailable';
     throw new Error(`Video not accessible: ${reason}`);
+  }
+
+  // For LOGIN_REQUIRED: only throw if no captions are available
+  if (status === 'LOGIN_REQUIRED') {
+    const hasCaptions = playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks?.length > 0;
+    if (!hasCaptions) {
+      const reason = playerData?.playabilityStatus?.reason || 'Login required and no captions found';
+      throw new Error(`Video not accessible: ${reason}`);
+    }
+    // Captions found despite LOGIN_REQUIRED — proceed
   }
 
   return playerData;
