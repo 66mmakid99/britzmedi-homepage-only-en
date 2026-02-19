@@ -80,13 +80,14 @@ const langSeoDescriptions: Record<string, string> = {
       <!-- Background: mobile = in-flow 250px block, desktop = absolute fullcover -->
       {heroImageUrl.endsWith('.mp4') ? (
         <video
+          id="hero-video"
           autoplay
           muted
           loop
           playsinline
-          preload="metadata"
+          preload="auto"
           poster={config.hero.backgroundVideoPoster || undefined}
-          class="w-full h-[300px] object-contain sm:absolute sm:inset-0 sm:h-full"
+          class="w-full h-[300px] object-contain sm:absolute sm:inset-0 sm:h-full opacity-0 transition-opacity duration-700"
         >
           <source src={heroImageUrl} type="video/mp4" />
         </video>
@@ -390,5 +391,16 @@ const langSeoDescriptions: Record<string, string> = {
         if (fallback) fallback.classList.remove('hidden');
       });
     });
+
+    // Fade in hero video once enough data is buffered
+    const heroVideo = document.getElementById('hero-video') as HTMLVideoElement | null;
+    if (heroVideo) {
+      const show = () => heroVideo.classList.remove('opacity-0');
+      if (heroVideo.readyState >= 3) {
+        show();
+      } else {
+        heroVideo.addEventListener('canplay', show, { once: true });
+      }
+    }
   </script>
 </BaseLayout>

@@ -3,6 +3,7 @@ import type { HomepageConfig } from '../../data/homepage.types';
 import ImageCropModal from './ImageCropModal';
 import { IMAGE_PRESETS, formatBytes, type OptimizeResult } from './imageUtils';
 import HomepagePreview from './HomepagePreview';
+import { optimizeVideo, formatBytes as formatVideoBytes, type ProgressCallback } from './videoOptimizer';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -175,6 +176,9 @@ function FileUpload({
   const [optimizeInfo, setOptimizeInfo] = useState<string | null>(null);
   const [blobPreview, setBlobPreview] = useState<string | null>(null);
   const [isBlobVideo, setIsBlobVideo] = useState(false);
+  const [compressing, setCompressing] = useState(false);
+  const [compressProgress, setCompressProgress] = useState(0);
+  const [compressMessage, setCompressMessage] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const preset = cropPreset ? IMAGE_PRESETS[cropPreset] : null;
@@ -225,19 +229,42 @@ function FileUpload({
     }
   };
 
-  const handleFileSelected = (file: File) => {
+  const handleFileSelected = async (file: File) => {
     if (preset && file.type.startsWith('image/')) {
       setPendingFile(file);
       setShowCrop(true);
-    } else {
-      // For video files, show immediate blob preview
-      if (file.type.startsWith('video/')) {
-        const blobUrl = URL.createObjectURL(file);
-        setBlobPreview(blobUrl);
-        setIsBlobVideo(true);
-      } else {
-        setIsBlobVideo(false);
+    } else if (file.type.startsWith('video/')) {
+      // Show immediate blob preview
+      const blobUrl = URL.createObjectURL(file);
+      setBlobPreview(blobUrl);
+      setIsBlobVideo(true);
+
+      // Compress video with FFmpeg.wasm before uploading
+      setCompressing(true);
+      setCompressProgress(0);
+      setCompressMessage('Loading FFmpeg...');
+      try {
+        const result = await optimizeVideo(file, (pct, msg) => {
+          setCompressProgress(pct);
+          setCompressMessage(msg);
+        });
+        setCompressing(false);
+        setOptimizeInfo(
+          `${formatVideoBytes(result.originalSize)} → ${formatVideoBytes(result.optimizedSize)} (${(result.durationMs / 1000).toFixed(1)}s)`
+        );
+        // Update preview with compressed blob
+        const compressedBlobUrl = URL.createObjectURL(result.blob);
+        setBlobPreview(compressedBlobUrl);
+        uploadFile(result.file);
+      } catch (err) {
+        console.error('Video compression failed, uploading original:', err);
+        setCompressing(false);
+        setCompressMessage('');
+        // Fallback: upload original if compression fails
+        uploadFile(file);
       }
+    } else {
+      setIsBlobVideo(false);
       uploadFile(file);
     }
   };
@@ -253,6 +280,41 @@ function FileUpload({
     setBlobPreview(blobUrl);
     onUploaded(blobUrl);
     uploadFile(result.file);
+  };
+
+  const handleReoptimize = async () => {
+    if (!currentUrl || compressing || uploading) return;
+    const url = currentUrl.split('?')[0];
+    if (!url.endsWith('.mp4')) return;
+
+    setCompressing(true);
+    setCompressProgress(0);
+    setCompressMessage('Downloading current video...');
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+      const blob = await res.blob();
+      const file = new File([blob], 'reoptimize.mp4', { type: 'video/mp4' });
+
+      const result = await optimizeVideo(file, (pct, msg) => {
+        setCompressProgress(pct);
+        setCompressMessage(msg);
+      });
+
+      setCompressing(false);
+      setOptimizeInfo(
+        `${formatVideoBytes(result.originalSize)} → ${formatVideoBytes(result.optimizedSize)} (${(result.durationMs / 1000).toFixed(1)}s)`
+      );
+      const compressedBlobUrl = URL.createObjectURL(result.blob);
+      setBlobPreview(compressedBlobUrl);
+      setIsBlobVideo(true);
+      uploadFile(result.file);
+    } catch (err) {
+      console.error('Re-optimize failed:', err);
+      setCompressing(false);
+      setCompressMessage('');
+      alert('Re-optimize failed. Please try again.');
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -275,7 +337,18 @@ function FileUpload({
           }`}
           onClick={() => inputRef.current?.click()}
         >
-          {uploading ? (
+          {compressing ? (
+            <div className="space-y-2">
+              <div className="text-sm text-purple-600 font-medium">Optimizing video...</div>
+              <div className="text-xs text-slate-500">{compressMessage}</div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div
+                  className="bg-purple-600 h-2 rounded-full transition-all"
+                  style={{ width: `${compressProgress}%` }}
+                />
+              </div>
+            </div>
+          ) : uploading ? (
             <div className="space-y-2">
               <div className="text-sm text-slate-600">Uploading...</div>
               <div className="w-full bg-slate-200 rounded-full h-2">
@@ -306,6 +379,15 @@ function FileUpload({
                 />
               )}
               <div className="text-xs text-slate-400">Click or drag to replace</div>
+              {(currentUrl?.split('?')[0]?.endsWith('.mp4') || isBlobVideo) && !compressing && !uploading && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleReoptimize(); }}
+                  className="mt-1 text-xs text-purple-600 hover:text-purple-800 underline"
+                >
+                  Re-optimize existing video
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-1">
