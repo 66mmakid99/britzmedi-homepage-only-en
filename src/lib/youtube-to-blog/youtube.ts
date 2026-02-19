@@ -29,7 +29,7 @@ export interface ExtractResult {
   metadata: VideoMetadata;
 }
 
-const USER_AGENT = 'com.google.android.youtube/19.44.38 (Linux; U; Android 14) gzip';
+const USER_AGENT = 'com.google.android.youtube/19.49.36 (Linux; U; Android 14; en_US) gzip';
 
 /**
  * Extract transcript from YouTube video.
@@ -85,7 +85,7 @@ async function fetchPlayerResponse(youtubeId: string): Promise<any> {
       context: {
         client: {
           clientName: 'ANDROID',
-          clientVersion: '19.44.38',
+          clientVersion: '19.49.36',
           androidSdkVersion: 34,
           hl: 'en',
           gl: 'US',
