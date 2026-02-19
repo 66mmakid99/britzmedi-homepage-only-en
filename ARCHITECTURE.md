@@ -56,7 +56,9 @@ src/
 │   │   ├── ContentEditor.tsx
 │   │   ├── LeadsPipeline.tsx
 │   │   ├── AnalyticsDashboard.tsx
-│   │   └── SocialDashboard.tsx
+│   │   ├── SocialDashboard.tsx
+│   │   ├── ContentPipeline.tsx
+│   │   └── AEOMonitor.tsx
 │   ├── blog/                         # Blog UI components
 │   │   ├── BlogCard.astro
 │   │   └── BlogHero.astro
@@ -198,6 +200,19 @@ public/
 | `/api/admin/social/linkedin/callback` | GET | LinkedIn OAuth 콜백 |
 | `/api/admin/social/linkedin/disconnect` | POST | LinkedIn 연결 해제 |
 
+### Content Pipeline APIs
+
+| Path | Method | Description |
+|------|--------|-------------|
+| `/api/admin/content-pipeline/queue` | GET, POST | 파이프라인 큐 조회/키워드 추가 |
+| `/api/admin/content-pipeline/queue/[id]` | DELETE | 큐 아이템 삭제 |
+| `/api/admin/content-pipeline/process/[id]` | POST | 개별 키워드 처리 (연구→생성→분석→품질) |
+| `/api/admin/content-pipeline/process-next` | POST | 다음 대기 키워드 자동 처리 |
+| `/api/admin/content-pipeline/batch` | POST | 키워드 배치 추가 |
+| `/api/admin/content-pipeline/stats` | GET | 파이프라인 통계 |
+| `/api/admin/content-pipeline/logs` | GET | 파이프라인 로그 |
+| `/api/admin/aeo-check` | GET, POST | AEO 모니터 조회/실행 |
+
 ### Homepage Editor APIs
 
 | Path | Method | Description |
@@ -335,6 +350,9 @@ YouTube/File → Blog 작업 큐.
 | `youtube_videos` | YouTube 비디오 처리 추적 |
 | `name_mappings` | 한국어→로마자 이름 매핑 |
 | `activity_log` | 시스템 활동 로그 (migration 0011) |
+| `content_queue` | 콘텐츠 파이프라인 큐 (migration 0015) |
+| `pipeline_logs` | 파이프라인 처리 로그 (migration 0015) |
+| `aeo_checks` | AEO/GEO AI 검색 노출 확인 이력 |
 
 ---
 

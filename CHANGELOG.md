@@ -5,6 +5,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2026-02-20]
+
+### Added
+- Content Pipeline 관리자 UI (`/admin/content-pipeline`)
+  - KPI 카드 (Queued, Processing, Published, Review, Failed, Avg Score)
+  - 키워드 추가 폼 (단일 + 배치 모드)
+  - 큐 테이블 (상태 배지, 프로세스/재시도/삭제 액션, 로그 확장)
+  - Process All 버튼 (순차 실행 + 진행률 표시)
+  - 배치 큐 API (`/api/admin/content-pipeline/batch`)
+- AEO/GEO 모니터링 시스템 (`/admin/aeo-monitor`)
+  - Claude web_search로 10개 쿼리 BRITZMEDI 언급 확인
+  - D1 `aeo_checks` 테이블 (트렌드 추적)
+  - 원형 진행률 그래프 + 결과 테이블 + 트렌드 표시
+  - "Add to Pipeline" 버튼 (미언급 쿼리 → 콘텐츠 파이프라인 연결)
+- 사이드바 네비게이션: Content 그룹에 Pipeline, Marketing 그룹에 AEO Monitor 추가
+
 ## [2026-02-12]
 
 ### Changed

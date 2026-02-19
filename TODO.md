@@ -1,6 +1,6 @@
 # TODO — BRITZMEDI Global Website
 
-Last updated: 2026-02-12
+Last updated: 2026-02-20
 
 ---
 
@@ -41,7 +41,8 @@ Last updated: 2026-02-12
 
 ## Phase 6 (Weeks 21-24): 성과 검증
 
-- [ ] AI 검색 노출 확인 (ChatGPT, Perplexity 언급)
+- [x] AI 검색 노출 확인 (ChatGPT, Perplexity 언급) → AEO Monitor 구축 완료
+- [x] 콘텐츠 자동 파이프라인 UI (`/admin/content-pipeline`) 구축 완료
 - [ ] 월간 방문자 15,000 목표
 - [ ] 월간 리드 100건 목표
 - [ ] 리드→미팅 전환율 30% 목표
