@@ -265,6 +265,17 @@ function selectBestTrack(tracks: CaptionTrack[]): { track: CaptionTrack; languag
 }
 
 /**
+ * Common headers for YouTube timedtext requests.
+ * Includes consent cookie and referer to avoid bot detection on caption URLs.
+ */
+const CAPTION_HEADERS = {
+  'User-Agent': BROWSER_USER_AGENT,
+  'Accept-Language': 'en-US,en;q=0.9',
+  'Referer': 'https://www.youtube.com/',
+  'Cookie': 'CONSENT=PENDING+987; SOCS=CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg',
+};
+
+/**
  * Fetch captions from the timedtext URL.
  * Tries JSON3 format first (easier to parse), falls back to XML.
  */
@@ -274,31 +285,37 @@ async function fetchCaptions(baseUrl: string): Promise<TranscriptSegment[]> {
     const url = new URL(baseUrl);
     url.searchParams.set('fmt', 'json3');
 
-    const res = await fetch(url.toString(), {
-      headers: { 'User-Agent': BROWSER_USER_AGENT },
-    });
+    const res = await fetch(url.toString(), { headers: CAPTION_HEADERS });
 
     if (res.ok) {
-      const data = await res.json() as any;
+      const text = await res.text();
+      // Check for HTML bot detection page
+      if (text.startsWith('<!') || text.startsWith('<html')) {
+        throw new Error('Caption URL returned HTML (possible bot detection)');
+      }
+      const data = JSON.parse(text);
       if (data.events) {
         const segments = parseJson3Captions(data.events);
         if (segments.length > 0) return segments;
       }
     }
-  } catch {
+  } catch (e: any) {
+    // Only fall through for parse errors, rethrow bot detection
+    if (e?.message?.includes('bot detection')) throw e;
     // Fall through to XML
   }
 
   // Fallback: XML format
-  const res = await fetch(baseUrl, {
-    headers: { 'User-Agent': BROWSER_USER_AGENT },
-  });
+  const res = await fetch(baseUrl, { headers: CAPTION_HEADERS });
 
   if (!res.ok) {
     throw new Error(`Failed to fetch captions: HTTP ${res.status}`);
   }
 
   const xml = await res.text();
+  if (xml.startsWith('<!') || xml.startsWith('<html')) {
+    throw new Error('Caption XML URL returned HTML (possible bot detection)');
+  }
   return parseXmlCaptions(xml);
 }
 
