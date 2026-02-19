@@ -240,13 +240,26 @@ async function analyzeContent(apiKey: string, db: D1Database, contentId: number)
     apiKey,
     maxTokens: 4000,
     system: `You are a STRICT content quality auditor for BRITZMEDI. Score content on 5 dimensions (total 100 points):
-1. EVIDENCE-BASED VALUE (35 pts)
-2. UNIQUE PERSPECTIVE (25 pts)
-3. COMPLETENESS (20 pts)
-4. READABILITY (10 pts)
-5. AEO/GEO/SEO (10 pts)
+1. evidence (35 pts max)
+2. uniqueness (25 pts max)
+3. completeness (20 pts max)
+4. readability (10 pts max)
+5. aeo_seo (10 pts max)
 
-Return ONLY valid JSON with scores, overall_score, critical_issues, suggestions, publish_recommendation.`,
+Return ONLY valid JSON using EXACTLY these keys:
+{
+  "scores": {
+    "evidence": { "score": 0, "max": 35, "details": ["..."] },
+    "uniqueness": { "score": 0, "max": 25, "details": ["..."] },
+    "completeness": { "score": 0, "max": 20, "details": ["..."] },
+    "readability": { "score": 0, "max": 10, "details": ["..."] },
+    "aeo_seo": { "score": 0, "max": 10, "details": ["..."] }
+  },
+  "overall_score": 0,
+  "critical_issues": ["..."],
+  "suggestions": [{ "priority": "high|medium|low", "title": "", "description": "", "auto_fixable": false }],
+  "publish_recommendation": "publish|needs_rewrite|needs_review"
+}`,
     userMessage: `Analyze:\nTITLE: ${item.title}\nKEYWORD: ${item.seo_keyword || 'N/A'}\nCONTENT:\n${item.content}\nFAQs:\n${item.faq || '(none)'}`,
   });
 
@@ -302,10 +315,17 @@ Return ONLY valid JSON:
 
 function qualityGate(analysis: AnalysisResult, retryCount: number): GateDecision {
   const { overall_score, scores } = analysis;
-  const evidence = scores.evidence?.score || 0;
-  const uniqueness = scores.uniqueness?.score || 0;
+  // Handle alternate key names from Claude's analysis
+  const evidenceScore = scores.evidence || scores.evidence_based_value;
+  const uniquenessScore = scores.uniqueness || scores.unique_perspective;
+  const evidence = evidenceScore?.score || 0;
+  const uniqueness = uniquenessScore?.score || 0;
 
-  const allAboveMin = Object.values(scores).every((s: any) => s.score >= (s.max * 0.5));
+  const allAboveMin = Object.values(scores).every((s: any) =>
+    typeof s === 'object' && s.score !== undefined && s.max !== undefined
+      ? s.score >= (s.max * 0.5)
+      : true
+  );
 
   if (overall_score >= 85 && evidence >= 28 && uniqueness >= 18 && allAboveMin) {
     return { action: 'AUTO_PUBLISH', reason: `Score ${overall_score}/100 - All criteria met` };

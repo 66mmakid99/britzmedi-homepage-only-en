@@ -59,6 +59,7 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
   const [contentId, setContentId] = useState<number | null>(null);
   const [contentSlug, setContentSlug] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [duplicateJobId, setDuplicateJobId] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -189,9 +190,11 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
       const queueData = await queueRes.json();
 
       if (!queueRes.ok) {
-        // Handle duplicate job
+        // Handle duplicate job — offer to clear and retry
         if (queueRes.status === 409 && queueData.existing_job_id) {
-          throw new Error(`This video already has an active job (${queueData.existing_job_id}). Wait for it to complete or delete it first.`);
+          const err = new Error(`Duplicate job exists (${queueData.existing_status || 'active'}). Clear it to retry.`) as any;
+          err.duplicateJobId = queueData.existing_job_id;
+          throw err;
         }
         throw new Error(queueData.error || 'Failed to create job');
       }
@@ -236,6 +239,11 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
       setPhase('complete');
     } catch (err: any) {
       if (err.name === 'AbortError') return;
+
+      // Capture duplicate job ID for "Clear & Retry" button
+      if (err.duplicateJobId) {
+        setDuplicateJobId(err.duplicateJobId);
+      }
 
       // Find the running step and mark it failed
       setSteps(prev => {
@@ -326,6 +334,24 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
     }
   }, [jobId, steps, runStep, blogPostId, contentId]);
 
+  // ─── Clear duplicate job & retry ────────────────────────────
+
+  const clearAndRetry = useCallback(async () => {
+    if (!duplicateJobId) return;
+
+    try {
+      await fetch(`/api/blog/queue/${duplicateJobId}`, { method: 'DELETE' });
+    } catch {
+      // Ignore delete errors — proceed to retry anyway
+    }
+
+    setDuplicateJobId(null);
+    setGlobalError(null);
+    setPhase('input');
+    // Re-trigger pipeline after a tick so state settles
+    setTimeout(() => startPipeline(), 100);
+  }, [duplicateJobId, startPipeline]);
+
   // ─── Reset ──────────────────────────────────────────────────
 
   const handleClose = useCallback(() => {
@@ -345,6 +371,7 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
     setContentId(null);
     setContentSlug(null);
     setGlobalError(null);
+    setDuplicateJobId(null);
     onClose();
   }, [phase, onClose]);
 
@@ -362,6 +389,7 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
     setContentId(null);
     setContentSlug(null);
     setGlobalError(null);
+    setDuplicateJobId(null);
   }, []);
 
   if (!isOpen) return null;
@@ -479,12 +507,23 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
               {globalError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2">
                   <p className="text-sm text-red-700">{globalError}</p>
-                  <button
-                    onClick={retryPipeline}
-                    className="px-4 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                  >
-                    Retry Failed Step
-                  </button>
+                  <div className="flex gap-2">
+                    {duplicateJobId ? (
+                      <button
+                        onClick={clearAndRetry}
+                        className="px-4 py-1.5 text-xs font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+                      >
+                        Clear Old Job & Retry
+                      </button>
+                    ) : (
+                      <button
+                        onClick={retryPipeline}
+                        className="px-4 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                      >
+                        Retry Failed Step
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 

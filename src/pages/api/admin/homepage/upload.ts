@@ -3,7 +3,7 @@ import { commitFileToGitHub } from '../../../../lib/youtube-to-blog/github';
 
 export const prerender = false;
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
 
 const ALLOWED_IMAGE_TYPES = ['image/webp', 'image/jpeg', 'image/png'];
@@ -32,13 +32,14 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
       });
     }
 
-    const isVideo = mediaType === 'video';
+    const isVideo = mediaType === 'video' || file.type.startsWith('video/');
     const allowedTypes = isVideo ? ALLOWED_VIDEO_TYPES : ALLOWED_IMAGE_TYPES;
     const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
 
     if (!allowedTypes.includes(file.type)) {
+      const allAllowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
       return new Response(JSON.stringify({
-        error: `Invalid file type: ${file.type}. Allowed: ${allowedTypes.join(', ')}`,
+        error: `Invalid file type: ${file.type}. Allowed: ${allAllowed.join(', ')}`,
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },

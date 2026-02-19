@@ -3,6 +3,24 @@
 import type { BlogJob, JobStatus, StepName } from './schemas';
 import { STEP_PROGRESS } from './schemas';
 
+/**
+ * Validate that required tables exist in the database.
+ * Throws a clear error if blog_jobs table is missing.
+ */
+export async function validateTables(db: D1Database): Promise<void> {
+  const result = await db.prepare(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='blog_jobs'"
+  ).first<{ name: string }>();
+
+  if (!result) {
+    throw new Error(
+      'blog_jobs table not found in D1 database. ' +
+      'Run migration 0010_full_schema.sql: ' +
+      'wrangler d1 execute britzmedi-leads --remote --file migrations/0010_full_schema.sql'
+    );
+  }
+}
+
 // Allowed columns for dynamic updates (prevents SQL injection)
 const ALLOWED_EXTRA_COLUMNS = new Set([
   'transcript_text', 'transcript_lang', 'translated_text',

@@ -29,7 +29,7 @@ export interface ExtractResult {
   metadata: VideoMetadata;
 }
 
-const USER_AGENT = 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip';
+const USER_AGENT = 'com.google.android.youtube/19.44.38 (Linux; U; Android 14) gzip';
 
 /**
  * Extract transcript from YouTube video.
@@ -85,8 +85,8 @@ async function fetchPlayerResponse(youtubeId: string): Promise<any> {
       context: {
         client: {
           clientName: 'ANDROID',
-          clientVersion: '19.09.37',
-          androidSdkVersion: 30,
+          clientVersion: '19.44.38',
+          androidSdkVersion: 34,
           hl: 'en',
           gl: 'US',
         },
@@ -95,7 +95,12 @@ async function fetchPlayerResponse(youtubeId: string): Promise<any> {
   });
 
   if (!res.ok) {
-    throw new Error(`YouTube API request failed: HTTP ${res.status}`);
+    const errBody = await res.text().catch(() => '');
+    throw new Error(
+      `YouTube innertube API failed (HTTP ${res.status}). ` +
+      `This may indicate the ANDROID client version is blocked. ` +
+      `Response: ${errBody.slice(0, 200)}`
+    );
   }
 
   const data = await res.json();

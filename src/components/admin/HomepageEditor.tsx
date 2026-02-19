@@ -174,6 +174,7 @@ function FileUpload({
   const [showCrop, setShowCrop] = useState(false);
   const [optimizeInfo, setOptimizeInfo] = useState<string | null>(null);
   const [blobPreview, setBlobPreview] = useState<string | null>(null);
+  const [isBlobVideo, setIsBlobVideo] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const preset = cropPreset ? IMAGE_PRESETS[cropPreset] : null;
@@ -182,9 +183,12 @@ function FileUpload({
     setUploading(true);
     setProgress(0);
 
+    // Auto-detect video files so the server applies the right size limit
+    const effectiveMediaType = file.type.startsWith('video/') ? 'video' : mediaType;
+
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('type', mediaType);
+    formData.append('type', effectiveMediaType);
     formData.append('target', uploadTarget);
     if (productId) formData.append('productId', productId);
 
@@ -226,6 +230,14 @@ function FileUpload({
       setPendingFile(file);
       setShowCrop(true);
     } else {
+      // For video files, show immediate blob preview
+      if (file.type.startsWith('video/')) {
+        const blobUrl = URL.createObjectURL(file);
+        setBlobPreview(blobUrl);
+        setIsBlobVideo(true);
+      } else {
+        setIsBlobVideo(false);
+      }
       uploadFile(file);
     }
   };
@@ -275,7 +287,16 @@ function FileUpload({
             </div>
           ) : (blobPreview || currentUrl) ? (
             <div className="space-y-2">
-              {mediaType === 'video' ? (
+              {(currentUrl?.split('?')[0]?.endsWith('.mp4') || isBlobVideo) ? (
+                <video
+                  src={blobPreview || currentUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="max-h-24 mx-auto rounded object-cover"
+                />
+              ) : mediaType === 'video' && !blobPreview ? (
                 <div className="text-xs text-slate-500 truncate">{currentUrl}</div>
               ) : (
                 <img
@@ -540,7 +561,7 @@ export default function HomepageEditor() {
             {config.hero.backgroundType === 'split' && (
               <>
                 <FileUpload
-                  label="Hero Image or Video (WebP/JPG/PNG/MP4, max 10MB)"
+                  label="Hero Image or Video (WebP/JPG/PNG max 10MB, MP4 max 50MB)"
                   accept="image/webp,image/jpeg,image/png,video/mp4"
                   mediaType={config.hero.heroImage?.split('?')[0]?.endsWith('.mp4') ? 'video' : 'image'}
                   currentUrl={config.hero.heroImage || ''}
@@ -562,7 +583,7 @@ export default function HomepageEditor() {
 
             {config.hero.backgroundType === 'image' && (
               <FileUpload
-                label="Background Image (WebP/JPG/PNG, max 5MB)"
+                label="Background Image (WebP/JPG/PNG, max 10MB)"
                 accept="image/webp,image/jpeg,image/png"
                 mediaType="image"
                 currentUrl={config.hero.backgroundImage}

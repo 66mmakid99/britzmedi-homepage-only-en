@@ -91,15 +91,23 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
+    // Auto-fail stale jobs stuck for 30+ minutes
+    await db.prepare(`
+      UPDATE blog_jobs SET status = 'failed', error_message = 'Auto-cleanup: stuck for 30+ minutes', updated_at = datetime('now')
+      WHERE youtube_id = ? AND status NOT IN ('completed', 'failed', 'pending')
+      AND updated_at < datetime('now', '-30 minutes')
+    `).bind(youtubeId).run();
+
     // Check if video already has a job
     const existing = await db.prepare(
-      'SELECT id, status FROM blog_jobs WHERE youtube_id = ? AND status != ?'
-    ).bind(youtubeId, 'failed').first();
+      'SELECT id, status FROM blog_jobs WHERE youtube_id = ? AND status NOT IN (?, ?)'
+    ).bind(youtubeId, 'failed', 'completed').first();
 
     if (existing) {
       return new Response(JSON.stringify({
         error: 'A job already exists for this video',
         existing_job_id: (existing as any).id,
+        existing_status: (existing as any).status,
       }), {
         status: 409,
         headers: { 'Content-Type': 'application/json' },
