@@ -17,7 +17,7 @@ export async function sendEmail({ apiKey, to, subject, html, from }: SendEmailOp
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: from || 'BRITZMEDI Blog <noreply@britzmedi.com>',
+        from: from || 'BRITZMEDI Global <noreply@britzmedi.com>',
         to: [to],
         subject,
         html,

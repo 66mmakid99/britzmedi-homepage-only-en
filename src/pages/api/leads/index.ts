@@ -206,6 +206,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     }
 
+    // Validate email format
+    if (data.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        return new Response(JSON.stringify({ error: 'Invalid email format' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     // Build enrichment_data with referral_source if provided
     let enrichmentData = null;
     if (data.referral_source) {
@@ -343,7 +354,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         to: data.email,
         subject: 'Thank you for your inquiry - BRITZMEDI',
         html: confirmHtml,
-        from: 'BRITZMEDI <noreply@britzmedi.com>',
+        from: 'BRITZMEDI Global <noreply@britzmedi.com>',
       }).catch(err =>
         console.error('[Leads API] Confirmation email failed:', err)
       );

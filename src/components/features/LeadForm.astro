@@ -262,11 +262,6 @@ const additionalOptions = [
 </div>
 
 <script>
-  // EmailJS Configuration (same as contact form)
-  const EMAILJS_PUBLIC_KEY = 'qZJl-FQP1CJJqGvNp';
-  const EMAILJS_SERVICE_ID = 'service_nbk0net';
-  const EMAILJS_TEMPLATE_ID = 'template_azmskha'; // TODO: Create new template_leadform
-
   // Personal email domains to block for B2B leads
   const personalEmailDomains = [
     'gmail.com', 'googlemail.com',
@@ -293,29 +288,8 @@ const additionalOptions = [
     'mohmal.com', 'tempail.com', 'tempmailaddress.com', 'burnermail.io',
   ];
 
-  // Dynamically load EmailJS SDK
-  function loadEmailJS(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if ((window as any).emailjs) {
-        resolve();
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-      script.onload = () => {
-        (window as any).emailjs.init(EMAILJS_PUBLIC_KEY);
-        resolve();
-      };
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
-
-  // Initialize on page load
-  loadEmailJS().catch(console.error);
-
-  // Validate business email (blocks personal domains)
-  function validateBusinessEmail(email: string): { valid: boolean; message?: string } {
+  // Validate business email (warns on personal domains, blocks disposable)
+  function validateBusinessEmail(email: string): { valid: boolean; warning?: boolean; message?: string } {
     // Basic format check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -324,16 +298,17 @@ const additionalOptions = [
 
     const domain = email.split('@')[1]?.toLowerCase();
 
-    // Check for disposable email domains
+    // Check for disposable email domains — hard block
     if (disposableEmailDomains.includes(domain)) {
       return { valid: false, message: 'Temporary email addresses are not accepted.' };
     }
 
-    // Check for personal email domains
+    // Check for personal email domains — soft warning, allow submission
     if (personalEmailDomains.includes(domain)) {
       return {
-        valid: false,
-        message: 'Please use your business email address. Personal emails (Gmail, Yahoo, etc.) are not accepted.'
+        valid: true,
+        warning: true,
+        message: 'We recommend using your company email for faster response.'
       };
     }
 
@@ -418,13 +393,21 @@ const additionalOptions = [
 
         if (result.valid) {
           emailValid?.classList.remove('hidden');
-          emailError?.classList.add('hidden');
           emailInput.classList.remove('border-red-500');
           emailInput.classList.add('border-green-500');
           isEmailValid = true;
+          // Show warning for personal emails (yellow, not red)
+          if (result.warning && emailError) {
+            emailError.textContent = result.message || '';
+            emailError.classList.remove('hidden', 'text-red-500');
+            emailError.classList.add('text-amber-600');
+          } else {
+            emailError?.classList.add('hidden');
+          }
         } else {
           emailInvalid?.classList.remove('hidden');
-          emailError?.classList.remove('hidden');
+          emailError?.classList.remove('hidden', 'text-amber-600');
+          emailError?.classList.add('text-red-500');
           if (emailError) emailError.textContent = result.message || 'Invalid email';
           emailInput.classList.remove('border-green-500');
           emailInput.classList.add('border-red-500');
@@ -578,30 +561,7 @@ const additionalOptions = [
 
     setLoading(true);
 
-    // Get country name from select
-    const countrySelect = document.getElementById('country') as HTMLSelectElement;
-    const countryName = countrySelect.options[countrySelect.selectedIndex]?.text || country;
-
-    // Get interested in labels
-    const interestedInLabels = interestedIn.map(value => {
-      const checkbox = document.querySelector(`input[name="interestedIn"][value="${value}"]`) as HTMLInputElement;
-      const label = checkbox?.parentElement?.querySelector('span')?.textContent;
-      return label || value;
-    }).join(', ');
-
-    const templateParams = {
-      company_name: companyName,
-      company_website: urlResult.normalizedUrl || companyWebsite,
-      from_name: yourName,
-      job_title: jobTitle,
-      from_email: businessEmail,
-      country: countryName,
-      interested_in: interestedInLabels,
-      submitted_at: new Date().toISOString(),
-    };
-
     try {
-      // 1. Save lead to database via API
       const message = (formData.get('message') as string)?.trim() || '';
       const referralSource = (formData.get('referralSource') as string) || '';
 
@@ -634,23 +594,13 @@ const additionalOptions = [
           setLoading(false);
           return;
         }
-        console.error('API Error:', errorData);
-      } else {
-        console.log('Lead saved to database');
+        throw new Error(errorData.error || 'Failed to submit inquiry');
       }
 
-      // 2. Send notification email via EmailJS
-      await loadEmailJS();
-      const emailResponse = await (window as any).emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-
-      if (emailResponse.status === 200) {
-        showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
-        form.reset();
-        emailStatus?.classList.add('hidden');
-        isEmailValid = false;
-      } else {
-        throw new Error('Failed to send email notification');
-      }
+      showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
+      form.reset();
+      emailStatus?.classList.add('hidden');
+      isEmailValid = false;
     } catch (error) {
       console.error('Submission Error:', error);
       showStatus('error', 'Please try again later or contact us directly via email at contact@britzmedi.co.kr');

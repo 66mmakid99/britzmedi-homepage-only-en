@@ -430,7 +430,12 @@ async function getOrCreateConversation(
   const result = await db.prepare(
     'INSERT INTO chat_conversations (session_id, visitor_ip, visitor_country, visitor_language) VALUES (?, ?, ?, ?)'
   ).bind(sessionId, clientIP, country, language).run();
-  return result.meta.last_row_id as number;
+  const newId = result.meta.last_row_id as number;
+
+  // Flag: this is a brand new conversation (used for first-message notification)
+  (db as any).__newConversation = true;
+
+  return newId;
 }
 
 async function saveMessage(
@@ -481,12 +486,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (body.leadConverted && body.conversationId && db) {
       try {
         await markLeadConverted(db, body.conversationId);
-        // Get conversation info for notification
         const conv = await db.prepare('SELECT visitor_ip, visitor_country FROM chat_conversations WHERE id = ?').bind(body.conversationId).first<any>();
         notifyNewLead(env, {
           type: 'chatbot',
-          country: conv?.visitor_country || undefined,
-          message: 'Chatbot visitor clicked Contact link',
+          message: 'Chatbot visitor converted to lead! Clicked contact link.',
+          country: conv?.visitor_country || 'Unknown',
+          lead_score: 90,
         }).catch(e => console.error('[NOTIFY]', e));
       } catch (e) { /* non-critical */ }
       return new Response(JSON.stringify({ ok: true }), {
@@ -592,6 +597,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
           conversationId = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
           await saveMessage(db, conversationId, 'user', body.message, 0);
           await saveMessage(db, conversationId, 'assistant', fallbackMessage, 0);
+          if ((db as any).__newConversation) {
+            (db as any).__newConversation = false;
+            notifyNewLead(env, {
+              type: 'chatbot',
+              message: body.message.substring(0, 200),
+              country: visitorCountry || 'Unknown',
+              source_url: request.headers.get('referer') || 'https://britzmedi.com',
+            }).catch(() => {});
+          }
         } catch (e) { /* non-critical */ }
       }
       return new Response(JSON.stringify({
@@ -669,6 +683,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
         conversationId = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
         await saveMessage(db, conversationId, 'user', body.message, 0);
         await saveMessage(db, conversationId, 'assistant', assistantMessage, inputTokens + outputTokens);
+
+        // Notify on brand new conversation (first message only)
+        if ((db as any).__newConversation) {
+          (db as any).__newConversation = false;
+          notifyNewLead(env, {
+            type: 'chatbot',
+            message: body.message.substring(0, 200),
+            country: visitorCountry || 'Unknown',
+            source_url: request.headers.get('referer') || 'https://britzmedi.com',
+          }).catch(e => console.error('[NOTIFY]', e));
+        }
       } catch (e) {
         console.error('[CHAT DB] Failed to save conversation:', e);
       }

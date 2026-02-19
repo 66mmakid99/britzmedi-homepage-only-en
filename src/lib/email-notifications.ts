@@ -2,7 +2,7 @@
 // Sends email via Resend (if API key set), always saves to admin_notifications
 
 const ADMIN_EMAIL = 'sh.lee@britzmedi.co.kr';
-const FROM_EMAIL = 'BRITZMEDI <noreply@britzmedi.com>';
+const FROM_EMAIL = 'BRITZMEDI Global <noreply@britzmedi.com>';
 
 export interface LeadNotification {
   type: 'contact_form' | 'chatbot' | 'newsletter';
@@ -75,7 +75,12 @@ async function sendEmailViaResend(apiKey: string, lead: LeadNotification) {
 }
 
 function getSubject(lead: LeadNotification): string {
-  if (lead.type === 'chatbot') return `New Lead (Chatbot) — ${lead.company || 'Visitor'}`;
+  if (lead.type === 'chatbot') {
+    if (lead.lead_score && lead.lead_score >= 80) {
+      return `Chatbot Lead Converted! — ${lead.country || 'Unknown'}`;
+    }
+    return `New Chatbot Conversation — ${lead.country || 'Visitor'}`;
+  }
   if (lead.type === 'newsletter') return `New Subscriber — ${lead.email}`;
   const grade = lead.lead_grade ? ` [${lead.lead_grade}]` : '';
   return `New Lead${grade} — ${lead.company || lead.name || 'Unknown'}`;
