@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AEOMonitor from '../../components/admin/AEOMonitor';
+---
+
+<AdminLayout title="AEO Monitor">
+  <AEOMonitor client:only="react" />
+</AdminLayout>

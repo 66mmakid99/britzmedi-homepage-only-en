@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import ContentPipeline from '../../components/admin/ContentPipeline';
+---
+
+<AdminLayout title="Content Pipeline">
+  <ContentPipeline client:only="react" />
+</AdminLayout>
