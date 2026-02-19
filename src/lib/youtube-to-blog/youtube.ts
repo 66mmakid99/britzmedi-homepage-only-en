@@ -280,7 +280,7 @@ async function fetchCaptions(baseUrl: string): Promise<TranscriptSegment[]> {
 
   // Fallback: XML format
   const res = await fetch(baseUrl, {
-    headers: { 'User-Agent': USER_AGENT },
+    headers: { 'User-Agent': BROWSER_USER_AGENT },
   });
 
   if (!res.ok) {
