@@ -3,6 +3,7 @@ import { sendSlackNotification, sendUrgentLeadAlert } from '../../../lib/slack';
 import { calculateLeadScore as calculateAdvancedScore } from '../../../lib/lead-score';
 import { logActivity } from '../../../lib/activity-log';
 import { sendEmail } from '../../../lib/youtube-to-blog/email';
+import { notifyNewLead } from '../../../lib/email-notifications';
 
 export const prerender = false;
 
@@ -261,6 +262,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
       detail: `New lead: ${data.company_name} (${data.country}) — Grade ${grade}, Score ${score}`,
       ip: clientIP,
     }).catch(() => {});
+
+    // Email + dashboard notification (non-blocking)
+    notifyNewLead(env, {
+      type: source === 'newsletter' ? 'newsletter' : 'contact_form',
+      company: data.company_name,
+      name: data.contact_name,
+      email: data.email,
+      country: data.country,
+      product_interest: Array.isArray(data.interested_products) ? data.interested_products.join(', ') : data.interested_products,
+      message: data.message,
+      lead_score: score,
+      lead_grade: grade,
+    }).catch(e => console.error('[NOTIFY]', e));
 
     // Send Slack notification (non-blocking, failure won't affect response)
     const slackUrl = (env as any)?.SLACK_WEBHOOK_URL as string | undefined;

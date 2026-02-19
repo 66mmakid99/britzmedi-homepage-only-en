@@ -230,6 +230,35 @@ const icons: Record<string, string> = {
           </svg>
         </button>
         <h1 style="font-size:15px; font-weight:600; color:#0f172a; margin:0;">{title}</h1>
+
+        <!-- Notification Bell -->
+        <div style="margin-left:auto; position:relative;" id="notifContainer">
+          <button
+            id="notifBell"
+            onclick="toggleNotifDropdown()"
+            style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border:none; background:none; cursor:pointer; border-radius:8px; color:#64748b; position:relative;"
+            onmouseover="this.style.background='#f1f5f9'"
+            onmouseout="this.style.background='none'"
+            title="Notifications"
+          >
+            <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+            <span id="notifBadge" style="display:none; position:absolute; top:4px; right:4px; width:18px; height:18px; background:#ef4444; color:#fff; font-size:10px; font-weight:700; border-radius:50%; line-height:18px; text-align:center;">0</span>
+          </button>
+          <div id="notifDropdown" style="display:none; position:absolute; right:0; top:42px; width:360px; background:#fff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.15); border:1px solid #e2e8f0; z-index:100; overflow:hidden;">
+            <div style="padding:12px 16px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-size:14px; font-weight:600; color:#0f172a;">Notifications</span>
+              <button onclick="markAllRead()" style="font-size:12px; color:#2563eb; background:none; border:none; cursor:pointer;">Mark all read</button>
+            </div>
+            <div id="notifList" style="max-height:320px; overflow-y:auto;">
+              <div style="padding:24px; text-align:center; color:#94a3b8; font-size:13px;">Loading...</div>
+            </div>
+            <div style="padding:10px 16px; border-top:1px solid #e2e8f0; text-align:center;">
+              <a href="/admin/leads" style="font-size:12px; color:#2563eb; text-decoration:none; font-weight:500;">View All Leads &rarr;</a>
+            </div>
+          </div>
+        </div>
       </header>
 
       <!-- Content -->
@@ -252,6 +281,111 @@ const icons: Record<string, string> = {
         sidebar.classList.toggle('collapsed');
       }
     }
+
+    // Notification bell
+    let _notifOpen = false;
+
+    function toggleNotifDropdown() {
+      _notifOpen = !_notifOpen;
+      document.getElementById('notifDropdown').style.display = _notifOpen ? 'block' : 'none';
+      if (_notifOpen) loadNotifications();
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+      const container = document.getElementById('notifContainer');
+      if (container && !container.contains(e.target) && _notifOpen) {
+        _notifOpen = false;
+        document.getElementById('notifDropdown').style.display = 'none';
+      }
+    });
+
+    async function loadNotifications() {
+      try {
+        const res = await fetch('/api/admin/notifications?limit=5');
+        if (!res.ok) return;
+        const data = await res.json();
+        updateNotifBadge(data.unread_count);
+        renderNotifList(data.notifications || []);
+      } catch (e) { /* silent */ }
+    }
+
+    function updateNotifBadge(count) {
+      const badge = document.getElementById('notifBadge');
+      if (!badge) return;
+      if (count > 0) {
+        badge.style.display = 'block';
+        badge.textContent = count > 9 ? '9+' : count;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function renderNotifList(items) {
+      const list = document.getElementById('notifList');
+      if (!list) return;
+      if (items.length === 0) {
+        list.innerHTML = '<div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">No notifications yet.</div>';
+        return;
+      }
+      list.innerHTML = items.map(function(n) {
+        const unread = n.is_read === 0;
+        const bg = unread ? '#f0f9ff' : '#fff';
+        var d = document.createElement('div');
+        d.textContent = n.title || '';
+        var safeTitle = d.innerHTML;
+        d.textContent = n.message || '';
+        var safeMsg = d.innerHTML;
+        var ago = _notifTimeAgo(n.created_at);
+        return '<a href="' + (n.link || '/admin/leads') + '" onclick="markNotifRead(' + n.id + ')" style="display:block;padding:10px 16px;border-bottom:1px solid #f1f5f9;text-decoration:none;background:' + bg + ';">' +
+          '<div style="display:flex;align-items:center;gap:6px;">' +
+            (unread ? '<span style="width:6px;height:6px;border-radius:50%;background:#2563eb;flex-shrink:0;"></span>' : '') +
+            '<span style="font-size:13px;font-weight:' + (unread ? '600' : '400') + ';color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + safeTitle + '</span>' +
+          '</div>' +
+          (safeMsg ? '<div style="font-size:12px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + safeMsg + '</div>' : '') +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px;">' + ago + '</div>' +
+        '</a>';
+      }).join('');
+    }
+
+    function markNotifRead(id) {
+      fetch('/api/admin/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id }),
+      }).catch(function() {});
+    }
+
+    async function markAllRead() {
+      await fetch('/api/admin/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'read-all' }),
+      }).catch(function() {});
+      updateNotifBadge(0);
+      loadNotifications();
+    }
+
+    function _notifTimeAgo(dateStr) {
+      if (!dateStr) return '';
+      var now = new Date();
+      var date = new Date(dateStr + (dateStr.endsWith('Z') ? '' : 'Z'));
+      var diff = Math.floor((now - date) / 1000);
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      return Math.floor(diff / 86400) + 'd ago';
+    }
+
+    // Fetch unread count on page load + poll every 30s
+    function _fetchUnreadCount() {
+      fetch('/api/admin/notifications?unread=true&limit=1')
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) { if (d) updateNotifBadge(d.unread_count); })
+        .catch(function() {});
+    }
+    _fetchUnreadCount();
+    setInterval(_fetchUnreadCount, 30000);
   </script>
 </body>
 </html>

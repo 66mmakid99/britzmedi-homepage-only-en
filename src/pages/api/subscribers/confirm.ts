@@ -3,6 +3,7 @@
 
 import type { APIRoute } from 'astro';
 import { sendEmail } from '../../../lib/youtube-to-blog/email';
+import { notifyNewLead } from '../../../lib/email-notifications';
 
 export const prerender = false;
 
@@ -44,6 +45,15 @@ export const GET: APIRoute = async ({ request, locals, redirect }) => {
         confirmation_token = NULL
       WHERE id = ?
     `).bind(subscriber.id).run();
+
+    // Notify admin of new subscriber
+    const env = runtime?.env;
+    await notifyNewLead(env, {
+      type: 'newsletter',
+      email: subscriber.email,
+      name: subscriber.name || undefined,
+      source_url: request.url,
+    });
 
     // Send welcome email
     if (resendKey) {

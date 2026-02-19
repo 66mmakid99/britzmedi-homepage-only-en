@@ -38,7 +38,7 @@ export const GET: APIRoute = async ({ locals }) => {
       posts, publishedPosts,
       contentItems, contentPublished, contentDraft,
       subs, weeklySubs,
-      activities, leadsByStatusRaw,
+      activities, leadsByStatusRaw, recentLeadsRaw,
     ] = await Promise.all([
       safeCount('SELECT COUNT(*) as c FROM leads'),
       safeCount('SELECT COUNT(*) as c FROM leads WHERE created_at >= ?', [weekAgo]),
@@ -57,6 +57,7 @@ export const GET: APIRoute = async ({ locals }) => {
       safeCount('SELECT COUNT(*) as c FROM subscribers WHERE subscribed_at >= ?', [weekAgo]),
       db.prepare('SELECT id, type, detail, created_at FROM activity_log ORDER BY created_at DESC LIMIT 8').all().catch(() => ({ results: [] })),
       db.prepare('SELECT status, COUNT(*) as c FROM leads GROUP BY status').all().catch(() => ({ results: [] })),
+      db.prepare('SELECT id, company_name, contact_name, email, country, product_interest, lead_score, lead_grade, status, source, created_at FROM leads ORDER BY created_at DESC LIMIT 5').all().catch(() => ({ results: [] })),
     ]);
 
     // Parse leads by status
@@ -128,6 +129,7 @@ export const GET: APIRoute = async ({ locals }) => {
       totalSubscribers: subs,
       weeklySubscribers: weeklySubs,
       recentActivities: activities.results || [],
+      recentLeads: recentLeadsRaw.results || [],
       lastHealthStatus,
       lastHealthAt,
       leadsByStatus,

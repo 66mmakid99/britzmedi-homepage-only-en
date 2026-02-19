@@ -6,6 +6,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 // Import knowledge base at build time (fs.readFileSync doesn't work on Cloudflare Workers)
 import knowledgeBaseContent from '../../data/chatbot-knowledge.md?raw';
+import { notifyNewLead } from '../../lib/email-notifications';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
@@ -478,7 +479,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Handle lead conversion signal (early return)
     if (body.leadConverted && body.conversationId && db) {
-      try { await markLeadConverted(db, body.conversationId); } catch (e) { /* non-critical */ }
+      try {
+        await markLeadConverted(db, body.conversationId);
+        // Get conversation info for notification
+        const conv = await db.prepare('SELECT visitor_ip, visitor_country FROM chat_conversations WHERE id = ?').bind(body.conversationId).first<any>();
+        notifyNewLead(env, {
+          type: 'chatbot',
+          country: conv?.visitor_country || undefined,
+          message: 'Chatbot visitor clicked Contact link',
+        }).catch(e => console.error('[NOTIFY]', e));
+      } catch (e) { /* non-critical */ }
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }

@@ -66,6 +66,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     .pipeline-bar { display: flex; gap: 2px; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; }
     .pipeline-seg { height: 100%; min-width: 2px; transition: width 0.3s; }
 
+    .lead-card {
+      display: flex; align-items: center; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9; font-size: 13px;
+    }
+    .lead-card:last-child { border-bottom: none; }
+    .lead-avatar {
+      width: 36px; height: 36px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-weight: 700;
+      font-size: 14px; color: #fff; flex-shrink: 0;
+    }
+    .lead-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+    }
+
     @media (max-width: 1024px) { .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 480px) { .dash-kpi-grid { grid-template-columns: 1fr; } }
   </style>
@@ -231,6 +246,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </div>
           </div>
 
+          <div class="dash-section" style="margin-bottom:16px;">
+            <div class="dash-section-title" style="justify-content:space-between;">
+              <span style="display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Recent Leads
+              </span>
+              <a href="/admin/leads" style="font-size:12px;color:#2563eb;text-decoration:none;font-weight:500;">View All &rarr;</a>
+            </div>
+            ${renderRecentLeads(data.recentLeads || [])}
+          </div>
+
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
             <div class="dash-section">
               <div class="dash-section-title">
@@ -275,6 +301,49 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       return Math.floor(diff / 86400) + 'd ago';
     }
 
+    function renderRecentLeads(leads) {
+      if (!leads || leads.length === 0) {
+        return '<div style="color:#94a3b8;font-size:13px;padding:12px 0;">No leads yet.</div>';
+      }
+
+      const avatarColors = ['#2563eb','#7c3aed','#0891b2','#059669','#d97706'];
+      const sourceBadge = { contact_form: { label: 'Form', bg: '#dbeafe', color: '#1d4ed8' }, chatbot: { label: 'Chatbot', bg: '#ede9fe', color: '#6d28d9' }, newsletter: { label: 'Newsletter', bg: '#e0f2fe', color: '#0369a1' } };
+      const gradeBadge = { A: { bg: '#dcfce7', color: '#15803d' }, B: { bg: '#dbeafe', color: '#1d4ed8' }, C: { bg: '#fef3c7', color: '#a16207' }, D: { bg: '#fef2f2', color: '#b91c1c' } };
+
+      return leads.map(function(lead, i) {
+        var initial = (lead.company_name || lead.contact_name || lead.email || '?').charAt(0).toUpperCase();
+        var bgColor = avatarColors[i % avatarColors.length];
+        var name = escapeHtml(lead.company_name || lead.contact_name || lead.email || 'Unknown');
+        var sub = [];
+        if (lead.contact_name && lead.company_name) sub.push(escapeHtml(lead.contact_name));
+        if (lead.country) sub.push(escapeHtml(lead.country));
+        if (lead.product_interest) sub.push(escapeHtml(lead.product_interest));
+        var subText = sub.join(' \u00b7 ');
+
+        var badges = '';
+        var src = sourceBadge[lead.source] || sourceBadge.contact_form;
+        badges += '<span class="lead-badge" style="background:' + src.bg + ';color:' + src.color + ';">' + src.label + '</span> ';
+        if (lead.lead_grade) {
+          var gb = gradeBadge[lead.lead_grade] || gradeBadge.D;
+          badges += '<span class="lead-badge" style="background:' + gb.bg + ';color:' + gb.color + ';">' + lead.lead_grade + '</span>';
+        }
+
+        return '<div class="lead-card">' +
+          '<div class="lead-avatar" style="background:' + bgColor + ';">' + initial + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>' +
+            (subText ? '<div style="font-size:12px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + subText + '</div>' : '') +
+          '</div>' +
+          '<div style="text-align:right;flex-shrink:0;">' +
+            '<div>' + badges + '</div>' +
+            '<div style="font-size:11px;color:#94a3b8;margin-top:3px;">' + timeAgo(lead.created_at) + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
     loadDashboard();
+    // Auto-refresh every 30 seconds
+    setInterval(loadDashboard, 30000);
   </script>
 </AdminLayout>
