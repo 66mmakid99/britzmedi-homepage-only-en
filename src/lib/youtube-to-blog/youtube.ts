@@ -34,49 +34,66 @@ const ANDROID_USER_AGENT = 'com.google.android.youtube/19.49.36 (Linux; U; Andro
 
 /**
  * Extract transcript from YouTube video.
- * Tries WEB HTML scraping first (more resilient to bot detection),
- * then falls back to ANDROID innertube API.
+ * Strategy chain:
+ *  1. WEB HTML scraping (fetch watch page, extract captions)
+ *  2. Innertube get_transcript endpoint (direct transcript API)
+ *  3. ANDROID innertube player API (legacy fallback)
+ * Each approach may fail due to YouTube's bot detection on CF Workers.
  */
 export async function extractTranscript(youtubeId: string): Promise<ExtractResult> {
-  // Try WEB approach first (scrape watch page HTML)
-  let playerResponse: any;
-  let fetchMethod = 'web';
+  const errors: string[] = [];
 
+  // ── Strategy 1: WEB page scraping ──
   try {
-    playerResponse = await fetchPlayerResponseWeb(youtubeId);
-  } catch (webErr: any) {
-    console.warn('[YouTube] WEB extraction failed, trying ANDROID:', webErr.message);
-    fetchMethod = 'android';
-    // Fall back to ANDROID innertube API
-    playerResponse = await fetchPlayerResponseAndroid(youtubeId);
+    const playerResponse = await fetchPlayerResponseWeb(youtubeId);
+    const captionTracks = extractCaptionTracks(playerResponse);
+    if (captionTracks.length > 0) {
+      const { track, language } = selectBestTrack(captionTracks);
+      const segments = await fetchCaptions(track.baseUrl);
+      if (segments && segments.length > 0) {
+        const transcript = segments.map(s => s.text).join(' ');
+        const metadata = extractMetadata(playerResponse);
+        return { transcript, language, metadata };
+      }
+      errors.push('WEB: captions found but content empty');
+    } else {
+      errors.push('WEB: no caption tracks');
+    }
+  } catch (e: any) {
+    errors.push(`WEB: ${e.message}`);
   }
 
-  // Extract caption tracks
-  const captionTracks = extractCaptionTracks(playerResponse);
-
-  if (captionTracks.length === 0) {
-    throw new Error(
-      'No captions available for this video. The video must have subtitles or auto-generated captions enabled.'
-    );
+  // ── Strategy 2: Innertube get_transcript ──
+  try {
+    const result = await fetchTranscriptViaInnertube(youtubeId);
+    if (result) return result;
+    errors.push('get_transcript: no transcript returned');
+  } catch (e: any) {
+    errors.push(`get_transcript: ${e.message}`);
   }
 
-  // Select best caption track
-  const { track, language } = selectBestTrack(captionTracks);
-
-  // Fetch and parse the captions
-  const segments = await fetchCaptions(track.baseUrl);
-
-  if (!segments || segments.length === 0) {
-    throw new Error('Caption track was found but contained no text segments.');
+  // ── Strategy 3: ANDROID innertube player ──
+  try {
+    const playerResponse = await fetchPlayerResponseAndroid(youtubeId);
+    const captionTracks = extractCaptionTracks(playerResponse);
+    if (captionTracks.length > 0) {
+      const { track, language } = selectBestTrack(captionTracks);
+      const segments = await fetchCaptions(track.baseUrl);
+      if (segments && segments.length > 0) {
+        const transcript = segments.map(s => s.text).join(' ');
+        const metadata = extractMetadata(playerResponse);
+        return { transcript, language, metadata };
+      }
+    }
+    errors.push('ANDROID: captions empty or unavailable');
+  } catch (e: any) {
+    errors.push(`ANDROID: ${e.message}`);
   }
 
-  // Combine segments into full text
-  const transcript = segments.map(s => s.text).join(' ');
-
-  // Extract metadata
-  const metadata = extractMetadata(playerResponse);
-
-  return { transcript, language, metadata };
+  throw new Error(
+    `All extraction strategies failed. YouTube may be blocking server requests. ` +
+    `Details: ${errors.join(' | ')}`
+  );
 }
 
 /**
@@ -133,6 +150,134 @@ async function fetchPlayerResponseWeb(youtubeId: string): Promise<any> {
   }
 
   return playerData;
+}
+
+/**
+ * Fetch transcript via YouTube's innertube get_transcript endpoint.
+ * This is a separate endpoint from the player API and may have
+ * different bot detection rules.
+ */
+async function fetchTranscriptViaInnertube(youtubeId: string): Promise<ExtractResult | null> {
+  // Encode video ID as protobuf params for get_transcript
+  const params = encodeTranscriptParams(youtubeId);
+
+  const res = await fetch('https://www.youtube.com/youtubei/v1/get_transcript', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': BROWSER_USER_AGENT,
+      'Cookie': 'CONSENT=PENDING+987; SOCS=CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg',
+    },
+    body: JSON.stringify({
+      context: {
+        client: {
+          clientName: 'WEB',
+          clientVersion: '2.20250101.00.00',
+          hl: 'en',
+          gl: 'US',
+        },
+      },
+      params,
+    }),
+  });
+
+  if (!res.ok) return null;
+
+  const data = await res.json() as any;
+
+  // Navigate the response structure to find transcript segments
+  const actions = data?.actions;
+  if (!actions?.length) return null;
+
+  const renderer = actions[0]?.updateEngagementPanelAction?.content
+    ?.transcriptRenderer?.content?.transcriptSearchPanelRenderer;
+  if (!renderer) return null;
+
+  const segmentList = renderer?.body?.transcriptSegmentListRenderer?.initialSegments;
+  if (!segmentList?.length) return null;
+
+  const segments: TranscriptSegment[] = [];
+  for (const seg of segmentList) {
+    const sr = seg?.transcriptSegmentRenderer;
+    if (!sr) continue;
+    const text = sr.snippet?.runs?.map((r: any) => r.text).join('') || '';
+    if (text.trim()) {
+      segments.push({
+        text: text.trim(),
+        offset: parseInt(sr.startMs || '0', 10),
+        duration: parseInt(sr.endMs || '0', 10) - parseInt(sr.startMs || '0', 10),
+      });
+    }
+  }
+
+  if (segments.length === 0) return null;
+
+  const transcript = segments.map(s => s.text).join(' ');
+
+  // Try to get metadata from the page (basic fallback)
+  let metadata: VideoMetadata = {
+    title: 'YouTube Video',
+    channelName: 'Unknown',
+    channelId: '',
+    description: '',
+    duration: '',
+    publishedAt: '',
+  };
+
+  // Try to get real metadata via oEmbed (CORS-friendly, no bot detection)
+  try {
+    const oembed = await fetch(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${youtubeId}&format=json`,
+      { headers: { 'User-Agent': BROWSER_USER_AGENT } }
+    );
+    if (oembed.ok) {
+      const odata = await oembed.json() as any;
+      metadata.title = odata.title || metadata.title;
+      metadata.channelName = odata.author_name || metadata.channelName;
+    }
+  } catch { /* ignore oEmbed failures */ }
+
+  // Detect language from first few segments
+  const language = detectLanguage(transcript.slice(0, 200));
+
+  return { transcript, language, metadata };
+}
+
+/**
+ * Encode video ID into protobuf params for get_transcript endpoint.
+ * Format: field1=videoId, field2={field1={field1=videoId}}
+ */
+function encodeTranscriptParams(videoId: string): string {
+  const encoder = new TextEncoder();
+  const idBytes = encoder.encode(videoId);
+  const len = idBytes.length;
+
+  // Inner-most: field1 = videoId  → 0x0A <len> <bytes>
+  const inner1 = new Uint8Array([0x0A, len, ...idBytes]);
+  // Middle: field1 = inner1       → 0x0A <len> <inner1>
+  const inner2 = new Uint8Array([0x0A, inner1.length, ...inner1]);
+  // Outer: field1=videoId + field2=inner2
+  const outer = new Uint8Array([
+    0x0A, len, ...idBytes,
+    0x12, inner2.length, ...inner2,
+  ]);
+
+  // Base64 encode
+  let binary = '';
+  for (const byte of outer) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+/**
+ * Simple language detection based on character ranges.
+ */
+function detectLanguage(text: string): string {
+  if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) return 'ja';
+  if (/[\uac00-\ud7af]/.test(text)) return 'ko';
+  if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+  if (/[\u0600-\u06ff]/.test(text)) return 'ar';
+  if (/[\u0e00-\u0e7f]/.test(text)) return 'th';
+  return 'en';
 }
 
 /**
