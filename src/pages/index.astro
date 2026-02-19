@@ -87,7 +87,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
   <!-- Hero Section with Video/Image/Gradient/Split Background Support -->
   {config.hero.backgroundType === 'split' ? (
     <!-- Hero: Full-bleed background image/video + gradient overlay -->
-    <section id="section-hero" class="relative overflow-hidden">
+    <section id="section-hero" class={`relative overflow-hidden ${heroImageUrl.endsWith('.mp4') ? 'bg-slate-900' : ''}`}>
       <!-- Background: mobile = in-flow 250px block, desktop = absolute fullcover -->
       {heroImageUrl.endsWith('.mp4') ? (
         <video
@@ -97,7 +97,7 @@ const techProductLinks: Record<string, { href: string; label: string }> = {
           playsinline
           preload="metadata"
           poster={config.hero.backgroundVideoPoster || undefined}
-          class="w-full h-[250px] object-cover object-center sm:absolute sm:inset-0 sm:h-full"
+          class="w-full h-[300px] object-contain sm:absolute sm:inset-0 sm:h-full"
         >
           <source src={heroImageUrl} type="video/mp4" />
         </video>
