@@ -29,18 +29,29 @@ export interface ExtractResult {
   metadata: VideoMetadata;
 }
 
-const USER_AGENT = 'com.google.android.youtube/19.49.36 (Linux; U; Android 14; en_US) gzip';
+const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+const ANDROID_USER_AGENT = 'com.google.android.youtube/19.49.36 (Linux; U; Android 14; en_US) gzip';
 
 /**
  * Extract transcript from YouTube video.
- * Uses YouTube innertube API with ANDROID client (bypasses consent pages).
- * Works reliably in Cloudflare Workers environment.
+ * Tries WEB HTML scraping first (more resilient to bot detection),
+ * then falls back to ANDROID innertube API.
  */
 export async function extractTranscript(youtubeId: string): Promise<ExtractResult> {
-  // Step 1: Get player response via innertube API
-  const playerResponse = await fetchPlayerResponse(youtubeId);
+  // Try WEB approach first (scrape watch page HTML)
+  let playerResponse: any;
+  let fetchMethod = 'web';
 
-  // Step 2: Extract caption tracks
+  try {
+    playerResponse = await fetchPlayerResponseWeb(youtubeId);
+  } catch (webErr: any) {
+    console.warn('[YouTube] WEB extraction failed, trying ANDROID:', webErr.message);
+    fetchMethod = 'android';
+    // Fall back to ANDROID innertube API
+    playerResponse = await fetchPlayerResponseAndroid(youtubeId);
+  }
+
+  // Extract caption tracks
   const captionTracks = extractCaptionTracks(playerResponse);
 
   if (captionTracks.length === 0) {
@@ -49,10 +60,10 @@ export async function extractTranscript(youtubeId: string): Promise<ExtractResul
     );
   }
 
-  // Step 3: Select best caption track
+  // Select best caption track
   const { track, language } = selectBestTrack(captionTracks);
 
-  // Step 4: Fetch and parse the captions
+  // Fetch and parse the captions
   const segments = await fetchCaptions(track.baseUrl);
 
   if (!segments || segments.length === 0) {
@@ -62,23 +73,113 @@ export async function extractTranscript(youtubeId: string): Promise<ExtractResul
   // Combine segments into full text
   const transcript = segments.map(s => s.text).join(' ');
 
-  // Step 5: Extract metadata
+  // Extract metadata
   const metadata = extractMetadata(playerResponse);
 
   return { transcript, language, metadata };
 }
 
 /**
- * Fetch player response via YouTube innertube API (ANDROID client).
- * ANDROID client is used because WEB client requires consent cookies
- * and returns UNPLAYABLE from server environments like Cloudflare Workers.
+ * Fetch player response by scraping the YouTube watch page HTML.
+ * Extracts ytInitialPlayerResponse from the page source.
+ * More resilient to bot detection than innertube API since it looks like
+ * a regular browser page load.
  */
-async function fetchPlayerResponse(youtubeId: string): Promise<any> {
+async function fetchPlayerResponseWeb(youtubeId: string): Promise<any> {
+  const url = `https://www.youtube.com/watch?v=${youtubeId}`;
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': BROWSER_USER_AGENT,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9',
+      // Bypass YouTube consent/cookie wall
+      'Cookie': 'CONSENT=PENDING+987; SOCS=CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg',
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch YouTube page (HTTP ${res.status})`);
+  }
+
+  const html = await res.text();
+
+  // Check for bot detection page
+  if (html.includes('Sign in to confirm') || html.includes('confirm you\'re not a bot')) {
+    throw new Error('YouTube bot detection on watch page');
+  }
+
+  // Extract ytInitialPlayerResponse from the page HTML
+  const playerData = extractJsonVarFromHtml(html, 'ytInitialPlayerResponse');
+  if (!playerData) {
+    throw new Error('Could not extract ytInitialPlayerResponse from YouTube page');
+  }
+
+  // Check playability
+  const status = playerData?.playabilityStatus?.status;
+  if (status === 'ERROR' || status === 'LOGIN_REQUIRED') {
+    const reason = playerData?.playabilityStatus?.reason || 'Video unavailable';
+    throw new Error(`Video not accessible: ${reason}`);
+  }
+
+  return playerData;
+}
+
+/**
+ * Extract a JSON variable assignment from HTML source.
+ * Handles nested braces correctly using bracket counting.
+ */
+function extractJsonVarFromHtml(html: string, varName: string): any {
+  // Try multiple patterns YouTube uses
+  const patterns = [
+    `var ${varName} = `,
+    `${varName} = `,
+  ];
+
+  for (const pattern of patterns) {
+    const idx = html.indexOf(pattern);
+    if (idx === -1) continue;
+
+    const start = idx + pattern.length;
+    if (html[start] !== '{') continue;
+
+    // Count braces to find the end of the JSON object
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+
+    for (let i = start; i < Math.min(start + 2_000_000, html.length); i++) {
+      if (esc) { esc = false; continue; }
+      const c = html[i];
+      if (c === '\\' && inStr) { esc = true; continue; }
+      if (c === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (c === '{') depth++;
+      else if (c === '}') {
+        depth--;
+        if (depth === 0) {
+          try {
+            return JSON.parse(html.slice(start, i + 1));
+          } catch {
+            break; // JSON parse failed, try next pattern
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Fetch player response via YouTube innertube API (ANDROID client).
+ * Used as fallback when WEB scraping fails.
+ */
+async function fetchPlayerResponseAndroid(youtubeId: string): Promise<any> {
   const res = await fetch('https://www.youtube.com/youtubei/v1/player', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'User-Agent': USER_AGENT,
+      'User-Agent': ANDROID_USER_AGENT,
     },
     body: JSON.stringify({
       videoId: youtubeId,
@@ -163,7 +264,7 @@ async function fetchCaptions(baseUrl: string): Promise<TranscriptSegment[]> {
     url.searchParams.set('fmt', 'json3');
 
     const res = await fetch(url.toString(), {
-      headers: { 'User-Agent': USER_AGENT },
+      headers: { 'User-Agent': BROWSER_USER_AGENT },
     });
 
     if (res.ok) {

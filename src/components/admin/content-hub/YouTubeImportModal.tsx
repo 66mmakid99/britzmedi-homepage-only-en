@@ -4,7 +4,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { YouTubePipelineProgress } from './YouTubePipelineProgress';
 
-type Phase = 'input' | 'processing' | 'complete';
+type Phase = 'input' | 'processing' | 'manual_paste' | 'complete';
 
 interface StepState {
   status: 'pending' | 'running' | 'completed' | 'failed';
@@ -44,6 +44,12 @@ function getInitialSteps(): Record<string, StepState> {
   return steps;
 }
 
+function isBotDetectionError(msg: string): boolean {
+  if (!msg) return false;
+  const lower = msg.toLowerCase();
+  return lower.includes('bot') || lower.includes('sign in') || lower.includes('not accessible');
+}
+
 export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
   const [phase, setPhase] = useState<Phase>('input');
   const [url, setUrl] = useState('');
@@ -60,6 +66,8 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
   const [contentSlug, setContentSlug] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [duplicateJobId, setDuplicateJobId] = useState<string | null>(null);
+  const [manualTranscript, setManualTranscript] = useState('');
+  const [manualVideoTitle, setManualVideoTitle] = useState('');
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -246,6 +254,14 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
         setDuplicateJobId(err.duplicateJobId);
       }
 
+      // Check if this is a bot detection error on the extract step
+      const isBotError = steps.extract?.status === 'running' && isBotDetectionError(err.message);
+      if (isBotError) {
+        setSteps(prev => ({ ...prev, extract: { status: 'failed', error: 'Bot detection' } }));
+        setPhase('manual_paste');
+        return;
+      }
+
       // Find the running step and mark it failed
       setSteps(prev => {
         const next = { ...prev };
@@ -259,7 +275,7 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
       });
       setGlobalError(err.message || 'Pipeline failed');
     }
-  }, [url, tone, wordCount, runStep, blogPostId]);
+  }, [url, tone, wordCount, runStep, blogPostId, steps]);
 
   // ─── Retry from failed step ─────────────────────────────────
 
@@ -353,6 +369,84 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
     setTimeout(() => startPipeline(), 100);
   }, [duplicateJobId, startPipeline]);
 
+  // ─── Manual transcript paste (fallback for bot detection) ──
+
+  const submitManualTranscript = useCallback(async () => {
+    if (!jobId || !manualTranscript.trim()) return;
+
+    setPhase('processing');
+    setGlobalError(null);
+    const abort = new AbortController();
+    abortRef.current = abort;
+
+    try {
+      // Send manual transcript to the extract step
+      setSteps(prev => ({ ...prev, extract: { status: 'running' } }));
+      setOverallProgress(STEP_PROGRESS.extract[0]);
+
+      const extractRes = await fetch(`/api/blog/queue/${jobId}/step/extract`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          manual_transcript: manualTranscript.trim(),
+          video_title: manualVideoTitle.trim() || undefined,
+        }),
+        signal: abort.signal,
+      });
+      const extractData = await extractRes.json().catch(() => ({}));
+      if (!extractRes.ok || !extractData.success) {
+        throw new Error(extractData.error || 'Manual extract failed');
+      }
+      setSteps(prev => ({ ...prev, extract: { status: 'completed' } }));
+      setOverallProgress(STEP_PROGRESS.extract[1]);
+
+      // Continue pipeline from translate step
+      let generateResult: any = null;
+      for (const stepName of STEP_NAMES.slice(1)) { // skip extract
+        if (abort.signal.aborted) break;
+        const result = await runStep(stepName, jobId, abort.signal);
+        if (stepName === 'generate' && result?.blog_post_id) {
+          setBlogPostId(result.blog_post_id);
+          generateResult = result;
+        }
+        if (stepName === 'finalize' && result?.blog_post_id) {
+          setBlogPostId(result.blog_post_id);
+        }
+      }
+
+      // Bridge: import into content_items
+      const postId = generateResult?.blog_post_id || blogPostId;
+      if (postId) {
+        const bridgeRes = await fetch('/api/admin/content-hub/import-youtube', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ blog_post_id: postId, job_id: jobId }),
+          signal: abort.signal,
+        });
+        const bridgeData = await bridgeRes.json();
+        if (bridgeRes.ok && bridgeData.content_id) {
+          setContentId(bridgeData.content_id);
+          setContentSlug(bridgeData.slug || null);
+        }
+      }
+
+      setPhase('complete');
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      setSteps(prev => {
+        const next = { ...prev };
+        for (const name of STEP_NAMES) {
+          if (next[name].status === 'running') {
+            next[name] = { status: 'failed', error: err.message };
+            break;
+          }
+        }
+        return next;
+      });
+      setGlobalError(err.message || 'Pipeline failed');
+    }
+  }, [jobId, manualTranscript, manualVideoTitle, runStep, blogPostId]);
+
   // ─── Reset ──────────────────────────────────────────────────
 
   const handleClose = useCallback(() => {
@@ -373,6 +467,8 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
     setContentSlug(null);
     setGlobalError(null);
     setDuplicateJobId(null);
+    setManualTranscript('');
+    setManualVideoTitle('');
     onClose();
   }, [phase, onClose]);
 
@@ -391,6 +487,8 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
     setContentSlug(null);
     setGlobalError(null);
     setDuplicateJobId(null);
+    setManualTranscript('');
+    setManualVideoTitle('');
   }, []);
 
   if (!isOpen) return null;
@@ -536,6 +634,62 @@ export function YouTubeImportModal({ isOpen, onClose, onComplete }: Props) {
                   Cancel
                 </button>
               )}
+            </div>
+          )}
+
+          {/* ─── Manual Paste Phase (bot detection fallback) ─── */}
+          {phase === 'manual_paste' && (
+            <div className="space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p className="text-sm text-amber-800 font-medium">YouTube blocked automatic extraction</p>
+                <p className="text-xs text-amber-600 mt-1">
+                  Paste the video transcript below. You can get it from YouTube: open the video,
+                  click "..." &rarr; "Show transcript", then copy all text.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Video Title (optional)</label>
+                <input
+                  type="text"
+                  value={manualVideoTitle}
+                  onChange={e => setManualVideoTitle(e.target.value)}
+                  placeholder="e.g. How HIFU Technology Works"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">
+                  Transcript <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={manualTranscript}
+                  onChange={e => setManualTranscript(e.target.value)}
+                  placeholder="Paste the full video transcript here..."
+                  rows={8}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-y"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  {manualTranscript.length > 0 ? `${manualTranscript.length.toLocaleString()} characters` : 'Min 50 characters'}
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={submitManualTranscript}
+                  disabled={manualTranscript.trim().length < 50}
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Continue with Pasted Transcript
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
 

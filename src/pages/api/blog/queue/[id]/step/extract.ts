@@ -7,7 +7,7 @@ import type { APIRoute } from 'astro';
 import { extractTranscript } from '../../../../../../lib/youtube-to-blog/youtube';
 import { getJob, updateJobStatus, failJob } from '../../../../../../lib/youtube-to-blog/queue';
 
-export const POST: APIRoute = async ({ params, locals }) => {
+export const POST: APIRoute = async ({ params, locals, request }) => {
   const { id } = params;
   if (!id) {
     return new Response(JSON.stringify({ error: 'Job ID required' }), {
@@ -38,13 +38,47 @@ export const POST: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    // Update status to extracting
+    // Check for manual transcript (fallback when bot detection blocks server)
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch { /* no body or invalid JSON — proceed with auto-extract */ }
+
     await updateJobStatus(db, id, 'extracting', 5);
 
-    // Extract transcript
+    if (body?.manual_transcript) {
+      // Manual paste mode: user provided transcript from browser
+      const transcript = body.manual_transcript.trim();
+      if (transcript.length < 50) {
+        return new Response(JSON.stringify({ error: 'Transcript too short (min 50 chars)' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      await updateJobStatus(db, id, 'extracting', 20, {
+        transcript_text: transcript,
+        transcript_lang: body.language || 'en',
+        video_title: body.video_title || job.youtube_id,
+        channel_name: body.channel_name || 'Unknown',
+        channel_id: null,
+      });
+
+      return new Response(JSON.stringify({
+        success: true,
+        language: body.language || 'en',
+        transcript_length: transcript.length,
+        video_title: body.video_title || job.youtube_id,
+        channel_name: body.channel_name || 'Unknown',
+        manual: true,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Auto-extract transcript from YouTube
     const result = await extractTranscript(job.youtube_id);
 
-    // Update job with results
     await updateJobStatus(db, id, 'extracting', 20, {
       transcript_text: result.transcript,
       transcript_lang: result.language,
