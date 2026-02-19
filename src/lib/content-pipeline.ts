@@ -2,6 +2,12 @@
 // Orchestrates PubMed research, Claude AI generation, quality analysis, and gate decisions
 
 import { callClaude, callClaudeWithWebSearch, extractJson, countWords } from './claude-api';
+import { getProductContext } from './britzmedi-products';
+import {
+  factCheckProducts, autoCorrectProducts, validateCitations,
+  checkSelfPromotion, checkComparisonTable, checkFirstParagraph,
+  insertInternalLinks, getAuthorByAngle
+} from './content-postprocess';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -167,20 +173,14 @@ async function claudeGenerate(apiKey: string, keyword: string, research: Researc
     `- ${a.title} (${a.authors}, ${a.journal}, ${a.year}) [PMID: ${a.pmid}]\n  Abstract: ${a.abstract?.substring(0, 500)}`
   ).join('\n');
 
+  const productContext = getProductContext();
+
   const response = await callClaude({
     apiKey,
     model: 'claude-sonnet-4-20250514',
     maxTokens: 8000,
-    system: 'You are a medical content writer for BRITZMEDI. Write evidence-based, high-quality content. Return ONLY valid JSON.',
+    system: `You are a medical content writer for BRITZMEDI. Write evidence-based, high-quality content. Return ONLY valid JSON.\n\n${productContext}`,
     userMessage: `Write a comprehensive blog article for BRITZMEDI's website.
-
-COMPANY: BRITZMEDI - Korean aesthetic medical device manufacturer
-CEO: Lee Shinjae, Founded: 2017, Seongnam, Gyeonggi-do, South Korea
-Products:
-- TORR RF: Multi-Wave RF workstation, FDA 510(k) cleared, simultaneous multi-frequency
-- ULBLANC: Multi-frequency ultrasound workstation
-- NEWCHAE SHOT: Needle-free mesotherapy device
-- LUMINO WAVE: LED phototherapy (coming soon)
 
 TARGET KEYWORD: "${keyword}"
 
@@ -194,17 +194,24 @@ CRITICAL RULES:
 1. EVERY major claim MUST cite a specific study: (Author et al., Journal, Year, key finding with numbers)
 2. Include AT LEAST 3 PubMed references with concrete data points
 3. Go BEYOND surface-level — explain biological mechanisms
-4. Include a "BRITZMEDI Perspective" section that ONLY BRITZMEDI could write
+4. Include a contextual section where BRITZMEDI's perspective adds value (do NOT make it a dedicated "BRITZMEDI" heading)
 5. If you cannot find solid evidence for a claim, DO NOT make the claim
 6. Include practical clinical insights
 7. NEVER write generic filler paragraphs
+8. Include a markdown comparison table (4+ rows) comparing relevant products/options
+
+PRODUCT FACT RULES (violating = immediate rejection):
+9. PRODUCT ACCURACY: ONLY use the product information provided in the system prompt. If you are unsure about a BRITZMEDI product detail, DO NOT GUESS — omit it entirely.
+10. NEWCHAE SHOT: This is a PERSONAL HOME-USE beauty device, NOT a medical device. NEVER describe it as an injection system, mesotherapy device, micro-injection device, needle-based system, FDA cleared, or requiring medical professional operation. It uses RF technology adapted from TORR RF for consumer home use. That's all.
+11. MEDICAL DEVICE CLAIMS: Only TORR RF can be described as an FDA 510(k) cleared medical device. Do NOT extend FDA claims to other products.
+12. UNKNOWN INFORMATION: If specific details about a BRITZMEDI product are not in the provided product data, write "Details available upon request at britzmedi.com/contact" — NEVER fabricate specifications, clinical data, or capabilities.
 
 STRUCTURE:
 - Title (keyword-optimized)
 - TL;DR (3-4 sentences)
-- Introduction (hook with data point)
+- Introduction (hook with data point + definition)
 - Main sections with H2/H3 (evidence-based)
-- BRITZMEDI Perspective section
+- Comparison table (4+ rows, BRITZMEDI as one among equals)
 - Clinical Takeaways
 - FAQ section (5-7 questions)
 - References list
@@ -245,6 +252,15 @@ async function analyzeContent(apiKey: string, db: D1Database, contentId: number)
 3. completeness (20 pts max)
 4. readability (10 pts max)
 5. aeo_seo (10 pts max)
+
+Additional blocking criteria (any = critical_issue):
+- If NEWCHAE SHOT is described as a medical device, injection system, or needle device → blocking_issue
+- If FDA clearance is claimed for any product other than TORR RF → blocking_issue
+- If there is a dedicated H2/H3 about BRITZMEDI → blocking_issue
+- If BRITZMEDI/TORR RF mentioned more than 8 times → blocking_issue
+- If no comparison table → completeness -15 points
+- If first paragraph lacks definition + number → aeo_seo -20 points (can go negative, cap at 0)
+- If fake citations detected (references without matching PMIDs) → blocking_issue
 
 Return ONLY valid JSON using EXACTLY these keys:
 {
@@ -438,6 +454,96 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
     await logPipeline(env, contentId, queueId, 'content_generated', {
       word_count: countWords(contentResult.content || ''),
       title: contentResult.title,
+    });
+
+    // ═══ Step 2.5: Post-processing ═══
+    await updateQueueStatus(env, queueId, 'postprocessing');
+
+    // 1: Product fact-check (highest priority)
+    const factCheck = factCheckProducts(contentResult.content || '');
+    if (factCheck.hasCriticalError) {
+      contentResult.content = await autoCorrectProducts(apiKey, contentResult.content, factCheck.corrections);
+      await logPipeline(env, contentId, queueId, 'product_facts_corrected', {
+        corrections: factCheck.corrections.length,
+        issues: factCheck.issues
+      });
+
+      // Re-check after correction
+      const recheck = factCheckProducts(contentResult.content);
+      if (recheck.hasCriticalError) {
+        await updateQueueStatus(env, queueId, 'failed');
+        await env.DB.prepare('UPDATE content_queue SET error_message = ? WHERE id = ?')
+          .bind('Product fact-check failed after auto-correction. Manual review required.', queueId).run();
+        await logPipeline(env, null, queueId, 'fact_check_failed', { issues: recheck.issues });
+        throw new Error('Product fact-check failed after auto-correction');
+      }
+    }
+
+    // 2: Citation validation
+    const validPMIDs = (researchData.pubmed_articles || [])
+      .map((a: PubMedArticle) => a.pmid)
+      .filter(Boolean);
+    const citationResult = validateCitations(contentResult.content, validPMIDs);
+    contentResult.content = citationResult.cleaned;
+    if (citationResult.removed.length > 0) {
+      await logPipeline(env, contentId, queueId, 'fake_citations_removed', {
+        removed_count: citationResult.removed.length,
+        removed: citationResult.removed.slice(0, 10)
+      });
+    }
+
+    // 3: Self-promotion check + fix
+    const promoCheck = checkSelfPromotion(contentResult.content);
+    if (promoCheck.hasDedicatedSection) {
+      const fixResponse = await callClaude({
+        apiKey,
+        maxTokens: 8000,
+        system: 'You are an editor. Return the full revised article.',
+        userMessage: `Remove any H2/H3 heading containing "BRITZMEDI". Redistribute that content into other sections naturally. BRITZMEDI should only appear in comparison contexts. Return the full revised article.\n\nArticle:\n${contentResult.content}`
+      });
+      contentResult.content = fixResponse;
+      await logPipeline(env, contentId, queueId, 'promo_section_removed', {});
+    }
+
+    // 4: Comparison table check + auto add
+    if (!checkComparisonTable(contentResult.content)) {
+      const tableResponse = await callClaude({
+        apiKey,
+        maxTokens: 8000,
+        system: 'You are a content editor. Return the full article with the table added.',
+        userMessage: `Add a markdown comparison table to this article. 4+ rows comparing relevant products/options. BRITZMEDI TORR RF as one row among equals. Columns: Product, Manufacturer, Technology, Key Feature, Target. Insert at logical position. Return full article.\n\nArticle:\n${contentResult.content}`
+      });
+      contentResult.content = tableResponse;
+      await logPipeline(env, contentId, queueId, 'table_added', {});
+    }
+
+    // 5: First paragraph check + fix
+    const fpCheck = checkFirstParagraph(contentResult.content);
+    if (!fpCheck.isAIExtractable) {
+      const fixFP = await callClaude({
+        apiKey,
+        maxTokens: 8000,
+        system: 'You are a content editor. Return the full article with only the first paragraph rewritten.',
+        userMessage: `Rewrite ONLY the first paragraph. Rules: Start with clear definition + specific number/statistic. Make it AI-extractable as featured snippet. Return full article.\n\nArticle:\n${contentResult.content}`
+      });
+      contentResult.content = fixFP;
+      await logPipeline(env, contentId, queueId, 'first_para_fixed', {});
+    }
+
+    // 6: Internal links
+    contentResult.content = insertInternalLinks(contentResult.content);
+
+    // 7: Author by angle
+    const author = getAuthorByAngle(queue.content_angle || 'general');
+
+    // Update content_items with post-processed content + author
+    await env.DB.prepare('UPDATE content_items SET content = ?, author = ?, updated_at = ? WHERE id = ?')
+      .bind(contentResult.content, author, new Date().toISOString(), contentId).run();
+
+    await logPipeline(env, contentId, queueId, 'postprocessing_complete', {
+      fact_issues: factCheck.issues.length,
+      citations_removed: citationResult.removed.length,
+      promo_issues: promoCheck.issues.length,
     });
 
     // ═══ Step 3: AI Analysis ═══

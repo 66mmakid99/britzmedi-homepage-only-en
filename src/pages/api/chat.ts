@@ -819,14 +819,14 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
 
   if (lowerMessage.includes('newchae') || lowerMessage.includes('home device') || lowerMessage.includes('뉴채') || lowerMessage.includes('홈디바이스') || lowerMessage.includes('홈케어')) {
     return korean
-      ? "NEWCHAE SHOT은 RF, EMS, ELP 3가지 기술을 결합한 혁신적인 홈뷰티 디바이스입니다. 임상 결과 피부 밀도 +128% 향상, 모공 크기 -26% 감소 효과를 입증했습니다. /contact에서 문의해 주세요."
-      : "NEWCHAE SHOT is our innovative 3-in-1 home beauty device combining RF, EMS, and ELP technologies. Clinical studies show +128% skin density improvement and -26% pore size reduction. Perfect for at-home professional skincare routines!";
+      ? "NEWCHAE SHOT은 TORR RF 핸드피스 기술을 개인용으로 적용한 홈뷰티 디바이스입니다. 의료기기가 아닌 개인용 미용기기로, 전문가 없이도 가정에서 안전하게 사용할 수 있습니다. /contact에서 문의해 주세요."
+      : "NEWCHAE SHOT is a personal home-use beauty device that applies TORR RF handpiece technology for consumer skincare. It is NOT a medical device — it's designed for safe, at-home use without medical supervision. For more details, visit /contact.";
   }
 
-  if (lowerMessage.includes('lumino') || lowerMessage.includes('laser') || lowerMessage.includes('루미노') || lowerMessage.includes('레이저')) {
+  if (lowerMessage.includes('lumino') || lowerMessage.includes('led') || lowerMessage.includes('루미노') || lowerMessage.includes('엘이디')) {
     return korean
-      ? "LUMINO WAVE (LSR-10)는 초음파와 레이저 기술을 융합한 차세대 디바이스입니다. 현재 MFDS 인증 심사 중이며 2026년 하반기 출시 예정입니다. /contact에서 업데이트를 받아보세요."
-      : "LUMINO WAVE (LSR-10) is our upcoming convergence device combining ultrasound and laser technologies. It's currently under MFDS review and scheduled for release in H2 2026. Sign up for updates on our contact page!";
+      ? "LUMINO WAVE는 다중 파장 LED 광치료 디바이스입니다. 클리닉과 메디컬 스파를 위한 전문 장비입니다. /contact에서 문의해 주세요."
+      : "LUMINO WAVE is a professional LED phototherapy device with multiple wavelengths, designed for aesthetic clinics and medical spas. For details, visit /contact.";
   }
 
   // CEO / representative (KO + EN)

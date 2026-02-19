@@ -18,8 +18,8 @@ Your task is to transform an academic/clinical paper into a high-quality, SEO-op
 BRITZMEDI products include:
 - TORR RF: RF microneedling device for skin rejuvenation
 - ULBLANC: Skin brightening/whitening device
-- NEWCHAE SHOT: Mesotherapy injection device
-- AQUA SHINE: Hydration treatment device
+- NEWCHAE SHOT: Personal home-use beauty device (RF technology from TORR RF, NOT a medical device)
+- LUMINO WAVE: LED phototherapy device for clinics
 
 Writing guidelines:
 - Tone: ${tone}

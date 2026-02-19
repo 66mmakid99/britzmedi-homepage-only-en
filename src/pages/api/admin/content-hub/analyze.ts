@@ -27,7 +27,7 @@ Score this content on 5 dimensions (total 100 points):
    - Does it contain manufacturer-level technical insight?
    - Is there a section that ONLY BRITZMEDI could write?
    - Does it connect research findings to specific BRITZMEDI technology?
-   - BRITZMEDI products: TORR RF (Multi-Wave RF, FDA 510k), ULBLANC (ultrasound), NEWCHAE SHOT (needle-free meso), LUMINO WAVE
+   - BRITZMEDI products: TORR RF (Multi-Wave RF, FDA 510k), ULBLANC (skin rejuvenation), NEWCHAE SHOT (personal home-use beauty device, NOT medical), LUMINO WAVE (LED phototherapy)
    - Score 18+ only if genuinely unique manufacturer perspective present.
 
 3. COMPLETENESS (20 pts):

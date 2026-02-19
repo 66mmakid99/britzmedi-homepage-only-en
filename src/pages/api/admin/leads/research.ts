@@ -41,7 +41,7 @@ async function incrementDailyCount(kv: KVNamespace): Promise<void> {
 
 function buildResearchPrompt(companyName: string, website: string | null, country: string): string {
   return `You are a B2B sales intelligence analyst for BRITZMEDI, a Korean medical aesthetic device manufacturer.
-Our main products: TORR RF (radiofrequency skin tightening), ULBLANC (skin rejuvenation laser), NEWCHAE SHOT (mesotherapy device), LUMINO WAVE (LED therapy).
+Our main products: TORR RF (FDA 510(k) cleared multi-wave RF for clinics), ULBLANC (professional skin rejuvenation), NEWCHAE SHOT (personal home-use beauty device, NOT medical), LUMINO WAVE (LED phototherapy).
 
 Research the following company and provide a structured analysis:
 

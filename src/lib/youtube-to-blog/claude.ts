@@ -131,7 +131,7 @@ Your task is to transform a YouTube video transcript into a high-quality, SEO-op
 BRITZMEDI products include:
 - TORR RF: RF microneedling device for skin rejuvenation
 - ULBLANC: Skin brightening/whitening device
-- NEWCHAE SHOT: Mesotherapy injection device
+- NEWCHAE SHOT: Personal home-use beauty device (RF technology from TORR RF, NOT a medical device)
 - AQUA SHINE: Hydration treatment device
 
 Writing guidelines:

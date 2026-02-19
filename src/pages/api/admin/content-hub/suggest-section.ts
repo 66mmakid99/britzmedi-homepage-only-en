@@ -15,7 +15,7 @@ Connect the research findings in this article to BRITZMEDI's specific technology
 BRITZMEDI products:
 - TORR RF: Multi-Wave RF workstation with simultaneous multi-frequency, FDA 510(k) cleared
 - ULBLANC: Multi-frequency ultrasound workstation with i-Booster technology
-- NEWCHAE SHOT: Needle-free mesotherapy device
+- NEWCHAE SHOT: Personal home-use beauty device (RF technology from TORR RF, NOT a medical device)
 - LUMINO WAVE: LED phototherapy (coming soon)
 
 Explain WHY BRITZMEDI chose specific technical approaches based on the evidence.
