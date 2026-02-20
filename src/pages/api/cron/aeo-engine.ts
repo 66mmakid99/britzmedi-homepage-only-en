@@ -38,32 +38,39 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const mode = body.mode || 'full';
 
-  // Full mode → background via ctx.waitUntil (results in aeo_cycles table)
-  if (mode === 'full' && ctx?.waitUntil) {
+  // Long-running modes → background via ctx.waitUntil (results in aeo_cycles table)
+  const bgModes = ['full', 'produce'];
+  if (bgModes.includes(mode) && ctx?.waitUntil) {
     ctx.waitUntil((async () => {
       try {
-        await runFullCycle(env);
+        let result;
+        if (mode === 'full') {
+          result = await runFullCycle(env);
+        } else {
+          result = await produce(env, body.max_items || 1);
+        }
+        console.log(`[Cron AEO] ${mode} bg completed:`, JSON.stringify(result).substring(0, 300));
       } catch (e: any) {
-        console.error('[Cron AEO] full cycle error:', e.message);
+        console.error(`[Cron AEO] ${mode} bg error:`, e.message);
         try {
           await env.DB.prepare(
-            `INSERT INTO aeo_cycles (phase, status, data, created_at) VALUES ('full', 'error', ?, datetime('now'))`
-          ).bind(JSON.stringify({ error: e.message })).run();
+            `INSERT INTO aeo_cycles (phase, status, data, created_at) VALUES (?, 'error', ?, datetime('now'))`
+          ).bind(mode, JSON.stringify({ error: e.message })).run();
         } catch {}
       }
     })());
 
     return new Response(JSON.stringify({
       success: true,
-      message: 'AEO full cycle started in background',
-      mode: 'full',
+      message: `AEO ${mode} cycle started in background`,
+      mode,
       check_status: 'GET /api/admin/aeo-engine/status',
     }), {
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  // Individual modes → synchronous (each fits within ~100s worker limit)
+  // Short modes (diagnose, plan, track, analyze) → synchronous
   try {
     let result;
 
