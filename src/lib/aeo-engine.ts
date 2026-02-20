@@ -41,22 +41,14 @@ export interface AEODiagnosisResult {
 }
 
 export async function diagnose(env: Env): Promise<AEODiagnosisResult> {
+  // 5 core queries — kept small for CF 100s wall-time limit
+  // Each Claude web_search call takes 10-20s, 5 in parallel ≈ 20s
   const diagnosticQueries = [
-    'What is TORR RF device?',
-    'TORR RF reviews and specifications',
     'Best RF skin tightening machines for clinics 2025',
     'Korean aesthetic medical device manufacturers',
-    'What are the best radiofrequency devices for body contouring?',
-    'Multi-wave RF technology aesthetic devices',
     'RF device comparison for aesthetic clinics',
     'Where to buy professional RF device for clinic',
-    'RF aesthetic device distributor Asia',
-    'Korean beauty device manufacturer B2B',
-    'How does multi-frequency RF work for skin tightening?',
     'RF vs HIFU vs laser for skin rejuvenation comparison',
-    'FDA cleared Korean aesthetic devices',
-    'Korean medical device export companies',
-    'Aesthetic device market Korea 2025',
   ];
 
   const results: AEODiagnosisResult['queries'] = [];
