@@ -1,4 +1,4 @@
-// Horizontal kanban pipeline with 5 status columns
+// Horizontal kanban pipeline with collapsible empty columns
 
 import { ContentCard } from './ContentCard';
 
@@ -51,11 +51,38 @@ export function PipelineView({ posts, qualityMap, selectedId, onSelectPost }: Pi
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: '400px' }}>
+    <div className="flex gap-3 overflow-x-auto pb-4" style={{ minHeight: '400px' }}>
       {COLUMNS.map(col => {
         const columnPosts = grouped[col.status] || [];
+        const isEmpty = columnPosts.length === 0;
+
+        // Collapsed empty column
+        if (isEmpty) {
+          return (
+            <div
+              key={col.status}
+              className="flex-shrink-0 flex flex-col items-center gap-2 pt-1"
+              style={{ width: '48px' }}
+            >
+              <div className={`w-2.5 h-2.5 rounded-full ${col.headerColor}`} />
+              <span
+                className="text-xs font-medium text-slate-400"
+                style={{ writingMode: 'vertical-lr' }}
+              >
+                {col.label}
+              </span>
+              <span className="text-xs text-slate-300">0</span>
+            </div>
+          );
+        }
+
+        // Full column with cards
         return (
-          <div key={col.status} className="flex-shrink-0 w-56">
+          <div
+            key={col.status}
+            className="flex-shrink-0"
+            style={{ minWidth: '240px', maxWidth: '280px', width: '240px' }}
+          >
             {/* Column header */}
             <div className="flex items-center gap-2 mb-3 px-1">
               <div className={`w-2.5 h-2.5 rounded-full ${col.headerColor}`} />
@@ -67,23 +94,19 @@ export function PipelineView({ posts, qualityMap, selectedId, onSelectPost }: Pi
 
             {/* Cards */}
             <div className="space-y-2 min-h-[200px] bg-slate-50 rounded-xl p-2 border border-slate-100">
-              {columnPosts.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-8">No posts</p>
-              ) : (
-                columnPosts.map(post => {
-                  const q = qualityMap[post.id];
-                  return (
-                    <ContentCard
-                      key={post.id}
-                      post={post}
-                      qualityScore={q?.score}
-                      qualityGrade={q?.grade}
-                      onClick={() => onSelectPost(post)}
-                      isSelected={selectedId === post.id}
-                    />
-                  );
-                })
-              )}
+              {columnPosts.map(post => {
+                const q = qualityMap[post.id];
+                return (
+                  <ContentCard
+                    key={post.id}
+                    post={post}
+                    qualityScore={q?.score}
+                    qualityGrade={q?.grade}
+                    onClick={() => onSelectPost(post)}
+                    isSelected={selectedId === post.id}
+                  />
+                );
+              })}
             </div>
           </div>
         );
