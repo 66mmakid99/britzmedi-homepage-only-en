@@ -9,8 +9,9 @@ export interface ClaudeCallOptions {
 }
 
 /**
- * Call Claude API (non-streaming). Returns accumulated text.
- * Non-streaming is reliable on Cloudflare Workers — fetch wait time doesn't count as CPU time.
+ * Call Claude API with streaming SSE. Returns accumulated text.
+ * Streaming keeps CF Workers alive during long-running generation
+ * by actively reading the response stream (prevents idle timeout).
  */
 export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
   const {
@@ -31,6 +32,7 @@ export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
     body: JSON.stringify({
       model,
       max_tokens: maxTokens,
+      stream: true,
       system,
       messages: [{ role: 'user', content: userMessage }],
     }),
@@ -41,21 +43,58 @@ export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
     throw new Error(`Claude API error (${res.status}): ${errText}`);
   }
 
-  const data = await res.json() as any;
+  if (!res.body) throw new Error('Claude returned no response body');
 
-  // Extract text from content blocks
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
   let text = '';
-  for (const block of data.content || []) {
-    if (block.type === 'text') {
-      text += block.text;
+  let buffer = '';
+  let errorMsg = '';
+  let stopReason = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (!data || data === '[DONE]') continue;
+
+      try {
+        const event = JSON.parse(data);
+        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+          text += event.delta.text;
+        } else if (event.type === 'error') {
+          errorMsg = event.error?.message || JSON.stringify(event.error);
+        } else if (event.type === 'message_delta') {
+          stopReason = event.delta?.stop_reason || '';
+        }
+      } catch {
+        // Skip non-JSON lines
+      }
     }
   }
 
-  if (!text) {
-    const contentTypes = (data.content || []).map((b: any) => b.type).join(',');
-    throw new Error(`Claude returned no text. stop_reason=${data.stop_reason}, content_types=[${contentTypes}], usage=${JSON.stringify(data.usage || {})}`);
+  // Flush remaining buffer
+  if (buffer.startsWith('data: ')) {
+    const data = buffer.slice(6).trim();
+    if (data && data !== '[DONE]') {
+      try {
+        const event = JSON.parse(data);
+        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+          text += event.delta.text;
+        }
+      } catch {}
+    }
   }
 
+  if (errorMsg) throw new Error(`Claude stream error: ${errorMsg}`);
+  if (!text) throw new Error(`Claude returned no text. stop_reason=${stopReason}`);
   return text;
 }
 
@@ -97,7 +136,7 @@ export async function callClaudeWithWebSearch(opts: ClaudeCallOptions): Promise<
 
   // Extract text from content blocks
   let text = '';
-  for (const block of data.content || []) {
+  for (const block of (data as any).content || []) {
     if (block.type === 'text') {
       text += block.text;
     }
