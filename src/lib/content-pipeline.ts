@@ -628,7 +628,7 @@ ${contentResult.content}`
     }
 
     // 8: Author by angle
-    const author = getAuthorByAngle(queue.content_angle || 'general');
+    const author = getAuthorByAngle(queue.content_angle || queue.search_intent || 'general');
 
     // Update content_items with post-processed content + author
     await env.DB.prepare('UPDATE content_items SET content = ?, author = ?, updated_at = ? WHERE id = ?')

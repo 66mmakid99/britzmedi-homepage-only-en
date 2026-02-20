@@ -190,18 +190,15 @@ Plan max 5 content pieces per cycle.`;
   const planData = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] || '{}');
 
   // 기획된 콘텐츠를 content_queue에 자동 등록
+  // Actual schema: keyword, search_intent, priority, status, created_at
   for (const item of (planData.planned_content || [])) {
-    for (const angle of (item.angles || ['aeo_response'])) {
-      await env.DB.prepare(
-        `INSERT INTO content_queue (keyword, intent, priority, content_angle, status, metadata, created_at)
-         VALUES (?, 'informational', ?, ?, 'queued', ?, datetime('now'))`
-      ).bind(
-        item.keyword,
-        item.priority,
-        angle,
-        JSON.stringify({ rationale: item.rationale, target_queries: item.target_queries, cycle: 'auto' })
-      ).run();
-    }
+    await env.DB.prepare(
+      `INSERT INTO content_queue (keyword, search_intent, priority, status, created_at)
+       VALUES (?, 'informational', ?, 'queued', datetime('now'))`
+    ).bind(
+      item.keyword,
+      item.priority || 5,
+    ).run();
   }
 
   await env.DB.prepare(
@@ -221,7 +218,7 @@ export async function produce(env: Env, maxItems: number = 3): Promise<{
   results: { id: number; keyword: string; angle: string; score: number; status: string }[];
 }> {
   const queued = await env.DB.prepare(
-    `SELECT id, keyword, content_angle FROM content_queue
+    `SELECT id, keyword, search_intent FROM content_queue
      WHERE status = 'queued' ORDER BY priority ASC, created_at ASC LIMIT ?`
   ).bind(maxItems).all<any>();
 
@@ -233,7 +230,7 @@ export async function produce(env: Env, maxItems: number = 3): Promise<{
       results.push({
         id: item.id,
         keyword: item.keyword,
-        angle: item.content_angle,
+        angle: item.search_intent || 'informational',
         score: result?.score || 0,
         status: result?.status || 'unknown'
       });
@@ -242,7 +239,7 @@ export async function produce(env: Env, maxItems: number = 3): Promise<{
       results.push({
         id: item.id,
         keyword: item.keyword,
-        angle: item.content_angle,
+        angle: item.search_intent || 'informational',
         score: 0,
         status: 'error: ' + e.message
       });
