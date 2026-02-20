@@ -474,170 +474,87 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
       title: contentResult.title,
     });
 
-    // ═══ Step 2.5: Post-processing ═══
+    // ═══ Step 2.5: Post-processing (combined — single Claude call) ═══
     await updateQueueStatus(env, queueId, 'postprocessing');
 
-    // 0: Topic relevance check (strategy enforcement)
+    // Run all LOCAL checks first (no API calls)
     const topicCheck = checkTopicRelevance(keyword, contentResult.content || '');
-    if (topicCheck.isCompetitorStandalone) {
-      await logPipeline(env, contentId, queueId, 'competitor_standalone_detected', {
-        issues: topicCheck.issues,
-        suggestion: topicCheck.suggestion
-      });
-
-      const rewriteResponse = await callClaude({
-        apiKey,
-        maxTokens: 8000,
-        system: 'You are a medical content writer. Return the full rewritten article in markdown.',
-        userMessage: `This article is a standalone guide about a competitor technology. BRITZMEDI is an RF company — we cannot publish standalone guides about competing technologies.
-
-REWRITE this article as a COMPARISON: "RF vs [This Technology]"
-- Keep useful clinical/technical information
-- Add substantial RF technology sections (at least 40% of content)
-- Include comparison table: RF vs this technology
-- Conclusion should fairly favor RF while being objective
-- Target word count: 2000 words (current article is too long, trim it)
-- Add BRITZMEDI TORR RF as the recommended RF option
-
-${topicCheck.suggestion ? `Suggested new angle: ${topicCheck.suggestion}` : ''}
-
-Original article:
-${contentResult.content}`
-      });
-      contentResult.content = rewriteResponse;
-
-      const newTitle = await callClaude({
-        apiKey,
-        maxTokens: 200,
-        system: 'Return ONLY a title, nothing else.',
-        userMessage: `Generate a new SEO title for this RF comparison article. Max 60 characters. Return ONLY the title, nothing else.\n\nArticle first 500 chars:\n${contentResult.content.substring(0, 500)}`
-      });
-      contentResult.title = newTitle.trim().replace(/^["']|["']$/g, '');
-    }
-
-    // 0.5: Word count check
     const wordCheck = checkWordCount(contentResult.content || '');
-    if (wordCheck.isTooLong) {
-      const trimResponse = await callClaude({
-        apiKey,
-        maxTokens: 8000,
-        system: 'You are a content editor. Return the full trimmed article.',
-        userMessage: `This article is ${wordCheck.wordCount} words. Trim to 2000-2500 words maximum.
-Rules:
-- Remove redundant sections and repetitive points
-- Merge similar sections
-- Keep the most valuable and unique content
-- Keep comparison tables, FAQs, and key data points
-- Keep all internal links and CTAs
-- Maintain article structure (intro, body, FAQ, conclusion)
-Return the full trimmed article.
-
-Article:
-${contentResult.content}`
-      });
-      contentResult.content = trimResponse;
-      await logPipeline(env, contentId, queueId, 'trimmed', {
-        before: wordCheck.wordCount,
-        after: trimResponse.split(/\s+/).length
-      });
-    }
-
-    // 1: Product fact-check (highest priority)
     const factCheck = factCheckProducts(contentResult.content || '');
-    if (factCheck.hasCriticalError) {
-      contentResult.content = await autoCorrectProducts(apiKey, contentResult.content, factCheck.corrections);
-      await logPipeline(env, contentId, queueId, 'product_facts_corrected', {
-        corrections: factCheck.corrections.length,
-        issues: factCheck.issues
-      });
-
-      // Re-check after correction
-      const recheck = factCheckProducts(contentResult.content);
-      if (recheck.hasCriticalError) {
-        await updateQueueStatus(env, queueId, 'failed');
-        await env.DB.prepare('UPDATE content_queue SET error_message = ? WHERE id = ?')
-          .bind('Product fact-check failed after auto-correction. Manual review required.', queueId).run();
-        await logPipeline(env, null, queueId, 'fact_check_failed', { issues: recheck.issues });
-        throw new Error('Product fact-check failed after auto-correction');
-      }
-    }
-
-    // 2: Citation validation
     const validPMIDs = (researchData.pubmed_articles || [])
       .map((a: PubMedArticle) => a.pmid)
       .filter(Boolean);
     const citationResult = validateCitations(contentResult.content, validPMIDs);
     contentResult.content = citationResult.cleaned;
-    if (citationResult.removed.length > 0) {
-      await logPipeline(env, contentId, queueId, 'fake_citations_removed', {
-        removed_count: citationResult.removed.length,
-        removed: citationResult.removed.slice(0, 10)
-      });
-    }
-
-    // 3: Self-promotion check + fix
     const promoCheck = checkSelfPromotion(contentResult.content);
-    if (promoCheck.hasDedicatedSection) {
-      const fixResponse = await callClaude({
-        apiKey,
-        maxTokens: 8000,
-        system: 'You are an editor. Return the full revised article.',
-        userMessage: `Remove any H2/H3 heading containing "BRITZMEDI". Redistribute that content into other sections naturally. BRITZMEDI should only appear in comparison contexts. Return the full revised article.\n\nArticle:\n${contentResult.content}`
-      });
-      contentResult.content = fixResponse;
-      await logPipeline(env, contentId, queueId, 'promo_section_removed', {});
-    }
-
-    // 4: Comparison table check + auto add
-    if (!checkComparisonTable(contentResult.content)) {
-      const tableResponse = await callClaude({
-        apiKey,
-        maxTokens: 8000,
-        system: 'You are a content editor. Return the full article with the table added.',
-        userMessage: `Add a markdown comparison table to this article. 4+ rows comparing relevant products/options. BRITZMEDI TORR RF as one row among equals. Columns: Product, Manufacturer, Technology, Key Feature, Target. Insert at logical position. Return full article.\n\nArticle:\n${contentResult.content}`
-      });
-      contentResult.content = tableResponse;
-      await logPipeline(env, contentId, queueId, 'table_added', {});
-    }
-
-    // 5: First paragraph check + fix
+    const hasTable = checkComparisonTable(contentResult.content);
     const fpCheck = checkFirstParagraph(contentResult.content);
+
+    // Collect all issues that need fixing
+    const fixInstructions: string[] = [];
+    if (topicCheck.isCompetitorStandalone) {
+      fixInstructions.push(`CRITICAL: This is a standalone guide about a competitor technology. BRITZMEDI is an RF company. REWRITE as "RF vs [This Technology]" comparison with at least 40% RF content. ${topicCheck.suggestion || ''}`);
+    }
+    if (wordCheck.isTooLong) {
+      fixInstructions.push(`TRIM: Article is ${wordCheck.wordCount} words. Cut to 2000-2500 words. Remove redundant sections, keep comparison tables and FAQs.`);
+    }
+    if (factCheck.hasCriticalError) {
+      fixInstructions.push(`PRODUCT FACTS: Fix these errors: ${factCheck.issues.join('; ')}. Corrections: ${factCheck.corrections.map(c => `${c.wrong} → ${c.correct}`).join('; ')}`);
+    }
+    if (citationResult.removed.length > 0) {
+      fixInstructions.push(`CITATIONS: ${citationResult.removed.length} fake citations were already removed. Do not re-add them.`);
+    }
+    if (promoCheck.hasDedicatedSection) {
+      fixInstructions.push(`SELF-PROMOTION: Remove any H2/H3 heading containing "BRITZMEDI". Redistribute that content into other sections naturally. BRITZMEDI should only appear in comparison contexts.`);
+    }
+    if (!hasTable) {
+      fixInstructions.push(`COMPARISON TABLE: Add a markdown comparison table (4+ rows) comparing relevant products/options. BRITZMEDI TORR RF as one row among equals. Columns: Product, Manufacturer, Technology, Key Feature, Target.`);
+    }
     if (!fpCheck.isAIExtractable) {
-      const fixFP = await callClaude({
-        apiKey,
-        maxTokens: 8000,
-        system: 'You are a content editor. Return the full article with only the first paragraph rewritten.',
-        userMessage: `Rewrite ONLY the first paragraph. Rules: Start with clear definition + specific number/statistic. Make it AI-extractable as featured snippet. Return full article.\n\nArticle:\n${contentResult.content}`
-      });
-      contentResult.content = fixFP;
-      await logPipeline(env, contentId, queueId, 'first_para_fixed', {});
+      fixInstructions.push(`FIRST PARAGRAPH: Rewrite the first paragraph to start with a clear definition + specific number/statistic. Make it AI-extractable as a featured snippet.`);
     }
 
-    // 6: Internal links
-    contentResult.content = insertInternalLinks(contentResult.content);
+    // Single combined Claude call for ALL fixes (or skip if no issues)
+    if (fixInstructions.length > 0) {
+      const fixedContent = await callClaude({
+        apiKey,
+        maxTokens: 8000,
+        system: 'You are a medical content editor for BRITZMEDI. Apply ALL requested fixes and return the complete revised article in markdown. Do not add explanations — return ONLY the article.',
+        userMessage: `Apply ALL of the following fixes to this article:\n\n${fixInstructions.map((f, i) => `${i + 1}. ${f}`).join('\n')}\n\nARTICLE:\n${contentResult.content}`,
+      });
+      contentResult.content = fixedContent;
 
-    // 7: CTA auto-insert
+      // Re-check product facts after fix
+      if (factCheck.hasCriticalError) {
+        const recheck = factCheckProducts(contentResult.content);
+        if (recheck.hasCriticalError) {
+          await updateQueueStatus(env, queueId, 'failed');
+          await env.DB.prepare('UPDATE content_queue SET error_message = ? WHERE id = ?')
+            .bind('Product fact-check failed after correction', queueId).run();
+          throw new Error('Product fact-check failed after auto-correction');
+        }
+      }
+
+      await logPipeline(env, contentId, queueId, 'combined_postprocess', {
+        fixes_applied: fixInstructions.length,
+        issues: fixInstructions.map(f => f.split(':')[0]),
+      });
+    }
+
+    // Local-only fixes (no Claude calls needed)
+    contentResult.content = insertInternalLinks(contentResult.content);
     const ctaResult = checkAndInsertCTAs(contentResult.content);
     contentResult.content = ctaResult.content;
-    if (ctaResult.inserted > 0) {
-      await logPipeline(env, contentId, queueId, 'cta_inserted', {
-        existing: ctaResult.ctaCount - ctaResult.inserted,
-        inserted: ctaResult.inserted,
-        total: ctaResult.ctaCount
-      });
-    }
 
-    // 8: Author by angle
-    const author = getAuthorByAngle(queue.content_angle || queue.search_intent || 'general');
+    const author = getAuthorByAngle(queue.search_intent || 'general');
 
     // Update content_items with post-processed content + author
     await env.DB.prepare('UPDATE content_items SET content = ?, author = ?, updated_at = ? WHERE id = ?')
       .bind(contentResult.content, author, new Date().toISOString(), contentId).run();
 
     await logPipeline(env, contentId, queueId, 'postprocessing_complete', {
-      fact_issues: factCheck.issues.length,
+      fix_count: fixInstructions.length,
       citations_removed: citationResult.removed.length,
-      promo_issues: promoCheck.issues.length,
     });
 
     // ═══ Step 3: AI Analysis ═══
