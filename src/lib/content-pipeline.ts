@@ -409,7 +409,7 @@ async function saveContentDraft(db: D1Database, content: any, research: Research
     slug,
     content.content,
     content.meta_description || content.tldr || '',
-    content.category || 'uncategorized',
+    (content.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
     JSON.stringify(content.tags || []),
     research.keyword,
     JSON.stringify(content.faqs || []),

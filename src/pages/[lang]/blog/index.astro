@@ -31,11 +31,17 @@ const getPostDescription = (slug: string, fallback: string) => {
 // Helper: translate category value to localized label
 const categoryMap: Record<string, string> = {
   'industry-news': t('blog.categories.industryNews'),
+  'industry-trends': t('blog.categories.industryNews'),
   'product-updates': t('blog.categories.productUpdates'),
   'technology': t('blog.categories.technology'),
+  'technology-guide': t('blog.categories.technology'),
   'clinical-studies': t('blog.categories.clinicalStudies'),
+  'clinical-reviews': t('blog.categories.clinicalStudies'),
   'education': t('blog.categories.education'),
   'medical-devices': t('blog.categories.medicalDevices'),
+  'aesthetic-technology': 'Aesthetic Technology',
+  'body-contouring': 'Body Contouring',
+  'buyer-guide': 'Buyer Guide',
 };
 const getCategoryLabel = (category: string) => categoryMap[category] || category.replace('-', ' ');
 

@@ -28,7 +28,9 @@ if (!item) {
 }
 
 // Convert markdown → HTML (or use as-is if already HTML)
-const htmlContent = isHtml(item.content || '') ? item.content : await marked(item.content || '');
+// Strip first H1 — title is shown separately in the hero area
+const rawHtml = isHtml(item.content || '') ? item.content : await marked(item.content || '');
+const htmlContent = rawHtml.replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
 
 // Extract TL;DR from content if present
 function extractTldr(content: string): string {

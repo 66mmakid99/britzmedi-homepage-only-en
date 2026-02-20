@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#FDF2F8"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#aesGrad)" opacity="0.25"/>
+  <defs>
+    <linearGradient id="aesGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <!-- Subtle wave patterns -->
+  <path d="M0 180 Q80 150 160 180 T320 180 T480 180" stroke="#F9A8D4" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M-40 160 Q60 130 140 160 T300 160 T460 160" stroke="#C084FC" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M20 200 Q100 170 180 200 T340 200 T500 200" stroke="#F9A8D4" stroke-width="1" fill="none" opacity="0.25"/>
+  <!-- Glow dots -->
+  <circle cx="100" cy="70" r="20" fill="#EC4899" opacity="0.08"/>
+  <circle cx="300" cy="150" r="25" fill="#8B5CF6" opacity="0.08"/>
+  <circle cx="60" cy="170" r="15" fill="#EC4899" opacity="0.06"/>
+  <!-- Center icon: stylized face/skin with RF waves -->
+  <g transform="translate(170, 70)">
+    <rect x="0" y="0" width="60" height="60" rx="14" fill="#EC4899" opacity="0.12"/>
+    <!-- Face outline -->
+    <ellipse cx="30" cy="28" rx="14" ry="18" stroke="#EC4899" stroke-width="1.8" fill="none"/>
+    <!-- RF waves emanating -->
+    <path d="M10 20 Q6 28 10 36" stroke="#8B5CF6" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M5 16 Q-1 28 5 40" stroke="#8B5CF6" stroke-width="1.2" fill="none" opacity="0.4"/>
+    <path d="M50 20 Q54 28 50 36" stroke="#8B5CF6" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M55 16 Q61 28 55 40" stroke="#8B5CF6" stroke-width="1.2" fill="none" opacity="0.4"/>
+    <!-- Sparkle -->
+    <circle cx="30" cy="50" r="2" fill="#EC4899" opacity="0.5"/>
+  </g>
+  <!-- Label -->
+  <text x="200" y="155" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#9333EA" opacity="0.6">AESTHETIC TECHNOLOGY</text>
+</svg>

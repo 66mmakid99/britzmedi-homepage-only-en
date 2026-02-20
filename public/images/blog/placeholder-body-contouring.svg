@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#F0FDF4"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#bodyGrad)" opacity="0.2"/>
+  <defs>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#0D9488"/>
+    </linearGradient>
+  </defs>
+  <!-- Background curves -->
+  <path d="M0 190 Q100 160 200 190 T400 190" stroke="#86EFAC" stroke-width="1.5" fill="none" opacity="0.4"/>
+  <path d="M0 170 Q80 140 160 170 T320 170 T480 170" stroke="#5EEAD4" stroke-width="1.2" fill="none" opacity="0.3"/>
+  <!-- Glow spots -->
+  <circle cx="90" cy="80" r="18" fill="#22C55E" opacity="0.07"/>
+  <circle cx="310" cy="140" r="22" fill="#0D9488" opacity="0.07"/>
+  <!-- Center icon: body silhouette with contour lines -->
+  <g transform="translate(170, 55)">
+    <rect x="0" y="0" width="60" height="70" rx="14" fill="#22C55E" opacity="0.1"/>
+    <!-- Simplified body silhouette -->
+    <path d="M30 12 C30 12 22 18 22 30 C22 42 24 55 30 60 C36 55 38 42 38 30 C38 18 30 12 30 12Z" stroke="#22C55E" stroke-width="1.8" fill="none"/>
+    <!-- Contour lines -->
+    <path d="M25 25 Q30 22 35 25" stroke="#0D9488" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <path d="M24 35 Q30 32 36 35" stroke="#0D9488" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <path d="M25 45 Q30 42 35 45" stroke="#0D9488" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <!-- Head -->
+    <circle cx="30" cy="8" r="4" stroke="#22C55E" stroke-width="1.5" fill="none"/>
+  </g>
+  <!-- Label -->
+  <text x="200" y="155" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#15803D" opacity="0.6">BODY CONTOURING</text>
+</svg>

@@ -123,7 +123,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       metaDescription: item.excerpt || '',
       keywords,
       tags: Array.isArray(tags) ? tags : [],
-      category: item.category || 'medical-devices',
+      category: (item.category || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       featuredImage: item.featured_image || null,
       youtubeEmbedUrl: null,
       youtubeUrl: item.source_url || null,

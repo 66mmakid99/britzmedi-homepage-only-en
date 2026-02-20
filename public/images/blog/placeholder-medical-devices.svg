@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <rect width="400" height="225" fill="#F1F5F9"/>
+  <rect x="0" y="0" width="400" height="225" fill="url(#medGrad)" opacity="0.2"/>
+  <defs>
+    <linearGradient id="medGrad" x1="0" y1="0" x2="400" y2="225">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <!-- Grid pattern -->
+  <g stroke="#CBD5E1" stroke-width="0.5" opacity="0.3">
+    <line x1="0" y1="45" x2="400" y2="45"/>
+    <line x1="0" y1="90" x2="400" y2="90"/>
+    <line x1="0" y1="135" x2="400" y2="135"/>
+    <line x1="0" y1="180" x2="400" y2="180"/>
+    <line x1="80" y1="0" x2="80" y2="225"/>
+    <line x1="160" y1="0" x2="160" y2="225"/>
+    <line x1="240" y1="0" x2="240" y2="225"/>
+    <line x1="320" y1="0" x2="320" y2="225"/>
+  </g>
+  <!-- Glow spots -->
+  <circle cx="120" cy="75" r="20" fill="#6366F1" opacity="0.07"/>
+  <circle cx="280" cy="150" r="25" fill="#3B82F6" opacity="0.06"/>
+  <!-- Center icon: medical device / handpiece -->
+  <g transform="translate(170, 65)">
+    <rect x="0" y="0" width="60" height="60" rx="12" fill="#6366F1" opacity="0.1"/>
+    <!-- Device body -->
+    <rect x="20" y="10" width="20" height="35" rx="4" stroke="#6366F1" stroke-width="1.8" fill="none"/>
+    <!-- Handle -->
+    <rect x="24" y="40" width="12" height="12" rx="2" stroke="#6366F1" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <!-- Energy indicator dots -->
+    <circle cx="30" cy="18" r="2.5" fill="#6366F1" opacity="0.4"/>
+    <circle cx="30" cy="26" r="2.5" fill="#6366F1" opacity="0.3"/>
+    <circle cx="30" cy="34" r="2.5" fill="#6366F1" opacity="0.2"/>
+    <!-- RF waves from tip -->
+    <path d="M18 8 Q12 5 18 2" stroke="#3B82F6" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <path d="M42 8 Q48 5 42 2" stroke="#3B82F6" stroke-width="1.2" fill="none" opacity="0.5"/>
+  </g>
+  <!-- Label -->
+  <text x="200" y="155" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#4F46E5" opacity="0.6">MEDICAL DEVICES</text>
+</svg>

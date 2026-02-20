@@ -173,6 +173,21 @@ function stripFirstH1(html: string): string {
 
 const processedContent = stripFirstH1(addHeadingIds(post.content, post.isDynamic));
 
+// Category-based OG image fallback
+const categoryOgImages: Record<string, string> = {
+  'technology-guide': '/images/blog/placeholder-technology.svg',
+  'clinical-reviews': '/images/blog/placeholder-clinical-studies.svg',
+  'industry-news': '/images/blog/placeholder-industry-news.svg',
+  'industry-trends': '/images/blog/placeholder-industry-news.svg',
+  'buyer-guide': '/images/blog/placeholder-product-updates.svg',
+  'product-updates': '/images/blog/placeholder-product-updates.svg',
+  'medical-devices': '/images/blog/placeholder-medical-devices.svg',
+  'aesthetic-technology': '/images/blog/placeholder-aesthetic-technology.svg',
+  'body-contouring': '/images/blog/placeholder-body-contouring.svg',
+  'education': '/images/blog/placeholder-education.svg',
+};
+const ogImage = post.featuredImage || categoryOgImages[post.category] || '/og-image.jpg';
+
 // Related posts for this language
 const relatedPostModules = import.meta.glob('../../../content/blog/*.json', { eager: true });
 const relatedDynamic = Object.values(relatedPostModules)
@@ -290,7 +305,7 @@ const breadcrumbSchema = {
   description={translatedDescription}
   keywords={post.tags}
   ogType="article"
-  ogImage={post.featuredImage || '/og-image.jpg'}
+  ogImage={ogImage}
   publishedTime={post.publishedAt}
   modifiedTime={post.updatedAt || post.publishedAt}
   author={post.author}
