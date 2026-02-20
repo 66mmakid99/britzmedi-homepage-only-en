@@ -136,6 +136,64 @@ export function getProductContext(): string {
   return context;
 }
 
+export const CONTENT_STRATEGY_RULES = {
+  // BRITZMEDI 핵심 기술
+  core_technology: 'radiofrequency (RF)',
+
+  // 경쟁 기술 목록 — 이 기술들은 단독 가이드 금지
+  competitor_technologies: [
+    'ultrasound', 'HIFU', 'laser', 'cryolipolysis', 'coolsculpting',
+    'ultrasonic cavitation', 'electromagnetic', 'EMS', 'HIFEM'
+  ],
+
+  // 콘텐츠 전략 규칙
+  rules: [
+    'NEVER publish a standalone guide about a competitor technology on BRITZMEDI blog',
+    'Competitor technologies MUST be covered in comparison format: "RF vs [Competitor]"',
+    'RF technology must always be presented as a primary option, with fair but favorable comparison',
+    'Every article must have a strategic connection to BRITZMEDI products',
+    'If an article topic does not relate to RF technology, skin tightening, body contouring, or aesthetic devices — do not write it'
+  ],
+
+  // 허용/금지 글 유형
+  allowed_topics: [
+    'RF skin tightening (any angle)',
+    'RF body contouring (any angle)',
+    'RF vs [competitor technology] comparison',
+    'Multi-wave RF technology deep dive',
+    'Aesthetic device buying guide (with RF featured)',
+    'Clinical evidence for RF treatments',
+    'Korean aesthetic device market (with BRITZMEDI context)',
+    'Clinic ROI analysis for RF devices',
+    'Patient education about RF treatments',
+    'FDA clearance process for aesthetic devices'
+  ],
+
+  banned_topics: [
+    'Standalone ultrasound/HIFU guide (without RF comparison)',
+    'Standalone laser treatment guide (without RF comparison)',
+    'Standalone cryotherapy guide (without RF comparison)',
+    'Any guide that promotes a competitor technology without comparing to RF',
+    'Topics unrelated to aesthetic devices or BRITZMEDI market'
+  ],
+
+  // 글 길이 규칙
+  word_count: {
+    min: 1500,
+    max: 2500,
+    ideal: 2000,
+    rule: 'Over 2500 words causes high bounce rate. Keep focused and concise.'
+  },
+
+  // CTA 규칙
+  cta_rules: {
+    minimum_count: 2,
+    positions: ['after_first_major_section (around 500 words)', 'end_of_article'],
+    format: 'Subtle inline CTA, not aggressive banner. Example: "Learn more about multi-wave RF technology at [britzmedi.com/products/torr-rf](https://britzmedi.com/products/torr-rf)"',
+    never: 'Never use aggressive sales language like "Buy now" or "Order today"'
+  }
+};
+
 // 특정 제품 정보만 가져오기
 export function getProductInfo(productName: string): Product | null {
   const normalized = productName.toUpperCase().replace(/\s+/g, ' ').trim();

@@ -6,7 +6,8 @@ import { getProductContext } from './britzmedi-products';
 import {
   factCheckProducts, autoCorrectProducts, validateCitations,
   checkSelfPromotion, checkComparisonTable, checkFirstParagraph,
-  insertInternalLinks, getAuthorByAngle
+  insertInternalLinks, getAuthorByAngle,
+  checkTopicRelevance, checkWordCount, checkAndInsertCTAs
 } from './content-postprocess';
 
 // ── Types ──────────────────────────────────────────────────
@@ -206,6 +207,15 @@ PRODUCT FACT RULES (violating = immediate rejection):
 11. MEDICAL DEVICE CLAIMS: Only TORR RF can be described as an FDA 510(k) cleared medical device. Do NOT extend FDA claims to other products.
 12. UNKNOWN INFORMATION: If specific details about a BRITZMEDI product are not in the provided product data, write "Details available upon request at britzmedi.com/contact" — NEVER fabricate specifications, clinical data, or capabilities.
 
+CONTENT STRATEGY RULES:
+13. COMPETITOR TECHNOLOGY: If the topic involves ultrasound, HIFU, laser, cryolipolysis, or any non-RF technology, you MUST write it as a COMPARISON with RF. Never write a standalone guide for a competing technology. BRITZMEDI is an RF company.
+14. WORD COUNT: Keep articles between 1500-2500 words. Over 2500 causes high bounce rates. Be focused and concise — depth on fewer points beats shallow coverage of many points.
+15. CTA PLACEMENT: Include at least 2 CTAs:
+    - One after the first major section (~500 words in): subtle inline link to britzmedi.com/products/torr-rf
+    - One before FAQ or at article end: contact link to britzmedi.com/contact
+    Format: Informative, not salesy. "Explore specifications →" not "Buy now!"
+16. STRATEGIC RELEVANCE: Every article must connect to BRITZMEDI's core business (RF aesthetic devices). If a topic cannot be connected to RF technology, skin tightening, body contouring, or aesthetic device market — do not write about it.
+
 STRUCTURE:
 - Title (keyword-optimized)
 - TL;DR (3-4 sentences)
@@ -261,6 +271,12 @@ Additional blocking criteria (any = critical_issue):
 - If no comparison table → completeness -15 points
 - If first paragraph lacks definition + number → aeo_seo -20 points (can go negative, cap at 0)
 - If fake citations detected (references without matching PMIDs) → blocking_issue
+
+Strategic checks:
+- If article is a standalone guide for a competitor technology (ultrasound, HIFU, laser, cryo) without RF comparison → blocking_issue: "Competitor standalone guide — must include RF comparison"
+- If article exceeds 2500 words → reduce readability by 10 points
+- If article has fewer than 2 CTAs → reduce structure by 5 points
+- If article has no connection to RF technology or BRITZMEDI market → blocking_issue: "No strategic relevance to BRITZMEDI"
 
 Return ONLY valid JSON using EXACTLY these keys:
 {
@@ -459,6 +475,71 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
     // ═══ Step 2.5: Post-processing ═══
     await updateQueueStatus(env, queueId, 'postprocessing');
 
+    // 0: Topic relevance check (strategy enforcement)
+    const topicCheck = checkTopicRelevance(keyword, contentResult.content || '');
+    if (topicCheck.isCompetitorStandalone) {
+      await logPipeline(env, contentId, queueId, 'competitor_standalone_detected', {
+        issues: topicCheck.issues,
+        suggestion: topicCheck.suggestion
+      });
+
+      const rewriteResponse = await callClaude({
+        apiKey,
+        maxTokens: 8000,
+        system: 'You are a medical content writer. Return the full rewritten article in markdown.',
+        userMessage: `This article is a standalone guide about a competitor technology. BRITZMEDI is an RF company — we cannot publish standalone guides about competing technologies.
+
+REWRITE this article as a COMPARISON: "RF vs [This Technology]"
+- Keep useful clinical/technical information
+- Add substantial RF technology sections (at least 40% of content)
+- Include comparison table: RF vs this technology
+- Conclusion should fairly favor RF while being objective
+- Target word count: 2000 words (current article is too long, trim it)
+- Add BRITZMEDI TORR RF as the recommended RF option
+
+${topicCheck.suggestion ? `Suggested new angle: ${topicCheck.suggestion}` : ''}
+
+Original article:
+${contentResult.content}`
+      });
+      contentResult.content = rewriteResponse;
+
+      const newTitle = await callClaude({
+        apiKey,
+        maxTokens: 200,
+        system: 'Return ONLY a title, nothing else.',
+        userMessage: `Generate a new SEO title for this RF comparison article. Max 60 characters. Return ONLY the title, nothing else.\n\nArticle first 500 chars:\n${contentResult.content.substring(0, 500)}`
+      });
+      contentResult.title = newTitle.trim().replace(/^["']|["']$/g, '');
+    }
+
+    // 0.5: Word count check
+    const wordCheck = checkWordCount(contentResult.content || '');
+    if (wordCheck.isTooLong) {
+      const trimResponse = await callClaude({
+        apiKey,
+        maxTokens: 8000,
+        system: 'You are a content editor. Return the full trimmed article.',
+        userMessage: `This article is ${wordCheck.wordCount} words. Trim to 2000-2500 words maximum.
+Rules:
+- Remove redundant sections and repetitive points
+- Merge similar sections
+- Keep the most valuable and unique content
+- Keep comparison tables, FAQs, and key data points
+- Keep all internal links and CTAs
+- Maintain article structure (intro, body, FAQ, conclusion)
+Return the full trimmed article.
+
+Article:
+${contentResult.content}`
+      });
+      contentResult.content = trimResponse;
+      await logPipeline(env, contentId, queueId, 'trimmed', {
+        before: wordCheck.wordCount,
+        after: trimResponse.split(/\s+/).length
+      });
+    }
+
     // 1: Product fact-check (highest priority)
     const factCheck = factCheckProducts(contentResult.content || '');
     if (factCheck.hasCriticalError) {
@@ -533,7 +614,18 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
     // 6: Internal links
     contentResult.content = insertInternalLinks(contentResult.content);
 
-    // 7: Author by angle
+    // 7: CTA auto-insert
+    const ctaResult = checkAndInsertCTAs(contentResult.content);
+    contentResult.content = ctaResult.content;
+    if (ctaResult.inserted > 0) {
+      await logPipeline(env, contentId, queueId, 'cta_inserted', {
+        existing: ctaResult.ctaCount - ctaResult.inserted,
+        inserted: ctaResult.inserted,
+        total: ctaResult.ctaCount
+      });
+    }
+
+    // 8: Author by angle
     const author = getAuthorByAngle(queue.content_angle || 'general');
 
     // Update content_items with post-processed content + author

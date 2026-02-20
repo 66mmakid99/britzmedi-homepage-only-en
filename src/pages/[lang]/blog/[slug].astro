@@ -498,8 +498,12 @@ const breadcrumbSchema = {
         <div class="related-posts-grid">
           {relatedPosts.map(rp => (
             <a href={`/${lang}/blog/${rp.slug}`} class="related-post-card">
-              {rp.featuredImage && (
+              {rp.featuredImage ? (
                 <img src={rp.featuredImage} alt={`Featured image for: ${rp.title}`} width="320" height="180" loading="lazy" />
+              ) : (
+                <div class="related-post-placeholder" style="width:320px;height:180px;background:linear-gradient(135deg,#e8f4f8,#d1e7f0);display:flex;align-items:center;justify-content:center;border-radius:8px;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
               )}
               <div class="related-post-info">
                 <h3>{getPostTitle(rp.slug, rp.title)}</h3>

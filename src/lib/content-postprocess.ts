@@ -1,8 +1,133 @@
 // Content post-processing: product fact-checking, citation validation, quality checks
 // Runs after content generation but before AI analysis in the pipeline
 
-import { BRITZMEDI_PRODUCTS, getProductInfo } from './britzmedi-products';
+import { BRITZMEDI_PRODUCTS, getProductInfo, CONTENT_STRATEGY_RULES } from './britzmedi-products';
 import { callClaude } from './claude-api';
+
+// ── 0-1: Topic relevance check ────────────────────────────
+
+export function checkTopicRelevance(keyword: string, content: string): {
+  isRelevant: boolean;
+  isCompetitorStandalone: boolean;
+  issues: string[];
+  suggestion?: string;
+} {
+  const keywordLower = keyword.toLowerCase();
+  const contentLower = content.toLowerCase();
+  const issues: string[] = [];
+
+  // 경쟁 기술 단독 가이드 감지
+  const competitorTech = CONTENT_STRATEGY_RULES.competitor_technologies.find(tech =>
+    keywordLower.includes(tech.toLowerCase())
+  );
+
+  const hasRFComparison = /\brf\b|radiofrequency|radio.frequency/i.test(keywordLower) ||
+    /\bvs\b|\bversus\b|\bcompared?\b|\bcomparison\b/i.test(keywordLower);
+
+  let isCompetitorStandalone = false;
+  let suggestion: string | undefined;
+
+  if (competitorTech && !hasRFComparison) {
+    isCompetitorStandalone = true;
+    issues.push(`BLOCKING: Standalone ${competitorTech} guide without RF comparison. BRITZMEDI is an RF company.`);
+    suggestion = `Rewrite as: "RF vs ${competitorTech.charAt(0).toUpperCase() + competitorTech.slice(1)}: Which Technology Delivers Better Results for [Indication]?"`;
+  }
+
+  // 콘텐츠 내에서 RF 언급 비율 체크
+  const rfMentions = (contentLower.match(/\brf\b|radiofrequency|radio.frequency|torr/g) || []).length;
+  const totalWords = content.split(/\s+/).length;
+  const rfDensity = rfMentions / totalWords;
+
+  if (competitorTech && rfDensity < 0.005) {
+    issues.push(`WARNING: Article about ${competitorTech} barely mentions RF (${rfMentions} times in ${totalWords} words). Must include substantial RF comparison.`);
+  }
+
+  // BRITZMEDI 연관성 체크
+  const hasBritzContext = /britzmedi|torr\s*rf|aesthetic\s*device|skin\s*tightening|body\s*contouring|rf\s*device/i.test(contentLower);
+  if (!hasBritzContext) {
+    issues.push('WARNING: Article has no connection to BRITZMEDI products or market');
+  }
+
+  return {
+    isRelevant: !isCompetitorStandalone && issues.filter(i => i.startsWith('BLOCKING')).length === 0,
+    isCompetitorStandalone,
+    issues,
+    suggestion
+  };
+}
+
+// ── 0-2: Word count check ────────────────────────────────
+
+export function checkWordCount(content: string): {
+  wordCount: number;
+  isTooLong: boolean;
+  isTooShort: boolean;
+  issues: string[];
+} {
+  const wordCount = content.split(/\s+/).length;
+  const issues: string[] = [];
+
+  if (wordCount > 2500) {
+    issues.push(`WARNING: Article is ${wordCount} words (max 2500). High bounce rate risk. Needs trimming.`);
+  }
+  if (wordCount < 1500) {
+    issues.push(`WARNING: Article is ${wordCount} words (min 1500). Too thin for SEO authority.`);
+  }
+
+  return {
+    wordCount,
+    isTooLong: wordCount > 2500,
+    isTooShort: wordCount < 1500,
+    issues
+  };
+}
+
+// ── 0-3: CTA check + auto-insert ─────────────────────────
+
+export function checkAndInsertCTAs(content: string): { content: string; ctaCount: number; inserted: number; } {
+  // 기존 CTA 감지
+  const ctaPatterns = /britzmedi\.com\/contact|britzmedi\.com\/products|learn more|request a demo|get in touch|contact.*team/gi;
+  const existingCTAs = (content.match(ctaPatterns) || []).length;
+
+  if (existingCTAs >= 2) {
+    return { content, ctaCount: existingCTAs, inserted: 0 };
+  }
+
+  let modified = content;
+  let inserted = 0;
+
+  // 중간 CTA 삽입 (세 번째 H2 직전)
+  if (existingCTAs < 1) {
+    const h2Positions: number[] = [];
+    const h2Regex = /^## /gm;
+    let match;
+    while ((match = h2Regex.exec(modified)) !== null) {
+      h2Positions.push(match.index);
+    }
+
+    if (h2Positions.length >= 3) {
+      const insertPos = h2Positions[2];
+      const midCTA = '\n\n> **Interested in RF technology for your clinic?** [Explore TORR RF specifications and clinical data →](https://britzmedi.com/products/torr-rf)\n\n';
+      modified = modified.slice(0, insertPos) + midCTA + modified.slice(insertPos);
+      inserted++;
+    }
+  }
+
+  // 끝 CTA (없으면 추가)
+  const hasEndCTA = /britzmedi\.com/.test(modified.slice(-500));
+  if (!hasEndCTA) {
+    const endCTA = '\n\n---\n\n*Looking for a reliable RF device for your aesthetic clinic? [Contact BRITZMEDI](https://britzmedi.com/contact) to discuss your needs or [explore our product range](https://britzmedi.com/products).*\n';
+    const faqIndex = modified.search(/^## (?:FAQ|Frequently Asked)/mi);
+    if (faqIndex > 0) {
+      modified = modified.slice(0, faqIndex) + endCTA + '\n' + modified.slice(faqIndex);
+    } else {
+      modified += endCTA;
+    }
+    inserted++;
+  }
+
+  return { content: modified, ctaCount: existingCTAs + inserted, inserted };
+}
 
 // ── 3-1: Product fact-checking ────────────────────────────
 
