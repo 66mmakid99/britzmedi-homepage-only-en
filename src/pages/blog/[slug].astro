@@ -241,7 +241,12 @@ function addHeadingIds(content: string, isDynamic: boolean): string {
   return content;
 }
 
-const processedContent = addHeadingIds(post.content, post.isDynamic);
+// Strip first <h1> from content (already shown in hero area)
+function stripFirstH1(html: string): string {
+  return html.replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/, '');
+}
+
+const processedContent = stripFirstH1(addHeadingIds(post.content, post.isDynamic));
 
 // Related posts - re-load all posts for the related section
 const relatedPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });

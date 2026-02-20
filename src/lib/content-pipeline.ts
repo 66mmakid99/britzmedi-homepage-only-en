@@ -218,9 +218,7 @@ CONTENT STRATEGY RULES:
     Format: Informative, not salesy. "Explore specifications →" not "Buy now!"
 16. STRATEGIC RELEVANCE: Every article must connect to BRITZMEDI's core business (RF aesthetic devices). If a topic cannot be connected to RF technology, skin tightening, body contouring, or aesthetic device market — do not write about it.
 
-STRUCTURE:
-- Title (keyword-optimized)
-- TL;DR (3-4 sentences)
+STRUCTURE (the "content" field should NOT start with an H1 title — the title is in a separate JSON field):
 - Introduction (hook with data point + definition)
 - Main sections with H2/H3 (evidence-based)
 - Comparison table (4+ rows, BRITZMEDI as one among equals)
