@@ -60,51 +60,59 @@ export async function diagnose(env: Env): Promise<AEODiagnosisResult> {
   ];
 
   const results: AEODiagnosisResult['queries'] = [];
+  const competitors = ['Classys', 'Ultraformer', 'InMode', 'Lutronic', 'Wontech', 'Jeisys', 'Alma', 'Syneron', 'Candela', 'Cynosure', 'Venus Concept'];
 
-  for (const query of diagnosticQueries) {
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': env.ANTHROPIC_API_KEY,
-          'content-type': 'application/json',
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1024,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-          messages: [{ role: 'user', content: query }]
-        })
-      });
+  // Process in parallel batches of 5 to stay within CF timeout
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < diagnosticQueries.length; i += BATCH_SIZE) {
+    const batch = diagnosticQueries.slice(i, i + BATCH_SIZE);
+    const batchResults = await Promise.allSettled(
+      batch.map(async (query) => {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': env.ANTHROPIC_API_KEY,
+            'content-type': 'application/json',
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1024,
+            tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+            messages: [{ role: 'user', content: query }]
+          })
+        });
 
-      const data: any = await response.json();
-      const fullText = data.content
-        ?.filter((b: any) => b.type === 'text')
-        ?.map((b: any) => b.text)
-        ?.join('\n') || '';
+        const data: any = await response.json();
+        const fullText = data.content
+          ?.filter((b: any) => b.type === 'text')
+          ?.map((b: any) => b.text)
+          ?.join('\n') || '';
 
-      const mentioned = /britzmedi|torr\s*rf/i.test(fullText);
+        const mentioned = /britzmedi|torr\s*rf/i.test(fullText);
+        const competitorMentioned = competitors.filter(c => new RegExp(c, 'i').test(fullText));
 
-      const competitors = ['Classys', 'Ultraformer', 'InMode', 'Lutronic', 'Wontech', 'Jeisys', 'Alma', 'Syneron', 'Candela', 'Cynosure', 'Venus Concept'];
-      const competitorMentioned = competitors.filter(c => new RegExp(c, 'i').test(fullText));
+        let position = 'not_found';
+        if (/britzmedi/i.test(fullText)) position = 'direct_mention';
+        else if (/torr\s*rf/i.test(fullText)) position = 'indirect_reference';
 
-      let position = 'not_found';
-      if (/britzmedi/i.test(fullText)) position = 'direct_mention';
-      else if (/torr\s*rf/i.test(fullText)) position = 'indirect_reference';
+        return {
+          query,
+          mentioned,
+          position: mentioned ? position : 'not_found',
+          competitor_mentioned: competitorMentioned,
+          snippet: fullText.substring(0, 300)
+        };
+      })
+    );
 
-      results.push({
-        query,
-        mentioned,
-        position: mentioned ? position : 'not_found',
-        competitor_mentioned: competitorMentioned,
-        snippet: fullText.substring(0, 300)
-      });
-
-      // Rate limiting
-      await new Promise(r => setTimeout(r, 2000));
-    } catch (e: any) {
-      results.push({ query, mentioned: false, snippet: `Error: ${e.message}` });
+    for (let j = 0; j < batchResults.length; j++) {
+      const r = batchResults[j];
+      if (r.status === 'fulfilled') {
+        results.push(r.value);
+      } else {
+        results.push({ query: batch[j], mentioned: false, snippet: `Error: ${r.reason?.message || 'unknown'}` });
+      }
     }
   }
 
