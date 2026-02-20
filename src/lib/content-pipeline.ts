@@ -428,7 +428,11 @@ async function saveContentDraft(db: D1Database, content: any, research: Research
 
 // ── Main Pipeline Process ──────────────────────────────────
 
-export async function processKeyword(queueId: number, env: Env): Promise<{ contentId: number; status: string; score: number }> {
+export interface ProcessOptions {
+  fast?: boolean; // Skip competitor research + analysis (for cron auto-produce)
+}
+
+export async function processKeyword(queueId: number, env: Env, opts: ProcessOptions = {}): Promise<{ contentId: number; status: string; score: number }> {
   const queue = await env.DB.prepare('SELECT * FROM content_queue WHERE id = ?').bind(queueId).first<any>();
   if (!queue) throw new Error('Queue item not found');
 
@@ -442,7 +446,12 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
     await logPipeline(env, null, queueId, 'research_start', { keyword });
 
     const pubmedArticles = await searchPubMed(keyword);
-    const competitorResearch = await researchCompetitors(apiKey, keyword);
+
+    // Skip competitor research in fast mode (saves 15-30s)
+    let competitorResearch: any = { competitors: [], industry_news: [], fda_updates: [] };
+    if (!opts.fast) {
+      competitorResearch = await researchCompetitors(apiKey, keyword);
+    }
 
     const researchData: ResearchData = {
       keyword,
@@ -558,6 +567,18 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
     });
 
     // ═══ Step 3: AI Analysis ═══
+    // Fast mode: skip analysis, save as draft for manual review later
+    if (opts.fast) {
+      await env.DB.prepare('UPDATE content_items SET status = ? WHERE id = ?')
+        .bind('review', contentId).run();
+      await updateQueueStatus(env, queueId, 'manual_review', contentId);
+      await logPipeline(env, contentId, queueId, 'fast_mode_complete', {
+        word_count: countWords(contentResult.content || ''),
+        title: contentResult.title,
+      });
+      return { contentId, status: 'manual_review', score: 0 };
+    }
+
     await updateQueueStatus(env, queueId, 'analyzing');
 
     const analysis = await analyzeContent(apiKey, env.DB, contentId);
@@ -609,7 +630,6 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
         }
       } catch (e: any) {
         await logPipeline(env, contentId, queueId, 'brand_evaluation_error', { error: e.message });
-        // If brand eval fails, still publish (quality already passed)
       }
 
       if (brandPassed) {
@@ -641,7 +661,6 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
         }
       }
     } else if (decision.action === 'AUTO_REWRITE') {
-      // Rewrite loop (max 3 retries)
       let currentRetry = (queue.retry_count || 0) + 1;
       await updateQueueStatus(env, queueId, 'rewriting');
 
@@ -655,7 +674,6 @@ export async function processKeyword(queueId: number, env: Env): Promise<{ conte
 
       await logPipeline(env, contentId, queueId, 'rewrite_complete', { retry: currentRetry });
 
-      // Re-analyze after rewrite
       if (currentRetry < 3) {
         const reanalysis = await analyzeContent(apiKey, env.DB, contentId);
         finalScore = reanalysis.overall_score;

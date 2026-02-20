@@ -226,7 +226,7 @@ export async function produce(env: Env, maxItems: number = 3): Promise<{
 
   for (const item of queued.results || []) {
     try {
-      const result = await processKeyword(item.id, env);
+      const result = await processKeyword(item.id, env, { fast: true });
       results.push({
         id: item.id,
         keyword: item.keyword,
