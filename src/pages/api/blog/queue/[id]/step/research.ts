@@ -52,18 +52,99 @@ export const POST: APIRoute = async ({ params, locals }) => {
     await updateJobStatus(db, id, 'researching', 65);
 
     const transcript = job.translated_text || job.transcript_text || '';
-    // Also use original transcript for subtitle-based name extraction
     const originalTranscript = job.transcript_text || '';
+    const anthropicKey = runtime?.env?.ANTHROPIC_API_KEY as string | undefined;
     let doctorInfo: DoctorResearchResult | null = null;
 
+    // Get detected names from translate step
+    const detectedNames: { korean: string; romanized: string; title?: string }[] =
+      job.detected_names ? JSON.parse(job.detected_names) : [];
+
     if (geminiKey) {
-      // Pass both transcripts - original may have "Dr." patterns the translation preserved
       doctorInfo = await researchDoctor(
         geminiKey,
         transcript || originalTranscript,
         job.video_title || '',
-        undefined // video description not stored in job
+        undefined
       );
+    }
+
+    // Enhanced: Claude web_search for Korean doctor profile
+    let doctorProfile: any = null;
+    if (detectedNames.length > 0 && anthropicKey) {
+      const primaryDoctor = detectedNames[0];
+      try {
+        const profilePrompt = `Research this Korean medical professional for a blog article. Compile their professional profile.
+
+Name (Korean): ${primaryDoctor.korean}
+Name (English): ${primaryDoctor.romanized}
+Title: ${primaryDoctor.title || 'Doctor'}
+Country: South Korea
+
+Search the web and provide a structured profile. Return JSON only:
+
+{
+  "name_english": "${primaryDoctor.romanized}",
+  "name_korean": "${primaryDoctor.korean}",
+  "verified_english_name": "If you find their official English name on their website/papers, use that instead",
+  "credentials": "MD, PhD, Board-certified [specialty], etc.",
+  "current_position": "Current role and institution",
+  "affiliation": "Hospital/Clinic name",
+  "specialty": "Medical specialty",
+  "education": ["Medical school", "Residency", "Fellowship if any"],
+  "certifications": ["Board certifications"],
+  "notable_achievements": ["Key achievements, publications, conference presentations"],
+  "profile_summary": "2-3 sentence professional bio suitable for blog article",
+  "sources_checked": ["URLs of sources found"],
+  "confidence": "high|medium|low",
+  "note": "Any caveats about the information found"
+}
+
+IMPORTANT:
+- If you find their OFFICIAL English name on a hospital website, academic paper, or social media, use that instead of the romanized version
+- Do NOT fabricate credentials or achievements
+- If you cannot find information, say "Not verified" — do not guess
+- Korean academic paper databases: PubMed, KoreaMed, RISS`;
+
+        const profileResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': anthropicKey,
+            'content-type': 'application/json',
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 2048,
+            tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+            messages: [{ role: 'user', content: profilePrompt }]
+          })
+        });
+
+        const profileData: any = await profileResponse.json();
+        const profileText = profileData.content
+          ?.filter((b: any) => b.type === 'text')
+          ?.map((b: any) => b.text)
+          ?.join('\n') || '';
+
+        const jsonMatch = profileText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          doctorProfile = JSON.parse(jsonMatch[0]);
+
+          // If Claude found verified English name, use it
+          if (doctorProfile.verified_english_name &&
+              doctorProfile.verified_english_name !== primaryDoctor.romanized &&
+              doctorProfile.verified_english_name !== 'Not verified') {
+            if (doctorInfo) {
+              doctorInfo.name = `Dr. ${doctorProfile.verified_english_name}`;
+              doctorInfo.verified = true;
+              doctorInfo.verifiedSource = 'claude-web-search';
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Research] Claude doctor profile research failed:', err);
+      }
     }
 
     // Update blog post with doctor info if found
@@ -92,10 +173,8 @@ export const POST: APIRoute = async ({ params, locals }) => {
       }
 
       // Check name_mappings for verified name override
-      const nameWithoutDr = doctorInfo.name.replace(/^Dr\.\s*/, '');
       if (containsKorean(originalTranscript)) {
         try {
-          // Extract Korean name from original transcript if present
           const koNameMatch = originalTranscript.match(/[\uAC00-\uD7AF]{2,4}\s*(원장|의사|교수|박사|선생)/);
           if (koNameMatch) {
             const koName = koNameMatch[0].replace(/\s*(원장|의사|교수|박사|선생)/, '');
@@ -110,6 +189,8 @@ export const POST: APIRoute = async ({ params, locals }) => {
           console.warn('[Research] Name mapping lookup failed:', err);
         }
       }
+
+      const doctorNameKorean = detectedNames.length > 0 ? detectedNames[0].korean : null;
 
       await db.prepare(`
         UPDATE blog_posts SET
@@ -132,6 +213,22 @@ export const POST: APIRoute = async ({ params, locals }) => {
         doctorInfo.verifiedSource,
         job.blog_post_id
       ).run();
+
+      // Save doctor profile and Korean name to blog_jobs
+      if (doctorProfile || doctorNameKorean) {
+        await db.prepare(`
+          UPDATE blog_jobs SET
+            doctor_profile = ?,
+            doctor_name = ?,
+            doctor_name_korean = ?
+          WHERE id = ?
+        `).bind(
+          doctorProfile ? JSON.stringify(doctorProfile) : null,
+          doctorInfo.name,
+          doctorNameKorean,
+          id
+        ).run();
+      }
     }
 
     await updateJobStatus(db, id, 'researching', 75);

@@ -56,6 +56,37 @@ Maintain the original meaning and technical terms.
 Clean up any speech disfluencies (ums, ahs, repeated words).
 Output ONLY the translated text, no commentary.
 
+CRITICAL TRANSLATION RULES FOR KOREAN NAMES:
+
+1. KOREAN PERSON NAMES: NEVER translate Korean names phonetically or by meaning. Korean names must be ROMANIZED using standard Korean romanization rules.
+   - 서의석 → "Seo Eui-seok" (NOT "Yui Saksayo" or any other phonetic guess)
+   - 김민수 → "Kim Min-su" (NOT "Minsoo Kim" unless that's their known English name)
+   - 박지영 → "Park Ji-yeong"
+
+2. NAME FORMAT: Family name first: "Seo Eui-seok" or Western order: "Eui-seok Seo"
+   - Family name (성): First character, capitalize: Kim, Lee, Park, Choi, Seo, etc.
+   - Given name (이름): Remaining characters, hyphenated, first letter cap: Eui-seok, Min-su, Ji-yeong
+
+3. KOREAN TITLES: Romanize properly:
+   - 원장/원장님 → "Director" (clinic director)
+   - 교수/교수님 → "Professor"
+   - 전문의 → "Board-certified specialist"
+   - 피부과 전문의 → "Board-certified dermatologist"
+   - 성형외과 전문의 → "Board-certified plastic surgeon"
+
+4. HOSPITAL/CLINIC NAMES: Keep the Korean romanization + English description:
+   - "서울피부과" → "Seoul Dermatology Clinic (서울피부과)"
+   - "강남성형외과" → "Gangnam Plastic Surgery Clinic (강남성형외과)"
+
+5. PRESERVE ORIGINAL: Always include the Korean name in parentheses on first mention:
+   - "Dr. Seo Eui-seok (서의석)"
+
+6. COMMON FAMILY NAME ROMANIZATIONS (use these, not phonetic guesses):
+   김=Kim, 이=Lee, 박=Park, 최=Choi, 정=Jung/Jeong, 강=Kang, 조=Cho,
+   윤=Yoon, 장=Jang, 임=Lim, 한=Han, 오=Oh, 서=Seo, 신=Shin, 권=Kwon,
+   황=Hwang, 안=Ahn, 송=Song, 류=Ryu, 유=Yoo, 전=Jeon, 홍=Hong, 고=Ko,
+   문=Moon, 배=Bae, 백=Baek, 허=Heo, 노=Noh
+
 Source language: ${sourceLang}
 
 Transcript:

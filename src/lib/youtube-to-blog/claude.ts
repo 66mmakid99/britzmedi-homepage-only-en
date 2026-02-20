@@ -120,10 +120,11 @@ export async function generateBlogPost(
     tone?: string;
     wordCount?: number;
     targetLang?: string;
+    detectedNames?: { korean: string; romanized: string; title?: string }[];
   } = {},
   onProgress?: (chunk: string, accumulated: string) => void
 ): Promise<GeneratedBlogPost> {
-  const { tone = 'professional', wordCount = 1500, targetLang = 'en' } = options;
+  const { tone = 'professional', wordCount = 1500, targetLang = 'en', detectedNames } = options;
 
   const systemPrompt = `You are an expert medical content writer for BRITZMEDI, a Korean medical aesthetics device company.
 Your task is to transform a YouTube video transcript into a high-quality, SEO-optimized blog post.
@@ -148,6 +149,24 @@ Writing guidelines:
 - Do NOT use markdown formatting - use proper HTML
 - Do NOT include any frontmatter or metadata in the HTML
 
+## Doctor Name Rules
+- The doctor's name in the article MUST use proper Korean romanization
+- First mention: "Dr. [Romanized Name] ([Korean Name])" — e.g., "Dr. Seo Eui-seok (서의석)"
+- Subsequent mentions: "Dr. Seo" (family name only)
+- NEVER invent or guess an English name for a Korean doctor
+- If unsure about romanization, keep the Korean name as-is and flag for manual review
+
+## Doctor JSON output
+Include a "doctor" field in your response:
+"doctor": {
+  "name": "Dr. Seo Eui-seok",
+  "name_korean": "서의석",
+  "name_display": "Dr. Seo Eui-seok (서의석)",
+  "credentials": "Board-certified [specialty]",
+  "affiliation": "[Hospital/Clinic name]",
+  "specialty": "[Specialty]"
+}
+
 IMPORTANT: Return your response as a valid JSON object with the following structure:
 {
   "title": "SEO-optimized blog post title",
@@ -160,12 +179,18 @@ IMPORTANT: Return your response as a valid JSON object with the following struct
   "category": "medical-devices"
 }`;
 
+  const nameContext = detectedNames && detectedNames.length > 0
+    ? `\n\nDOCTOR/EXPERT NAMES (use these exact romanizations):\n${detectedNames.map(n =>
+        `- ${n.romanized} (${n.korean})${n.title ? ` — ${n.title}` : ''}`
+      ).join('\n')}\n\nFirst mention: "Dr. ${detectedNames[0].romanized} (${detectedNames[0].korean})"\nSubsequent: "Dr. ${detectedNames[0].romanized.split(' ')[0]}"\n`
+    : '';
+
   const userMessage = `Transform this YouTube video transcript into a blog post.
 
 Video Title: ${videoTitle}
 Channel: ${channelName}
 YouTube ID: ${youtubeId}
-
+${nameContext}
 Transcript:
 ${transcript.slice(0, 12000)}
 

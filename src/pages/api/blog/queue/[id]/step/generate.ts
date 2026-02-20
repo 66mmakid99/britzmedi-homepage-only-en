@@ -81,6 +81,9 @@ export const POST: APIRoute = async ({ params, locals }) => {
 
         let lastProgressSent = Date.now();
 
+        // Parse detected names from translate step
+        const detectedNames = job.detected_names ? JSON.parse(job.detected_names) : [];
+
         // Generate blog post with Claude (streaming)
         const post = await generateBlogPost(
           anthropicKey,
@@ -92,6 +95,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
             tone: job.tone,
             wordCount: job.word_count,
             targetLang: job.target_lang,
+            detectedNames,
           },
           // onProgress: send keepalive every 3 seconds during generation
           (_chunk, accumulated) => {
