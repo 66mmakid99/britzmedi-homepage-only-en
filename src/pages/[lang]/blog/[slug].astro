@@ -26,7 +26,7 @@ export function getStaticPaths() {
         updatedAt: data.updatedAt || data.publishedAt,
         category: data.category || 'medical-devices',
         tags: data.tags || [],
-        content: data.content || '',
+        content: (data.content || '').replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/i, ''),
         faqs: (data.faqs || []) as { question: string; answer: string }[],
         featuredImage: data.featuredImage || null,
         youtubeEmbedUrl: data.youtubeEmbedUrl || null,

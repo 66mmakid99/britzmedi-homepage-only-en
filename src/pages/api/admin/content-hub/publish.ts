@@ -109,7 +109,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     } catch { faqData = null; }
 
     // Convert markdown to HTML for blog rendering (blog pages use set:html)
-    const htmlContent = isHtml(item.content) ? item.content : await marked(item.content);
+    // Strip first H1 heading — the title is shown separately in the hero area
+    const rawHtml = isHtml(item.content) ? item.content : await marked(item.content);
+    const htmlContent = rawHtml.replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
 
     // Build blog post JSON (compatible with existing blog system)
     const blogPostJson = JSON.stringify({
