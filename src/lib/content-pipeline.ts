@@ -3,6 +3,8 @@
 
 import { callClaude, callClaudeWithWebSearch, extractJson, countWords } from './claude-api';
 import { getProductContext } from './britzmedi-products';
+import { evaluateBrand, QUALITY_THRESHOLDS } from './aeo-engine';
+import { triggerAutoPost } from './social/auto-post';
 import {
   factCheckProducts, autoCorrectProducts, validateCitations,
   checkSelfPromotion, checkComparisonTable, checkFirstParagraph,
@@ -359,7 +361,7 @@ function qualityGate(analysis: AnalysisResult, retryCount: number): GateDecision
       : true
   );
 
-  if (overall_score >= 85 && evidence >= 28 && uniqueness >= 18 && allAboveMin) {
+  if (overall_score >= QUALITY_THRESHOLDS.auto_publish && evidence >= 28 && uniqueness >= 18 && allAboveMin) {
     return { action: 'AUTO_PUBLISH', reason: `Score ${overall_score}/100 - All criteria met` };
   }
 
@@ -659,14 +661,68 @@ ${contentResult.content}`
     await logPipeline(env, contentId, queueId, 'gate_decision', decision);
 
     if (decision.action === 'AUTO_PUBLISH') {
-      await env.DB.prepare('UPDATE content_items SET status = ? WHERE id = ?')
-        .bind('approved', contentId).run();
-      await updateQueueStatus(env, queueId, 'published', contentId);
-      await logPipeline(env, contentId, queueId, 'published', { score: analysis.overall_score });
+      // Brand evaluation gate (80+ to auto-publish)
+      let brandPassed = true;
+      try {
+        const brandEval = await evaluateBrand(env, contentResult.content, contentResult.title || '');
+        await logPipeline(env, contentId, queueId, 'brand_evaluation', {
+          brand_awareness: brandEval.brand_awareness,
+          product_persuasion: brandEval.product_persuasion,
+          trust_building: brandEval.trust_building,
+          call_to_action: brandEval.call_to_action,
+          overall: brandEval.overall,
+          passed: brandEval.passed,
+        });
 
-      // Sitemap ping
-      try { await fetch('https://www.google.com/ping?sitemap=https://britzmedi.com/sitemap-index.xml'); } catch {}
+        if (!brandEval.passed) {
+          brandPassed = false;
+          await env.DB.prepare('UPDATE content_items SET status = ? WHERE id = ?')
+            .bind('review', contentId).run();
+          await updateQueueStatus(env, queueId, 'manual_review', contentId);
+          try {
+            await env.DB.prepare(
+              `INSERT INTO admin_notifications (type, title, message, link) VALUES (?, ?, ?, ?)`
+            ).bind(
+              'brand_review_needed',
+              `Brand Review: ${contentResult.title || 'Untitled'}`,
+              `Quality ${analysis.overall_score}/100 passed, but brand evaluation ${brandEval.overall}/100 needs review. Issues: ${brandEval.issues.join('; ')}`,
+              '/admin/content-hub'
+            ).run();
+          } catch {}
+        }
+      } catch (e: any) {
+        await logPipeline(env, contentId, queueId, 'brand_evaluation_error', { error: e.message });
+        // If brand eval fails, still publish (quality already passed)
+      }
 
+      if (brandPassed) {
+        await env.DB.prepare('UPDATE content_items SET status = ? WHERE id = ?')
+          .bind('approved', contentId).run();
+        await updateQueueStatus(env, queueId, 'published', contentId);
+        await logPipeline(env, contentId, queueId, 'published', { score: analysis.overall_score });
+
+        // Sitemap ping
+        try { await fetch('https://www.google.com/ping?sitemap=https://britzmedi.com/sitemap-index.xml'); } catch {}
+
+        // SNS auto-post
+        try {
+          await triggerAutoPost(
+            {
+              postId: String(contentId),
+              title: contentResult.title || '',
+              slug: contentResult.slug || '',
+              excerpt: contentResult.meta_description || contentResult.tldr || '',
+              category: contentResult.category || '',
+              featuredImage: null,
+              doctorName: null,
+            },
+            { db: env.DB, ...env } as any,
+          );
+          await logPipeline(env, contentId, queueId, 'social_posted', {});
+        } catch (e: any) {
+          await logPipeline(env, contentId, queueId, 'social_post_error', { error: e.message });
+        }
+      }
     } else if (decision.action === 'AUTO_REWRITE') {
       // Rewrite loop (max 3 retries)
       let currentRetry = (queue.retry_count || 0) + 1;

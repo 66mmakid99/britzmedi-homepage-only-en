@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AEOEngineDashboard from '../../components/admin/AEOEngineDashboard';
+---
+
+<AdminLayout title="AEO Growth Engine">
+  <AEOEngineDashboard client:only="react" />
+</AdminLayout>

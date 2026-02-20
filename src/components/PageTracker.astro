@@ -1,0 +1,43 @@
+---
+// PageTracker — lightweight pageview tracking
+// Sends beacon to /api/analytics/pageview on page load
+// Excluded from admin pages via BaseLayout conditional
+---
+
+<script>
+(function() {
+  // Session ID (persists per browser tab session)
+  let sid = sessionStorage.getItem('_bm_sid');
+  if (!sid) {
+    sid = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    sessionStorage.setItem('_bm_sid', sid);
+  }
+
+  function trackView() {
+    const data = JSON.stringify({
+      path: window.location.pathname,
+      referrer: document.referrer || '',
+      sessionId: sid
+    });
+
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/analytics/pageview', data);
+    } else {
+      fetch('/api/analytics/pageview', {
+        method: 'POST',
+        body: data,
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true
+      }).catch(() => {});
+    }
+  }
+
+  // Track on page load
+  trackView();
+
+  // SPA navigation detection (Astro View Transitions)
+  document.addEventListener('astro:page-load', () => {
+    trackView();
+  });
+})();
+</script>
