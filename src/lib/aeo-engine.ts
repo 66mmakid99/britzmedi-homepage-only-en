@@ -12,7 +12,7 @@
  * [8] analyze()      — 통계 분석 + 성장 리포트
  */
 
-import { processKeyword } from './content-pipeline';
+import { processKeyword, pipelineStep1_research, pipelineStep2_generate, pipelineStep3_postprocess } from './content-pipeline';
 import { sendEmail } from './youtube-to-blog/email';
 
 interface Env {
@@ -213,44 +213,65 @@ Plan max 5 content pieces per cycle.`;
 // [3] PRODUCE — 콘텐츠 자동 생성
 // ==========================================
 
-export async function produce(env: Env, maxItems: number = 3): Promise<{
+/**
+ * Step-based produce: processes ONE step per call.
+ * Each step fits within CF Workers 100s wall-time limit.
+ * Priority order: postprocess > generate > research (finish in-progress items first)
+ * Call 3 times per keyword to complete the full pipeline.
+ */
+export async function produce(env: Env, maxItems: number = 1): Promise<{
   processed: number;
-  results: { id: number; keyword: string; angle: string; score: number; status: string }[];
+  results: { id: number; keyword: string; step: string; status: string }[];
 }> {
-  const queued = await env.DB.prepare(
-    `SELECT id, keyword, search_intent FROM content_queue
-     WHERE status = 'queued' ORDER BY priority ASC, created_at ASC LIMIT ?`
-  ).bind(maxItems).all<any>();
+  // Find the next item to process (prioritize items further in the pipeline)
+  const item = await env.DB.prepare(
+    `SELECT id, keyword, search_intent, status FROM content_queue
+     WHERE status IN ('queued', 'research_done', 'generated')
+     ORDER BY
+       CASE status
+         WHEN 'generated' THEN 1
+         WHEN 'research_done' THEN 2
+         WHEN 'queued' THEN 3
+       END,
+       priority ASC, created_at ASC
+     LIMIT 1`
+  ).first<any>();
 
-  const results: any[] = [];
-
-  for (const item of queued.results || []) {
-    try {
-      const result = await processKeyword(item.id, env, { fast: true });
-      results.push({
-        id: item.id,
-        keyword: item.keyword,
-        angle: item.search_intent || 'informational',
-        score: result?.score || 0,
-        status: result?.status || 'unknown'
-      });
-      // No delay between items — CF Workers wall time is limited
-    } catch (e: any) {
-      results.push({
-        id: item.id,
-        keyword: item.keyword,
-        angle: item.search_intent || 'informational',
-        score: 0,
-        status: 'error: ' + e.message
-      });
-    }
+  if (!item) {
+    await env.DB.prepare(
+      `INSERT INTO aeo_cycles (phase, status, data, created_at) VALUES ('produce', 'completed', ?, datetime('now'))`
+    ).bind(JSON.stringify({ processed: 0, message: 'No items to process' })).run();
+    return { processed: 0, results: [] };
   }
+
+  let step = '';
+  let newStatus = '';
+  try {
+    switch (item.status) {
+      case 'queued':
+        step = 'research';
+        newStatus = await pipelineStep1_research(item.id, env);
+        break;
+      case 'research_done':
+        step = 'generate';
+        newStatus = await pipelineStep2_generate(item.id, env);
+        break;
+      case 'generated':
+        step = 'postprocess';
+        newStatus = await pipelineStep3_postprocess(item.id, env);
+        break;
+    }
+  } catch (e: any) {
+    newStatus = 'error: ' + e.message;
+  }
+
+  const result = { id: item.id, keyword: item.keyword, step, status: newStatus };
 
   await env.DB.prepare(
     `INSERT INTO aeo_cycles (phase, status, data, created_at) VALUES ('produce', 'completed', ?, datetime('now'))`
-  ).bind(JSON.stringify({ processed: results.length, results })).run();
+  ).bind(JSON.stringify({ processed: 1, results: [result] })).run();
 
-  return { processed: results.length, results };
+  return { processed: 1, results: [result] };
 }
 
 

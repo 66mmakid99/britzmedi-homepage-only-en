@@ -426,10 +426,164 @@ async function saveContentDraft(db: D1Database, content: any, research: Research
   return result.meta?.last_row_id as number;
 }
 
-// ── Main Pipeline Process ──────────────────────────────────
+// ── Step-based Pipeline (each step fits within CF Workers 100s limit) ──
+
+/**
+ * Step 1: Research — PubMed search, save research data (~5s)
+ */
+export async function pipelineStep1_research(queueId: number, env: Env): Promise<string> {
+  const queue = await env.DB.prepare('SELECT * FROM content_queue WHERE id = ?').bind(queueId).first<any>();
+  if (!queue) throw new Error('Queue item not found');
+
+  const keyword = queue.keyword;
+  await updateQueueStatus(env, queueId, 'researching');
+  await logPipeline(env, null, queueId, 'research_start', { keyword });
+
+  const pubmedArticles = await searchPubMed(keyword);
+
+  const researchData: ResearchData = {
+    keyword,
+    pubmed_articles: pubmedArticles,
+    competitors: [],
+    industry_news: [],
+    research_date: new Date().toISOString(),
+  };
+
+  await env.DB.prepare('UPDATE content_queue SET research_data = ?, status = ? WHERE id = ?')
+    .bind(JSON.stringify(researchData), 'research_done', queueId).run();
+
+  await logPipeline(env, null, queueId, 'research_complete', {
+    pubmed_count: pubmedArticles.length,
+  });
+
+  return 'research_done';
+}
+
+/**
+ * Step 2: Generate — Claude content generation, save draft (~60-90s)
+ */
+export async function pipelineStep2_generate(queueId: number, env: Env): Promise<string> {
+  const queue = await env.DB.prepare('SELECT * FROM content_queue WHERE id = ?').bind(queueId).first<any>();
+  if (!queue) throw new Error('Queue item not found');
+
+  const apiKey = env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+
+  const researchData = JSON.parse(queue.research_data || '{}') as ResearchData;
+  await updateQueueStatus(env, queueId, 'generating');
+
+  const contentResult = await claudeGenerate(apiKey, queue.keyword, researchData);
+  const contentId = await saveContentDraft(env.DB, contentResult, researchData);
+
+  await env.DB.prepare('UPDATE content_queue SET content_id = ?, status = ? WHERE id = ?')
+    .bind(contentId, 'generated', queueId).run();
+
+  await logPipeline(env, contentId, queueId, 'content_generated', {
+    word_count: countWords(contentResult.content || ''),
+    title: contentResult.title,
+  });
+
+  return 'generated';
+}
+
+/**
+ * Step 3: Post-process — Combined fixes + local fixes (~20-30s)
+ */
+export async function pipelineStep3_postprocess(queueId: number, env: Env): Promise<string> {
+  const queue = await env.DB.prepare('SELECT * FROM content_queue WHERE id = ?').bind(queueId).first<any>();
+  if (!queue || !queue.content_id) throw new Error('Queue item or content_id not found');
+
+  const apiKey = env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+
+  const contentId = queue.content_id;
+  const item = await env.DB.prepare('SELECT * FROM content_items WHERE id = ?').bind(contentId).first<any>();
+  if (!item) throw new Error('Content item not found');
+
+  const researchData = JSON.parse(queue.research_data || '{}') as ResearchData;
+  let content = item.content || '';
+
+  await updateQueueStatus(env, queueId, 'postprocessing');
+
+  // Run all LOCAL checks
+  const topicCheck = checkTopicRelevance(queue.keyword, content);
+  const wordCheck = checkWordCount(content);
+  const factCheck = factCheckProducts(content);
+  const validPMIDs = (researchData.pubmed_articles || []).map((a: PubMedArticle) => a.pmid).filter(Boolean);
+  const citationResult = validateCitations(content, validPMIDs);
+  content = citationResult.cleaned;
+  const promoCheck = checkSelfPromotion(content);
+  const hasTable = checkComparisonTable(content);
+  const fpCheck = checkFirstParagraph(content);
+
+  // Collect issues
+  const fixInstructions: string[] = [];
+  if (topicCheck.isCompetitorStandalone) {
+    fixInstructions.push(`CRITICAL: Standalone competitor guide. REWRITE as "RF vs [This Technology]" comparison. ${topicCheck.suggestion || ''}`);
+  }
+  if (wordCheck.isTooLong) {
+    fixInstructions.push(`TRIM: Article is ${wordCheck.wordCount} words. Cut to 2000-2500 words.`);
+  }
+  if (factCheck.hasCriticalError) {
+    fixInstructions.push(`PRODUCT FACTS: Fix: ${factCheck.corrections.map(c => `${c.wrong} → ${c.correct}`).join('; ')}`);
+  }
+  if (promoCheck.hasDedicatedSection) {
+    fixInstructions.push(`SELF-PROMOTION: Remove H2/H3 headings containing "BRITZMEDI". Redistribute naturally.`);
+  }
+  if (!hasTable) {
+    fixInstructions.push(`COMPARISON TABLE: Add 4+ row comparison table. BRITZMEDI TORR RF as one row among equals.`);
+  }
+  if (!fpCheck.isAIExtractable) {
+    fixInstructions.push(`FIRST PARAGRAPH: Start with clear definition + statistic. AI-extractable snippet.`);
+  }
+
+  // Single Claude call for ALL fixes
+  if (fixInstructions.length > 0) {
+    const fixedContent = await callClaude({
+      apiKey,
+      maxTokens: 6000,
+      system: 'You are a medical content editor. Apply ALL fixes, return ONLY the revised article in markdown.',
+      userMessage: `Fix this article:\n\n${fixInstructions.map((f, i) => `${i + 1}. ${f}`).join('\n')}\n\nARTICLE:\n${content}`,
+    });
+    content = fixedContent;
+
+    if (factCheck.hasCriticalError) {
+      const recheck = factCheckProducts(content);
+      if (recheck.hasCriticalError) {
+        await updateQueueStatus(env, queueId, 'failed');
+        await env.DB.prepare('UPDATE content_queue SET error_message = ? WHERE id = ?')
+          .bind('Product fact-check failed after correction', queueId).run();
+        throw new Error('Product fact-check failed');
+      }
+    }
+
+    await logPipeline(env, contentId, queueId, 'combined_postprocess', {
+      fixes_applied: fixInstructions.length,
+    });
+  }
+
+  // Local-only fixes
+  content = insertInternalLinks(content);
+  const ctaResult = checkAndInsertCTAs(content);
+  content = ctaResult.content;
+  const author = getAuthorByAngle(queue.search_intent || 'general');
+
+  await env.DB.prepare('UPDATE content_items SET content = ?, author = ?, status = ?, updated_at = ? WHERE id = ?')
+    .bind(content, author, 'review', new Date().toISOString(), contentId).run();
+
+  await updateQueueStatus(env, queueId, 'manual_review', contentId);
+  await logPipeline(env, contentId, queueId, 'postprocessing_complete', {
+    fix_count: fixInstructions.length,
+    citations_removed: citationResult.removed.length,
+  });
+
+  return 'manual_review';
+}
+
+// ── Legacy full Pipeline Process (for manual/UI use) ──────
 
 export interface ProcessOptions {
-  fast?: boolean; // Skip competitor research + analysis (for cron auto-produce)
+  fast?: boolean;
 }
 
 export async function processKeyword(queueId: number, env: Env, opts: ProcessOptions = {}): Promise<{ contentId: number; status: string; score: number }> {
@@ -441,13 +595,11 @@ export async function processKeyword(queueId: number, env: Env, opts: ProcessOpt
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
   try {
-    // ═══ Step 1: Research ═══
+    // Step 1: Research
     await updateQueueStatus(env, queueId, 'researching');
     await logPipeline(env, null, queueId, 'research_start', { keyword });
 
     const pubmedArticles = await searchPubMed(keyword);
-
-    // Skip competitor research in fast mode (saves 15-30s)
     let competitorResearch: any = { competitors: [], industry_news: [], fda_updates: [] };
     if (!opts.fast) {
       competitorResearch = await researchCompetitors(apiKey, keyword);
@@ -466,12 +618,10 @@ export async function processKeyword(queueId: number, env: Env, opts: ProcessOpt
 
     await logPipeline(env, null, queueId, 'research_complete', {
       pubmed_count: pubmedArticles.length,
-      competitor_count: competitorResearch.competitors?.length || 0,
     });
 
-    // ═══ Step 2: Generate Content ═══
+    // Step 2: Generate
     await updateQueueStatus(env, queueId, 'generating');
-
     const contentResult = await claudeGenerate(apiKey, keyword, researchData);
     const contentId = await saveContentDraft(env.DB, contentResult, researchData);
 
@@ -483,87 +633,47 @@ export async function processKeyword(queueId: number, env: Env, opts: ProcessOpt
       title: contentResult.title,
     });
 
-    // ═══ Step 2.5: Post-processing (combined — single Claude call) ═══
+    // Step 2.5: Post-processing
     await updateQueueStatus(env, queueId, 'postprocessing');
 
-    // Run all LOCAL checks first (no API calls)
     const topicCheck = checkTopicRelevance(keyword, contentResult.content || '');
     const wordCheck = checkWordCount(contentResult.content || '');
     const factCheck = factCheckProducts(contentResult.content || '');
-    const validPMIDs = (researchData.pubmed_articles || [])
-      .map((a: PubMedArticle) => a.pmid)
-      .filter(Boolean);
+    const validPMIDs = (researchData.pubmed_articles || []).map((a: PubMedArticle) => a.pmid).filter(Boolean);
     const citationResult = validateCitations(contentResult.content, validPMIDs);
     contentResult.content = citationResult.cleaned;
     const promoCheck = checkSelfPromotion(contentResult.content);
     const hasTable = checkComparisonTable(contentResult.content);
     const fpCheck = checkFirstParagraph(contentResult.content);
 
-    // Collect all issues that need fixing
     const fixInstructions: string[] = [];
-    if (topicCheck.isCompetitorStandalone) {
-      fixInstructions.push(`CRITICAL: This is a standalone guide about a competitor technology. BRITZMEDI is an RF company. REWRITE as "RF vs [This Technology]" comparison with at least 40% RF content. ${topicCheck.suggestion || ''}`);
-    }
-    if (wordCheck.isTooLong) {
-      fixInstructions.push(`TRIM: Article is ${wordCheck.wordCount} words. Cut to 2000-2500 words. Remove redundant sections, keep comparison tables and FAQs.`);
-    }
-    if (factCheck.hasCriticalError) {
-      fixInstructions.push(`PRODUCT FACTS: Fix these errors: ${factCheck.issues.join('; ')}. Corrections: ${factCheck.corrections.map(c => `${c.wrong} → ${c.correct}`).join('; ')}`);
-    }
-    if (citationResult.removed.length > 0) {
-      fixInstructions.push(`CITATIONS: ${citationResult.removed.length} fake citations were already removed. Do not re-add them.`);
-    }
-    if (promoCheck.hasDedicatedSection) {
-      fixInstructions.push(`SELF-PROMOTION: Remove any H2/H3 heading containing "BRITZMEDI". Redistribute that content into other sections naturally. BRITZMEDI should only appear in comparison contexts.`);
-    }
-    if (!hasTable) {
-      fixInstructions.push(`COMPARISON TABLE: Add a markdown comparison table (4+ rows) comparing relevant products/options. BRITZMEDI TORR RF as one row among equals. Columns: Product, Manufacturer, Technology, Key Feature, Target.`);
-    }
-    if (!fpCheck.isAIExtractable) {
-      fixInstructions.push(`FIRST PARAGRAPH: Rewrite the first paragraph to start with a clear definition + specific number/statistic. Make it AI-extractable as a featured snippet.`);
-    }
+    if (topicCheck.isCompetitorStandalone) fixInstructions.push(`CRITICAL: Standalone competitor guide. Rewrite as RF comparison.`);
+    if (wordCheck.isTooLong) fixInstructions.push(`TRIM to 2000-2500 words.`);
+    if (factCheck.hasCriticalError) fixInstructions.push(`PRODUCT FACTS: ${factCheck.corrections.map(c => `${c.wrong}→${c.correct}`).join('; ')}`);
+    if (promoCheck.hasDedicatedSection) fixInstructions.push(`Remove BRITZMEDI H2/H3 headings.`);
+    if (!hasTable) fixInstructions.push(`Add comparison table (4+ rows).`);
+    if (!fpCheck.isAIExtractable) fixInstructions.push(`Fix first paragraph for AI extraction.`);
 
-    // Single combined Claude call for ALL fixes (or skip if no issues)
     if (fixInstructions.length > 0) {
       const fixedContent = await callClaude({
         apiKey,
-        maxTokens: 8000,
-        system: 'You are a medical content editor for BRITZMEDI. Apply ALL requested fixes and return the complete revised article in markdown. Do not add explanations — return ONLY the article.',
-        userMessage: `Apply ALL of the following fixes to this article:\n\n${fixInstructions.map((f, i) => `${i + 1}. ${f}`).join('\n')}\n\nARTICLE:\n${contentResult.content}`,
+        maxTokens: 6000,
+        system: 'Medical content editor. Apply ALL fixes. Return ONLY the revised article.',
+        userMessage: `Fix:\n${fixInstructions.join('\n')}\n\nARTICLE:\n${contentResult.content}`,
       });
       contentResult.content = fixedContent;
-
-      // Re-check product facts after fix
-      if (factCheck.hasCriticalError) {
-        const recheck = factCheckProducts(contentResult.content);
-        if (recheck.hasCriticalError) {
-          await updateQueueStatus(env, queueId, 'failed');
-          await env.DB.prepare('UPDATE content_queue SET error_message = ? WHERE id = ?')
-            .bind('Product fact-check failed after correction', queueId).run();
-          throw new Error('Product fact-check failed after auto-correction');
-        }
-      }
-
-      await logPipeline(env, contentId, queueId, 'combined_postprocess', {
-        fixes_applied: fixInstructions.length,
-        issues: fixInstructions.map(f => f.split(':')[0]),
-      });
     }
 
-    // Local-only fixes (no Claude calls needed)
     contentResult.content = insertInternalLinks(contentResult.content);
     const ctaResult = checkAndInsertCTAs(contentResult.content);
     contentResult.content = ctaResult.content;
-
     const author = getAuthorByAngle(queue.search_intent || 'general');
 
-    // Update content_items with post-processed content + author
     await env.DB.prepare('UPDATE content_items SET content = ?, author = ?, updated_at = ? WHERE id = ?')
       .bind(contentResult.content, author, new Date().toISOString(), contentId).run();
 
     await logPipeline(env, contentId, queueId, 'postprocessing_complete', {
       fix_count: fixInstructions.length,
-      citations_removed: citationResult.removed.length,
     });
 
     // ═══ Step 3: AI Analysis ═══
