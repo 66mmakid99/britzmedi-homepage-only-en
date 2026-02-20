@@ -1,5 +1,4 @@
 // Shared Claude API helper for content analysis, rewriting, and generation
-// Uses streaming to avoid Cloudflare Workers 30-second timeout
 
 export interface ClaudeCallOptions {
   apiKey: string;
@@ -10,7 +9,8 @@ export interface ClaudeCallOptions {
 }
 
 /**
- * Call Claude API with streaming SSE. Returns accumulated text.
+ * Call Claude API (non-streaming). Returns accumulated text.
+ * Non-streaming is reliable on Cloudflare Workers — fetch wait time doesn't count as CPU time.
  */
 export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
   const {
@@ -31,7 +31,6 @@ export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
     body: JSON.stringify({
       model,
       max_tokens: maxTokens,
-      stream: true,
       system,
       messages: [{ role: 'user', content: userMessage }],
     }),
@@ -42,38 +41,21 @@ export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
     throw new Error(`Claude API error (${res.status}): ${errText}`);
   }
 
-  if (!res.body) throw new Error('Claude returned no response body');
+  const data = await res.json() as any;
 
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
+  // Extract text from content blocks
   let text = '';
-  let buffer = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const data = line.slice(6).trim();
-      if (!data || data === '[DONE]') continue;
-
-      try {
-        const event = JSON.parse(data);
-        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-          text += event.delta.text;
-        }
-      } catch {
-        // Skip non-JSON lines
-      }
+  for (const block of data.content || []) {
+    if (block.type === 'text') {
+      text += block.text;
     }
   }
 
-  if (!text) throw new Error('Claude returned no text');
+  if (!text) {
+    const contentTypes = (data.content || []).map((b: any) => b.type).join(',');
+    throw new Error(`Claude returned no text. stop_reason=${data.stop_reason}, content_types=[${contentTypes}], usage=${JSON.stringify(data.usage || {})}`);
+  }
+
   return text;
 }
 
