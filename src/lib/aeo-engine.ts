@@ -234,7 +234,7 @@ export async function produce(env: Env, maxItems: number = 3): Promise<{
         score: result?.score || 0,
         status: result?.status || 'unknown'
       });
-      await new Promise(r => setTimeout(r, 10000));
+      // No delay between items — CF Workers wall time is limited
     } catch (e: any) {
       results.push({
         id: item.id,

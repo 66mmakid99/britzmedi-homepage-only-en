@@ -181,7 +181,7 @@ async function claudeGenerate(apiKey: string, keyword: string, research: Researc
   const response = await callClaude({
     apiKey,
     model: 'claude-sonnet-4-20250514',
-    maxTokens: 8000,
+    maxTokens: 6000,
     system: `You are a medical content writer for BRITZMEDI. Write evidence-based, high-quality content. Return ONLY valid JSON.\n\n${productContext}`,
     userMessage: `Write a comprehensive blog article for BRITZMEDI's website.
 
