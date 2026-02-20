@@ -130,7 +130,10 @@ const additionalOptions = [
               </div>
             </div>
             <p id="businessEmailError" class="hidden mt-1.5 text-xs text-red-500"></p>
-            <p class="mt-1 text-xs text-slate-500">Please use your company email address</p>
+            <div id="email-warning" class="hidden mt-1 p-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
+              <strong>Company email recommended.</strong> Free email addresses (Gmail, Yahoo, etc.) result in lower priority processing. Please use your company email for faster response.
+            </div>
+            <p id="email-hint" class="mt-1 text-xs text-slate-500">Please use your company email address</p>
           </div>
 
           <!-- Country -->
@@ -396,12 +399,16 @@ const additionalOptions = [
           emailInput.classList.remove('border-red-500');
           emailInput.classList.add('border-green-500');
           isEmailValid = true;
+          const emailWarning = document.getElementById('email-warning');
+          const emailHint = document.getElementById('email-hint');
           // Show warning for personal emails (yellow, not red)
-          if (result.warning && emailError) {
-            emailError.textContent = result.message || '';
-            emailError.classList.remove('hidden', 'text-red-500');
-            emailError.classList.add('text-amber-600');
+          if (result.warning) {
+            emailWarning?.classList.remove('hidden');
+            emailHint?.classList.add('hidden');
+            emailError?.classList.add('hidden');
           } else {
+            emailWarning?.classList.add('hidden');
+            emailHint?.classList.remove('hidden');
             emailError?.classList.add('hidden');
           }
         } else {

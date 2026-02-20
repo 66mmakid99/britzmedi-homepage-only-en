@@ -21,6 +21,10 @@ interface Lead {
   assigned_to?: string;
   lost_reason?: string;
   ai_research?: string;
+  is_free_email?: number;
+  company_research?: string;
+  research_status?: string;
+  score_breakdown?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -580,6 +584,12 @@ function LeadCard({ lead, onClick, compact }: { lead: Lead; onClick: () => void;
               {lead.lead_grade}
             </span>
             <span className="text-[10px] text-slate-400">{lead.country}</span>
+            {lead.is_free_email === 1 && (
+              <span className="text-[10px] text-amber-500" title="Free email">free</span>
+            )}
+            {lead.research_status === 'completed' && (
+              <span className="text-[10px] text-green-500" title="Research complete">AI</span>
+            )}
           </div>
           {products.length > 0 && (
             <div className="flex flex-wrap gap-1">
@@ -811,6 +821,114 @@ function LeadDetailSidebar({
               </div>
             </div>
           </section>
+
+          {/* Score Breakdown */}
+          {lead.score_breakdown && (() => {
+            try {
+              const sb = JSON.parse(lead.score_breakdown);
+              return (
+                <section>
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Score Breakdown ({sb.total}/100)</h3>
+                  <div className="space-y-1.5">
+                    {[
+                      { label: 'Email Quality', axis: sb.email_quality },
+                      { label: 'Company Info', axis: sb.company_info },
+                      { label: 'Product Interest', axis: sb.product_interest },
+                      { label: 'Engagement', axis: sb.engagement_signals },
+                      { label: 'Market Fit', axis: sb.market_fit },
+                    ].map(({ label, axis }) => axis && (
+                      <div key={label} className="flex items-center gap-2 text-sm">
+                        <span className="w-28 text-slate-500 shrink-0">{label}</span>
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-500 rounded-full"
+                            style={{ width: `${(axis.score / axis.max) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-slate-700 w-10 text-right">{axis.score}/{axis.max}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            } catch { return null; }
+          })()}
+
+          {/* Company Research */}
+          {(() => {
+            const status = lead.research_status;
+            if (status === 'pending') {
+              return (
+                <section>
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Company Research</h3>
+                  <div className="flex items-center gap-2 text-sm text-amber-600">
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Researching...
+                  </div>
+                </section>
+              );
+            }
+            if (status === 'failed') {
+              return (
+                <section>
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Company Research</h3>
+                  <p className="text-sm text-red-600">Research failed</p>
+                </section>
+              );
+            }
+            if (status === 'completed' && lead.company_research) {
+              try {
+                const r = JSON.parse(lead.company_research);
+                return (
+                  <section>
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                      AI Company Research
+                      <span className="ml-2 text-green-500 font-normal normal-case">completed</span>
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      {r.company_overview && (
+                        <div className="bg-slate-50 rounded-lg p-3 space-y-1">
+                          <p><span className="text-slate-500">Industry:</span> <span className="font-medium">{r.company_overview.industry}</span></p>
+                          <p><span className="text-slate-500">Type:</span> <span className="font-medium">{r.company_overview.business_type}</span></p>
+                          <p><span className="text-slate-500">Size:</span> <span className="font-medium">{r.company_overview.estimated_size}</span></p>
+                        </div>
+                      )}
+                      {r.relevance_assessment?.assessment_summary && (
+                        <div className="bg-blue-50 rounded-lg p-3 border-l-3 border-blue-400">
+                          <p className="font-medium text-blue-900">{r.relevance_assessment.assessment_summary}</p>
+                        </div>
+                      )}
+                      {r.red_flags?.length > 0 && (
+                        <div className="bg-red-50 rounded-lg p-3">
+                          <p className="font-medium text-red-700 mb-1">Red Flags:</p>
+                          {r.red_flags.map((f: string, i: number) => (
+                            <p key={i} className="text-red-600 text-xs">{f}</p>
+                          ))}
+                        </div>
+                      )}
+                      {r.recommended_action && (
+                        <p className="text-slate-700"><span className="text-slate-500">Action:</span> <span className="font-medium">{r.recommended_action}</span></p>
+                      )}
+                      {r.talking_points?.length > 0 && (
+                        <div>
+                          <p className="text-slate-500 mb-1">Talking Points:</p>
+                          <ul className="list-disc pl-4 text-xs text-slate-700 space-y-0.5">
+                            {r.talking_points.map((tp: string, i: number) => (
+                              <li key={i}>{tp}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                );
+              } catch { return null; }
+            }
+            return null;
+          })()}
 
           {/* Actions */}
           <section>

@@ -1,9 +1,11 @@
 import type { APIRoute } from 'astro';
 import { sendSlackNotification, sendUrgentLeadAlert } from '../../../lib/slack';
-import { calculateLeadScore as calculateAdvancedScore } from '../../../lib/lead-score';
 import { logActivity } from '../../../lib/activity-log';
 import { sendEmail } from '../../../lib/youtube-to-blog/email';
-import { notifyNewLead } from '../../../lib/email-notifications';
+import { notifyNewLead, buildLeadReportEmail, sendLeadReportEmail } from '../../../lib/email-notifications';
+import { isFreeEmail, isValidEmailFormat } from '../../../lib/email-validation';
+import { scoreLead } from '../../../lib/lead-scoring';
+import { researchCompany } from '../../../lib/lead-research';
 
 export const prerender = false;
 
@@ -11,6 +13,7 @@ interface Env {
   DB: D1Database;
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
+  ANTHROPIC_API_KEY?: string;
 }
 
 // IP-based rate limiting for lead submissions
@@ -206,16 +209,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     }
 
-    // Validate email format
-    if (data.email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(data.email)) {
-        return new Response(JSON.stringify({ error: 'Invalid email format' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
+    // 1. Validate email format
+    if (!isValidEmailFormat(data.email)) {
+      return new Response(JSON.stringify({ error: 'Invalid email format', field: 'email' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
+
+    // 2. Check free email — save but flag
+    const isFree = isFreeEmail(data.email);
 
     // Build enrichment_data with referral_source if provided
     let enrichmentData = null;
@@ -223,30 +226,43 @@ export const POST: APIRoute = async ({ request, locals }) => {
       enrichmentData = JSON.stringify({ referral_source: data.referral_source });
     }
 
-    // Calculate lead score
-    const { score, grade } = calculateLeadScore(data);
+    // 3. Intelligent 5-axis scoring (pre-research)
+    const interestedProducts = Array.isArray(data.interested_products) ? data.interested_products : [];
+    const initialScoring = scoreLead({
+      email: data.email,
+      companyName: data.company_name || '',
+      companyWebsite: data.company_website || undefined,
+      jobTitle: data.job_title || undefined,
+      country: data.country || '',
+      interestedIn: interestedProducts,
+      message: data.message || undefined,
+      source: source,
+      isFreeEmail: isFree,
+    });
 
     const runtime = (locals as any).runtime;
     const env = runtime?.env as Env | undefined;
     const db = env?.DB;
     if (!db) {
       // Dev mode - just return success
-      console.log('[Leads API] Would create lead:', { ...data, lead_score: score, lead_grade: grade });
+      console.log('[Leads API] Would create lead:', { ...data, lead_score: initialScoring.total, lead_grade: initialScoring.grade });
       return new Response(JSON.stringify({
         success: true,
-        lead: { id: Date.now(), ...data, lead_score: score, lead_grade: grade },
+        lead: { id: Date.now(), ...data, lead_score: initialScoring.total, lead_grade: initialScoring.grade },
       }), {
         status: 201,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
+    // 4. Save to DB with new columns
     const result = await db.prepare(`
       INSERT INTO leads (
         company_name, company_website, contact_name, job_title, email, country,
         interested_products, message, lead_score, lead_grade,
-        source, utm_source, utm_medium, utm_campaign, enrichment_data
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        source, utm_source, utm_medium, utm_campaign, enrichment_data,
+        is_free_email, research_status, score_breakdown
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
     `).bind(
       data.company_name || 'N/A',
       data.company_website || null,
@@ -254,27 +270,30 @@ export const POST: APIRoute = async ({ request, locals }) => {
       data.job_title || 'N/A',
       data.email,
       data.country || 'N/A',
-      JSON.stringify(data.interested_products || []),
+      JSON.stringify(interestedProducts),
       data.message || null,
-      score,
-      grade,
+      initialScoring.total,
+      initialScoring.grade,
       source,
       data.utm_source || null,
       data.utm_medium || null,
       data.utm_campaign || null,
       enrichmentData,
+      isFree ? 1 : 0,
+      JSON.stringify(initialScoring),
     ).run();
 
-    console.log('[Leads API] Lead created:', result.meta?.last_row_id);
+    const leadId = result.meta?.last_row_id;
+    console.log('[Leads API] Lead created:', leadId, `Grade ${initialScoring.grade}, Score ${initialScoring.total}`);
 
     // Log activity (non-blocking)
     logActivity(db, {
       type: 'lead_created',
-      detail: `New lead: ${data.company_name} (${data.country}) — Grade ${grade}, Score ${score}`,
+      detail: `New lead: ${data.company_name} (${data.country}) — Grade ${initialScoring.grade}, Score ${initialScoring.total}${isFree ? ' [Free email]' : ''}`,
       ip: clientIP,
     }).catch(() => {});
 
-    // Email + dashboard notification (awaited to prevent CF Worker early termination)
+    // 5. Instant 1st notification (score only, no research yet)
     try {
       await notifyNewLead(env, {
         type: source === 'newsletter' ? 'newsletter' : 'contact_form',
@@ -282,16 +301,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
         name: data.contact_name,
         email: data.email,
         country: data.country,
-        product_interest: Array.isArray(data.interested_products) ? data.interested_products.join(', ') : data.interested_products,
+        product_interest: interestedProducts.join(', '),
         message: data.message,
-        lead_score: score,
-        lead_grade: grade,
+        lead_score: initialScoring.total,
+        lead_grade: initialScoring.grade,
       });
     } catch (e) {
       console.error('[NOTIFY]', e);
     }
 
-    // Send Slack notification (non-blocking, failure won't affect response)
+    // Send Slack notification (non-blocking)
     const slackUrl = (env as any)?.SLACK_WEBHOOK_URL as string | undefined;
     if (slackUrl) {
       const slackPayload = {
@@ -300,17 +319,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
         email: data.email,
         country: data.country || 'N/A',
         jobTitle: data.job_title || 'N/A',
-        interestedProducts: data.interested_products || [],
-        leadScore: score,
-        leadGrade: grade,
+        interestedProducts: interestedProducts,
+        leadScore: initialScoring.total,
+        leadGrade: initialScoring.grade,
         message: data.message,
         companyWebsite: data.company_website,
       };
-      // Fire-and-forget: don't await to avoid slowing response
       sendSlackNotification(slackPayload, slackUrl).catch(err =>
         console.error('[Leads API] Slack notification failed:', err)
       );
-      if (grade === 'A') {
+      if (initialScoring.grade === 'A') {
         sendUrgentLeadAlert(slackPayload, slackUrl).catch(err =>
           console.error('[Leads API] Slack urgent alert failed:', err)
         );
@@ -321,9 +339,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const resendKey = (env as any)?.RESEND_API_KEY as string | undefined;
     if (resendKey && data.email && source === 'website') {
       const contactName = data.contact_name || 'there';
-      const products = Array.isArray(data.interested_products)
-        ? data.interested_products.join(', ')
-        : '';
+      const products = interestedProducts.join(', ');
       const confirmHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #0070c4, #015a9f); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -364,9 +380,79 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
+    // 6. Async company research via waitUntil (does not delay response)
+    const ctx = (locals as any)?.runtime?.ctx;
+    if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY) {
+      ctx.waitUntil((async () => {
+        try {
+          const research = await researchCompany(env, {
+            companyName: data.company_name || '',
+            companyWebsite: data.company_website || undefined,
+            email: data.email,
+            country: data.country || '',
+            jobTitle: data.job_title || undefined,
+            interestedIn: interestedProducts,
+          });
+
+          // Re-score with research data
+          const finalScoring = scoreLead({
+            email: data.email,
+            companyName: data.company_name || '',
+            companyWebsite: data.company_website || undefined,
+            jobTitle: data.job_title || undefined,
+            country: data.country || '',
+            interestedIn: interestedProducts,
+            message: data.message || undefined,
+            source: source,
+            isFreeEmail: isFree,
+            companyResearch: research,
+          });
+
+          // Update DB with research results
+          await db.prepare(
+            `UPDATE leads SET company_research = ?, research_status = 'completed', lead_grade = ?, score_breakdown = ?, lead_score = ? WHERE id = ?`
+          ).bind(
+            JSON.stringify(research),
+            finalScoring.grade,
+            JSON.stringify(finalScoring),
+            finalScoring.total,
+            leadId,
+          ).run();
+
+          console.log(`[Leads API] Research complete for lead ${leadId}: Grade ${finalScoring.grade}, Score ${finalScoring.total}`);
+
+          // 2nd notification: full sales intelligence report email
+          const { subject, html } = buildLeadReportEmail({
+            lead: { ...data, isFreeEmail: isFree },
+            scoring: finalScoring,
+            research,
+          });
+          await sendLeadReportEmail(env, { subject, html });
+
+          // Save notification to admin_notifications
+          await db.prepare(
+            `INSERT INTO admin_notifications (type, title, message, link, data) VALUES (?, ?, ?, ?, ?)`
+          ).bind(
+            'lead_researched',
+            `Lead Research Complete: ${data.company_name}`,
+            `Grade ${finalScoring.grade} (${finalScoring.total}/100) — ${research.recommended_action || 'Review needed'}`,
+            '/admin/leads',
+            JSON.stringify({ lead_id: leadId, grade: finalScoring.grade, score: finalScoring.total }),
+          ).run();
+
+        } catch (e) {
+          console.error('[Leads API] Research failed for lead', leadId, e);
+          await db.prepare(
+            `UPDATE leads SET research_status = 'failed' WHERE id = ?`
+          ).bind(leadId).run().catch(() => {});
+        }
+      })());
+    }
+
+    // 7. Respond immediately (research runs in background)
     return new Response(JSON.stringify({
       success: true,
-      lead: { id: result.meta?.last_row_id, ...data, lead_score: score, lead_grade: grade },
+      lead: { id: leadId, ...data, lead_score: initialScoring.total, lead_grade: initialScoring.grade },
     }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
@@ -388,23 +474,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
-
-// Lead scoring — delegates to the advanced 7-category algorithm in lead-score.ts
-function calculateLeadScore(data: any): { score: number; grade: string } {
-  const result = calculateAdvancedScore({
-    companyName: data.company_name || '',
-    companyWebsite: data.company_website || undefined,
-    contactName: data.contact_name || '',
-    jobTitle: data.job_title || '',
-    email: data.email || '',
-    country: data.country || '',
-    interestedProducts: Array.isArray(data.interested_products)
-      ? data.interested_products
-      : [],
-    message: data.message || undefined,
-  });
-  return { score: result.total, grade: result.grade };
-}
 
 // Sample data for development
 function getSampleLeads() {
