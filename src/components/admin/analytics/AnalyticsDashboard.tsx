@@ -109,6 +109,124 @@ interface TrafficData {
   }>;
 }
 
+// Self-hosted page_views fallback when GA4 is not configured
+function SelfHostedTraffic({ days, setDays }: { days: number; setDays: (d: number) => void }) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/admin/analytics/overview?period=${days}d`)
+      .then(r => r.json())
+      .then(d => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [days]);
+
+  if (loading) return <LoadingSpinner />;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-4">
+        {[7, 14, 30, 90].map(d => (
+          <button key={d} onClick={() => setDays(d)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${days === d ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            {d}d
+          </button>
+        ))}
+        <span className="ml-auto text-[10px] text-slate-400">Self-hosted tracking</span>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <KpiCard label="Page Views" value={data?.total_views?.toLocaleString() || '0'} sub={`Last ${days} days`} />
+        <KpiCard label="Unique Visitors" value={data?.unique_visitors?.toLocaleString() || '0'} sub={`By session`} />
+        <KpiCard label="Desktop" value={data?.devices?.desktop?.toLocaleString() || '0'} sub="Views" />
+        <KpiCard label="Mobile" value={data?.devices?.mobile?.toLocaleString() || '0'} sub="Views" />
+      </div>
+
+      {/* Daily chart */}
+      {data?.daily?.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Daily Views</h3>
+          <div className="flex items-end gap-1" style={{ height: 120 }}>
+            {(() => {
+              const maxViews = Math.max(...data.daily.map((d: any) => d.views || 0), 1);
+              return data.daily.map((d: any, i: number) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-[9px] text-slate-400">{d.views}</span>
+                  <div className="w-full bg-blue-500 rounded-t" style={{ height: `${Math.max(2, (d.views / maxViews) * 100)}%` }} />
+                  <span className="text-[8px] text-slate-400 truncate w-full text-center">{d.date?.slice(5)}</span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4">
+        {/* Top Pages */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Top Pages</h3>
+          {data?.top_pages?.length > 0 ? (
+            <div className="space-y-1.5">
+              {data.top_pages.slice(0, 10).map((p: any, i: number) => (
+                <div key={i} className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600 truncate flex-1 mr-2">{p.path}</span>
+                  <span className="text-slate-800 font-medium">{p.views}</span>
+                </div>
+              ))}
+            </div>
+          ) : <p className="text-xs text-slate-400">No data yet</p>}
+        </div>
+
+        {/* Top Countries + Referrers */}
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Top Countries</h3>
+            {data?.top_countries?.length > 0 ? (
+              <div className="space-y-1.5">
+                {data.top_countries.slice(0, 5).map((c: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600">{c.country}</span>
+                    <span className="text-slate-800 font-medium">{c.views}</span>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-xs text-slate-400">No data yet</p>}
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Top Referrers</h3>
+            {data?.top_referrers?.length > 0 ? (
+              <div className="space-y-1.5">
+                {data.top_referrers.slice(0, 5).map((r: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 truncate flex-1 mr-2">{r.referrer}</span>
+                    <span className="text-slate-800 font-medium">{r.views}</span>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="text-xs text-slate-400">No data yet</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Blog Performance */}
+      {data?.blog_performance?.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mt-4">
+          <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Blog Performance</h3>
+          <div className="space-y-1.5">
+            {data.blog_performance.map((b: any, i: number) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <span className="text-slate-600 truncate flex-1 mr-2">{b.path.replace('/blog/', '')}</span>
+                <span className="text-slate-500 mr-3">{b.unique_visitors} visitors</span>
+                <span className="text-slate-800 font-medium">{b.views} views</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TrafficTab() {
   const [data, setData] = useState<TrafficData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,38 +273,9 @@ function TrafficTab() {
     );
   }
 
-  // Not configured state
+  // Not configured — fall back to self-hosted analytics
   if (notConfigured || !connected) {
-    return (
-      <div>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <KpiCard label="Users" value="--" sub={`Last ${days} days`} />
-          <KpiCard label="Sessions" value="--" sub={`Last ${days} days`} />
-          <KpiCard label="Pageviews" value="--" sub={`Last ${days} days`} />
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <div className="text-4xl mb-3">&#x1F4CA;</div>
-          <h3 className="text-base font-semibold text-slate-600 mb-2">
-            {notConfigured ? 'GA4 Not Configured' : 'Analytics API Unreachable'}
-          </h3>
-          <p className="text-sm text-slate-400 max-w-md mx-auto">
-            {notConfigured
-              ? 'Set GA4_PROPERTY_ID in SEO Workers and grant the service account Viewer access to your GA4 property.'
-              : 'The SEO Workers API is not reachable. Check that britzmedi-seo is deployed.'}
-          </p>
-          <div className="mt-6 text-left max-w-lg mx-auto bg-slate-50 rounded-lg p-4 text-xs text-slate-600 space-y-2">
-            <p className="font-semibold text-slate-700">Setup Steps:</p>
-            <ol className="list-decimal pl-4 space-y-1">
-              <li>Enable Analytics Data API in Google Cloud Console</li>
-              <li>Add service account as Viewer in GA4 Admin &rarr; Property Access</li>
-              <li>Find your GA4 Property ID in Admin &rarr; Property Settings</li>
-              <li>Set <code className="bg-slate-200 px-1 rounded">GA4_PROPERTY_ID=properties/XXXXXXXXX</code> in wrangler.toml</li>
-              <li>Deploy: <code className="bg-slate-200 px-1 rounded">wrangler deploy</code></li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    );
+    return <SelfHostedTraffic days={days} setDays={setDays} />;
   }
 
   const s = data?.summary;

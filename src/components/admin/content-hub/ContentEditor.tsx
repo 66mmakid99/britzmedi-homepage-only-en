@@ -586,7 +586,9 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
   // Markdown preview (memoized)
   const previewHtml = useMemo(() => {
     try {
-      return marked(content || '', { breaks: true }) as string;
+      const html = marked(content || '', { breaks: true }) as string;
+      // Strip first H1 to avoid duplication (title shown separately above)
+      return html.replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
     } catch {
       return '<p style="color:red;">Preview error</p>';
     }

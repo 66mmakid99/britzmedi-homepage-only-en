@@ -368,6 +368,51 @@ export function insertInternalLinks(content: string): string {
   return modified;
 }
 
+// ── Citation quality check ────────────────────────────────
+
+export function checkCitations(content: string): {
+  hasReferences: boolean;
+  inlineCitations: number;
+  referenceEntries: number;
+  issues: string[];
+} {
+  const issues: string[] = [];
+
+  // Count inline citations: "Author et al. (Year)" or "(Author et al., Year)"
+  const inlinePatterns = content.match(/\b[A-Z][a-z]+\s+et\s+al\.?\s*[\(,]\s*\d{4}/g) || [];
+  const inlineCitations = inlinePatterns.length;
+
+  // Check for References section
+  const refMatch = content.match(/^##\s*References/mi);
+  const hasReferences = !!refMatch;
+
+  // Count reference entries (numbered or bulleted lines after References heading)
+  let referenceEntries = 0;
+  if (hasReferences) {
+    const refSection = content.slice(content.search(/^##\s*References/mi));
+    const entries = refSection.match(/^\s*(?:\d+\.|[-*])\s+.+/gm) || [];
+    referenceEntries = entries.length;
+  }
+
+  if (!hasReferences && inlineCitations > 0) {
+    issues.push('BLOCKING: Inline citations found but no References section');
+  }
+
+  if (inlineCitations === 0) {
+    issues.push('WARNING: No inline citations found — article lacks evidence attribution');
+  }
+
+  if (hasReferences && referenceEntries < 3) {
+    issues.push(`WARNING: Only ${referenceEntries} references (minimum 3 recommended)`);
+  }
+
+  if (inlineCitations > 0 && hasReferences && Math.abs(inlineCitations - referenceEntries) > 3) {
+    issues.push(`WARNING: Mismatch between inline citations (${inlineCitations}) and references (${referenceEntries})`);
+  }
+
+  return { hasReferences, inlineCitations, referenceEntries, issues };
+}
+
 export function getAuthorByAngle(angle: string): string {
   return ({
     'clinical_evidence': 'BRITZMEDI Clinical Advisory',

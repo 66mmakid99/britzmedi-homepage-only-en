@@ -9,7 +9,7 @@ import {
   factCheckProducts, autoCorrectProducts, validateCitations,
   checkSelfPromotion, checkComparisonTable, checkFirstParagraph,
   insertInternalLinks, getAuthorByAngle,
-  checkTopicRelevance, checkWordCount, checkAndInsertCTAs
+  checkTopicRelevance, checkWordCount, checkAndInsertCTAs, checkCitations
 } from './content-postprocess';
 
 // ── Types ──────────────────────────────────────────────────
@@ -172,8 +172,8 @@ Return JSON: {
 // ── Content Generation ─────────────────────────────────────
 
 async function claudeGenerate(apiKey: string, keyword: string, research: ResearchData): Promise<any> {
-  const pubmedSection = research.pubmed_articles.map(a =>
-    `- ${a.title} (${a.authors}, ${a.journal}, ${a.year}) [PMID: ${a.pmid}]\n  Abstract: ${a.abstract?.substring(0, 500)}`
+  const pubmedSection = research.pubmed_articles.map((a, i) =>
+    `${i + 1}. ${a.authors} et al. "${a.title}" ${a.journal}. ${a.year}. ${a.doi ? `doi:${a.doi.replace(/^doi:\s*/i, '')}` : ''} PMID: ${a.pmid}\n   Abstract: ${a.abstract?.substring(0, 500)}`
   ).join('\n');
 
   const productContext = getProductContext();
@@ -187,11 +187,21 @@ async function claudeGenerate(apiKey: string, keyword: string, research: Researc
 
 TARGET KEYWORD: "${keyword}"
 
-AVAILABLE RESEARCH FROM PUBMED:
-${pubmedSection || '(No PubMed results found - use your knowledge)'}
+AVAILABLE RESEARCH FROM PUBMED (use these citations with EXACT details in References):
+${pubmedSection || '(No PubMed results found - use your knowledge but mark citations as [verification needed])'}
 
 COMPETITOR ANALYSIS:
 ${JSON.stringify(research.competitors || [], null, 2)}
+
+CITATION RULES (MANDATORY):
+- When citing research inline, use abbreviated format: "Author et al. (Year)"
+- At the END of every article, include a "References" section with FULL citations in AMA format:
+  Author(s). Article title. Journal Name. Year;Volume(Issue):Pages. doi:xxxxx
+  Example: Taub AF, Garretson CB. Treatment of acne scars by sublative bipolar radiofrequency. J Clin Aesthet Dermatol. 2020;13(1):28-34. doi:10.xxxxx
+- Every inline citation MUST have a matching entry in References
+- If you cannot provide exact DOI/volume/pages, write "doi: [verification needed]" — do NOT fabricate citation details
+- PubMed links are acceptable: "PMID: 12345678"
+- Minimum 3 references per article, maximum 10
 
 CRITICAL RULES:
 1. EVERY major claim MUST cite a specific study: (Author et al., Journal, Year, key finding with numbers)
@@ -514,6 +524,9 @@ export async function pipelineStep3_postprocess(queueId: number, env: Env): Prom
   const hasTable = checkComparisonTable(content);
   const fpCheck = checkFirstParagraph(content);
 
+  // Citation quality check
+  const citationCheck = checkCitations(content);
+
   // Collect issues
   const fixInstructions: string[] = [];
   if (topicCheck.isCompetitorStandalone) {
@@ -533,6 +546,12 @@ export async function pipelineStep3_postprocess(queueId: number, env: Env): Prom
   }
   if (!fpCheck.isAIExtractable) {
     fixInstructions.push(`FIRST PARAGRAPH: Start with clear definition + statistic. AI-extractable snippet.`);
+  }
+  if (!citationCheck.hasReferences && citationCheck.inlineCitations > 0) {
+    fixInstructions.push(`REFERENCES: Add a "## References" section at the end with full AMA-format citations for every inline citation.`);
+  }
+  if (citationCheck.inlineCitations === 0) {
+    fixInstructions.push(`CITATIONS: Add inline citations (Author et al., Year) for major claims and a References section at the end.`);
   }
 
   // Single Claude call for ALL fixes
