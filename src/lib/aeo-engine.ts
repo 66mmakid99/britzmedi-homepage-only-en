@@ -193,11 +193,12 @@ Plan max 5 content pieces per cycle.`;
   // Actual schema: keyword, search_intent, priority, status, created_at
   for (const item of (planData.planned_content || [])) {
     await env.DB.prepare(
-      `INSERT INTO content_queue (keyword, search_intent, priority, status, created_at)
-       VALUES (?, 'informational', ?, 'queued', datetime('now'))`
+      `INSERT INTO content_queue (keyword, search_intent, priority, category, status, created_at)
+       VALUES (?, 'informational', ?, ?, 'queued', datetime('now'))`
     ).bind(
       item.keyword,
       item.priority || 5,
+      (item.category || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
     ).run();
   }
 

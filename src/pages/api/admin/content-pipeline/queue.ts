@@ -16,7 +16,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const { keyword, search_intent, priority, target_word_count, scheduled_at } = await request.json();
+    const { keyword, search_intent, priority, target_word_count, scheduled_at, category } = await request.json();
 
     if (!keyword) {
       return new Response(JSON.stringify({ error: 'keyword required' }), {
@@ -24,14 +24,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
+    const normalizedCategory = (category || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const result = await db.prepare(
-      'INSERT INTO content_queue (keyword, search_intent, priority, target_word_count, scheduled_at) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO content_queue (keyword, search_intent, priority, target_word_count, scheduled_at, category) VALUES (?, ?, ?, ?, ?, ?)'
     ).bind(
       keyword,
       search_intent || null,
       priority || 5,
       target_word_count || 2000,
       scheduled_at || null,
+      normalizedCategory,
     ).run();
 
     return new Response(JSON.stringify({

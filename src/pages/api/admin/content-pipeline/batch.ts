@@ -16,9 +16,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const keyword = typeof kw === 'string' ? kw : kw.keyword;
     const intent = (typeof kw === 'object' ? kw.search_intent : null) || 'informational';
     const priority = (typeof kw === 'object' ? kw.priority : null) || 5;
+    const cat = ((typeof kw === 'object' ? kw.category : null) || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const result = await db.prepare(
-      'INSERT INTO content_queue (keyword, search_intent, priority) VALUES (?, ?, ?)'
-    ).bind(keyword.trim(), intent, priority).run();
+      'INSERT INTO content_queue (keyword, search_intent, priority, category) VALUES (?, ?, ?, ?)'
+    ).bind(keyword.trim(), intent, priority, cat).run();
     ids.push(result.meta?.last_row_id);
   }
 
