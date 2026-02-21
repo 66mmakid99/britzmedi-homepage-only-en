@@ -251,15 +251,21 @@ const processedContent = stripFirstH1(addHeadingIds(post.content, post.isDynamic
 // Category-based OG image fallback
 const categoryOgImages: Record<string, string> = {
   'technology-guide': '/images/blog/placeholder-technology.svg',
+  'technology-comparison': '/images/blog/placeholder-technology.svg',
   'clinical-reviews': '/images/blog/placeholder-clinical-studies.svg',
+  'clinical-technology': '/images/blog/placeholder-clinical-studies.svg',
   'industry-news': '/images/blog/placeholder-industry-news.svg',
   'industry-trends': '/images/blog/placeholder-industry-news.svg',
+  'industry-insights': '/images/blog/placeholder-industry-news.svg',
+  'industry-analysis': '/images/blog/placeholder-industry-news.svg',
   'buyer-guide': '/images/blog/placeholder-product-updates.svg',
   'product-updates': '/images/blog/placeholder-product-updates.svg',
+  'equipment-technology': '/images/blog/placeholder-product-updates.svg',
   'medical-devices': '/images/blog/placeholder-medical-devices.svg',
   'aesthetic-technology': '/images/blog/placeholder-aesthetic-technology.svg',
   'body-contouring': '/images/blog/placeholder-body-contouring.svg',
   'education': '/images/blog/placeholder-education.svg',
+  'treatment-comparisons': '/images/blog/placeholder-technology.svg',
 };
 const ogImage = post.featuredImage || categoryOgImages[post.category] || '/og-image.jpg';
 

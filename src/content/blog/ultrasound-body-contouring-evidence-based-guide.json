@@ -20,10 +20,27 @@
   "youtubeEmbedUrl": null,
   "youtubeUrl": null,
   "author": "BRITZMEDI Research Team",
-  "publishedAt": "2026-02-15T16:01:22.203Z",
-  "updatedAt": "2026-02-15T16:01:22.203Z",
+  "publishedAt": "2026-02-21T06:41:48.772Z",
+  "updatedAt": "2026-02-21T06:41:48.772Z",
   "doctor": null,
-  "schemaJsonLd": null,
+  "schemaJsonLd": {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Ultrasound Body Contouring: Evidence-Based Guide to Non-Invasive Fat Reduction Technology",
+    "description": "Discover how ultrasound body contouring works, clinical evidence, and treatment protocols. Complete guide to non-invasive fat reduction technology.",
+    "keywords": "ultrasound body contouring",
+    "datePublished": "2026-02-21T06:41:48.772Z",
+    "dateModified": "2026-02-21T06:41:48.772Z",
+    "author": {
+      "@type": "Organization",
+      "name": "BRITZMEDI Research Team"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "BRITZMEDI",
+      "url": "https://britzmedi.com"
+    }
+  },
   "faqs": [
     {
       "question": "How does ultrasound body contouring actually destroy fat cells?",
