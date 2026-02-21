@@ -87,6 +87,43 @@ function slugify(text: string): string {
     .substring(0, 80);
 }
 
+// ─── Thumbnail suggestion rules ──────────────────────────────
+const PRODUCT_IMAGES = [
+  { src: '/images/products/torr-rf/torrrf.webp', label: 'TORR RF' },
+  { src: '/images/products/torr-rf/torrrf-01.webp', label: 'TORR RF Front' },
+  { src: '/images/products/torr-rf/torrrf-handpiece-set.webp', label: 'Handpiece Set' },
+  { src: '/images/products/torr-rf/face-handpiece-deep.webp', label: 'Face Deep' },
+  { src: '/images/products/torr-rf/body-handpiece-deep.webp', label: 'Body Deep' },
+  { src: '/images/products/newchae-shot/newchae-01-1.webp', label: 'Newchae Shot' },
+  { src: '/images/products/newchae-shot/newchae-pack-1.webp', label: 'Newchae Pack' },
+  { src: '/images/products/ulblanc/ulblanc-01.webp', label: 'Ulblanc' },
+  { src: '/images/products/ulblanc/ulblanc-02.webp', label: 'Ulblanc 02' },
+  { src: '/images/products/torr-rf.webp', label: 'TORR RF Hero' },
+  { src: '/images/products/newchae-shot.webp', label: 'Newchae Hero' },
+  { src: '/images/products/ulblanc.webp', label: 'Ulblanc Hero' },
+];
+
+function getThumbnailSuggestion(title: string, _category: string | null, _tags: string | null): string {
+  const t = (title || '').toLowerCase();
+  if (/\bvs\b|comparison/i.test(t))
+    return '💡 Suggested: Product comparison diagram, side-by-side device photos, or technology comparison table screenshot';
+  if (/torr\s*rf/i.test(t))
+    return '💡 Suggested: TORR RF product photo from /images/products/, clinical result photo, or FDA clearance certificate';
+  if (/\b(buy|guide|how.to)\b/i.test(t))
+    return '💡 Suggested: Product lineup photo, pricing comparison chart, or clinic setup photo';
+  if (/cellulite|body\s*(contour|sculpt)/i.test(t))
+    return '💡 Suggested: Body contouring treatment area diagram, RF handpiece close-up, or clinical workflow photo';
+  if (/fda|certifi|510\(k\)|regulatory/i.test(t))
+    return '💡 Suggested: FDA 510(k) clearance document, CE marking certificate, or regulatory compliance badge';
+  if (/microneedling|skin\s*(tight|rejuv|treat)/i.test(t))
+    return '💡 Suggested: RF microneedling handpiece photo, skin layer cross-section diagram, or treatment protocol chart';
+  if (/ultrasound|sonophoresis|iontophoresis/i.test(t))
+    return '💡 Suggested: Ultrasound device photo, transdermal delivery diagram, or treatment comparison infographic';
+  if (/roi|calculator|pricing|cost/i.test(t))
+    return '💡 Suggested: ROI chart graphic, cost comparison table screenshot, or clinic revenue dashboard mockup';
+  return '💡 Suggested: TORR RF product photo, relevant clinical diagram, or BRITZMEDI branded graphic';
+}
+
 const STATUS_BADGE: Record<string, string> = {
   brief: 'bg-slate-100 text-slate-600',
   generating: 'bg-yellow-100 text-yellow-700',
@@ -1234,6 +1271,28 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
                 <span className="text-[10px] text-slate-400 font-medium">Add Thumbnail</span>
               </button>
             )}
+            {/* AI Thumbnail Suggestion */}
+            <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
+              {getThumbnailSuggestion(title, category, tags)}
+            </p>
+
+            {/* Quick Select from Product Photos */}
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <h5 className="text-[10px] font-medium text-slate-500 mb-2">Quick Select from Product Photos</h5>
+              <div className="grid grid-cols-4 gap-1.5">
+                {PRODUCT_IMAGES.map((img) => (
+                  <button
+                    key={img.src}
+                    type="button"
+                    title={img.label}
+                    onClick={() => setFeaturedImage(img.src)}
+                    className={`aspect-square rounded-md overflow-hidden border-2 transition-all hover:border-blue-400 hover:shadow-sm ${featuredImage === img.src ? 'border-blue-500 ring-1 ring-blue-300' : 'border-slate-200'}`}
+                  >
+                    <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Content Score Widget */}
