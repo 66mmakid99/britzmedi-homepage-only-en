@@ -3,7 +3,6 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import BlogHero from '../../../components/blog/BlogHero.astro';
 import BlogCard from '../../../components/blog/BlogCard.astro';
 import CategoryFilter from '../../../components/blog/CategoryFilter.astro';
-import Pagination from '../../../components/blog/Pagination.astro';
 import { supportedLanguages, defaultLang, type Language } from '../../../i18n/config';
 import { useTranslations } from '../../../i18n';
 
@@ -32,16 +31,29 @@ const getPostDescription = (slug: string, fallback: string) => {
 const categoryMap: Record<string, string> = {
   'industry-news': t('blog.categories.industryNews'),
   'industry-trends': t('blog.categories.industryNews'),
+  'industry-insights': 'Industry Insights',
+  'industry-analysis': 'Industry Analysis',
   'product-updates': t('blog.categories.productUpdates'),
   'technology': t('blog.categories.technology'),
   'technology-guide': t('blog.categories.technology'),
+  'technology-comparison': 'Technology Comparison',
+  'technology-analysis': 'Technology Analysis',
   'clinical-studies': t('blog.categories.clinicalStudies'),
   'clinical-reviews': t('blog.categories.clinicalStudies'),
+  'clinical-technology': 'Clinical Technology',
+  'clinical-protocols': 'Clinical Protocols',
   'education': t('blog.categories.education'),
   'medical-devices': t('blog.categories.medicalDevices'),
+  'medical-device-regulations': 'Medical Device Regulations',
   'aesthetic-technology': 'Aesthetic Technology',
   'body-contouring': 'Body Contouring',
   'buyer-guide': 'Buyer Guide',
+  'equipment-technology': 'Equipment & Technology',
+  'treatment-comparisons': 'Treatment Comparisons',
+  'treatment-comparison': 'Treatment Comparison',
+  'regulatory': 'Regulatory',
+  'business-development': 'Business Development',
+  'business-strategy': 'Business Strategy',
 };
 const getCategoryLabel = (category: string) => categoryMap[category] || category.replace('-', ' ');
 
@@ -86,8 +98,6 @@ const allPosts = [...staticPosts, ...dynamicPosts].sort(
 const POSTS_PER_PAGE = 9;
 const heroPost = allPosts[0];
 const remainingPosts = allPosts.slice(1);
-const totalGridPages = Math.ceil(remainingPosts.length / POSTS_PER_PAGE);
-const paginatedPosts = remainingPosts.slice(0, POSTS_PER_PAGE);
 
 const categories = [
   { value: 'all', label: t('blog.categories.all') },
@@ -159,6 +169,18 @@ const moreArticlesMap: Record<string, string> = {
   ar: '\u0645\u0632\u064a\u062f \u0645\u0646 \u0627\u0644\u0645\u0642\u0627\u0644\u0627\u062a',
 };
 const moreArticlesLabel = moreArticlesMap[lang] || 'More Articles';
+
+const loadMoreMap: Record<string, string> = {
+  ja: 'もっと見る',
+  zh: '加载更多',
+  th: 'โหลดเพิ่มเติม',
+  vi: 'Xem thêm',
+  es: 'Cargar más',
+  fr: 'Charger plus',
+  ru: 'Загрузить ещё',
+  ar: 'تحميل المزيد',
+};
+const loadMoreLabel = loadMoreMap[lang] || 'Load More Articles';
 ---
 
 <BaseLayout
@@ -215,9 +237,9 @@ const moreArticlesLabel = moreArticlesMap[lang] || 'More Articles';
         <div class="divider-gradient flex-1"></div>
       </div>
 
-      {/* Post Grid */}
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-        {paginatedPosts.map((post, index) => (
+      {/* Post Grid - all posts rendered, hidden beyond initial batch */}
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" id="blog-grid">
+        {remainingPosts.map((post, index) => (
           <BlogCard
             slug={post.slug}
             title={getPostTitle(post.slug, post.title)}
@@ -234,14 +256,64 @@ const moreArticlesLabel = moreArticlesMap[lang] || 'More Articles';
         ))}
       </div>
 
-      <Pagination
-        currentPage={1}
-        totalPages={totalGridPages}
-        basePath={`/${lang}/blog`}
-        previousText={t('blog.pagination.previous')}
-        nextText={t('blog.pagination.next')}
-        pageText={t('blog.pagination.page')}
-      />
+      {remainingPosts.length > POSTS_PER_PAGE && (
+        <div class="mt-12 text-center" id="load-more-wrapper">
+          <button
+            id="load-more-btn"
+            class="inline-flex items-center gap-2 px-8 py-3 text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 shadow-md shadow-primary-500/20 transition-all duration-300 cursor-pointer"
+            data-per-page={POSTS_PER_PAGE}
+          >
+            {loadMoreLabel}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   </section>
+
+  <script>
+    function initLoadMore() {
+      const grid = document.getElementById('blog-grid');
+      const btn = document.getElementById('load-more-btn');
+      const wrapper = document.getElementById('load-more-wrapper');
+      if (!grid || !btn || !wrapper) return;
+
+      const perPage = parseInt(btn.getAttribute('data-per-page') || '9', 10);
+      const allCards = Array.from(grid.querySelectorAll(':scope > article'));
+      let shown = perPage;
+
+      allCards.forEach((card, i) => {
+        if (i >= perPage) (card as HTMLElement).style.display = 'none';
+      });
+
+      function updateVisibility() {
+        allCards.forEach((card, i) => {
+          if (i < shown) {
+            (card as HTMLElement).style.removeProperty('display');
+          }
+        });
+        if (shown >= allCards.length) wrapper.style.display = 'none';
+      }
+
+      btn.addEventListener('click', () => {
+        shown = Math.min(shown + perPage, allCards.length);
+        updateVisibility();
+      });
+
+      const filterContainer = document.getElementById('category-filter');
+      if (filterContainer) {
+        filterContainer.addEventListener('click', () => {
+          shown = allCards.length;
+          wrapper.style.display = 'none';
+        });
+      }
+
+      updateVisibility();
+    }
+
+    document.addEventListener('astro:page-load', initLoadMore);
+    initLoadMore();
+  </script>
 </BaseLayout>

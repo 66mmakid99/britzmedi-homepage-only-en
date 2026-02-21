@@ -3,7 +3,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogHero from '../../components/blog/BlogHero.astro';
 import BlogCard from '../../components/blog/BlogCard.astro';
 import CategoryFilter from '../../components/blog/CategoryFilter.astro';
-import Pagination from '../../components/blog/Pagination.astro';
 
 // Load dynamic blog posts from content/blog/*.json
 const dynamicPostModules = import.meta.glob('../../content/blog/*.json', { eager: true });
@@ -46,8 +45,6 @@ const allPosts = [...staticPosts, ...dynamicPosts].sort(
 const POSTS_PER_PAGE = 9;
 const heroPost = allPosts[0];
 const remainingPosts = allPosts.slice(1);
-const totalGridPages = Math.ceil(remainingPosts.length / POSTS_PER_PAGE);
-const paginatedPosts = remainingPosts.slice(0, POSTS_PER_PAGE);
 
 const categories = [
   { value: 'all', label: 'All Posts' },
@@ -168,9 +165,9 @@ const blogListSchema = {
         <div class="divider-gradient flex-1"></div>
       </div>
 
-      {/* Post Grid */}
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-        {paginatedPosts.map((post, index) => (
+      {/* Post Grid - all posts rendered, hidden beyond initial batch */}
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" id="blog-grid">
+        {remainingPosts.map((post, index) => (
           <BlogCard
             slug={post.slug}
             title={post.title}
@@ -186,14 +183,68 @@ const blogListSchema = {
         ))}
       </div>
 
-      <Pagination
-        currentPage={1}
-        totalPages={totalGridPages}
-        basePath="/blog"
-        previousText="Previous"
-        nextText="Next"
-        pageText="Page"
-      />
+      {remainingPosts.length > POSTS_PER_PAGE && (
+        <div class="mt-12 text-center" id="load-more-wrapper">
+          <button
+            id="load-more-btn"
+            class="inline-flex items-center gap-2 px-8 py-3 text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 shadow-md shadow-primary-500/20 transition-all duration-300 cursor-pointer"
+            data-per-page={POSTS_PER_PAGE}
+          >
+            Load More Articles
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   </section>
+
+  <script>
+    function initLoadMore() {
+      const grid = document.getElementById('blog-grid');
+      const btn = document.getElementById('load-more-btn');
+      const wrapper = document.getElementById('load-more-wrapper');
+      if (!grid || !btn || !wrapper) return;
+
+      const perPage = parseInt(btn.getAttribute('data-per-page') || '9', 10);
+      const allCards = Array.from(grid.querySelectorAll(':scope > article'));
+      let shown = perPage;
+
+      // Hide cards beyond initial batch
+      allCards.forEach((card, i) => {
+        if (i >= perPage) (card as HTMLElement).style.display = 'none';
+      });
+
+      function updateVisibility() {
+        allCards.forEach((card, i) => {
+          // Respect category filter: don't show cards hidden by filter
+          if (i < shown) {
+            (card as HTMLElement).style.removeProperty('display');
+          }
+        });
+        if (shown >= allCards.length) wrapper.style.display = 'none';
+      }
+
+      btn.addEventListener('click', () => {
+        shown = Math.min(shown + perPage, allCards.length);
+        updateVisibility();
+      });
+
+      // Re-init on category filter change to work with load more
+      const filterContainer = document.getElementById('category-filter');
+      if (filterContainer) {
+        filterContainer.addEventListener('click', () => {
+          // When filtering, show all matching cards and hide load more
+          shown = allCards.length;
+          wrapper.style.display = 'none';
+        });
+      }
+
+      updateVisibility();
+    }
+
+    document.addEventListener('astro:page-load', initLoadMore);
+    initLoadMore();
+  </script>
 </BaseLayout>
