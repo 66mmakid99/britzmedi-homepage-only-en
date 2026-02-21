@@ -44,6 +44,13 @@ const categoryPlaceholders: Record<string, string> = {
   'body-contouring': '/images/blog/placeholder-body-contouring.svg',
   'education': '/images/blog/placeholder-education.svg',
   'treatment-comparisons': '/images/blog/placeholder-technology.svg',
+  'treatment-comparison': '/images/blog/placeholder-technology.svg',
+  'technology-analysis': '/images/blog/placeholder-technology.svg',
+  'clinical-protocols': '/images/blog/placeholder-clinical-studies.svg',
+  'regulatory': '/images/blog/placeholder-product-updates.svg',
+  'medical-device-regulations': '/images/blog/placeholder-product-updates.svg',
+  'business-development': '/images/blog/placeholder-industry-news.svg',
+  'business-strategy': '/images/blog/placeholder-industry-news.svg',
 };
 const placeholderSrc = categoryPlaceholders[category] || '/images/blog/placeholder-default.svg';
 const imageSrc = featuredImage || placeholderSrc;
@@ -65,6 +72,13 @@ const categoryColors: Record<string, string> = {
   'body-contouring': 'bg-emerald-100/90 text-emerald-700',
   'education': 'bg-purple-100/90 text-purple-700',
   'treatment-comparisons': 'bg-blue-100/90 text-blue-700',
+  'treatment-comparison': 'bg-blue-100/90 text-blue-700',
+  'technology-analysis': 'bg-blue-100/90 text-blue-700',
+  'clinical-protocols': 'bg-green-100/90 text-green-700',
+  'regulatory': 'bg-amber-100/90 text-amber-700',
+  'medical-device-regulations': 'bg-amber-100/90 text-amber-700',
+  'business-development': 'bg-orange-100/90 text-orange-700',
+  'business-strategy': 'bg-orange-100/90 text-orange-700',
 };
 const badgeColor = categoryColors[category] || 'bg-slate-100/90 text-slate-600';
 
