@@ -1,7 +1,7 @@
 // Content Editor — Markdown textarea + live preview
 // Uses marked for rendering, no heavy WYSIWYG dependency
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { marked } from 'marked';
 import { isHtml, htmlToMarkdown } from '../../../lib/html-to-markdown';
 
@@ -520,6 +520,276 @@ function ImageUploadModal({
   );
 }
 
+// ─── Crop Modal (canvas-based, 1.91:1 aspect) ──────────────────
+
+const CROP_W = 1200;
+const CROP_H = 630;
+const CROP_RATIO = CROP_W / CROP_H; // 1.9047...
+
+function CropModal({
+  open,
+  imageSrc,
+  onApply,
+  onCancel,
+  contentId,
+}: {
+  open: boolean;
+  imageSrc: string;
+  onApply: (croppedUrl: string) => void;
+  onCancel: () => void;
+  contentId: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [applying, setApplying] = useState(false);
+
+  // Container display size
+  const DISPLAY_W = 480;
+  const DISPLAY_H = Math.round(DISPLAY_W / CROP_RATIO);
+
+  // Load image
+  useEffect(() => {
+    if (!open || !imageSrc) return;
+    setImgLoaded(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      imgRef.current = img;
+      // Compute initial zoom to cover crop area
+      const scaleX = DISPLAY_W / img.width;
+      const scaleY = DISPLAY_H / img.height;
+      const initZoom = Math.max(scaleX, scaleY);
+      setZoom(initZoom);
+      // Center the image
+      setOffset({
+        x: (DISPLAY_W - img.width * initZoom) / 2,
+        y: (DISPLAY_H - img.height * initZoom) / 2,
+      });
+      setImgLoaded(true);
+    };
+    img.onerror = () => {
+      // For same-origin product images, retry without crossOrigin
+      if (img.crossOrigin) {
+        img.crossOrigin = '';
+        img.src = imageSrc;
+      }
+    };
+    img.src = imageSrc;
+  }, [open, imageSrc]);
+
+  // Draw canvas
+  useEffect(() => {
+    if (!imgLoaded || !imgRef.current || !canvasRef.current) return;
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+    const img = imgRef.current;
+
+    ctx.clearRect(0, 0, DISPLAY_W, DISPLAY_H);
+    ctx.drawImage(img, offset.x, offset.y, img.width * zoom, img.height * zoom);
+  }, [imgLoaded, zoom, offset]);
+
+  // Mouse handlers for drag
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setDragging(true);
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragging) return;
+    setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+  const handleMouseUp = () => setDragging(false);
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    setDragging(true);
+    setDragStart({ x: t.clientX - offset.x, y: t.clientY - offset.y });
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!dragging || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    setOffset({ x: t.clientX - dragStart.x, y: t.clientY - dragStart.y });
+  };
+  const handleTouchEnd = () => setDragging(false);
+
+  // Zoom handler
+  const handleZoom = (val: number) => {
+    if (!imgRef.current) return;
+    const img = imgRef.current;
+    const minZoom = Math.max(DISPLAY_W / img.width, DISPLAY_H / img.height);
+    const newZoom = Math.max(minZoom, val);
+    // Zoom toward center
+    const cx = DISPLAY_W / 2;
+    const cy = DISPLAY_H / 2;
+    const ratio = newZoom / zoom;
+    setOffset({
+      x: cx - (cx - offset.x) * ratio,
+      y: cy - (cy - offset.y) * ratio,
+    });
+    setZoom(newZoom);
+  };
+
+  // Apply: render crop to full-res canvas, upload
+  const handleApply = async () => {
+    if (!imgRef.current) return;
+    setApplying(true);
+
+    try {
+      const img = imgRef.current;
+      // Map display coords back to image coords
+      const scale = CROP_W / DISPLAY_W;
+      const fullZoom = zoom * scale;
+      const fullOffX = offset.x * scale;
+      const fullOffY = offset.y * scale;
+
+      // Source rect in image space
+      const sx = -fullOffX / fullZoom;
+      const sy = -fullOffY / fullZoom;
+      const sw = CROP_W / fullZoom;
+      const sh = CROP_H / fullZoom;
+
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = CROP_W;
+      outCanvas.height = CROP_H;
+      const ctx = outCanvas.getContext('2d')!;
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, CROP_W, CROP_H);
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        outCanvas.toBlob(resolve, 'image/webp', 0.85)
+      );
+      if (!blob) throw new Error('Failed to create image');
+
+      const formData = new FormData();
+      formData.append('file', blob, `thumb-${Date.now()}.webp`);
+      formData.append('content_item_id', String(contentId));
+      formData.append('alt_text', 'Blog thumbnail');
+      formData.append('type', 'thumbnail');
+
+      const res = await fetch('/api/admin/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      const data = await res.json();
+      onApply(data.url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Crop failed');
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={onCancel}>
+      <div className="bg-white rounded-xl shadow-2xl max-w-[560px] w-full mx-4 flex flex-col" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+          <h3 className="text-sm font-semibold text-slate-900">Crop Thumbnail</h3>
+          <button onClick={onCancel} className="p-1.5 text-slate-400 hover:text-slate-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Canvas area */}
+          <div
+            ref={containerRef}
+            className="relative mx-auto overflow-hidden rounded-lg border-2 border-slate-300 bg-slate-900 select-none"
+            style={{ width: DISPLAY_W, height: DISPLAY_H, maxWidth: '100%', aspectRatio: `${CROP_W}/${CROP_H}` }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {!imgLoaded ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin w-6 h-6 border-2 border-white/30 border-t-white rounded-full" />
+              </div>
+            ) : (
+              <canvas
+                ref={canvasRef}
+                width={DISPLAY_W}
+                height={DISPLAY_H}
+                className="block"
+                style={{ cursor: dragging ? 'grabbing' : 'grab', width: '100%', height: '100%' }}
+              />
+            )}
+            {/* Crop area border overlay */}
+            <div className="absolute inset-0 pointer-events-none border-2 border-white/60 rounded-lg" />
+            {/* Corner marks */}
+            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-white pointer-events-none rounded-tl" />
+            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-white pointer-events-none rounded-tr" />
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-white pointer-events-none rounded-bl" />
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-white pointer-events-none rounded-br" />
+          </div>
+
+          {/* Zoom slider */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-500 w-10">Zoom</span>
+            <input
+              type="range"
+              min={imgRef.current ? Math.max(DISPLAY_W / imgRef.current.width, DISPLAY_H / imgRef.current.height) : 0.1}
+              max={imgRef.current ? Math.max(DISPLAY_W / imgRef.current.width, DISPLAY_H / imgRef.current.height) * 4 : 2}
+              step={0.01}
+              value={zoom}
+              onChange={e => handleZoom(parseFloat(e.target.value))}
+              className="flex-1 h-1.5 accent-blue-600"
+            />
+            <span className="text-xs text-slate-400 w-12 text-right">{Math.round(zoom * 100)}%</span>
+          </div>
+
+          {/* Size guide */}
+          <p className="text-[10px] text-slate-400 text-center">
+            Recommended: 1200 x 630px (1.91:1) — optimal for blog cards & OG images
+          </p>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-2">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleApply}
+              disabled={!imgLoaded || applying}
+              className="px-5 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {applying && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              {applying ? 'Cropping...' : 'Apply Crop'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Editor Component ──────────────────────────────────────
 
 export default function ContentEditor({ contentId }: { contentId: number }) {
@@ -555,6 +825,16 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
   const [galleryLoading, setGalleryLoading] = useState(false);
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [savedCursorPos, setSavedCursorPos] = useState<number | null>(null);
+
+  // Crop modal
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string>('');
+
+  // Open crop modal for a given image source
+  const openCropModal = useCallback((src: string) => {
+    setCropImageSrc(src);
+    setCropModalOpen(true);
+  }, []);
 
   // Editable fields
   const [title, setTitle] = useState('');
@@ -1269,6 +1549,7 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span className="text-[10px] text-slate-400 font-medium">Add Thumbnail</span>
+                <span className="text-[9px] text-slate-300">1200 x 630px (1.91:1)</span>
               </button>
             )}
             {/* AI Thumbnail Suggestion */}
@@ -1285,7 +1566,7 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
                     key={img.src}
                     type="button"
                     title={img.label}
-                    onClick={() => setFeaturedImage(img.src)}
+                    onClick={() => openCropModal(img.src)}
                     className={`aspect-square rounded-md overflow-hidden border-2 transition-all hover:border-blue-400 hover:shadow-sm ${featuredImage === img.src ? 'border-blue-500 ring-1 ring-blue-300' : 'border-slate-200'}`}
                   >
                     <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
@@ -1397,9 +1678,21 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
           setImageGallery(prev => prev.filter(img => img.id !== id));
         }}
         onSetThumbnail={(url) => {
-          setFeaturedImage(url);
           setImageModalOpen(false);
+          openCropModal(url);
         }}
+      />
+
+      {/* Crop Modal */}
+      <CropModal
+        open={cropModalOpen}
+        imageSrc={cropImageSrc}
+        contentId={contentId}
+        onApply={(croppedUrl) => {
+          setFeaturedImage(croppedUrl);
+          setCropModalOpen(false);
+        }}
+        onCancel={() => setCropModalOpen(false)}
       />
 
       {/* Revision View Modal */}
