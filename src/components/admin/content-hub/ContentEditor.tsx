@@ -61,6 +61,20 @@ interface FAQItem {
   answer: string;
 }
 
+interface ContentImage {
+  id: number;
+  content_item_id: number;
+  filename: string;
+  original_name: string;
+  alt_text: string;
+  caption: string;
+  type: string;
+  size_bytes: number;
+  r2_key: string;
+  url: string;
+  created_at: string;
+}
+
 // ─── Helpers ────────────────────────────────────────────────────
 
 function slugify(text: string): string {
@@ -85,7 +99,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 // ─── Markdown Toolbar ───────────────────────────────────────────
 
-function MarkdownToolbar({ onInsert }: { onInsert: (before: string, after?: string) => void }) {
+function MarkdownToolbar({ onInsert, onImageClick }: { onInsert: (before: string, after?: string) => void; onImageClick?: () => void }) {
   return (
     <div className="flex items-center gap-0.5 flex-wrap px-3 py-2 border-b border-slate-200 bg-slate-50">
       <button type="button" onClick={() => onInsert('**', '**')} title="Bold" className="px-2 py-1.5 text-xs font-medium rounded text-slate-600 hover:bg-slate-100">
@@ -115,7 +129,7 @@ function MarkdownToolbar({ onInsert }: { onInsert: (before: string, after?: stri
       <button type="button" onClick={() => onInsert('[', '](url)')} title="Link" className="px-2 py-1.5 text-xs font-medium rounded text-slate-600 hover:bg-slate-100">
         Link
       </button>
-      <button type="button" onClick={() => onInsert('![alt](', ')')} title="Image" className="px-2 py-1.5 text-xs font-medium rounded text-slate-600 hover:bg-slate-100">
+      <button type="button" onClick={onImageClick || (() => onInsert('![alt](', ')'))} title="Image" className="px-2 py-1.5 text-xs font-medium rounded text-slate-600 hover:bg-slate-100">
         Image
       </button>
       <div className="w-px h-5 bg-slate-200 mx-1" />
@@ -184,6 +198,291 @@ function FAQEditor({
   );
 }
 
+// ─── Image Upload Modal ─────────────────────────────────────────
+
+function ImageUploadModal({
+  open,
+  onClose,
+  contentId,
+  gallery,
+  galleryLoading,
+  onUploadComplete,
+  onInsertImage,
+  onDeleteImage,
+  onSetThumbnail,
+}: {
+  open: boolean;
+  onClose: () => void;
+  contentId: number;
+  gallery: ContentImage[];
+  galleryLoading: boolean;
+  onUploadComplete: (img: ContentImage) => void;
+  onInsertImage: (alt: string, url: string) => void;
+  onDeleteImage: (id: number) => void;
+  onSetThumbnail: (url: string) => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [altText, setAltText] = useState('');
+  const [caption, setCaption] = useState('');
+  const [imageType, setImageType] = useState<string>('inline');
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const resetForm = () => {
+    setFile(null);
+    setPreview(null);
+    setAltText('');
+    setCaption('');
+    setImageType('inline');
+    setError(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    if (selected.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum: 5MB');
+      return;
+    }
+
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(selected.type)) {
+      setError('Invalid file type. Allowed: JPEG, PNG, WebP, GIF');
+      return;
+    }
+
+    setFile(selected);
+    setError(null);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPreview(ev.target?.result as string);
+    reader.readAsDataURL(selected);
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+    if (!altText.trim()) {
+      setError('Alt text is required');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('content_item_id', String(contentId));
+      formData.append('alt_text', altText.trim());
+      formData.append('caption', caption.trim());
+      formData.append('type', imageType);
+
+      const res = await fetch('/api/admin/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      const data = await res.json();
+      onUploadComplete({
+        id: data.id,
+        content_item_id: contentId,
+        filename: data.filename,
+        original_name: data.original_name,
+        alt_text: data.alt_text,
+        caption: caption.trim(),
+        type: imageType,
+        size_bytes: data.size_bytes,
+        r2_key: data.r2_key,
+        url: data.url,
+        created_at: new Date().toISOString(),
+      });
+
+      resetForm();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Delete this image?')) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/admin/images/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Delete failed');
+      }
+      onDeleteImage(id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+          <h3 className="text-sm font-semibold text-slate-900">Image Manager</h3>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Upload Section */}
+          <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Upload New Image</h4>
+
+            {/* File input + Preview */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block">
+                  <span className="text-xs text-slate-500 mb-1 block">File (JPEG, PNG, WebP, GIF — max 5MB)</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleFileChange}
+                    className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-slate-200 file:text-xs file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100"
+                  />
+                </label>
+              </div>
+              {preview && (
+                <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200">
+                  <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
+
+            {/* Alt text */}
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Alt Text <span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                value={altText}
+                onChange={e => setAltText(e.target.value)}
+                placeholder="Describe the image for accessibility..."
+                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+
+            {/* Caption */}
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Caption (optional)</label>
+              <input
+                type="text"
+                value={caption}
+                onChange={e => setCaption(e.target.value)}
+                placeholder="Optional caption..."
+                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+
+            {/* Type */}
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Image Type</label>
+              <select
+                value={imageType}
+                onChange={e => setImageType(e.target.value)}
+                className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="inline">Inline</option>
+                <option value="thumbnail">Thumbnail</option>
+                <option value="hero">Hero</option>
+              </select>
+            </div>
+
+            {error && <p className="text-xs text-red-600">{error}</p>}
+
+            {/* Upload button */}
+            <button
+              onClick={handleUpload}
+              disabled={!file || uploading}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {uploading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              {uploading ? 'Uploading...' : 'Upload'}
+            </button>
+          </div>
+
+          {/* Gallery Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">
+              Gallery ({gallery.length})
+            </h4>
+            {galleryLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full" />
+              </div>
+            ) : gallery.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No images uploaded yet</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-3">
+                {gallery.map(img => (
+                  <div key={img.id} className="group relative border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                    <div className="aspect-square">
+                      <img
+                        src={img.url}
+                        alt={img.alt_text || img.filename}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {/* Overlay actions */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={() => onInsertImage(img.alt_text || img.filename, img.url)}
+                        className="px-2 py-1 text-[10px] font-medium text-white bg-blue-600 hover:bg-blue-700 rounded"
+                        title="Insert into editor"
+                      >
+                        Insert
+                      </button>
+                      <button
+                        onClick={() => onSetThumbnail(img.url)}
+                        className="px-2 py-1 text-[10px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded"
+                        title="Set as thumbnail"
+                      >
+                        Thumb
+                      </button>
+                      <button
+                        onClick={() => handleDelete(img.id)}
+                        disabled={deletingId === img.id}
+                        className="px-2 py-1 text-[10px] font-medium text-white bg-red-600 hover:bg-red-700 rounded disabled:opacity-50"
+                        title="Delete"
+                      >
+                        {deletingId === img.id ? '...' : 'Del'}
+                      </button>
+                    </div>
+                    {/* Meta */}
+                    <div className="px-2 py-1.5 border-t border-slate-200">
+                      <p className="text-[10px] text-slate-600 truncate">{img.original_name || img.filename}</p>
+                      <p className="text-[10px] text-slate-400">{(img.size_bytes / 1024).toFixed(0)} KB &middot; {img.type}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Editor Component ──────────────────────────────────────
 
 export default function ContentEditor({ contentId }: { contentId: number }) {
@@ -212,6 +511,13 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
   const [revisions, setRevisions] = useState<RevisionItem[]>([]);
   const [revisionsLoading, setRevisionsLoading] = useState(false);
   const [viewingRevision, setViewingRevision] = useState<RevisionItem | null>(null);
+
+  // Image management
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageGallery, setImageGallery] = useState<ContentImage[]>([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [featuredImage, setFeaturedImage] = useState<string | null>(null);
+  const [savedCursorPos, setSavedCursorPos] = useState<number | null>(null);
 
   // Editable fields
   const [title, setTitle] = useState('');
@@ -247,6 +553,36 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
     });
   }, [content]);
 
+  // Image gallery loader
+  const loadGallery = useCallback(async () => {
+    setGalleryLoading(true);
+    try {
+      const res = await fetch(`/api/admin/images?content_item_id=${contentId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setImageGallery(data.images || []);
+      }
+    } catch { /* silent */ }
+    finally { setGalleryLoading(false); }
+  }, [contentId]);
+
+  // Open image modal
+  const handleImageClick = useCallback(() => {
+    const ta = (window as any).__editorTextarea as HTMLTextAreaElement | undefined;
+    if (ta) setSavedCursorPos(ta.selectionStart);
+    setImageModalOpen(true);
+    loadGallery();
+  }, [loadGallery]);
+
+  // Insert image markdown at cursor
+  const insertImageMarkdown = useCallback((alt: string, url: string) => {
+    const md = `![${alt}](${url})`;
+    const pos = savedCursorPos ?? content.length;
+    const newContent = content.substring(0, pos) + md + content.substring(pos);
+    setContent(newContent);
+    setImageModalOpen(false);
+  }, [content, savedCursorPos]);
+
   // Markdown preview (memoized)
   const previewHtml = useMemo(() => {
     try {
@@ -277,6 +613,7 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
         setCategory(ci.category || '');
         setSlug(ci.slug || '');
         setSeoKeyword(ci.seo_keyword || '');
+        setFeaturedImage(ci.featured_image || null);
         if (ci.slug) setSlugManual(true);
 
         if (ci.tags) {
@@ -336,6 +673,7 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
           faq: faqs.filter(f => f.question.trim()),
           word_count: wc,
           estimated_read_time: readTime,
+          featured_image: featuredImage,
         }),
       });
 
@@ -355,7 +693,7 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
     } finally {
       setSaving(false);
     }
-  }, [contentId, title, slug, content, excerpt, category, tags, seoKeyword, faqs]);
+  }, [contentId, title, slug, content, excerpt, category, tags, seoKeyword, faqs, featuredImage]);
 
   // ─── Transition handler ─────────────────────────────────────
 
@@ -733,7 +1071,7 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
             <>
               <div className={`bg-white rounded-xl border border-slate-200 overflow-hidden mb-6 ${showPreview ? 'flex' : ''}`}>
                 <div className={showPreview ? 'w-1/2 border-r border-slate-200 flex flex-col' : 'flex flex-col'}>
-                  <MarkdownToolbar onInsert={handleInsert} />
+                  <MarkdownToolbar onInsert={handleInsert} onImageClick={handleImageClick} />
                   <textarea
                     ref={textareaRef}
                     value={content}
@@ -857,6 +1195,45 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
             </div>
           </div>
 
+          {/* Thumbnail */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Thumbnail</h4>
+            {featuredImage ? (
+              <div className="space-y-2">
+                <div className="rounded-lg overflow-hidden border border-slate-200 aspect-video">
+                  <img src={featuredImage} alt="Featured" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleImageClick}
+                    className="flex-1 px-2 py-1.5 text-[10px] font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  >
+                    Change
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFeaturedImage(null)}
+                    className="flex-1 px-2 py-1.5 text-[10px] font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleImageClick}
+                className="w-full aspect-video border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center gap-1.5 hover:border-blue-400 hover:bg-blue-50/30 transition-colors cursor-pointer"
+              >
+                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-[10px] text-slate-400 font-medium">Add Thumbnail</span>
+              </button>
+            )}
+          </div>
+
           {/* Content Score Widget */}
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Content Score</h4>
@@ -943,6 +1320,26 @@ export default function ContentEditor({ contentId }: { contentId: number }) {
           </div>
         </div>
       </div>
+
+      {/* Image Upload Modal */}
+      <ImageUploadModal
+        open={imageModalOpen}
+        onClose={() => setImageModalOpen(false)}
+        contentId={contentId}
+        gallery={imageGallery}
+        galleryLoading={galleryLoading}
+        onUploadComplete={(img) => {
+          setImageGallery(prev => [img, ...prev]);
+        }}
+        onInsertImage={insertImageMarkdown}
+        onDeleteImage={(id) => {
+          setImageGallery(prev => prev.filter(img => img.id !== id));
+        }}
+        onSetThumbnail={(url) => {
+          setFeaturedImage(url);
+          setImageModalOpen(false);
+        }}
+      />
 
       {/* Revision View Modal */}
       {viewingRevision && (
