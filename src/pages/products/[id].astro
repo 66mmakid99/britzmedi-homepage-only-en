@@ -3,7 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { products, getProductById } from '../../content/products';
 
 export function getStaticPaths() {
-  return products.map((product) => ({
+  // newchae-shot has a dedicated page (newchae-shot.astro)
+  return products.filter(p => p.id !== 'newchae-shot').map((product) => ({
     params: { id: product.id },
     props: { product },
   }));
