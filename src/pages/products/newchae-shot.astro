@@ -485,11 +485,16 @@ const packageItems = data.packageContents || [];
             </div>
           </div>
 
-          <div class="bg-gradient-to-br from-rose-50 to-amber-50/30 rounded-3xl border border-rose-100 aspect-square flex flex-col items-center justify-center p-12">
-            <div class="w-40 h-52 bg-white rounded-2xl shadow-lg border border-rose-100 flex items-center justify-center mb-6">
-              <span class="text-sm text-rose-400 text-center px-4">[Cream Product Photo]</span>
-            </div>
-            <p class="text-xs text-rose-400 text-center">{companion.name} - {companion.volume}<br/>Sold separately</p>
+          <div class="bg-gradient-to-br from-rose-50/30 to-amber-50/20 rounded-3xl border border-rose-100 aspect-square flex items-center justify-center overflow-hidden">
+            <img
+              src="/images/products/newchae-shot/newchae-cream.webp"
+              alt="NEWCHAE Peptide Lifting Cream"
+              width="800"
+              height="800"
+              loading="lazy"
+              decoding="async"
+              class="w-full h-full object-contain p-8"
+            />
           </div>
         </div>
       </div>

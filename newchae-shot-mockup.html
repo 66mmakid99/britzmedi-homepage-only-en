@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEWCHAE SHOT - Design Mockup | BRITZMEDI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              800: '#1e40af', 900: '#1e3a8a',
+            },
+            rose: {
+              50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af',
+              400: '#fb7185', 500: '#f43f5e', 600: '#e11d48',
+            },
+            gold: {
+              50: '#fefce8', 100: '#fef9c3', 200: '#fef08a', 300: '#fde047',
+              400: '#facc15', 500: '#eab308', 600: '#ca8a04',
+            }
+          },
+          fontFamily: {
+            display: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+
+    /* Gradient Text */
+    .gradient-text {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Mode Cards Hover */
+    .mode-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mode-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Pulse Ring Animation */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.1); opacity: 0.3; }
+      100% { transform: scale(0.9); opacity: 0.6; }
+    }
+    .pulse-ring { animation: pulse-ring 2.5s ease-in-out infinite; }
+
+    /* Fade In */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeInUp 0.8s ease-out forwards; }
+
+    /* RF Energy Emission - expanding rings from electrodes */
+    @keyframes rf-emit {
+      0% { r: 0; opacity: 0.7; }
+      100% { r: 12; opacity: 0; }
+    }
+    @keyframes rf-emit-sm {
+      0% { r: 0; opacity: 0.6; }
+      100% { r: 8; opacity: 0; }
+    }
+    /* Subtle glow on electrodes */
+    @keyframes electrode-glow {
+      0%, 100% { filter: drop-shadow(0 0 2px rgba(59,130,246,0.3)); }
+      50% { filter: drop-shadow(0 0 6px rgba(59,130,246,0.6)); }
+    }
+    .electrode-glow { animation: electrode-glow 2.5s ease-in-out infinite; }
+
+    /* Design Note */
+    .design-note {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      margin: 8px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Section Separator */
+    .section-sep {
+      border-top: 1px dashed #e2e8f0;
+      position: relative;
+      margin: 0;
+    }
+    .section-sep::before {
+      content: attr(data-label);
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 0 16px;
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+
+  <!-- ============================================================ -->
+  <!-- DESIGN MOCKUP HEADER -->
+  <!-- ============================================================ -->
+  <div class="bg-amber-50 border-b border-amber-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded">MOCKUP</span>
+        <span class="text-sm font-medium text-amber-900">NEWCHAE SHOT Product Page - Design Draft v1</span>
+      </div>
+      <span class="text-xs text-amber-700">2026-03-24 | BRITZMEDI Global Site</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1: HERO -->
+  <!-- ============================================================ -->
+  <section class="relative bg-gradient-to-br from-slate-50 via-white to-blue-50/30 py-16 lg:py-24 overflow-hidden">
+    <!-- Background Deco -->
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary-50/40 to-transparent rounded-full -translate-y-1/3 translate-x-1/4"></div>
+    <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-rose-50/30 to-transparent rounded-full translate-y-1/3 -translate-x-1/4"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6">
+      <!-- Breadcrumb -->
+      <nav class="mb-10">
+        <ol class="flex items-center gap-2 text-sm">
+          <li><a href="#" class="text-slate-400 hover:text-primary-600 transition">Home</a></li>
+          <li class="text-slate-300">/</li>
+          <li><a href="#" class="text-slate-400 hover:text-primary-600 transition">Products</a></li>
+          <li class="text-slate-300">/</li>
+          <li class="text-slate-700 font-medium">NEWCHAE SHOT</li>
+        </ol>
+      </nav>
+
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <!-- Left: Product Image -->
+        <div class="relative">
+          <div class="aspect-square bg-gradient-to-br from-slate-100/80 to-slate-50 rounded-3xl relative overflow-hidden border border-slate-100">
+            <!-- Placeholder for product image -->
+            <div class="w-full h-full flex flex-col items-center justify-center">
+              <div class="relative">
+                <div class="w-48 h-48 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center">
+                  <span class="text-6xl font-light text-white/80">N</span>
+                </div>
+                <!-- Animated energy rings -->
+                <div class="absolute inset-0 w-48 h-48 border-2 border-primary-300/40 rounded-full pulse-ring"></div>
+                <div class="absolute -inset-4 w-56 h-56 border border-rose-300/20 rounded-full pulse-ring" style="animation-delay: 0.8s"></div>
+              </div>
+              <p class="text-sm text-slate-400 mt-6">[Product Hero Image - newchae-shot.webp]</p>
+            </div>
+
+            <!-- Heritage Badge -->
+            <div class="absolute top-6 left-6">
+              <div class="flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-slate-100">
+                <div class="w-2 h-2 bg-primary-500 rounded-full"></div>
+                <span class="text-xs font-semibold text-slate-700">Powered by TORR RF Technology</span>
+              </div>
+            </div>
+
+            <!-- Cert Badges -->
+            <div class="absolute bottom-6 right-6 flex gap-2">
+              <span class="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-xs font-bold text-slate-600 rounded-full border border-slate-100">KC</span>
+              <span class="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-xs font-bold text-slate-600 rounded-full border border-slate-100">CE</span>
+              <span class="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-xs font-bold text-slate-600 rounded-full border border-slate-100">VCCI</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Product Info -->
+        <div class="fade-in">
+          <!-- Category -->
+          <div class="flex items-center gap-3 mb-5">
+            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold bg-rose-50 text-rose-600 rounded-full uppercase tracking-wider">
+              Personal Beauty Device
+            </span>
+            <span class="inline-flex items-center px-3 py-1 text-xs font-medium bg-slate-100 text-slate-500 rounded-full">
+              BD-ERD24NWP
+            </span>
+          </div>
+
+          <!-- Title -->
+          <h1 class="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-3 tracking-tight">
+            NEWCHAE SHOT
+          </h1>
+
+          <!-- Tagline -->
+          <p class="text-xl lg:text-2xl font-semibold mb-2 leading-snug">
+            <span class="text-slate-800">A Masterpiece Built on Three Pillars</span>
+          </p>
+          <p class="text-lg text-primary-600 font-medium mb-6 tracking-wide">
+            Safety &middot; Stability &middot; Durability &mdash; Crowned with Peak Efficacy
+          </p>
+
+          <!-- Description -->
+          <p class="text-lg text-slate-600 leading-relaxed mb-8">
+            Three pillars of uncompromising engineering meet the pinnacle of beauty science.
+            Born from TORR RF medical device heritage, NEWCHAE SHOT delivers professional-grade RF, EMS, and Electroporation in one device &mdash; crafted for home care excellence.
+          </p>
+
+          <!-- Quick Specs Pills -->
+          <div class="flex flex-wrap gap-3 mb-8">
+            <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span class="text-sm font-medium text-slate-700">Max 8W RF Power</span>
+            </div>
+            <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+              </svg>
+              <span class="text-sm font-medium text-slate-700">3 Modes</span>
+            </div>
+            <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              <span class="text-sm font-medium text-slate-700">Medical-Grade Steel</span>
+            </div>
+            <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+              <span class="text-sm font-medium text-slate-700">Samsung SDI Battery</span>
+            </div>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-wrap gap-4">
+            <a href="#" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all shadow-lg shadow-primary-600/20 hover:shadow-primary-600/30">
+              Request a Quote
+              <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </a>
+            <a href="#" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-slate-700 bg-white border-2 border-slate-200 hover:border-primary-300 hover:text-primary-700 rounded-xl transition-all">
+              Download Brochure
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 2: Core Technology Story"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2: TECHNOLOGY HERITAGE -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <!-- Section Header -->
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+          Core Technology
+        </span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+          Medical-Grade Technology,<br>
+          <span class="gradient-text">Designed for Home Care</span>
+        </h2>
+        <p class="text-lg text-slate-500">
+          NEWCHAE SHOT inherits the multi-channel RF technology proven in BRITZMEDI's TORR RF medical device, now engineered for safe, effective home use.
+        </p>
+      </div>
+
+      <!-- RF Stack Diagram -->
+      <div class="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-3xl border border-slate-100 p-8 lg:p-12 mb-16">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-semibold mb-4">
+              <span class="w-1.5 h-1.5 bg-primary-500 rounded-full"></span>
+              RF STACK Method
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">Multi-Channel Concentrated Energy Shot System</h3>
+            <p class="text-slate-600 leading-relaxed mb-6">
+              Unlike conventional single-channel RF devices, NEWCHAE SHOT uses a proprietary multi-circuit, multi-electrode system for deeper and more even energy distribution. Low energy is converted to high thermal energy through the RF STACK method, delivering heat deep into the dermis while preventing surface burns.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-700">Deeper heat penetration vs single-channel devices</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-700">Safe output activated only upon skin contact</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-700">Medical-grade stainless steel electrodes (not plated)</span>
+              </li>
+            </ul>
+          </div>
+          <!-- Diagram: Toroidal 3-Ring Electrode Comparison -->
+          <div class="bg-white rounded-2xl border border-slate-200 aspect-[4/3] flex flex-col items-center justify-center p-8">
+            <div class="flex items-center gap-10 w-full max-w-md justify-center">
+              <!-- Other Devices: Single point -->
+              <div class="text-center flex-1">
+                <div class="w-32 h-32 mx-auto relative flex items-center justify-center mb-4">
+                  <div class="absolute inset-0 rounded-full border-2 border-dashed border-slate-200"></div>
+                  <div class="w-4 h-4 bg-slate-300 rounded-full"></div>
+                </div>
+                <p class="text-xs font-medium text-slate-400">Other Devices</p>
+                <p class="text-[10px] text-slate-400 mt-1">Single Channel</p>
+              </div>
+
+              <!-- VS divider -->
+              <div class="text-xs font-bold text-slate-300">VS</div>
+
+              <!-- NEWCHAE: Toroidal 3-ring electrode -->
+              <div class="text-center flex-1">
+                <div class="w-32 h-32 mx-auto relative flex items-center justify-center mb-4">
+                  <svg class="absolute inset-0 w-32 h-32 electrode-glow" viewBox="0 0 128 128">
+                    <defs>
+                      <!-- Reusable RF emission wave -->
+                      <g id="rf-wave-lg">
+                        <circle cx="0" cy="0" r="0" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0">
+                          <animate attributeName="r" values="0;12" dur="2s" repeatCount="indefinite"/>
+                          <animate attributeName="opacity" values="0.5;0" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="0" cy="0" r="0" fill="none" stroke="#3b82f6" stroke-width="0.8" opacity="0">
+                          <animate attributeName="r" values="0;12" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+                          <animate attributeName="opacity" values="0.4;0" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+                        </circle>
+                      </g>
+                      <g id="rf-wave-md">
+                        <circle cx="0" cy="0" r="0" fill="none" stroke="#2563eb" stroke-width="0.8" opacity="0">
+                          <animate attributeName="r" values="0;9" dur="2.2s" repeatCount="indefinite"/>
+                          <animate attributeName="opacity" values="0.5;0" dur="2.2s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="0" cy="0" r="0" fill="none" stroke="#2563eb" stroke-width="0.6" opacity="0">
+                          <animate attributeName="r" values="0;9" dur="2.2s" begin="0.8s" repeatCount="indefinite"/>
+                          <animate attributeName="opacity" values="0.35;0" dur="2.2s" begin="0.8s" repeatCount="indefinite"/>
+                        </circle>
+                      </g>
+                      <g id="rf-wave-sm">
+                        <circle cx="0" cy="0" r="0" fill="none" stroke="#1d4ed8" stroke-width="0.8" opacity="0">
+                          <animate attributeName="r" values="0;7" dur="1.8s" repeatCount="indefinite"/>
+                          <animate attributeName="opacity" values="0.6;0" dur="1.8s" repeatCount="indefinite"/>
+                        </circle>
+                      </g>
+                    </defs>
+
+                    <!-- === STATIC STRUCTURE === -->
+                    <!-- Outer ring track -->
+                    <circle cx="64" cy="64" r="56" fill="none" stroke="#dbeafe" stroke-width="1.5" stroke-dasharray="6 4"/>
+                    <!-- Middle ring track -->
+                    <circle cx="64" cy="64" r="34" fill="none" stroke="#bfdbfe" stroke-width="1.5" stroke-dasharray="5 3"/>
+                    <!-- Center ring track -->
+                    <circle cx="64" cy="64" r="14" fill="none" stroke="#93c5fd" stroke-width="1.5"/>
+
+                    <!-- === RF EMISSION WAVES (dynamic) === -->
+                    <!-- Outer electrode emissions (staggered) -->
+                    <use href="#rf-wave-lg" x="64" y="8" style="animation-delay:0s"/>
+                    <use href="#rf-wave-lg" x="103.6" y="24.4" style="animation-delay:0.25s"/>
+                    <use href="#rf-wave-lg" x="120" y="64" style="animation-delay:0.5s"/>
+                    <use href="#rf-wave-lg" x="103.6" y="103.6" style="animation-delay:0.75s"/>
+                    <use href="#rf-wave-lg" x="64" y="120" style="animation-delay:1.0s"/>
+                    <use href="#rf-wave-lg" x="24.4" y="103.6" style="animation-delay:1.25s"/>
+                    <use href="#rf-wave-lg" x="8" y="64" style="animation-delay:1.5s"/>
+                    <use href="#rf-wave-lg" x="24.4" y="24.4" style="animation-delay:1.75s"/>
+                    <!-- Middle electrode emissions -->
+                    <use href="#rf-wave-md" x="64" y="30" style="animation-delay:0.1s"/>
+                    <use href="#rf-wave-md" x="88" y="47" style="animation-delay:0.45s"/>
+                    <use href="#rf-wave-md" x="88" y="81" style="animation-delay:0.8s"/>
+                    <use href="#rf-wave-md" x="64" y="98" style="animation-delay:1.15s"/>
+                    <use href="#rf-wave-md" x="40" y="81" style="animation-delay:0.6s"/>
+                    <use href="#rf-wave-md" x="40" y="47" style="animation-delay:0.3s"/>
+                    <!-- Center electrode emission -->
+                    <use href="#rf-wave-sm" x="64" y="64"/>
+
+                    <!-- === STATIC ELECTRODES (on top) === -->
+                    <!-- Outer electrodes -->
+                    <circle cx="64" cy="8" r="4.5" fill="#3b82f6"/>
+                    <circle cx="103.6" cy="24.4" r="4.5" fill="#3b82f6"/>
+                    <circle cx="120" cy="64" r="4.5" fill="#3b82f6"/>
+                    <circle cx="103.6" cy="103.6" r="4.5" fill="#3b82f6"/>
+                    <circle cx="64" cy="120" r="4.5" fill="#3b82f6"/>
+                    <circle cx="24.4" cy="103.6" r="4.5" fill="#3b82f6"/>
+                    <circle cx="8" cy="64" r="4.5" fill="#3b82f6"/>
+                    <circle cx="24.4" cy="24.4" r="4.5" fill="#3b82f6"/>
+                    <!-- Middle electrodes -->
+                    <circle cx="64" cy="30" r="4" fill="#2563eb"/>
+                    <circle cx="88" cy="47" r="4" fill="#2563eb"/>
+                    <circle cx="88" cy="81" r="4" fill="#2563eb"/>
+                    <circle cx="64" cy="98" r="4" fill="#2563eb"/>
+                    <circle cx="40" cy="81" r="4" fill="#2563eb"/>
+                    <circle cx="40" cy="47" r="4" fill="#2563eb"/>
+                    <!-- Center electrode -->
+                    <circle cx="64" cy="64" r="5.5" fill="#1d4ed8"/>
+                  </svg>
+                </div>
+                <p class="text-xs font-bold text-primary-700">NEWCHAE SHOT</p>
+                <p class="text-[10px] text-primary-500 mt-1">Toroidal 3-Ring Multi-Channel</p>
+              </div>
+            </div>
+            <!-- Ring Legend -->
+            <div class="flex items-center gap-5 mt-5 pt-4 border-t border-slate-100">
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#1d4ed8]"></div>
+                <span class="text-[10px] text-slate-500">Core Ring</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></div>
+                <span class="text-[10px] text-slate-500">Middle Ring</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>
+                <span class="text-[10px] text-slate-500">Outer Ring</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 3: Three Modes"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3: THREE MODES -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+          3 Professional Modes
+        </span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+          One Device, Complete Skin Care
+        </h2>
+        <p class="text-lg text-slate-500">
+          From deep collagen stimulation to muscle toning and nutrient absorption, each mode addresses a different dimension of skin health.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- RF Mode -->
+        <div class="mode-card bg-white rounded-2xl overflow-hidden border border-slate-100 group">
+          <div class="h-2 bg-gradient-to-r from-red-400 via-orange-400 to-amber-400"></div>
+          <div class="p-8">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl flex items-center justify-center mb-6 border border-red-100">
+              <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <h3 class="text-xl font-bold text-slate-900">RF Mode</h3>
+              <span class="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">1 MHz</span>
+            </div>
+            <p class="text-sm font-medium text-red-500 mb-4">Tightening & Collagen Boost</p>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-red-400 rounded-full shrink-0 mt-2"></span>
+                Multi-channel concentrated energy shot deep into dermal layer
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-red-400 rounded-full shrink-0 mt-2"></span>
+                Promotes collagen & elastin secretion for skin elasticity
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-red-400 rounded-full shrink-0 mt-2"></span>
+                Enhances blood circulation for smoother texture & brighter tone
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-red-400 rounded-full shrink-0 mt-2"></span>
+                Prevention of fine lines and volume management
+              </li>
+            </ul>
+            <div class="mt-6 pt-5 border-t border-slate-100">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Max Power</span>
+                <span class="font-bold text-slate-700">8W</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                <div class="bg-gradient-to-r from-red-400 to-orange-400 h-1.5 rounded-full" style="width: 80%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMS Mode -->
+        <div class="mode-card bg-white rounded-2xl overflow-hidden border border-slate-100 group">
+          <div class="h-2 bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400"></div>
+          <div class="p-8">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center mb-6 border border-blue-100">
+              <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <h3 class="text-xl font-bold text-slate-900">EMS Mode</h3>
+              <span class="text-xs font-medium text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">1 KHz</span>
+            </div>
+            <p class="text-sm font-medium text-blue-500 mb-4">Muscle Toning & Lifting</p>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0 mt-2"></span>
+                Induces muscle contraction & relaxation for skin elasticity
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0 mt-2"></span>
+                Gentle stimulation of deep skin tissue and muscles
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0 mt-2"></span>
+                Increases absorption rate of cosmetics
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0 mt-2"></span>
+                Improves internal moisturization & sagging skin
+              </li>
+            </ul>
+            <div class="mt-6 pt-5 border-t border-slate-100">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Frequency</span>
+                <span class="font-bold text-slate-700">Medium (1 KHz)</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                <div class="bg-gradient-to-r from-blue-400 to-indigo-400 h-1.5 rounded-full" style="width: 50%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ELP Mode -->
+        <div class="mode-card bg-white rounded-2xl overflow-hidden border border-slate-100 group">
+          <div class="h-2 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400"></div>
+          <div class="p-8">
+            <div class="w-14 h-14 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl flex items-center justify-center mb-6 border border-emerald-100">
+              <svg class="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+              <h3 class="text-xl font-bold text-slate-900">ELP Mode</h3>
+              <span class="text-xs font-medium text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">5-20 KHz</span>
+            </div>
+            <p class="text-sm font-medium text-emerald-500 mb-4">Electroporation Absorption</p>
+            <ul class="space-y-3 text-sm text-slate-600">
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0 mt-2"></span>
+                Multi-frequency penetration through all skin layers
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0 mt-2"></span>
+                Deep absorption from stratum corneum to subcutaneous layer
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0 mt-2"></span>
+                Maximizes active ingredient delivery of cosmetics
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0 mt-2"></span>
+                Enhances skin texture and radiance
+              </li>
+            </ul>
+            <div class="mt-6 pt-5 border-t border-slate-100">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Absorption Depth</span>
+                <span class="font-bold text-slate-700">All Layers</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                <div class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full" style="width: 95%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Vibration Banner -->
+      <div class="mt-10 bg-gradient-to-r from-violet-50 via-white to-violet-50 rounded-2xl border border-violet-100 p-6 lg:p-8">
+        <div class="flex flex-col lg:flex-row items-center gap-6 lg:gap-10">
+          <!-- Vibration Icon -->
+          <div class="shrink-0">
+            <div class="w-20 h-20 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center relative">
+              <svg class="w-9 h-9 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"/>
+              </svg>
+              <!-- Pulse rings -->
+              <div class="absolute inset-0 rounded-2xl border border-violet-200 pulse-ring"></div>
+            </div>
+          </div>
+          <!-- Content -->
+          <div class="flex-1 text-center lg:text-left">
+            <div class="flex items-center gap-2 justify-center lg:justify-start mb-2">
+              <h3 class="text-lg font-bold text-slate-900">Smart Vibration System</h3>
+              <span class="px-2 py-0.5 bg-violet-100 text-violet-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Active in All Modes</span>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed max-w-2xl">
+              <strong>Skin contact sensor auto-activates 10,000 micro-vibrations per minute</strong> the moment electrodes touch your skin. Each mode triggers a unique vibration pattern -- maximizing heat transfer in RF, deepening muscle stimulation in EMS, and accelerating solution absorption in ELP. This isn't an optional add-on; it's an always-on system engineered to multiply the efficacy of every session.
+            </p>
+          </div>
+          <!-- Spec pill -->
+          <div class="shrink-0 text-center">
+            <div class="px-5 py-3 bg-violet-600 text-white rounded-xl">
+              <p class="text-2xl font-bold">10,000</p>
+              <p class="text-[10px] uppercase tracking-wider opacity-80">RPM per minute</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommended Cycle -->
+      <div class="mt-12 bg-white rounded-2xl border border-slate-200 p-8">
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <div class="shrink-0">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Recommended Cycle</p>
+            <p class="text-sm text-slate-600">2-3 times per week, 10 min per session</p>
+          </div>
+          <div class="flex-1 flex items-center gap-4 justify-center flex-wrap">
+            <div class="flex items-center gap-3 px-5 py-3 bg-red-50 rounded-xl border border-red-100">
+              <span class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-xs font-bold text-red-600">D1</span>
+              <span class="text-sm font-medium text-red-700">RF Mode</span>
+            </div>
+            <svg class="w-5 h-5 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+            <div class="flex items-center gap-3 px-5 py-3 bg-blue-50 rounded-xl border border-blue-100">
+              <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-xs font-bold text-blue-600">D2</span>
+              <span class="text-sm font-medium text-blue-700">EMS Mode</span>
+            </div>
+            <svg class="w-5 h-5 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+            <div class="flex items-center gap-3 px-5 py-3 bg-emerald-50 rounded-xl border border-emerald-100">
+              <span class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-xs font-bold text-emerald-600">D3</span>
+              <span class="text-sm font-medium text-emerald-700">ELP Mode</span>
+            </div>
+            <svg class="w-5 h-5 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span class="text-xs text-slate-400 font-medium">Repeat</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 4: Companion Cream (NEW)"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4: COMPANION CREAM (NEW SECTION) -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left: Content -->
+        <div>
+          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-rose-50 text-rose-600 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+            High-End Skincare Solution
+          </span>
+          <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+            NEWCHAE Peptide<br>Lifting Cream
+          </h2>
+          <p class="text-sm text-slate-400 mb-4">Dual-function: Wrinkle Improvement + Skin Whitening | 80ml</p>
+
+          <!-- NOT a generic gel callout -->
+          <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl px-5 py-3 mb-6">
+            <p class="text-sm font-medium">
+              This is not a generic RF conduction gel. It is a premium skincare solution that maximizes conductivity while delivering clinical-grade peptide compounds into the skin.
+            </p>
+          </div>
+
+          <p class="text-lg text-slate-600 leading-relaxed mb-8">
+            Engineered to serve a dual purpose: <strong>maximize RF energy conductivity</strong> for optimal device performance, and simultaneously deliver a concentrated peptide complex that transforms each treatment session into a full skincare regimen. Where conventional conduction gels end at surface contact, NEWCHAE Cream penetrates deep &mdash; powered by the device's Electroporation mode.
+          </p>
+
+          <!-- Peptide Complex -->
+          <div class="bg-gradient-to-br from-rose-50/50 to-amber-50/30 rounded-2xl p-6 border border-rose-100 mb-6">
+            <h4 class="text-sm font-semibold text-slate-900 mb-4">Peptide Complex</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-rose-400 rounded-full"></div>
+                <span class="text-sm text-slate-700">Botox Peptide</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-amber-400 rounded-full"></div>
+                <span class="text-sm text-slate-700">Neuro Peptide</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-pink-400 rounded-full"></div>
+                <span class="text-sm text-slate-700">Elastin Peptide</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-violet-400 rounded-full"></div>
+                <span class="text-sm text-slate-700">Multi Growth Factor</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Growth Factors -->
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">EGF</span>
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">IGF</span>
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">SCF</span>
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">FGF</span>
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">White Rose Extract</span>
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">Yuzu Extract</span>
+            <span class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg">Wine Extract</span>
+          </div>
+
+          <!-- Benefits -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <span class="text-sm font-medium text-slate-700">Enhanced RF Transmission</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                </svg>
+              </div>
+              <span class="text-sm font-medium text-slate-700">Smooth Application</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="text-sm font-medium text-slate-700">Rapid Absorption</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+              </div>
+              <span class="text-sm font-medium text-slate-700">Post-Treatment Moisture</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Cream Image Placeholder -->
+        <div class="bg-gradient-to-br from-rose-50/30 to-amber-50/20 rounded-3xl border border-rose-100 aspect-square flex items-center justify-center overflow-hidden">
+          <img
+            src="/images/products/newchae-shot/newchae-cream.webp"
+            alt="NEWCHAE Peptide Lifting Cream"
+            class="w-full h-full object-contain p-8"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 5: Why Choose (Differentiators)"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5: WHY CHOOSE NEWCHAE SHOT -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 text-white/90 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+          Why Choose
+        </span>
+        <h2 class="text-3xl lg:text-4xl font-bold mb-4">
+          Why NEWCHAE SHOT?
+        </h2>
+        <p class="text-lg text-white/60">
+          6 key reasons that set NEWCHAE SHOT apart from every other home beauty device on the market.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Differentiator 1 -->
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:border-white/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="text-xl font-bold text-white/90">01</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-3">TORR RF Medical Heritage</h3>
+          <p class="text-sm text-white/50 leading-relaxed">
+            Built on the same multi-channel RF technology proven in BRITZMEDI's TORR RF medical device used in professional clinics.
+          </p>
+        </div>
+
+        <!-- Differentiator 2 -->
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:border-white/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-violet-500/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="text-xl font-bold text-white/90">02</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-3">Concentrated Energy Shot</h3>
+          <p class="text-sm text-white/50 leading-relaxed">
+            Automatic shot system concentrates RF energy output for precise delivery at optimal intervals. Buzzer indicates completion per zone.
+          </p>
+        </div>
+
+        <!-- Differentiator 3 -->
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:border-white/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="text-xl font-bold text-white/90">03</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-3">Medical-Grade Materials</h3>
+          <p class="text-sm text-white/50 leading-relaxed">
+            Electrodes made of medical-grade stainless steel (not plated). Samsung SDI battery cells with 3,350mAh high-capacity lithium-ion.
+          </p>
+        </div>
+
+        <!-- Differentiator 4 -->
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:border-white/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-yellow-500/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="text-xl font-bold text-white/90">04</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-3">Unparalleled RF Power</h3>
+          <p class="text-sm text-white/50 leading-relaxed">
+            Max 8W RF power at 1 MHz with RF STACK method for deeper heat penetration without surface skin damage. Unmatched in home devices.
+          </p>
+        </div>
+
+        <!-- Differentiator 5 -->
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:border-white/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="text-xl font-bold text-white/90">05</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-3">Smart Vibration System</h3>
+          <p class="text-sm text-white/50 leading-relaxed">
+            10,000 micro-vibrations per minute with different vibration patterns per mode for optimized energy penetration and comfortable treatment.
+          </p>
+        </div>
+
+        <!-- Differentiator 6 -->
+        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-7 border border-white/10 hover:border-white/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="text-xl font-bold text-white/90">06</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-3">GMP Certified Manufacturing</h3>
+          <p class="text-sm text-white/50 leading-relaxed">
+            Manufactured by a domestic GMP-certified company. Certified with KC (Korea), CE (Europe), and VCCI (Japan) standards.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 6: Specifications"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6: SPECIFICATIONS -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-5 gap-12">
+        <!-- Left: Spec Table -->
+        <div class="lg:col-span-3">
+          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+            Technical Data
+          </span>
+          <h2 class="text-3xl font-bold text-slate-900 mb-8">Specifications</h2>
+
+          <div class="rounded-2xl border border-slate-200 overflow-hidden">
+            <table class="w-full">
+              <tbody>
+                <tr class="border-b border-slate-100 bg-white">
+                  <td class="p-4 lg:p-5 w-2/5 font-medium text-slate-900">Product Name</td>
+                  <td class="p-4 lg:p-5 text-slate-600">NEWCHAE SHOT</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Model</td>
+                  <td class="p-4 lg:p-5 text-slate-600">BD-ERD24NWP</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-white">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Rating</td>
+                  <td class="p-4 lg:p-5 text-slate-600">DC 5V, &gt;1A</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">RF Frequency / Power</td>
+                  <td class="p-4 lg:p-5 text-slate-600">
+                    1 MHz / Max 8W
+                    <span class="block text-xs text-slate-400 mt-1">Multi-channel concentrated energy shot</span>
+                  </td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-white">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">EMS Frequency</td>
+                  <td class="p-4 lg:p-5 text-slate-600">1 KHz</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">ELP Frequency</td>
+                  <td class="p-4 lg:p-5 text-slate-600">
+                    5-20 KHz
+                    <span class="block text-xs text-slate-400 mt-1">Electroporation multi-frequency</span>
+                  </td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-white">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Modes / Levels</td>
+                  <td class="p-4 lg:p-5 text-slate-600">3 Modes (RF / EMS / ELP) &times; 3 Levels</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Vibration</td>
+                  <td class="p-4 lg:p-5 text-slate-600">10,000 rpm (mode-specific patterns)</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-white">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Usage Time</td>
+                  <td class="p-4 lg:p-5 text-slate-600">
+                    10 min per session
+                    <span class="block text-xs text-slate-400 mt-1">Alert every 2 min 30 sec</span>
+                  </td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Battery</td>
+                  <td class="p-4 lg:p-5 text-slate-600">
+                    3.6V, 3,350 mAh Li-ion
+                    <span class="block text-xs text-slate-400 mt-1">Samsung SDI cell &middot; USB-C charging &middot; 5-6 uses per charge</span>
+                  </td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-white">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Dimensions</td>
+                  <td class="p-4 lg:p-5 text-slate-600">54 &times; 50 &times; 191 mm</td>
+                </tr>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Weight</td>
+                  <td class="p-4 lg:p-5 text-slate-600">567g</td>
+                </tr>
+                <tr class="bg-white">
+                  <td class="p-4 lg:p-5 font-medium text-slate-900">Certifications</td>
+                  <td class="p-4 lg:p-5">
+                    <div class="flex gap-2">
+                      <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-md border border-green-200">KC</span>
+                      <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-md border border-green-200">CE</span>
+                      <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-md border border-green-200">VCCI</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: What's in the Box -->
+        <div class="lg:col-span-2">
+          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+            Package Contents
+          </span>
+          <h3 class="text-2xl font-bold text-slate-900 mb-8">What's in the Box</h3>
+
+          <div class="space-y-4">
+            <!-- Main Unit -->
+            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 border border-slate-200">
+                <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18V6m0 0l-4 4m4-4l4 4M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-slate-900">NEWCHAE SHOT Main Unit</p>
+                <p class="text-xs text-slate-400">BD-ERD24NWP</p>
+              </div>
+            </div>
+            <!-- USB-C Cable -->
+            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 border border-slate-200">
+                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-slate-900">USB-C Charging Cable</p>
+              </div>
+            </div>
+            <!-- Pouch -->
+            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 border border-slate-200">
+                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-slate-900">Product Pouch</p>
+                <p class="text-xs text-slate-400">Easy to store and carry</p>
+              </div>
+            </div>
+            <!-- User Manual -->
+            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 border border-slate-200">
+                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-slate-900">User Manual</p>
+              </div>
+            </div>
+            <!-- Peptide Cream (Optional) -->
+            <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-rose-50 to-amber-50 rounded-xl border border-rose-100">
+              <div class="w-16 h-16 bg-white rounded-xl flex items-center justify-center shrink-0 border border-rose-200">
+                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-slate-900">NEWCHAE Peptide Lifting Cream</p>
+                <p class="text-xs text-rose-500 font-medium">Optional &mdash; Sold Separately</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 7: Product Gallery"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7: GALLERY -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+          Gallery
+        </span>
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Product Gallery</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="aspect-[4/3] bg-white rounded-xl border border-slate-200 flex items-center justify-center group cursor-pointer hover:shadow-xl transition-all overflow-hidden">
+          <span class="text-xs text-slate-400">[newchae-01-1.webp]</span>
+        </div>
+        <div class="aspect-[4/3] bg-white rounded-xl border border-slate-200 flex items-center justify-center group cursor-pointer hover:shadow-xl transition-all overflow-hidden">
+          <span class="text-xs text-slate-400">[newchae-01-4.webp]</span>
+        </div>
+        <div class="aspect-[4/3] bg-white rounded-xl border border-slate-200 flex items-center justify-center group cursor-pointer hover:shadow-xl transition-all overflow-hidden">
+          <span class="text-xs text-slate-400">[newchae-pack-1.webp]</span>
+        </div>
+        <div class="aspect-[4/3] bg-white rounded-xl border border-slate-200 flex items-center justify-center group cursor-pointer hover:shadow-xl transition-all overflow-hidden">
+          <span class="text-xs text-slate-400">[newchae-pack-2.webp]</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep" data-label="Section 8: CTA"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 8: CTA -->
+  <!-- ============================================================ -->
+  <section class="py-20 lg:py-28 bg-slate-900">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+      <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">
+        Interested in NEWCHAE SHOT?
+      </h2>
+      <p class="text-lg text-slate-400 mb-10 leading-relaxed">
+        Whether you're a distributor, clinic owner, or retailer, we'd love to discuss partnership opportunities. Schedule a product demo or request the full product catalog.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#" class="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-slate-900 bg-white hover:bg-slate-100 rounded-xl transition-colors shadow-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Request Demo
+        </a>
+        <a href="#" class="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-white border-2 border-white/30 hover:bg-white/10 rounded-xl transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Download Catalog
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- DESIGN NOTES FOOTER -->
+  <!-- ============================================================ -->
+  <div class="bg-amber-50 border-t border-amber-200 py-8">
+    <div class="max-w-4xl mx-auto px-6">
+      <h3 class="text-lg font-bold text-amber-900 mb-4">Design Notes</h3>
+      <div class="space-y-3">
+        <div class="design-note">
+          <strong>Section 1 (Hero) v2:</strong> 태그라인 변경 — 기술 용어 삭제. "안전성·안정성·견고성 + 최고의 효능" 마케팅 카피로 교체. 3 Pillars 구조.
+        </div>
+        <div class="design-note">
+          <strong>Section 2 (Technology) v3:</strong> 토로이달 3중 전극 구조를 정적(static)으로 고정. 전극·링 트랙은 움직이지 않음. RF 에너지 방사 효과만 동적 — 각 전극에서 확장되는 원형 파동(SVG animate)으로 고주파 발산 표현. 구조 안정성 + 에너지 출력 동시 전달.
+        </div>
+        <div class="design-note">
+          <strong>Section 3 (Three Modes) v2:</strong> Smart Vibration 통합 배너 상단 추가. 피부접촉 센서 자동 가동 강조. 모든 모드에서 동시 작동하는 10,000rpm 바이브레이션 → 열전달·솔루션 흡수 극대화 설명.
+        </div>
+        <div class="design-note">
+          <strong>Section 4 (Cream) v2:</strong> 하이엔드 포지셔닝으로 전면 재작성. "This is NOT a generic RF gel" 다크 배너 추가. 전도성 극대화 + 프리미엄 펩타이드 듀얼 목적 강조. 저가 크림과 명확 차별화.
+        </div>
+        <div class="design-note">
+          <strong>What's in the Box v2:</strong> 이모지 전량 삭제 → SVG 아이콘(디바이스, 번개, 박스, 책, 비커)으로 교체.
+        </div>
+        <div class="design-note">
+          <strong>톤앤매너:</strong> B2B 글로벌 — Professional yet aspirational. "명작(Masterpiece)" 포지셔닝. 기술적 근거 + 마케팅 감성 밸런스.
+        </div>
+        <div class="design-note">
+          <strong>Compliance:</strong> "Personal Beauty Device"로 일관. FDA 언급 없음. "Clinical" 대신 "Professional-grade" 표현. britzmedi-products.ts 규정 준수.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
