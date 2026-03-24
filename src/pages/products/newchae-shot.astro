@@ -83,10 +83,13 @@ const packageItems = data.packageContents || [];
       50% { filter: drop-shadow(0 0 6px rgba(59,130,246,0.6)); }
     }
     .electrode-glow { animation: electrode-glow 2.5s ease-in-out infinite; }
+    /* Compact section spacing for product page */
+    .nc-section { padding-top: 3rem; padding-bottom: 3rem; }
+    @media (min-width: 1024px) { .nc-section { padding-top: 4.5rem; padding-bottom: 4.5rem; } }
   </style>
 
   <!-- ==================== SECTION 1: HERO ==================== -->
-  <section class="relative bg-gradient-to-br from-slate-50 via-white to-blue-50/30 py-12 lg:py-24 overflow-hidden">
+  <section class="relative bg-gradient-to-br from-slate-50 via-white to-blue-50/30 py-10 lg:py-16 overflow-hidden">
     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-blue-50/40 to-transparent rounded-full -translate-y-1/3 translate-x-1/4"></div>
     <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-rose-50/30 to-transparent rounded-full translate-y-1/3 -translate-x-1/4"></div>
 
@@ -189,9 +192,9 @@ const packageItems = data.packageContents || [];
   </section>
 
   <!-- ==================== SECTION 2: TECHNOLOGY HERITAGE ==================== -->
-  <section class="section bg-white">
+  <section class="nc-section bg-white">
     <div class="container">
-      <div class="max-w-3xl mx-auto text-center mb-16">
+      <div class="max-w-3xl mx-auto text-center mb-10">
         <span class="label mb-3 justify-center">Core Technology</span>
         <h2 class="heading-2 mb-4">Medical-Grade Technology, <span class="gradient-text">Designed for Home Care</span></h2>
         <p class="body-large">NEWCHAE SHOT inherits the multi-channel RF technology proven in BRITZMEDI's TORR RF medical device, now engineered for safe, effective home use.</p>
@@ -305,9 +308,9 @@ const packageItems = data.packageContents || [];
   </section>
 
   <!-- ==================== SECTION 3: THREE MODES ==================== -->
-  <section class="section bg-slate-50">
+  <section class="nc-section bg-slate-50">
     <div class="container">
-      <div class="max-w-3xl mx-auto text-center mb-16">
+      <div class="max-w-3xl mx-auto text-center mb-10">
         <span class="label mb-3 justify-center">3 Professional Modes</span>
         <h2 class="heading-2 mb-4">One Device, Complete Skin Care</h2>
         <p class="body-large">From deep collagen stimulation to muscle toning and nutrient absorption, each mode addresses a different dimension of skin health.</p>
@@ -418,7 +421,7 @@ const packageItems = data.packageContents || [];
       </div>
 
       <!-- Recommended Cycle -->
-      <div class="mt-12 bg-white rounded-2xl border border-slate-200 p-8">
+      <div class="mt-8 bg-white rounded-2xl border border-slate-200 p-6 lg:p-8">
         <div class="flex flex-col md:flex-row items-center gap-8">
           <div class="shrink-0">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Recommended Cycle</p>
@@ -449,7 +452,7 @@ const packageItems = data.packageContents || [];
 
   <!-- ==================== SECTION 4: COMPANION CREAM ==================== -->
   {companion && (
-    <section class="section bg-white">
+    <section class="nc-section bg-white">
       <div class="container">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -502,9 +505,9 @@ const packageItems = data.packageContents || [];
   )}
 
   <!-- ==================== SECTION 5: WHY CHOOSE ==================== -->
-  <section class="section bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
+  <section class="nc-section bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
     <div class="container">
-      <div class="max-w-3xl mx-auto text-center mb-16">
+      <div class="max-w-3xl mx-auto text-center mb-10">
         <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 text-white/90 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">Why Choose</span>
         <h2 class="text-3xl lg:text-4xl font-bold mb-4">Why NEWCHAE SHOT?</h2>
         <p class="text-lg text-white/60">6 key reasons that set NEWCHAE SHOT apart from every other home beauty device on the market.</p>
@@ -535,12 +538,12 @@ const packageItems = data.packageContents || [];
   </section>
 
   <!-- ==================== SECTION 6: SPECIFICATIONS ==================== -->
-  <section class="section bg-white">
+  <section class="nc-section bg-white">
     <div class="container">
       <div class="grid lg:grid-cols-5 gap-12">
         <div class="lg:col-span-3">
           <span class="label mb-3 block">Technical Data</span>
-          <h2 class="heading-2 mb-8">Specifications</h2>
+          <h2 class="heading-2 mb-6">Specifications</h2>
           <div class="rounded-2xl border border-slate-200 overflow-hidden">
             <table class="w-full">
               <tbody>
@@ -560,7 +563,7 @@ const packageItems = data.packageContents || [];
 
         <div class="lg:col-span-2">
           <span class="label mb-3 block">Package Contents</span>
-          <h3 class="text-2xl font-bold text-slate-900 mb-8">What's in the Box</h3>
+          <h3 class="text-2xl font-bold text-slate-900 mb-6">What's in the Box</h3>
           <div class="space-y-4">
             {packageItems.map((item: { name: string; note?: string }) => (
               <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
@@ -591,9 +594,9 @@ const packageItems = data.packageContents || [];
 
   <!-- ==================== SECTION 7: GALLERY ==================== -->
   {product.images?.gallery && product.images.gallery.length > 0 && (
-    <section class="section bg-slate-50">
+    <section class="nc-section bg-slate-50">
       <div class="container">
-        <div class="text-center mb-12">
+        <div class="text-center mb-8">
           <span class="label mb-3 justify-center">Gallery</span>
           <h2 class="heading-2 mb-4">Product Gallery</h2>
         </div>
@@ -609,7 +612,7 @@ const packageItems = data.packageContents || [];
   )}
 
   <!-- ==================== SECTION 8: CTA ==================== -->
-  <section class="section bg-slate-900">
+  <section class="nc-section bg-slate-900">
     <div class="container">
       <div class="text-center max-w-3xl mx-auto">
         <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">Interested in NEWCHAE SHOT?</h2>
@@ -629,9 +632,9 @@ const packageItems = data.packageContents || [];
   </section>
 
   <!-- Related Products -->
-  <section class="section bg-slate-50">
+  <section class="nc-section bg-slate-50">
     <div class="container">
-      <div class="max-w-2xl mb-12">
+      <div class="max-w-2xl mb-8">
         <span class="label mb-3 block">Explore More</span>
         <h2 class="heading-2 mb-4">Related Products</h2>
         <p class="body-large">Discover other innovative aesthetic devices from BRITZMEDI.</p>
