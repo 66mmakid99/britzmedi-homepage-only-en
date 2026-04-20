@@ -86,7 +86,7 @@ Traditional search engine optimization.
   "logo": "https://britzmedi.com/logo.png",
   "contactPoint": {
     "@type": "ContactPoint",
-    "email": "sh.lee@britzmedi.co.kr",
+    "email": "sh.lee@britzmedi.com",
     "contactType": "sales"
   }
 }

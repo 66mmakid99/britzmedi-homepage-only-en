@@ -24,7 +24,7 @@ Manages Tawk.to chatbot integration for BRITZMEDI Global website. Handles widget
 - **Widget URL**: `https://embed.tawk.to/69750b239602761980a882d2/1jfoj70v5`
 - **AI Features**: 100 free messages/month
 - **Knowledge Base**: Manual entry (18 FAQ items)
-- **Notifications**: sh.lee@britzmedi.co.kr
+- **Notifications**: sh.lee@britzmedi.com
 
 ## Tasks
 
@@ -76,7 +76,7 @@ Manages Tawk.to chatbot integration for BRITZMEDI Global website. Handles widget
 
 **Steps**:
 1. Go to Settings → Notifications
-2. Add email: sh.lee@britzmedi.co.kr
+2. Add email: sh.lee@britzmedi.com
 3. Enable:
    - New conversation notifications
    - Missed conversation alerts

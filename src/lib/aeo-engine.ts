@@ -580,7 +580,7 @@ async function sendGrowthReportEmail(env: Env, results: any) {
   try {
     await sendEmail({
       apiKey: env.RESEND_API_KEY!,
-      to: 'sh.lee@britzmedi.co.kr',
+      to: 'sh.lee@britzmedi.com',
       from: 'BRITZMEDI Global <noreply@britzmedi.com>',
       subject,
       html

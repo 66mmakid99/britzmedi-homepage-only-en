@@ -3,7 +3,7 @@
 
 import type { ScoreBreakdown } from './lead-scoring';
 
-const ADMIN_EMAIL = 'sh.lee@britzmedi.co.kr';
+const ADMIN_EMAIL = 'sh.lee@britzmedi.com';
 const FROM_EMAIL = 'BRITZMEDI Global <noreply@britzmedi.com>';
 
 export interface LeadNotification {

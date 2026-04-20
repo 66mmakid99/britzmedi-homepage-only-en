@@ -95,7 +95,7 @@ export const BRITZMEDI_COMPANY = {
   name: "BRITZMEDI Co., Ltd.",
   ceo: "이신재 (Shinjae Lee)",
   cmo: "이성호 (Sungho Lee)",
-  cmo_email: "sh.lee@britzmedi.co.kr",
+  cmo_email: "sh.lee@britzmedi.com",
   headquarters: "1211, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea",
   website: "https://britzmedi.com",
   phone: "+82-70-4348-7244",

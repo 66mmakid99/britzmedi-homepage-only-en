@@ -28,7 +28,7 @@ Planning OH-MY-OPENCODE setup for BRITZMEDI Global website with focus on Crisp c
 **Requirements**:
 - Embed Crisp widget via script tag
 - Train AI on FAQ content (18 items from `src/content/faq.ts`)
-- Configure email notifications to sh.lee@britzmedi.co.kr
+- Configure email notifications to sh.lee@britzmedi.com
 - Enable Knowledge Base feature
 
 **Current Status**:
@@ -183,7 +183,7 @@ Planning OH-MY-OPENCODE setup for BRITZMEDI Global website with focus on Crisp c
 - **Status**: ✅ Active
 - **Service ID**: service_nbk0net
 - **Template ID**: template_azmskha
-- **Recipient**: sh.lee@britzmedi.co.kr
+- **Recipient**: sh.lee@britzmedi.com
 - **Features**: Client-side validation, disposable domain blocking, typo detection
 
 #### Tawk.to (Live Chat)

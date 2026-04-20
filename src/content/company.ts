@@ -16,7 +16,7 @@ export const company = {
   
   contact: {
     phone: "+82-70-4348-7244",
-    email: "sh.lee@britzmedi.co.kr",
+    email: "sh.lee@britzmedi.com",
     website: "www.britzmedi.co.kr",
   },
 

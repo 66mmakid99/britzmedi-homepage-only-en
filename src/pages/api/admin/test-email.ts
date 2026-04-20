@@ -21,7 +21,7 @@ export const GET: APIRoute = async ({ locals }) => {
       },
       body: JSON.stringify({
         from: 'BRITZMEDI Global <noreply@britzmedi.com>',
-        to: ['sh.lee@britzmedi.co.kr'],
+        to: ['sh.lee@britzmedi.com'],
         subject: '[TEST] BRITZMEDI Email ' + new Date().toISOString(),
         html: '<h2>Email test OK</h2><p>Sent at ' + new Date().toISOString() + '</p>',
       }),

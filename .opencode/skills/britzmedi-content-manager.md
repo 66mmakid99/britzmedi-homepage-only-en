@@ -165,7 +165,7 @@ secondaryCTA: {
 
 ```typescript
 contact: {
-  email: 'sh.lee@britzmedi.co.kr',
+  email: 'sh.lee@britzmedi.com',
   phone: '+82-31-XXX-XXXX',
   address: 'Full address here',
 }

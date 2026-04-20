@@ -128,7 +128,7 @@ export const faqItems: FAQItem[] = [
 ### 1. EmailJS (Contact Form)
 
 ```
-User submits form ──▶ Client-side JS ──▶ EmailJS API ──▶ sh.lee@britzmedi.co.kr
+User submits form ──▶ Client-side JS ──▶ EmailJS API ──▶ sh.lee@britzmedi.com
                            │
                            └── No server required
 ```

@@ -69,7 +69,7 @@ All content is managed via **TypeScript files** in `src/content/`:
 ### EmailJS (Contact Form)
 - **Service ID**: `service_nbk0net`
 - **Template ID**: `template_azmskha`
-- **Recipient**: sh.lee@britzmedi.co.kr
+- **Recipient**: sh.lee@britzmedi.com
 
 ### Tawk.to (Live Chat)
 - **Property ID**: `69750b239602761980a882d2`
