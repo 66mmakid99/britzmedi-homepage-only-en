@@ -68,7 +68,7 @@
 **A:** BRITZMEDI products come with a standard manufacturer warranty. Warranty terms and coverage vary by product and region. Our warranty covers manufacturing defects and includes technical support. Extended warranty options are available. Please refer to your purchase documentation or contact our support team for specific warranty information.
 
 ### Q: How can I get technical support?
-**A:** Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at contact@britzmedi.co.kr, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days.
+**A:** Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at sh.lee@britzmedi.com, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days.
 
 ---
 

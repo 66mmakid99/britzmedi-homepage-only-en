@@ -183,7 +183,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       console.error('[Chatbot] Fetch error:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: "I'm having trouble connecting. Please try again or contact us at contact@britzmedi.co.kr",
+        content: "I'm having trouble connecting. Please try again or contact us at sh.lee@britzmedi.com",
         timestamp: new Date()
       }]);
     } finally {

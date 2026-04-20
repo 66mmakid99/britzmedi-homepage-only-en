@@ -645,7 +645,7 @@ After going live with Crisp:
 ## Support Contacts
 
 **BRITZMEDI Support:**
-- Email: contact@britzmedi.co.kr
+- Email: sh.lee@britzmedi.com
 - Phone: +82-70-4348-7244
 - Hours: 9:00 AM - 6:00 PM KST, Monday-Friday
 

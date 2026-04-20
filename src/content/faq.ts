@@ -109,7 +109,7 @@ export const faqItems: FAQItem[] = [
   {
     id: 'technical-support',
     question: 'How can I get technical support?',
-    answer: 'Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at contact@britzmedi.co.kr, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days. You can also reach us through our <a href="/contact" class="text-primary-600 hover:underline font-medium">contact page</a>.',
+    answer: 'Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at sh.lee@britzmedi.com, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days. You can also reach us through our <a href="/contact" class="text-primary-600 hover:underline font-medium">contact page</a>.',
     category: 'technical',
   },
   

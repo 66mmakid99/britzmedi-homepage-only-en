@@ -717,7 +717,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     console.error('Chat API error:', error);
     return new Response(JSON.stringify({
       error: 'Failed to process chat request',
-      message: 'I apologize for the technical difficulty. Please contact us directly at contact@britzmedi.co.kr'
+      message: 'I apologize for the technical difficulty. Please contact us directly at sh.lee@britzmedi.com'
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

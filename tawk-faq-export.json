@@ -80,7 +80,7 @@
     {
       "category": "Technical Support",
       "question": "How can I get technical support?",
-      "answer": "Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at contact@britzmedi.co.kr, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days."
+      "answer": "Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at sh.lee@britzmedi.com, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days."
     },
     {
       "category": "Certifications",
@@ -109,7 +109,7 @@
     },
     {
       "trigger": "contact",
-      "response": "You can reach us at:\n- Email: contact@britzmedi.co.kr\n- Phone: +82-70-4348-7244\n- Or use our contact form at britzmedi.com/contact"
+      "response": "You can reach us at:\n- Email: sh.lee@britzmedi.com\n- Phone: +82-70-4348-7244\n- Or use our contact form at britzmedi.com/contact"
     },
     {
       "trigger": "distributor",

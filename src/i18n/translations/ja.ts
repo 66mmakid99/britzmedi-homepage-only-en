@@ -327,7 +327,7 @@ export const ja: TranslationKeys = {
     error: {
       title: '送信に失敗しました',
       duplicateEmail: 'このメールアドレスでのお問い合わせは既に送信されています。まもなくご連絡いたします。',
-      generic: '後でもう一度お試しいただくか、contact@britzmedi.co.kr まで直接メールでお問い合わせください。',
+      generic: '後でもう一度お試しいただくか、sh.lee@britzmedi.com まで直接メールでお問い合わせください。',
     },
     info: {
       title: '連絡先情報',
@@ -418,7 +418,7 @@ export const ja: TranslationKeys = {
       },
       'technical-support': {
         question: 'テクニカルサポートはどのように受けられますか？',
-        answer: 'テクニカルサポートは複数のチャネルで提供されています：1）地域の公認販売代理店にご連絡、2）contact@britzmedi.co.krにメールでサポートチームに問い合わせ、3）営業時間内（月〜金曜日の午前9時〜午後6時KST）に+82-70-4348-7244に電話。すべてのお問い合わせに1-2営業日以内に回答することを目指しています。',
+        answer: 'テクニカルサポートは複数のチャネルで提供されています：1）地域の公認販売代理店にご連絡、2）sh.lee@britzmedi.comにメールでサポートチームに問い合わせ、3）営業時間内（月〜金曜日の午前9時〜午後6時KST）に+82-70-4348-7244に電話。すべてのお問い合わせに1-2営業日以内に回答することを目指しています。',
       },
       'iso-certification': {
         question: 'BRITZMEDIはISO認証を取得していますか？',

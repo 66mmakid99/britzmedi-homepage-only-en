@@ -604,13 +604,16 @@ const additionalOptions = [
         throw new Error(errorData.error || 'Failed to submit inquiry');
       }
 
+      if (typeof gtag === 'function') {
+        gtag('event', 'qualify_lead');
+      }
       showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
       form.reset();
       emailStatus?.classList.add('hidden');
       isEmailValid = false;
     } catch (error) {
       console.error('Submission Error:', error);
-      showStatus('error', 'Please try again later or contact us directly via email at contact@britzmedi.co.kr');
+      showStatus('error', 'Please try again later or contact us directly via email at sh.lee@britzmedi.com');
     } finally {
       setLoading(false);
     }

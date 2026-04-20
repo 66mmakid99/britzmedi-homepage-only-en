@@ -147,4 +147,4 @@ For Tawk.to platform issues:
 - Email: support@tawk.to
 
 For BRITZMEDI website issues:
-- Email: contact@britzmedi.co.kr
+- Email: sh.lee@britzmedi.com

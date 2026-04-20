@@ -327,7 +327,7 @@ export const es: TranslationKeys = {
     error: {
       title: 'Error al enviar',
       duplicateEmail: 'Ya se ha enviado una consulta con este correo electrónico. Nos comunicaremos con usted pronto.',
-      generic: 'Por favor intente de nuevo más tarde o contáctenos directamente por correo electrónico a contact@britzmedi.co.kr',
+      generic: 'Por favor intente de nuevo más tarde o contáctenos directamente por correo electrónico a sh.lee@britzmedi.com',
     },
     info: {
       title: 'Información de Contacto',
@@ -418,7 +418,7 @@ export const es: TranslationKeys = {
       },
       'technical-support': {
         question: '¿Cómo puedo obtener soporte técnico?',
-        answer: 'El soporte técnico está disponible a través de múltiples canales: 1) Contacte a su distribuidor autorizado local, 2) Envíe un correo electrónico a nuestro equipo de soporte a contact@britzmedi.co.kr, 3) Llámenos al +82-70-4348-7244 durante el horario comercial (9:00 AM - 6:00 PM KST, lunes a viernes). Nuestro objetivo es responder a todas las consultas en 1-2 días hábiles.',
+        answer: 'El soporte técnico está disponible a través de múltiples canales: 1) Contacte a su distribuidor autorizado local, 2) Envíe un correo electrónico a nuestro equipo de soporte a sh.lee@britzmedi.com, 3) Llámenos al +82-70-4348-7244 durante el horario comercial (9:00 AM - 6:00 PM KST, lunes a viernes). Nuestro objetivo es responder a todas las consultas en 1-2 días hábiles.',
       },
       'iso-certification': {
         question: '¿BRITZMEDI tiene certificación ISO?',

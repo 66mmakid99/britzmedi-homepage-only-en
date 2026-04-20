@@ -279,7 +279,7 @@
   Technical support is available through multiple channels:
   
   1. Contact your local authorized distributor
-  2. Email our support team at contact@britzmedi.co.kr
+  2. Email our support team at sh.lee@britzmedi.com
   3. Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday)
   
   We aim to respond to all inquiries within 1-2 business days.
@@ -591,7 +591,7 @@
 - **Video Tutorials:** https://www.tawk.to/resources/
 
 ### BRITZMEDI Support
-- **Email:** contact@britzmedi.co.kr
+- **Email:** sh.lee@britzmedi.com
 - **Phone:** +82-70-4348-7244
 - **Hours:** 9:00 AM - 6:00 PM KST, Monday-Friday
 
