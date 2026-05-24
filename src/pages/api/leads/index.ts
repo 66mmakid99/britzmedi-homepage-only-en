@@ -14,7 +14,6 @@ interface Env {
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
-  MAKE_LEAD_WEBHOOK_URL?: string;
 }
 
 // IP-based rate limiting for lead submissions
@@ -381,31 +380,79 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // 6. Make Webhook (non-blocking, env-gated)
+    // 6. AI Draft: generate personalized response email and send to sales team
     const ctx = (locals as any)?.runtime?.ctx;
-    if (ctx?.waitUntil && env?.MAKE_LEAD_WEBHOOK_URL) {
-      ctx.waitUntil(
-        fetch(env.MAKE_LEAD_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'new_lead',
-            timestamp: new Date().toISOString(),
-            lead: {
-              companyName: data.company_name || 'N/A',
-              companyWebsite: data.company_website || null,
-              name: data.contact_name || 'N/A',
-              jobTitle: data.job_title || 'N/A',
-              email: data.email,
-              country: data.country || 'N/A',
-              interestedIn: interestedProducts,
-              message: data.message || null,
-              source,
-              submittedAt: new Date().toISOString(),
+    if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY && resendKey && source === 'website') {
+      ctx.waitUntil((async () => {
+        try {
+          const draftResponse = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key': env.ANTHROPIC_API_KEY!,
+              'anthropic-version': '2023-06-01',
+              'content-type': 'application/json',
             },
-          }),
-        }).catch(err => console.error('[make-webhook] failed:', err))
-      );
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-6',
+              max_tokens: 1024,
+              messages: [{
+                role: 'user',
+                content: `You are Sarah Lee, International Sales Manager at BRITZMEDI (sh.lee@britzmedi.com). BRITZMEDI is a Korean medical aesthetic device manufacturer.
+
+Write a personalized follow-up email for this new lead:
+- Company: ${data.company_name || 'N/A'}
+- Website: ${data.company_website || 'N/A'}
+- Name: ${data.contact_name || 'N/A'}
+- Title: ${data.job_title || 'N/A'}
+- Country: ${data.country || 'N/A'}
+- Interested in: ${interestedProducts.join(', ')}
+- Their message: ${data.message || '(none)'}
+
+Rules:
+- Write in English
+- Professional, warm, not pushy
+- Mention specific benefits of the products they asked about
+- Keep under 200 words
+- Output format: first line "Subject: <subject>", then a blank line, then email body
+- Sign as "Sarah Lee | International Sales Manager | BRITZMEDI Co., Ltd."`,
+              }],
+            }),
+          });
+
+          if (!draftResponse.ok) {
+            console.error('[ai-draft] Claude API error:', draftResponse.status);
+            return;
+          }
+
+          const draftResult = await draftResponse.json() as any;
+          const draftText = draftResult.content?.[0]?.text || '';
+
+          const subjectMatch = draftText.match(/^Subject:\s*(.+)/m);
+          const draftSubject = subjectMatch ? subjectMatch[1].trim() : `Follow-up: ${data.company_name}`;
+          const draftBody = draftText.replace(/^Subject:\s*.+\n\n?/, '').trim();
+
+          await sendEmail({
+            apiKey: resendKey,
+            to: 'sh.lee@britzmedi.com',
+            subject: `[AI Draft] ${draftSubject}`,
+            html: `<div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px;">
+  <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+    <p style="margin: 0; color: #64748b; font-size: 13px;">
+      AI generated draft — review and edit before sending.<br/>
+      <strong>To:</strong> ${data.contact_name} &lt;${data.email}&gt;<br/>
+      <strong>Company:</strong> ${data.company_name} | <strong>Country:</strong> ${data.country}
+    </p>
+  </div>
+  <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; white-space: pre-line; line-height: 1.7; color: #1e293b; font-size: 15px;">${draftBody}</div>
+</div>`,
+            from: 'BRITZMEDI Sales AI <noreply@britzmedi.com>',
+          });
+
+          console.log(`[ai-draft] Draft email sent for lead ${leadId}`);
+        } catch (e) {
+          console.error('[ai-draft] Failed:', e);
+        }
+      })());
     }
 
     // 7. Async company research via waitUntil (does not delay response)

@@ -8,7 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [2026-05-24]
 
 ### Added
-- Add optional Make webhook trigger for new leads (`MAKE_LEAD_WEBHOOK_URL` env-gated)
+- AI draft email: new lead → Claude generates personalized follow-up → sends to sh.lee@britzmedi.com as `[AI Draft]`
 
 ## [2026-02-20]
 
