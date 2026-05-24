@@ -6,6 +6,7 @@ import { notifyNewLead, buildLeadReportEmail, sendLeadReportEmail } from '../../
 import { isFreeEmail, isValidEmailFormat } from '../../../lib/email-validation';
 import { scoreLead } from '../../../lib/lead-scoring';
 import { researchCompany } from '../../../lib/lead-research';
+import { createGmailDraft } from '../../../lib/gmail-draft';
 
 export const prerender = false;
 
@@ -14,6 +15,9 @@ interface Env {
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
+  GMAIL_CLIENT_ID?: string;
+  GMAIL_CLIENT_SECRET?: string;
+  GMAIL_REFRESH_TOKEN?: string;
 }
 
 // IP-based rate limiting for lead submissions
@@ -380,9 +384,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // 6. AI Draft: generate personalized response email and send to sales team
+    // 6. AI Draft: generate personalized response → save to Gmail Drafts → notify
     const ctx = (locals as any)?.runtime?.ctx;
-    if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY && resendKey && source === 'website') {
+    if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY && env?.GMAIL_CLIENT_ID && source === 'website') {
       ctx.waitUntil((async () => {
         try {
           const draftResponse = await fetch('https://api.anthropic.com/v1/messages', {
@@ -413,7 +417,7 @@ Rules:
 - Professional, warm, not pushy
 - Mention specific benefits of the products they asked about
 - Keep under 200 words
-- Output format: first line "Subject: <subject>", then a blank line, then email body
+- Output ONLY the email body as HTML (no subject line, no markdown)
 - Sign as "Sarah Lee | International Sales Manager | BRITZMEDI Co., Ltd."`,
               }],
             }),
@@ -425,30 +429,43 @@ Rules:
           }
 
           const draftResult = await draftResponse.json() as any;
-          const draftText = draftResult.content?.[0]?.text || '';
+          const draftBody = draftResult.content?.[0]?.text || '';
+          const draftSubject = `Thank you for your interest — ${interestedProducts[0] || 'BRITZMEDI'}`;
 
-          const subjectMatch = draftText.match(/^Subject:\s*(.+)/m);
-          const draftSubject = subjectMatch ? subjectMatch[1].trim() : `Follow-up: ${data.company_name}`;
-          const draftBody = draftText.replace(/^Subject:\s*.+\n\n?/, '').trim();
+          await createGmailDraft(
+            {
+              clientId: env.GMAIL_CLIENT_ID!,
+              clientSecret: env.GMAIL_CLIENT_SECRET!,
+              refreshToken: env.GMAIL_REFRESH_TOKEN!,
+            },
+            {
+              to: data.email,
+              toName: data.contact_name || '',
+              subject: draftSubject,
+              htmlBody: draftBody,
+            },
+          );
 
-          await sendEmail({
-            apiKey: resendKey,
-            to: 'sh.lee@britzmedi.com',
-            subject: `[AI Draft] ${draftSubject}`,
-            html: `<div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px;">
-  <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-    <p style="margin: 0; color: #64748b; font-size: 13px;">
-      AI generated draft — review and edit before sending.<br/>
-      <strong>To:</strong> ${data.contact_name} &lt;${data.email}&gt;<br/>
-      <strong>Company:</strong> ${data.company_name} | <strong>Country:</strong> ${data.country}
-    </p>
+          console.log(`[ai-draft] Gmail draft created for lead ${leadId}`);
+
+          if (resendKey) {
+            await sendEmail({
+              apiKey: resendKey,
+              to: 'sh.lee@britzmedi.com',
+              subject: `[AI Draft Ready] ${data.company_name} (${data.country})`,
+              html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+  <p style="font-size: 15px; color: #1e293b;">Gmail 임시보관함에 AI 응대 초안이 저장되었습니다.</p>
+  <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin: 16px 0;">
+    <p style="margin: 4px 0; color: #475569;"><strong>To:</strong> ${data.contact_name} &lt;${data.email}&gt;</p>
+    <p style="margin: 4px 0; color: #475569;"><strong>Company:</strong> ${data.company_name}</p>
+    <p style="margin: 4px 0; color: #475569;"><strong>Products:</strong> ${interestedProducts.join(', ')}</p>
+    <p style="margin: 4px 0; color: #475569;"><strong>Subject:</strong> ${draftSubject}</p>
   </div>
-  <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; white-space: pre-line; line-height: 1.7; color: #1e293b; font-size: 15px;">${draftBody}</div>
+  <p style="font-size: 14px; color: #64748b;">Gmail에서 확인 후 수정하여 발송하세요.</p>
 </div>`,
-            from: 'BRITZMEDI Sales AI <noreply@britzmedi.com>',
-          });
-
-          console.log(`[ai-draft] Draft email sent for lead ${leadId}`);
+              from: 'BRITZMEDI AI <noreply@britzmedi.com>',
+            });
+          }
         } catch (e) {
           console.error('[ai-draft] Failed:', e);
         }

@@ -8,7 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [2026-05-24]
 
 ### Added
-- AI draft email: new lead → Claude generates personalized follow-up → sends to sh.lee@britzmedi.com as `[AI Draft]`
+- AI draft email: new lead → Claude generates personalized follow-up → Gmail 임시보관함 저장 + 알림 메일
 
 ## [2026-02-20]
 
