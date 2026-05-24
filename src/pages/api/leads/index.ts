@@ -14,6 +14,7 @@ interface Env {
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
+  MAKE_LEAD_WEBHOOK_URL?: string;
 }
 
 // IP-based rate limiting for lead submissions
@@ -380,8 +381,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // 6. Async company research via waitUntil (does not delay response)
+    // 6. Make Webhook (non-blocking, env-gated)
     const ctx = (locals as any)?.runtime?.ctx;
+    if (ctx?.waitUntil && env?.MAKE_LEAD_WEBHOOK_URL) {
+      ctx.waitUntil(
+        fetch(env.MAKE_LEAD_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'new_lead',
+            timestamp: new Date().toISOString(),
+            lead: {
+              companyName: data.company_name || 'N/A',
+              companyWebsite: data.company_website || null,
+              name: data.contact_name || 'N/A',
+              jobTitle: data.job_title || 'N/A',
+              email: data.email,
+              country: data.country || 'N/A',
+              interestedIn: interestedProducts,
+              message: data.message || null,
+              source,
+              submittedAt: new Date().toISOString(),
+            },
+          }),
+        }).catch(err => console.error('[make-webhook] failed:', err))
+      );
+    }
+
+    // 7. Async company research via waitUntil (does not delay response)
     if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY) {
       ctx.waitUntil((async () => {
         try {
@@ -449,7 +476,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       })());
     }
 
-    // 7. Respond immediately (research runs in background)
+    // 8. Respond immediately (research runs in background)
     return new Response(JSON.stringify({
       success: true,
       lead: { id: leadId, ...data, lead_score: initialScoring.total, lead_grade: initialScoring.grade },

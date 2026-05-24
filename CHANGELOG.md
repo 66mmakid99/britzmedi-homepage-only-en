@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2026-05-24]
+
+### Added
+- Add optional Make webhook trigger for new leads (`MAKE_LEAD_WEBHOOK_URL` env-gated)
+
 ## [2026-02-20]
 
 ### Added
