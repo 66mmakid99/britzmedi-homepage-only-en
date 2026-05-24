@@ -80,10 +80,15 @@ html {
   scroll-behavior: smooth;
 }
 
-/* CLS Prevention - Reserve space for common elements */
-img, video, iframe {
-  max-width: 100%;
-  height: auto;
+/* CLS Prevention - Reserve space for common elements.
+   Wrapped in @layer base so Tailwind size utilities (e.g. h-12/w-auto on the logo)
+   override this; an unlayered `img { height:auto }` would otherwise beat them and
+   force images to their intrinsic size (broke the header/footer logo). */
+@layer base {
+  img, video, iframe {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 /* Aspect ratio boxes for images */
