@@ -38,6 +38,37 @@ async function isValidSession(context: any, sessionToken: string): Promise<boole
   return false;
 }
 
+// Non-admin API routes that still require an admin session.
+// These live outside /api/admin/ but expose sensitive data, AI cost, or publishing.
+// Method-aware so that legitimately public actions (lead intake, subscribe, blog read) stay open.
+function requiresAdminAuth(pathname: string, method: string): boolean {
+  // Leads: list (GET) / stats / single-record ops are admin-only.
+  // POST /api/leads is the public lead-intake form and must stay open.
+  if (pathname === '/api/leads' && method !== 'POST') return true;
+  if (pathname === '/api/leads/stats') return true;
+  if (/^\/api\/leads\/[^/]+$/.test(pathname)) return true; // /api/leads/{id} GET/PUT/DELETE
+
+  // Subscribers: list/export/notify are admin. subscribe/confirm/unsubscribe stay public.
+  if (pathname === '/api/subscribers/list') return true;
+  if (pathname === '/api/subscribers/export') return true;
+  if (pathname === '/api/subscribers/notify') return true;
+
+  // Translate + YouTube channel fetch are admin tooling (AI / external cost).
+  if (pathname === '/api/translate') return true;
+  if (pathname === '/api/youtube/channel') return true;
+
+  // Blog: management endpoints (queue, upload, approve, publish, generation steps,
+  // and PUT/DELETE on posts) are admin. Public reads stay open.
+  if (pathname.startsWith('/api/blog/')) {
+    if (pathname.startsWith('/api/blog/images/')) return false; // public image serving
+    if (pathname === '/api/blog/posts' && method === 'GET') return false; // public list
+    if (/^\/api\/blog\/posts\/[^/]+$/.test(pathname) && method === 'GET') return false; // public single post
+    return true; // everything else under /api/blog/ requires auth
+  }
+
+  return false;
+}
+
 // Admin authentication middleware
 export const onRequest: MiddlewareHandler = async (context, next) => {
   const url = new URL(context.request.url);
@@ -80,6 +111,21 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     const valid = await isValidSession(context, sessionToken);
     if (!valid) {
       return new Response(JSON.stringify({ error: 'Session expired' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return next();
+  }
+
+  // Protected non-admin API routes - sensitive data / AI cost / publishing.
+  // Same cookie-session check as /api/admin/, method-aware allowlist above.
+  if (pathname.startsWith('/api/') && requiresAdminAuth(pathname, context.request.method)) {
+    const sessionToken = context.cookies.get('admin_session')?.value;
+
+    if (!sessionToken || !(await isValidSession(context, sessionToken))) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
       });

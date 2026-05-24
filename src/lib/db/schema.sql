@@ -1,7 +1,13 @@
 -- BRITZMEDI Lead Management Database Schema
 -- Cloudflare D1 (SQLite)
+--
+-- ⚠️ SOURCE OF TRUTH: the `migrations/` directory (applied via wrangler) plus a few
+-- columns that were added directly on the production DB (britzmedi-leads). This file is
+-- a reference snapshot and is NOT executed at runtime. It is kept in sync with the live
+-- `PRAGMA table_info` so new environments / debugging match production.
+-- Last reconciled against production: 2026-05-24.
 
--- Leads table
+-- Leads table — reflects live production schema (0001 + 0013 + manual ALTERs).
 CREATE TABLE IF NOT EXISTS leads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   company_name TEXT NOT NULL,
@@ -15,41 +21,47 @@ CREATE TABLE IF NOT EXISTS leads (
 
   -- Lead scoring fields
   lead_score INTEGER DEFAULT 0,
-  lead_grade TEXT DEFAULT 'C', -- A, B, C, D
+  lead_grade TEXT DEFAULT 'D', -- A, B, C, D
+  score_breakdown TEXT,          -- JSON: full scoring detail (lead-scoring.ts)
 
-  -- Status tracking
+  -- Status tracking / CRM pipeline (migration 0013)
   status TEXT DEFAULT 'new', -- new, contacted, qualified, proposal, won, lost
+  notes TEXT,                    -- admin notes (updated via PUT)
+  priority TEXT DEFAULT 'normal',
   assigned_to TEXT,
+  last_contacted_at DATETIME,
+  next_action TEXT,
+  next_action_date DATETIME,
+  lost_reason TEXT,
+  contacted_at TEXT,
 
-  -- Enrichment data (AI-gathered)
-  company_size TEXT,
-  company_industry TEXT,
-  company_description TEXT,
-  linkedin_url TEXT,
-  enrichment_data TEXT, -- JSON object for additional data
+  -- AI research / enrichment
+  ai_research TEXT,              -- JSON, populated by api/admin/leads/research.ts
+  company_research TEXT,         -- JSON, enrichment lookup
+  research_status TEXT DEFAULT 'pending', -- pending | done | failed
+  enrichment_data TEXT,          -- JSON object for additional data
+  is_free_email INTEGER DEFAULT 0, -- 1 if a free/personal email domain
 
-  -- Metadata
+  -- Acquisition tracking
   source TEXT DEFAULT 'website',
   utm_source TEXT,
   utm_medium TEXT,
   utm_campaign TEXT,
-  ip_address TEXT,
-  user_agent TEXT,
 
   -- Timestamps
   created_at TEXT DEFAULT (datetime('now')),
-  updated_at TEXT DEFAULT (datetime('now')),
-  contacted_at TEXT,
-  qualified_at TEXT
+  updated_at TEXT DEFAULT (datetime('now'))
 );
 
--- Lead activities/notes
+-- Lead activities/notes (migration 0013). NOTE: columns are `type` + `title`,
+-- NOT `activity_type`. Code (api/leads/[id].ts) inserts type/title/description/created_by.
 CREATE TABLE IF NOT EXISTS lead_activities (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   lead_id INTEGER NOT NULL,
-  activity_type TEXT NOT NULL, -- note, email, call, meeting, status_change
+  type TEXT NOT NULL,          -- note, email, call, meeting, status_change, lead_created
+  title TEXT NOT NULL,
   description TEXT,
-  created_by TEXT,
+  created_by TEXT DEFAULT 'admin',
   created_at TEXT DEFAULT (datetime('now')),
   FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
 );

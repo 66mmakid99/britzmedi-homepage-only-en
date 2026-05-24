@@ -1,6 +1,8 @@
 ---
 import { countries } from '../../data/countries';
 import { products } from '../../content/products';
+import { getLangFromUrl } from '../../i18n/config';
+import { useTranslations } from '../../i18n';
 
 interface Props {
   className?: string;
@@ -8,17 +10,43 @@ interface Props {
 
 const { className = '' } = Astro.props;
 
-// Build product options from products.ts
+const currentLang = getLangFromUrl(Astro.url);
+const t = useTranslations(currentLang);
+
+// Build product options from products.ts (product names are brand names — not translated)
 const productOptions = products.map(p => ({
   value: p.id,
   label: p.name,
 }));
 
-// Additional interest options
+// Additional interest options (translated)
 const additionalOptions = [
-  { value: 'distribution', label: 'Distribution Partnership' },
-  { value: 'oem-odm', label: 'OEM/ODM Inquiry' },
+  { value: 'distribution', label: t('contact.form.distributionPartnership') },
+  { value: 'oem-odm', label: t('contact.form.oemOdm') },
 ];
+
+// i18n strings to inject into the script via data-i18n
+const i18nStrings = {
+  invalidEmail: t('contact.validation.invalidEmail'),
+  tempEmailNotAccepted: t('contact.validation.tempEmailNotAccepted'),
+  softEmailWarning: t('contact.form.softEmailWarning'),
+  companyWebsiteRequired: t('contact.validation.companyWebsiteRequired'),
+  invalidUrl: t('contact.validation.invalidUrl'),
+  businessWebsiteRequired: t('contact.validation.businessWebsiteRequired'),
+  companyNameMin: t('contact.validation.companyNameMin'),
+  yourNameMin: t('contact.validation.yourNameMin'),
+  jobTitleRequired: t('contact.validation.jobTitleRequired'),
+  countryRequired: t('contact.validation.countryRequired'),
+  businessEmailRequired: t('contact.validation.businessEmailRequired'),
+  selectAtLeastOne: t('contact.validation.selectAtLeastOne'),
+  submitting: t('contact.form.submitting'),
+  submitInquiry: t('contact.form.submit'),
+  successTitle: t('contact.success.title'),
+  successMessage: t('contact.success.message'),
+  errorTitle: t('contact.error.title'),
+  duplicateEmail: t('contact.error.duplicateEmail'),
+  genericError: t('contact.error.generic'),
+};
 ---
 
 <div class={`lead-form-wrapper ${className}`}>
@@ -26,23 +54,23 @@ const additionalOptions = [
     <div class="absolute -inset-4 bg-gradient-to-br from-primary-500/5 to-accent-500/5 rounded-3xl blur-2xl"></div>
     <div class="relative bg-white rounded-2xl border border-slate-200/80 p-6 lg:p-8 shadow-xl shadow-slate-200/50">
 
-      <h2 class="heading-3 mb-2">Request Information</h2>
-      <p class="body-small mb-8">Fill out the form below and we'll get back to you within 1-2 business days.</p>
+      <h2 class="heading-3 mb-2">{t('contact.form.title')}</h2>
+      <p class="body-small mb-8">{t('contact.form.description')}</p>
 
-      <form id="leadForm" class="space-y-6">
+      <form id="leadForm" class="space-y-6" data-i18n={JSON.stringify(i18nStrings)}>
         <!-- Company Name & Website Row -->
         <div class="grid md:grid-cols-2 gap-5">
           <!-- Company Name -->
           <div>
             <label for="companyName" class="block text-sm font-semibold text-slate-700 mb-2">
-              Company Name <span class="text-red-500">*</span>
+              {t('contact.form.companyName')} <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               id="companyName"
               name="companyName"
               required
-              placeholder="Your Company Name"
+              placeholder={t('contact.placeholders.companyName')}
               class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="companyNameError" class="hidden mt-1.5 text-xs text-red-500"></p>
@@ -51,14 +79,14 @@ const additionalOptions = [
           <!-- Company Website -->
           <div>
             <label for="companyWebsite" class="block text-sm font-semibold text-slate-700 mb-2">
-              Company Website <span class="text-red-500">*</span>
+              {t('contact.form.companyWebsite')} <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               id="companyWebsite"
               name="companyWebsite"
               required
-              placeholder="www.example.com"
+              placeholder={t('contact.placeholders.companyWebsite')}
               class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="companyWebsiteError" class="hidden mt-1.5 text-xs text-red-500"></p>
@@ -70,14 +98,14 @@ const additionalOptions = [
           <!-- Your Name -->
           <div>
             <label for="yourName" class="block text-sm font-semibold text-slate-700 mb-2">
-              Your Name <span class="text-red-500">*</span>
+              {t('contact.form.yourName')} <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               id="yourName"
               name="yourName"
               required
-              placeholder="John Doe"
+              placeholder={t('contact.placeholders.yourName')}
               class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="yourNameError" class="hidden mt-1.5 text-xs text-red-500"></p>
@@ -86,14 +114,14 @@ const additionalOptions = [
           <!-- Job Title -->
           <div>
             <label for="jobTitle" class="block text-sm font-semibold text-slate-700 mb-2">
-              Job Title <span class="text-red-500">*</span>
+              {t('contact.form.jobTitle')} <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               id="jobTitle"
               name="jobTitle"
               required
-              placeholder="CEO / Director / Manager"
+              placeholder={t('contact.placeholders.jobTitle')}
               class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
             />
             <p id="jobTitleError" class="hidden mt-1.5 text-xs text-red-500"></p>
@@ -105,7 +133,7 @@ const additionalOptions = [
           <!-- Business Email -->
           <div>
             <label for="businessEmail" class="block text-sm font-semibold text-slate-700 mb-2">
-              Business Email <span class="text-red-500">*</span>
+              {t('contact.form.businessEmail')} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <input
@@ -113,7 +141,7 @@ const additionalOptions = [
                 id="businessEmail"
                 name="businessEmail"
                 required
-                placeholder="you@company.com"
+                placeholder={t('contact.placeholders.businessEmail')}
                 class="w-full px-4 py-3.5 pr-12 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow"
               />
               <div id="emailStatus" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
@@ -131,15 +159,15 @@ const additionalOptions = [
             </div>
             <p id="businessEmailError" class="hidden mt-1.5 text-xs text-red-500"></p>
             <div id="email-warning" class="hidden mt-1 p-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
-              <strong>Company email recommended.</strong> Free email addresses (Gmail, Yahoo, etc.) result in lower priority processing. Please use your company email for faster response.
+              <strong>{t('contact.form.emailWarningTitle')}</strong> {t('contact.form.emailWarningBody')}
             </div>
-            <p id="email-hint" class="mt-1 text-xs text-slate-500">Please use your company email address</p>
+            <p id="email-hint" class="mt-1 text-xs text-slate-500">{t('contact.hints.businessEmail')}</p>
           </div>
 
           <!-- Country -->
           <div>
             <label for="country" class="block text-sm font-semibold text-slate-700 mb-2">
-              Country <span class="text-red-500">*</span>
+              {t('contact.form.country')} <span class="text-red-500">*</span>
             </label>
             <select
               id="country"
@@ -147,7 +175,7 @@ const additionalOptions = [
               required
               class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 transition-shadow"
             >
-              <option value="">Select your country</option>
+              <option value="">{t('contact.placeholders.selectCountry')}</option>
               {countries.map((c) => (
                 <option value={c.code}>{c.name}</option>
               ))}
@@ -159,8 +187,8 @@ const additionalOptions = [
         <!-- Interested In (Checkboxes) -->
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-3">
-            Interested In <span class="text-red-500">*</span>
-            <span class="font-normal text-slate-500 ml-1">(Select at least one)</span>
+            {t('contact.form.interestedIn')} <span class="text-red-500">*</span>
+            <span class="font-normal text-slate-500 ml-1">({t('contact.form.selectAtLeastOne')})</span>
           </label>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {productOptions.map((option) => (
@@ -192,14 +220,14 @@ const additionalOptions = [
         <!-- Message (Optional) -->
         <div>
           <label for="message" class="block text-sm font-semibold text-slate-700 mb-2">
-            Message
-            <span class="font-normal text-slate-500 ml-1">(Optional)</span>
+            {t('contact.form.message')}
+            <span class="font-normal text-slate-500 ml-1">({t('contact.form.optional')})</span>
           </label>
           <textarea
             id="message"
             name="message"
             rows="3"
-            placeholder="Tell us about your requirements..."
+            placeholder={t('contact.placeholders.message')}
             class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 placeholder-slate-400 transition-shadow resize-y"
           ></textarea>
         </div>
@@ -207,22 +235,22 @@ const additionalOptions = [
         <!-- How did you hear about us? (Optional) -->
         <div>
           <label for="referralSource" class="block text-sm font-semibold text-slate-700 mb-2">
-            How did you hear about us?
-            <span class="font-normal text-slate-500 ml-1">(Optional)</span>
+            {t('contact.form.howDidYouHear')}
+            <span class="font-normal text-slate-500 ml-1">({t('contact.form.optional')})</span>
           </label>
           <select
             id="referralSource"
             name="referralSource"
             class="w-full px-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-slate-900 transition-shadow"
           >
-            <option value="">Select an option</option>
-            <option value="google_search">Google Search</option>
-            <option value="trade_show">Industry Event / Trade Show</option>
-            <option value="referral">Referral</option>
-            <option value="social_media">Social Media</option>
-            <option value="article_blog">Online Article / Blog</option>
-            <option value="ai_assistant">AI Assistant (ChatGPT, etc.)</option>
-            <option value="other">Other</option>
+            <option value="">{t('contact.placeholders.selectOption')}</option>
+            <option value="google_search">{t('contact.referral.googleSearch')}</option>
+            <option value="trade_show">{t('contact.referral.tradeShow')}</option>
+            <option value="referral">{t('contact.referral.referral')}</option>
+            <option value="social_media">{t('contact.referral.socialMedia')}</option>
+            <option value="article_blog">{t('contact.referral.articleBlog')}</option>
+            <option value="ai_assistant">{t('contact.referral.aiAssistant')}</option>
+            <option value="other">{t('contact.referral.other')}</option>
           </select>
         </div>
 
@@ -236,7 +264,7 @@ const additionalOptions = [
             class="mt-1 w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
           />
           <label for="privacy" class="text-sm text-slate-600 leading-relaxed">
-            I agree to the collection and use of my personal information for the purpose of responding to my inquiry.
+            {t('contact.form.privacy')}
             <span class="text-red-500">*</span>
           </label>
         </div>
@@ -247,7 +275,7 @@ const additionalOptions = [
           id="submitBtn"
           class="w-full btn-primary py-4 text-base"
         >
-          <span id="btnText">Submit Inquiry</span>
+          <span id="btnText">{t('contact.form.submit')}</span>
           <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
           </svg>
@@ -291,19 +319,22 @@ const additionalOptions = [
     'mohmal.com', 'tempail.com', 'tempmailaddress.com', 'burnermail.io',
   ];
 
+  // Read i18n strings from data-i18n attribute (injected at build time)
+  const I18N = JSON.parse((document.getElementById('leadForm') as HTMLElement)?.dataset.i18n || '{}');
+
   // Validate business email (warns on personal domains, blocks disposable)
   function validateBusinessEmail(email: string): { valid: boolean; warning?: boolean; message?: string } {
     // Basic format check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return { valid: false, message: 'Please enter a valid email address.' };
+      return { valid: false, message: I18N.invalidEmail || 'Please enter a valid email address.' };
     }
 
     const domain = email.split('@')[1]?.toLowerCase();
 
     // Check for disposable email domains — hard block
     if (disposableEmailDomains.includes(domain)) {
-      return { valid: false, message: 'Temporary email addresses are not accepted.' };
+      return { valid: false, message: I18N.tempEmailNotAccepted || 'Temporary email addresses are not accepted.' };
     }
 
     // Check for personal email domains — soft warning, allow submission
@@ -311,7 +342,7 @@ const additionalOptions = [
       return {
         valid: true,
         warning: true,
-        message: 'We recommend using your company email for faster response.'
+        message: I18N.softEmailWarning || 'We recommend using your company email for faster response.'
       };
     }
 
@@ -321,7 +352,7 @@ const additionalOptions = [
   // Validate URL - accepts domain.com, www.domain.com, https://domain.com
   function validateUrl(url: string): { valid: boolean; message?: string; normalizedUrl?: string } {
     if (!url || !url.trim()) {
-      return { valid: false, message: 'Company website is required.' };
+      return { valid: false, message: I18N.companyWebsiteRequired || 'Company website is required.' };
     }
 
     let normalizedUrl = url.trim().replace(/^\/+|\/+$/g, '');
@@ -335,22 +366,22 @@ const additionalOptions = [
       const urlObj = new URL(normalizedUrl);
 
       if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        return { valid: false, message: 'Please enter a valid website URL.' };
+        return { valid: false, message: I18N.invalidUrl || 'Please enter a valid website URL.' };
       }
 
       const hostname = urlObj.hostname.toLowerCase();
       const hostParts = hostname.split('.');
       if (hostParts.length < 2 || hostParts.some(p => p.length === 0)) {
-        return { valid: false, message: 'Please enter a valid website URL.' };
+        return { valid: false, message: I18N.invalidUrl || 'Please enter a valid website URL.' };
       }
 
       if (hostname === 'localhost' || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
-        return { valid: false, message: 'Please enter a valid business website URL.' };
+        return { valid: false, message: I18N.businessWebsiteRequired || 'Please enter a valid business website URL.' };
       }
 
       return { valid: true, normalizedUrl };
     } catch {
-      return { valid: false, message: 'Please enter a valid website URL.' };
+      return { valid: false, message: I18N.invalidUrl || 'Please enter a valid website URL.' };
     }
   }
 
@@ -430,13 +461,13 @@ const additionalOptions = [
     if (loading) {
       submitBtn.setAttribute('disabled', 'true');
       submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-      btnText.textContent = 'Submitting...';
+      btnText.textContent = I18N.submitting || 'Submitting...';
       btnIcon.classList.add('hidden');
       btnSpinner.classList.remove('hidden');
     } else {
       submitBtn.removeAttribute('disabled');
       submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-      btnText.textContent = 'Submit Inquiry';
+      btnText.textContent = I18N.submitInquiry || 'Submit Inquiry';
       btnIcon.classList.remove('hidden');
       btnSpinner.classList.add('hidden');
     }
@@ -455,7 +486,7 @@ const additionalOptions = [
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
           <div>
-            <p class="font-semibold">Inquiry submitted successfully!</p>
+            <p class="font-semibold">${I18N.successTitle || 'Inquiry submitted successfully!'}</p>
             <p class="text-sm mt-1">${message}</p>
           </div>
         </div>
@@ -468,7 +499,7 @@ const additionalOptions = [
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
           <div>
-            <p class="font-semibold">Failed to submit</p>
+            <p class="font-semibold">${I18N.errorTitle || 'Failed to submit'}</p>
             <p class="text-sm mt-1">${message}</p>
           </div>
         </div>
@@ -514,7 +545,7 @@ const additionalOptions = [
     // Validate Company Name
     const companyName = (formData.get('companyName') as string)?.trim();
     if (!companyName || companyName.length < 2) {
-      showFieldError('companyName', 'Company name is required (min 2 characters).');
+      showFieldError('companyName', I18N.companyNameMin || 'Company name is required (min 2 characters).');
       hasErrors = true;
     }
 
@@ -522,21 +553,21 @@ const additionalOptions = [
     const companyWebsite = (formData.get('companyWebsite') as string)?.trim();
     const urlResult = validateUrl(companyWebsite);
     if (!urlResult.valid) {
-      showFieldError('companyWebsite', urlResult.message || 'Invalid URL.');
+      showFieldError('companyWebsite', urlResult.message || I18N.invalidUrl || 'Invalid URL.');
       hasErrors = true;
     }
 
     // Validate Your Name
     const yourName = (formData.get('yourName') as string)?.trim();
     if (!yourName || yourName.length < 2) {
-      showFieldError('yourName', 'Your name is required (min 2 characters).');
+      showFieldError('yourName', I18N.yourNameMin || 'Your name is required (min 2 characters).');
       hasErrors = true;
     }
 
     // Validate Job Title
     const jobTitle = (formData.get('jobTitle') as string)?.trim();
     if (!jobTitle) {
-      showFieldError('jobTitle', 'Job title is required.');
+      showFieldError('jobTitle', I18N.jobTitleRequired || 'Job title is required.');
       hasErrors = true;
     }
 
@@ -544,21 +575,21 @@ const additionalOptions = [
     const businessEmail = (formData.get('businessEmail') as string)?.trim();
     const emailResult = validateBusinessEmail(businessEmail);
     if (!emailResult.valid) {
-      showFieldError('businessEmail', emailResult.message || 'Invalid email.');
+      showFieldError('businessEmail', emailResult.message || I18N.invalidEmail || 'Invalid email.');
       hasErrors = true;
     }
 
     // Validate Country
     const country = formData.get('country') as string;
     if (!country) {
-      showFieldError('country', 'Please select your country.');
+      showFieldError('country', I18N.countryRequired || 'Please select your country.');
       hasErrors = true;
     }
 
     // Validate Interested In (at least one checkbox)
     const interestedIn = formData.getAll('interestedIn') as string[];
     if (interestedIn.length === 0) {
-      showFieldError('interestedIn', 'Please select at least one product or service.');
+      showFieldError('interestedIn', I18N.selectAtLeastOne || 'Please select at least one product or service.');
       hasErrors = true;
     }
 
@@ -597,7 +628,7 @@ const additionalOptions = [
       if (!apiResponse.ok) {
         const errorData = await apiResponse.json().catch(() => ({}));
         if (apiResponse.status === 409) {
-          showStatus('error', 'An inquiry with this email has already been submitted. We will contact you soon.');
+          showStatus('error', I18N.duplicateEmail || 'An inquiry with this email has already been submitted. We will contact you soon.');
           setLoading(false);
           return;
         }
@@ -607,13 +638,13 @@ const additionalOptions = [
       if (typeof gtag === 'function') {
         gtag('event', 'qualify_lead');
       }
-      showStatus('success', "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
+      showStatus('success', I18N.successMessage || "Thank you for your inquiry. We'll get back to you within 1-2 business days.");
       form.reset();
       emailStatus?.classList.add('hidden');
       isEmailValid = false;
     } catch (error) {
       console.error('Submission Error:', error);
-      showStatus('error', 'Please try again later or contact us directly via email at sh.lee@britzmedi.com');
+      showStatus('error', I18N.genericError || 'Please try again later or contact us directly via email at sh.lee@britzmedi.com');
     } finally {
       setLoading(false);
     }

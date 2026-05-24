@@ -1,9 +1,17 @@
 ---
-import { languages, getLangFromUrl, addLanguageToPath, type Language } from '../../i18n/config';
+import { languages, getLangFromUrl, addLanguageToPath, isLocalizedRoute, defaultLang, type Language } from '../../i18n/config';
 
 const currentLang = getLangFromUrl(Astro.url);
 const currentPath = Astro.url.pathname;
 const currentLanguageInfo = languages[currentLang];
+
+// Pages without localized versions (e.g. /news) would 404 if we just prefixed the
+// language. For those, switch to the target language's home instead of a dead URL.
+const pathIsLocalized = isLocalizedRoute(currentPath);
+const targetPath = (code: Language) =>
+  pathIsLocalized
+    ? addLanguageToPath(currentPath, code)
+    : (code === defaultLang ? '/' : `/${code}`);
 ---
 
 <div class="relative language-switcher">
@@ -23,7 +31,7 @@ const currentLanguageInfo = languages[currentLang];
   <div class="language-dropdown absolute right-0 rtl:right-auto rtl:left-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 opacity-0 invisible transform translate-y-2 transition-all duration-200 z-50">
     {Object.entries(languages).map(([code, info]) => {
       const isActive = code === currentLang;
-      const href = addLanguageToPath(currentPath, code as Language);
+      const href = targetPath(code as Language);
 
       return (
         <a

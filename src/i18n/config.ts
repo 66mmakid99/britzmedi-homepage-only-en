@@ -56,6 +56,31 @@ export function addLanguageToPath(pathname: string, lang: Language): string {
   return `/${lang}${cleanPath}`;
 }
 
+// Route patterns that have localized ([lang]/...) versions.
+// Pages NOT matching these (e.g. /news, /confirm-subscription, /404) are English-only:
+// the language switcher must not link to a non-existent /xx/... URL, and SEOHead must
+// not emit hreflang alternates pointing at 404s.
+const LOCALIZED_ROUTE_PATTERNS: RegExp[] = [
+  /^\/$/,
+  /^\/about$/,
+  /^\/blog$/,
+  /^\/blog\/[^/]+$/,
+  /^\/certifications$/,
+  /^\/contact$/,
+  /^\/faq$/,
+  /^\/privacy$/,
+  /^\/products$/,
+  /^\/products\/[^/]+$/,
+  /^\/resources$/,
+  /^\/terms$/,
+];
+
+// Whether the given path (with or without a language prefix) has localized versions.
+export function isLocalizedRoute(pathname: string): boolean {
+  const cleanPath = removeLanguageFromPath(pathname);
+  return LOCALIZED_ROUTE_PATTERNS.some((re) => re.test(cleanPath));
+}
+
 // Generate alternate URLs for hreflang tags
 export function getAlternateUrls(pathname: string, baseUrl: string): Record<Language, string> {
   const cleanPath = removeLanguageFromPath(pathname);

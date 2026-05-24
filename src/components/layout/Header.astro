@@ -22,7 +22,8 @@ const navigation = [
   { key: 'nav.about', href: "/about" },
   { key: 'nav.certifications', href: "/certifications" },
   { key: 'nav.blog', href: "/blog" },
-  { key: 'nav.news', href: "/news" },
+  // News hidden: all entries in src/data/news.json are published:false (unverified PR claims).
+  // Restore this line once the news content is verified and at least one item is published:true.
   { key: 'nav.resources', href: "/resources" },
   { key: 'nav.faq', href: "/faq" },
   { key: 'nav.contact', href: "/contact" },
@@ -42,13 +43,8 @@ const isActivePath = (href: string) => {
   <div class="container relative">
     <nav class="flex items-center justify-between h-16 lg:h-20">
       <!-- Logo -->
-      <a href={localizedUrl("/")} class="flex items-center gap-3 group">
-        <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow">
-          <span class="text-white font-bold text-lg">B</span>
-        </div>
-        <span class="text-xl lg:text-2xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-          BRITZMEDI
-        </span>
+      <a href={localizedUrl("/")} class="flex items-center group" aria-label="BRITZMEDI">
+        <img src="/images/logos/britzmedi-logo.png" alt="BRITZMEDI" class="h-10 lg:h-12 w-auto" />
       </a>
 
       <!-- Desktop Navigation -->

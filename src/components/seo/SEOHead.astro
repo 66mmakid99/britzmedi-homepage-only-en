@@ -1,6 +1,6 @@
 ---
 // Enhanced SEO Head Component
-import { getAlternateUrls, defaultLang, supportedLanguages } from '../../i18n/config';
+import { getAlternateUrls, defaultLang, supportedLanguages, isLocalizedRoute } from '../../i18n/config';
 
 interface Props {
   title: string;
@@ -39,7 +39,9 @@ const fullTitle = title === 'Home'
 const canonical = canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 
-// Generate hreflang URLs
+// Generate hreflang URLs — only for pages that actually have localized versions.
+// Emitting alternates for English-only pages (e.g. /news) declares 404 URLs to Google.
+const hasLocalizedVersions = isLocalizedRoute(Astro.url.pathname);
 const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
 ---
 
@@ -59,11 +61,15 @@ const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 )}
 
-<!-- Hreflang Tags for International SEO -->
-{supportedLanguages.map(lang => (
-  <link rel="alternate" hreflang={lang} href={alternateUrls[lang]} />
-))}
-<link rel="alternate" hreflang="x-default" href={alternateUrls[defaultLang]} />
+<!-- Hreflang Tags for International SEO (localized pages only) -->
+{hasLocalizedVersions && (
+  <>
+    {supportedLanguages.map(lang => (
+      <link rel="alternate" hreflang={lang} href={alternateUrls[lang]} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={alternateUrls[defaultLang]} />
+  </>
+)}
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content={ogType} />
