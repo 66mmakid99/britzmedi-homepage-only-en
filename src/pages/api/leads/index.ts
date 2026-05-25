@@ -405,9 +405,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
               max_tokens: 1024,
               messages: [{
                 role: 'user',
-                content: `You are Sarah Lee, International Sales Manager at BRITZMEDI (sh.lee@britzmedi.com). BRITZMEDI is a Korean medical aesthetic device manufacturer.
+                content: `You are Sarah Lee, International Sales Manager at BRITZMEDI (sh.lee@britzmedi.com).
 
-Write a follow-up email body for this lead:
+BRITZMEDI CONTEXT:
+- Korean medical aesthetic device manufacturer
+- Current products: TORR RF (radiofrequency device), NEWCHAE (microneedling device). These are the ONLY two products. Do NOT mention any other products.
+- If the lead asked about a product we don't sell, acknowledge their interest but naturally redirect to TORR RF or NEWCHAE.
+
+LEAD INFO:
 - Company: ${data.company_name || 'N/A'}
 - Website: ${data.company_website || 'N/A'}
 - Name: ${data.contact_name || 'N/A'}
@@ -416,13 +421,14 @@ Write a follow-up email body for this lead:
 - Interested in: ${interestedProducts.join(', ')}
 - Their message: ${data.message || '(none)'}
 
-Rules:
-- Start directly with "Dear ${data.contact_name || 'there'}," — no subject line, no headers
-- Professional, warm, not pushy
-- Mention specific benefits of the products they asked about
-- Under 150 words
-- Plain text only (no HTML, no markdown, no code blocks)
-- End with signature block:
+SALES RULES (MUST FOLLOW):
+1. This is a FIRST CONTACT reply. Keep it light — thank them, briefly acknowledge their interest.
+2. Do NOT propose calls, video meetings, or visits. That comes later after basic documents are exchanged.
+3. Ask them to submit their company profile and import license via our online form (say "I will send you a short online form to collect your company details and import documentation").
+4. Keep under 120 words. Short and professional.
+5. Start with "Dear ${data.contact_name || 'there'}," — no subject line.
+6. Plain text only (no HTML, no markdown).
+7. End with:
 
 Warm regards,
 
