@@ -388,6 +388,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const ctx = (locals as any)?.runtime?.ctx;
     if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY && env?.GMAIL_CLIENT_ID && source === 'website') {
       ctx.waitUntil((async () => {
+        let draftBody = '';
+        let draftSubject = `Thank you for your interest - ${interestedProducts[0] || 'BRITZMEDI'}`;
+        let gmailOk = false;
+
         try {
           const draftResponse = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -413,61 +417,71 @@ Write a personalized follow-up email for this new lead:
 - Their message: ${data.message || '(none)'}
 
 Rules:
-- Write in English
-- Professional, warm, not pushy
-- Mention specific benefits of the products they asked about
-- Keep under 200 words
-- Output ONLY the email body as HTML (no subject line, no markdown)
+- Write in English, professional and warm
+- Mention specific product benefits
+- Under 200 words
+- Output plain text only (no HTML tags, no markdown, no code blocks)
 - Sign as "Sarah Lee | International Sales Manager | BRITZMEDI Co., Ltd."`,
               }],
             }),
           });
 
           if (!draftResponse.ok) {
-            console.error('[ai-draft] Claude API error:', draftResponse.status);
-            return;
+            console.error('[ai-draft] Claude API error:', draftResponse.status, await draftResponse.text());
+          } else {
+            const draftResult = await draftResponse.json() as any;
+            const rawText = draftResult.content?.[0]?.text || '';
+            draftBody = rawText.replace(/```[\s\S]*?```/g, '').trim();
           }
+        } catch (e) {
+          console.error('[ai-draft] Claude API failed:', e);
+        }
 
-          const draftResult = await draftResponse.json() as any;
-          const draftBody = draftResult.content?.[0]?.text || '';
-          const draftSubject = `Thank you for your interest — ${interestedProducts[0] || 'BRITZMEDI'}`;
+        if (draftBody) {
+          try {
+            await createGmailDraft(
+              {
+                clientId: env.GMAIL_CLIENT_ID!,
+                clientSecret: env.GMAIL_CLIENT_SECRET!,
+                refreshToken: env.GMAIL_REFRESH_TOKEN!,
+              },
+              {
+                to: data.email,
+                toName: data.contact_name || '',
+                subject: draftSubject,
+                htmlBody: `<div style="font-family: Arial, sans-serif; line-height: 1.7; white-space: pre-line;">${draftBody}</div>`,
+              },
+            );
+            gmailOk = true;
+            console.log(`[ai-draft] Gmail draft created for lead ${leadId}`);
+          } catch (e) {
+            console.error('[ai-draft] Gmail draft failed:', e);
+          }
+        }
 
-          await createGmailDraft(
-            {
-              clientId: env.GMAIL_CLIENT_ID!,
-              clientSecret: env.GMAIL_CLIENT_SECRET!,
-              refreshToken: env.GMAIL_REFRESH_TOKEN!,
-            },
-            {
-              to: data.email,
-              toName: data.contact_name || '',
-              subject: draftSubject,
-              htmlBody: draftBody,
-            },
-          );
-
-          console.log(`[ai-draft] Gmail draft created for lead ${leadId}`);
-
-          if (resendKey) {
+        if (resendKey) {
+          try {
+            const statusLine = gmailOk
+              ? 'Gmail draft saved - check your Drafts folder.'
+              : 'Gmail draft failed - see draft content below.';
             await sendEmail({
               apiKey: resendKey,
               to: 'sh.lee@britzmedi.com',
-              subject: `[AI Draft Ready] ${data.company_name} (${data.country})`,
-              html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
-  <p style="font-size: 15px; color: #1e293b;">Gmail 임시보관함에 AI 응대 초안이 저장되었습니다.</p>
-  <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin: 16px 0;">
+              subject: `[AI Draft${gmailOk ? '' : ' - Gmail Error'}] ${data.company_name} (${data.country})`,
+              html: `<div style="font-family: Arial, sans-serif; max-width: 700px; padding: 20px;">
+  <p style="font-size: 15px; color: #1e293b; margin: 0 0 16px;">${statusLine}</p>
+  <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
     <p style="margin: 4px 0; color: #475569;"><strong>To:</strong> ${data.contact_name} &lt;${data.email}&gt;</p>
     <p style="margin: 4px 0; color: #475569;"><strong>Company:</strong> ${data.company_name}</p>
     <p style="margin: 4px 0; color: #475569;"><strong>Products:</strong> ${interestedProducts.join(', ')}</p>
-    <p style="margin: 4px 0; color: #475569;"><strong>Subject:</strong> ${draftSubject}</p>
   </div>
-  <p style="font-size: 14px; color: #64748b;">Gmail에서 확인 후 수정하여 발송하세요.</p>
+  <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; white-space: pre-line; line-height: 1.7; color: #1e293b; font-size: 15px;">${draftBody || '(AI draft generation failed)'}</div>
 </div>`,
               from: 'BRITZMEDI AI <noreply@britzmedi.com>',
             });
+          } catch (e) {
+            console.error('[ai-draft] Notification email failed:', e);
           }
-        } catch (e) {
-          console.error('[ai-draft] Failed:', e);
         }
       })());
     }

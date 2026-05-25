@@ -24,31 +24,37 @@ async function getAccessToken(creds: GmailCredentials): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error(`Token refresh failed: ${response.status}`);
+    const body = await response.text();
+    throw new Error(`Token refresh failed: ${response.status} ${body}`);
   }
 
   const data = await response.json() as any;
   return data.access_token;
 }
 
-function buildRawEmail(draft: DraftEmail): string {
-  const boundary = '----=_Part_' + Date.now();
-  const lines = [
-    `From: sh.lee@britzmedi.com`,
-    `To: ${draft.toName} <${draft.to}>`,
-    `Subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(draft.subject)))}?=`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset=utf-8`,
-    `Content-Transfer-Encoding: base64`,
-    '',
-    btoa(unescape(encodeURIComponent(draft.htmlBody))),
-  ];
-
-  const raw = lines.join('\r\n');
-  return btoa(unescape(encodeURIComponent(raw)))
+function toBase64Url(str: string): string {
+  const utf8Bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (const byte of utf8Bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
+}
+
+function buildRawEmail(draft: DraftEmail): string {
+  const lines = [
+    `From: sh.lee@britzmedi.com`,
+    `To: ${draft.toName} <${draft.to}>`,
+    `Subject: ${draft.subject}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: text/html; charset=utf-8`,
+    '',
+    draft.htmlBody,
+  ];
+  return toBase64Url(lines.join('\r\n'));
 }
 
 export async function createGmailDraft(
