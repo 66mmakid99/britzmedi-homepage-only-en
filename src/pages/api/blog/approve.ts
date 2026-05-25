@@ -5,6 +5,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import type { BlogPost } from '../../../lib/youtube-to-blog/schemas';
+import { publishPost } from '../../../lib/youtube-to-blog/publish';
 
 export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url);
@@ -47,10 +48,33 @@ export const GET: APIRoute = async ({ request, locals }) => {
         WHERE id = ?
       `).bind(post.id).run();
 
+      // 1-click approve = publish: publish immediately after approving.
+      const env = runtime?.env;
+      let publishResult;
+      try {
+        // Re-read so status='approved' passes publishPost's guard.
+        const approvedPost = await db.prepare('SELECT * FROM blog_posts WHERE id = ?')
+          .bind(post.id).first<BlogPost>();
+        publishResult = approvedPost ? await publishPost(approvedPost, env) : { ok: false, error: 'Post not found after approval' };
+      } catch (pubErr: any) {
+        publishResult = { ok: false, error: pubErr?.message || 'Publish failed' };
+      }
+
+      if (publishResult.ok) {
+        return htmlResponse(`
+          <h2 style="color: #16a34a;">Blog Post Approved &amp; Published!</h2>
+          <p><strong>${post.title}</strong></p>
+          <p>The post has been approved and published. Cloudflare Pages will rebuild automatically.</p>
+          <a href="/admin/youtube-to-blog/${post.id}" style="color: #2563eb;">Go to Editor</a>
+        `);
+      }
+
+      // Approved but publish failed — surface clearly, post stays 'approved' for manual publish.
       return htmlResponse(`
-        <h2 style="color: #16a34a;">Blog Post Approved!</h2>
+        <h2 style="color: #16a34a;">Blog Post Approved</h2>
         <p><strong>${post.title}</strong></p>
-        <p>The post has been approved and is ready for publishing.</p>
+        <p>The post was approved, but automatic publishing failed: ${publishResult.error || 'unknown error'}.</p>
+        <p>You can publish it manually from the editor.</p>
         <a href="/admin/youtube-to-blog/${post.id}" style="color: #2563eb;">Go to Editor</a>
       `);
     } else {

@@ -5,6 +5,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import type { BlogPost } from '../../../../../lib/youtube-to-blog/schemas';
+import { publishPost } from '../../../../../lib/youtube-to-blog/publish';
 
 export const POST: APIRoute = async ({ params, request, locals }) => {
   const { id } = params;
@@ -27,7 +28,8 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     const runtime = (locals as any).runtime;
-    const db = runtime?.env?.DB as D1Database | undefined;
+    const env = runtime?.env;
+    const db = env?.DB as D1Database | undefined;
 
     if (!db) {
       return new Response(JSON.stringify({ success: true, message: `Post ${action}d (dev mode)` }), {
@@ -45,28 +47,60 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       });
     }
 
-    if (action === 'approve') {
-      await db.prepare(`
-        UPDATE blog_posts SET
-          status = 'approved',
-          approved_at = datetime('now'),
-          approved_by = 'admin',
-          updated_at = datetime('now')
-        WHERE id = ?
-      `).bind(id).run();
-    } else {
+    if (action === 'reject') {
       await db.prepare(`
         UPDATE blog_posts SET
           status = 'draft',
           updated_at = datetime('now')
         WHERE id = ?
       `).bind(id).run();
+
+      return new Response(JSON.stringify({
+        success: true,
+        action,
+        new_status: 'draft',
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // approve → mark approved, then publish (1-click approve = publish)
+    await db.prepare(`
+      UPDATE blog_posts SET
+        status = 'approved',
+        approved_at = datetime('now'),
+        approved_by = 'admin',
+        approval_token = NULL,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(id).run();
+
+    const approvedPost = await db.prepare('SELECT * FROM blog_posts WHERE id = ?')
+      .bind(id).first<BlogPost>();
+    const publishResult = approvedPost
+      ? await publishPost(approvedPost, env)
+      : { ok: false, error: 'Post not found after approval' };
+
+    if (!publishResult.ok) {
+      // Approved but publish failed — report so caller can retry publish manually.
+      return new Response(JSON.stringify({
+        success: true,
+        action,
+        new_status: 'approved',
+        published: false,
+        publish_error: publishResult.error || 'Publishing failed',
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     return new Response(JSON.stringify({
       success: true,
       action,
-      new_status: action === 'approve' ? 'approved' : 'draft',
+      new_status: 'published',
+      published: true,
+      commit_sha: publishResult.commit_sha,
+      slug: publishResult.slug,
     }), {
       headers: { 'Content-Type': 'application/json' },
     });

@@ -61,6 +61,7 @@ function requiresAdminAuth(pathname: string, method: string): boolean {
   // and PUT/DELETE on posts) are admin. Public reads stay open.
   if (pathname.startsWith('/api/blog/')) {
     if (pathname.startsWith('/api/blog/images/')) return false; // public image serving
+    if (pathname === '/api/blog/approve') return false; // email approval link, authenticated by its own approval_token
     if (pathname === '/api/blog/posts' && method === 'GET') return false; // public list
     if (/^\/api\/blog\/posts\/[^/]+$/.test(pathname) && method === 'GET') return false; // public single post
     return true; // everything else under /api/blog/ requires auth
