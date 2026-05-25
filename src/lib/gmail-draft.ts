@@ -32,20 +32,8 @@ async function getAccessToken(creds: GmailCredentials): Promise<string> {
   return data.access_token;
 }
 
-function toBase64Url(str: string): string {
-  const utf8Bytes = new TextEncoder().encode(str);
-  let binary = '';
-  for (const byte of utf8Bytes) {
-    binary += String.fromCharCode(byte);
-  }
-  return btoa(binary)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
-
 function buildRawEmail(draft: DraftEmail): string {
-  const lines = [
+  const message = [
     `From: sh.lee@britzmedi.com`,
     `To: ${draft.toName} <${draft.to}>`,
     `Subject: ${draft.subject}`,
@@ -53,8 +41,14 @@ function buildRawEmail(draft: DraftEmail): string {
     `Content-Type: text/html; charset=utf-8`,
     '',
     draft.htmlBody,
-  ];
-  return toBase64Url(lines.join('\r\n'));
+  ].join('\r\n');
+
+  const bytes = new TextEncoder().encode(message);
+  const binString = Array.from(bytes, (b) => String.fromCodePoint(b)).join('');
+  return btoa(binString)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 export async function createGmailDraft(
