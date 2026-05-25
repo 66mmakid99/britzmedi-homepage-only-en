@@ -407,7 +407,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
                 role: 'user',
                 content: `You are Sarah Lee, International Sales Manager at BRITZMEDI (sh.lee@britzmedi.com). BRITZMEDI is a Korean medical aesthetic device manufacturer.
 
-Write a personalized follow-up email for this new lead:
+Write a follow-up email body for this lead:
 - Company: ${data.company_name || 'N/A'}
 - Website: ${data.company_website || 'N/A'}
 - Name: ${data.contact_name || 'N/A'}
@@ -417,11 +417,19 @@ Write a personalized follow-up email for this new lead:
 - Their message: ${data.message || '(none)'}
 
 Rules:
-- Write in English, professional and warm
-- Mention specific product benefits
-- Under 200 words
-- Output plain text only (no HTML tags, no markdown, no code blocks)
-- Sign as "Sarah Lee | International Sales Manager | BRITZMEDI Co., Ltd."`,
+- Start directly with "Dear ${data.contact_name || 'there'}," — no subject line, no headers
+- Professional, warm, not pushy
+- Mention specific benefits of the products they asked about
+- Under 150 words
+- Plain text only (no HTML, no markdown, no code blocks)
+- End with signature block:
+
+Warm regards,
+
+Sarah Lee
+International Sales Manager
+BRITZMEDI Co., Ltd.
+sh.lee@britzmedi.com`,
               }],
             }),
           });
