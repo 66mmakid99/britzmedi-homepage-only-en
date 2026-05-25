@@ -473,17 +473,14 @@ sh.lee@britzmedi.com`,
           }
         }
 
-        if (resendKey) {
+        if (resendKey && !gmailOk) {
           try {
-            const statusLine = gmailOk
-              ? 'Gmail draft saved - check your Drafts folder.'
-              : 'Gmail draft failed - see draft content below.';
             await sendEmail({
               apiKey: resendKey,
               to: 'sh.lee@britzmedi.com',
-              subject: `[AI Draft${gmailOk ? '' : ' - Gmail Error'}] ${data.company_name} (${data.country})`,
+              subject: `[AI Draft - Gmail Error] ${data.company_name} (${data.country})`,
               html: `<div style="font-family: Arial, sans-serif; max-width: 700px; padding: 20px;">
-  <p style="font-size: 15px; color: #1e293b; margin: 0 0 16px;">${statusLine}</p>
+  <p style="font-size: 15px; color: #1e293b; margin: 0 0 16px;">Gmail draft failed. Copy the draft below and send manually.</p>
   <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
     <p style="margin: 4px 0; color: #475569;"><strong>To:</strong> ${data.contact_name} &lt;${data.email}&gt;</p>
     <p style="margin: 4px 0; color: #475569;"><strong>Company:</strong> ${data.company_name}</p>
@@ -494,7 +491,7 @@ sh.lee@britzmedi.com`,
               from: 'BRITZMEDI AI <noreply@britzmedi.com>',
             });
           } catch (e) {
-            console.error('[ai-draft] Notification email failed:', e);
+            console.error('[ai-draft] Fallback notification failed:', e);
           }
         }
       })());
