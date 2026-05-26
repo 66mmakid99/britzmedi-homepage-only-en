@@ -1,0 +1,42 @@
+name: Blog Pipeline Cron
+
+# Triggers the semi-automatic blog pipeline (RSS channel watch + job progression).
+# Cloudflare Pages has no native cron, so GitHub Actions drives the schedule.
+#
+# REQUIRED repo secret: CRON_SECRET  (must match the Pages env var CRON_SECRET)
+# Endpoint: POST https://www.britzmedi.com/api/cron/blog-pipeline
+#   Header: Authorization: Bearer <CRON_SECRET>
+
+on:
+  # Weekdays 09:00 KST (00:00 UTC, Mon-Fri)
+  schedule:
+    - cron: '0 0 * * 1-5'
+
+  # Manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  trigger-blog-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger blog pipeline endpoint
+        run: |
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "::error::CRON_SECRET repo secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "https://www.britzmedi.com/api/cron/blog-pipeline" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 300)
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response body:"
+          cat response.json || true
+          echo ""
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "::error::Blog pipeline endpoint returned $HTTP_CODE"
+            exit 1
+          fi

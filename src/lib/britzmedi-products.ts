@@ -2,9 +2,9 @@ export const BRITZMEDI_PRODUCTS = {
   "TORR RF": {
     name: "TORR RF",
     category: "professional_medical_device",
-    classification: "FDA 510(k) cleared medical device",
+    classification: "Non-invasive FDA 510(k) cleared medical device (K212561) — contact RF, NOT a microneedling/needle-based device",
     target_user: "Licensed aesthetic clinics, dermatology clinics, medical spas",
-    technology: "Multi-wave radiofrequency (mono-polar, bi-polar, multi-polar switching)",
+    technology: "Non-invasive multi-wave radiofrequency (mono-polar, bi-polar, multi-polar switching) via contact handpieces — no needles, no cartridges",
     indications: [
       "Skin tightening",
       "Body contouring",
@@ -26,15 +26,16 @@ export const BRITZMEDI_PRODUCTS = {
   "ULBLANC": {
     name: "ULBLANC",
     category: "professional_medical_device",
-    classification: "Professional aesthetic device",
+    classification: "Professional multi-frequency ultrasound workstation (NOT an RF device, NOT a microneedling device)",
     target_user: "Licensed aesthetic clinics, dermatology clinics",
-    technology: "Advanced skin rejuvenation system",
+    technology: "Multi-frequency ultrasound (dual-frequency tightening) + acoustic cavitation / sonophoresis for transdermal delivery",
     indications: [
       "Skin rejuvenation",
       "Skin tone improvement"
     ],
     key_features: [
-      "Multiple energy modalities for skin rejuvenation"
+      "Dual-frequency ultrasound for superficial and deep tissue treatment",
+      "Acoustic cavitation (sonophoresis) for transdermal ingredient delivery"
     ],
     certifications: ["CE", "ISO 13485"],
     regulatory_note: "Professional use only.",
