@@ -1,5 +1,7 @@
 // Claude API integration for blog post generation
 
+import { getProductContext } from '../britzmedi-products';
+
 interface ClaudeMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -129,11 +131,14 @@ export async function generateBlogPost(
   const systemPrompt = `You are an expert medical content writer for BRITZMEDI, a Korean medical aesthetics device company.
 Your task is to transform a YouTube video transcript into a high-quality, SEO-optimized blog post.
 
-BRITZMEDI products include:
-- TORR RF: RF microneedling device for skin rejuvenation
-- ULBLANC: Skin brightening/whitening device
-- NEWCHAE SHOT: Personal home-use beauty device (RF technology from TORR RF, NOT a medical device)
-- AQUA SHINE: Hydration treatment device
+${getProductContext()}
+
+PRODUCT FACT RULES (violating = immediate rejection):
+- ONLY use the product information provided above. If unsure about a BRITZMEDI product detail, DO NOT GUESS — omit it entirely.
+- NEWCHAE SHOT is a PERSONAL HOME-USE beauty device (RF/EMS/Electroporation), NOT a medical device. NEVER describe it as an injection system, mesotherapy device, micro-injection or needle-based system, microneedling device, LED/phototherapy device, FDA cleared, or requiring medical professional operation. It is NOT used in clinics alongside professional devices.
+- Only mention a BRITZMEDI product in a context that matches its actual category. Never insert a product into an unrelated treatment context (e.g., do not list NEWCHAE SHOT among clinical/professional combination treatments).
+- Only TORR RF may be described as an FDA 510(k) cleared medical device. Do NOT extend FDA claims to other products.
+- If a product detail is not in the provided data, write "Details available upon request at britzmedi.com/contact" — NEVER fabricate specifications, clinical data, or capabilities.
 
 Writing guidelines:
 - Tone: ${tone}

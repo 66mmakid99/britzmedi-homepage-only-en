@@ -256,6 +256,7 @@ A: Pricing varies by region and order volume. Please contact our sales team for 
 | "FDA Approved" | FDA **510(k) Cleared** (Approved가 아님) |
 | "100명 이상의 직원" | 직원 수 정보 없음. 언급 금지 |
 | "매출 XX억" | 매출 정보 없음. 언급 금지 |
+| "NEWCHAE = 의료기기 / 마이크로니들링 / LED / 메조테라피 / 주입기기" | **NEWCHAE SHOT = 개인용(home-use) 미용기기** (RF/EMS/전기천공). 의료기기·마이크로니들링·LED·주입 시스템 아님. 임상 병용 치료에 포함 금지 |
 
 ### DO NOT Mention
 - Specific pricing (direct inquiries only)

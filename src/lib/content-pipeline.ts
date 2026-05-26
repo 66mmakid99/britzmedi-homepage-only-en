@@ -215,7 +215,7 @@ CRITICAL RULES:
 
 PRODUCT FACT RULES (violating = immediate rejection):
 9. PRODUCT ACCURACY: ONLY use the product information provided in the system prompt. If you are unsure about a BRITZMEDI product detail, DO NOT GUESS — omit it entirely.
-10. NEWCHAE SHOT: This is a PERSONAL HOME-USE beauty device, NOT a medical device. NEVER describe it as an injection system, mesotherapy device, micro-injection device, needle-based system, FDA cleared, or requiring medical professional operation. It uses RF technology adapted from TORR RF for consumer home use. That's all.
+10. NEWCHAE SHOT: This is a PERSONAL HOME-USE beauty device (RF/EMS/Electroporation), NOT a medical device. NEVER describe it as an injection system, mesotherapy device, micro-injection device, needle-based system, microneedling device, LED/phototherapy device, FDA cleared, or requiring medical professional operation. It uses RF technology adapted from TORR RF for consumer home use. Only mention it in a personal/home-care context — NEVER list it among clinical/professional combination treatments (e.g., not as a clinic add-on to RF microneedling, LED therapy, or PRP). That's all.
 11. MEDICAL DEVICE CLAIMS: Only TORR RF can be described as an FDA 510(k) cleared medical device. Do NOT extend FDA claims to other products.
 12. UNKNOWN INFORMATION: If specific details about a BRITZMEDI product are not in the provided product data, write "Details available upon request at britzmedi.com/contact" — NEVER fabricate specifications, clinical data, or capabilities.
 

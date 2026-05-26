@@ -61,11 +61,12 @@ export const BRITZMEDI_PRODUCTS = {
     is_medical_device: false,
     is_personal_device: true,
     CRITICAL_WARNINGS: [
-      "NEVER describe as medical device, injection system, or mesotherapy device",
+      "NEVER describe as medical device, injection system, mesotherapy device, micro-injection/needle-based system, microneedling device, or LED/phototherapy device",
       "NEVER claim FDA clearance for this product",
       "NEVER say it requires medical professional to operate",
       "NEVER list clinical indications (it is NOT a clinical device)",
-      "ALWAYS clarify it is a PERSONAL/HOME-USE beauty device based on TORR RF technology"
+      "NEVER list it among clinical/professional combination treatments (it is home-use only, not a clinic add-on to RF microneedling, LED therapy, PRP, etc.)",
+      "ALWAYS clarify it is a PERSONAL/HOME-USE beauty device (RF/EMS/Electroporation) based on TORR RF technology"
     ]
   },
   "LUMINO WAVE": {
