@@ -405,7 +405,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
               max_tokens: 1024,
               messages: [{
                 role: 'user',
-                content: `You are Sarah Lee, International Sales Manager at BRITZMEDI (sh.lee@britzmedi.com).
+                content: `You are Sungho Lee, Overseas Sales & Marketing Director at BRITZMEDI (sh.lee@britzmedi.com).
 
 BRITZMEDI CONTEXT:
 - Korean aesthetic device company
@@ -436,8 +436,8 @@ SALES RULES (MUST FOLLOW):
 
 Warm regards,
 
-Sarah Lee
-International Sales Manager
+Sungho Lee
+Overseas Sales & Marketing Director
 BRITZMEDI Co., Ltd.
 sh.lee@britzmedi.com`,
               }],
