@@ -382,8 +382,7 @@ body {
 #section-badges,
 #section-products,
 #section-why,
-#section-tech,
-#section-news {
+#section-tech {
   padding-top: clamp(1rem, 7.4vw - 0.75rem, 4rem) !important;
   padding-bottom: clamp(1rem, 7.4vw - 0.75rem, 4rem) !important;
 }

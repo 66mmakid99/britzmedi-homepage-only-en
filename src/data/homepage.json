@@ -117,13 +117,6 @@
     "title": "Core Technologies",
     "description": "Our proprietary technologies power the next generation of aesthetic treatments."
   },
-  "latestNews": {
-    "enabled": true,
-    "label": "News & Updates",
-    "title": "Latest News",
-    "description": "Stay up to date with the latest from BRITZMEDI.",
-    "displayCount": 3
-  },
   "cta": {
     "title": "Ready to Partner with BRITZMEDI?",
     "description": "Whether you're a distributor, clinic, or OEM partner, we're here to help you bring world-class aesthetic technology to your market.",

@@ -5,7 +5,7 @@ const currentLang = getLangFromUrl(Astro.url);
 const currentPath = Astro.url.pathname;
 const currentLanguageInfo = languages[currentLang];
 
-// Pages without localized versions (e.g. /news) would 404 if we just prefixed the
+// Pages without localized versions (e.g. /confirm-subscription) would 404 if we just prefixed the
 // language. For those, switch to the target language's home instead of a dead URL.
 const pathIsLocalized = isLocalizedRoute(currentPath);
 const targetPath = (code: Language) =>

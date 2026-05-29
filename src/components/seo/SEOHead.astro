@@ -40,7 +40,7 @@ const canonical = canonicalUrl || new URL(Astro.url.pathname, siteUrl).toString(
 const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 
 // Generate hreflang URLs — only for pages that actually have localized versions.
-// Emitting alternates for English-only pages (e.g. /news) declares 404 URLs to Google.
+// Emitting alternates for English-only pages (e.g. /confirm-subscription) declares 404 URLs to Google.
 const hasLocalizedVersions = isLocalizedRoute(Astro.url.pathname);
 const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
 ---
@@ -54,6 +54,9 @@ const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
 <!-- Canonical URL -->
 <link rel="canonical" href={canonical} />
 
+<!-- Sitemap -->
+<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
 <!-- Robots -->
 {noIndex ? (
   <meta name="robots" content="noindex, nofollow" />
@@ -61,14 +64,17 @@ const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 )}
 
-<!-- Hreflang Tags for International SEO (localized pages only) -->
-{hasLocalizedVersions && (
+<!-- Hreflang Tags for International SEO -->
+{hasLocalizedVersions ? (
   <>
     {supportedLanguages.map(lang => (
       <link rel="alternate" hreflang={lang} href={alternateUrls[lang]} />
     ))}
     <link rel="alternate" hreflang="x-default" href={alternateUrls[defaultLang]} />
   </>
+) : (
+  /* English-only pages: declare self as the default version (never a 404). */
+  !noIndex && <link rel="alternate" hreflang="x-default" href={canonical} />
 )}
 
 <!-- Open Graph / Facebook -->

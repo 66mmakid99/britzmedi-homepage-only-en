@@ -50,6 +50,7 @@ const remainingAttempts = Astro.url.searchParams.get('remaining');
             {error === 'required' && 'Password is required.'}
             {error === 'expired' && 'Session expired. Please sign in again.'}
             {error === 'locked' && `Too many failed attempts. Please try again in ${lockoutMinutes || 15} minute(s).`}
+            {error === 'session_unavailable' && 'Session store is temporarily unavailable. Please try again shortly.'}
           </p>
         </div>
       )}

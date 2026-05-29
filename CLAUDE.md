@@ -18,10 +18,10 @@
 - P6 (21-24주): 성과 검증
 - P7 (25-32주): SaaS 빌더 MVP
 
-### 현재 Phase: P5 완료 (Week 17-20)
+### 현재 Phase: P5 완료 + 운영 자동화 확장 (2026-05 기준)
 - [x] Keystatic 스키마 + 블로그 컬렉션
-- [x] Admin 인증 시스템 (Basic Auth)
-- [x] 다국어 기본 구조 (8개 언어)
+- [x] Admin 인증 시스템 (KV 세션 쿠키 + `src/middleware.ts` 중앙 인증)
+- [x] 다국어 (9개 언어, 전 언어 완역)
 - [x] ~~테마 시스템 (다크모드)~~ → 라이트모드 전용으로 변경 (2026-02-03)
 - [x] 블로그 시스템 + TL;DR
 - [x] D1 리드 저장 + Lead Score
@@ -29,6 +29,13 @@
 - [x] AI 챗봇 (Claude Sonnet 4) - 개선됨 (2026-02-03)
 - [x] Core Web Vitals 최적화
 - [x] SEO 메타태그 강화
+- [x] **AEO Engine** (admin/aeo-engine + cron) - 키워드 발굴/모니터링
+- [x] **Content Hub** (admin/content-hub) - 콘텐츠 수집·생성·품질검사·발행 파이프라인
+- [x] **Content Pipeline** (admin/content-pipeline + cron) - 배치 콘텐츠 생성
+- [x] **소셜 자동 게시** (LinkedIn/Facebook/Instagram/X)
+- [x] **반자동 블로그 발행** (YouTube/문서 → 블로그, Gmail 초안 승인)
+- [x] **Lead Research** (Claude + 웹검색 기반 리드 자동 조사)
+- [x] **Analytics** (자체 pageview 추적 + admin 대시보드)
 
 ---
 
@@ -61,10 +68,11 @@
 - **Cache**: Cloudflare KV
 
 ### External APIs
-- **AI Chatbot**: Claude API (Sonnet 4) - 업그레이드됨
+- **AI Chatbot / Content**: Claude API (Sonnet 4)
 - **Lead Enrichment**: Claude API + Web Search
-- **Translation**: DeepL API (8 languages)
-- **Email**: EmailJS / Resend
+- **Translation**: DeepL API (9 languages)
+- **Email**: Resend + Gmail Draft API
+- **Social**: LinkedIn / Facebook / Instagram / X (자동 게시)
 
 ---
 
@@ -157,9 +165,10 @@ chore: 빌드, 설정 변경
 - **Contact 폼 링크 자동 안내**
 
 ### 4. 다국어 지원 ✅
-- 8개 언어: EN, KO, ZH, JA, ES, PT-BR, DE, AR
+- 9개 언어: EN, JA, ZH, TH, VI, ES, FR, RU, AR (AR은 RTL)
+- 전 언어 완역 (`src/i18n/translations/*.ts` 각 ~598줄)
 - 언어 스위처 컴포넌트
-- hreflang 태그
+- hreflang 태그 + `[lang]` 라우트 (news 제외)
 
 ### 5. 성능 최적화 ✅
 - Core Web Vitals 모니터링
@@ -227,6 +236,16 @@ npm run test
 
 ## 개발 이력 (Development History)
 
+### 2026-05-29 - 문서 정합성 정정 + 위생/SEO 정리
+
+#### 변경 사항
+- **CLAUDE.md 정정**: 언어를 잘못된 8개(EN/KO/ZH/JA/ES/PT-BR/DE/AR) → 실제 9개(EN/JA/ZH/TH/VI/ES/FR/RU/AR)로 수정. KO/PT-BR/DE는 미존재, TH/VI/FR/RU 누락이었음
+- **현재 기능 반영**: 2026-02-03 이후 추가된 AEO Engine / Content Hub / Content Pipeline / 소셜 자동게시 / 반자동 블로그 발행 / Lead Research / Analytics 기재
+- **Admin 인증 설명 정정**: "Basic Auth" → 실제는 KV 세션 쿠키 + `src/middleware.ts` 중앙 인증
+- **루트 정리**: 일회성 설계문서 14개 → `docs/archive/` 이동, 세션 쿠키 파일(cookies*.txt)·`nul` 삭제
+- **보안**: `middleware.ts` 정적 세션 폴백을 프로덕션에서 차단(dev 한정)
+- **SEO**: `SEOHead.astro` sitemap 링크 + `x-default` hreflang 추가, 제품 갤러리 alt 텍스트 구체화
+
 ### 2026-02-03 - AI 챗봇 고도화 및 UI 최적화
 
 #### 변경 사항
@@ -272,4 +291,4 @@ npm run test
 
 ---
 
-*Last Updated: 2026-02-03*
+*Last Updated: 2026-05-29*

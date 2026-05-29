@@ -29,10 +29,14 @@ async function isValidSession(context: any, sessionToken: string): Promise<boole
     }
   }
 
-  // Fallback: check static secret (dev mode or KV unavailable)
-  const validToken = getEnv(context, 'ADMIN_SESSION_SECRET');
-  if (validToken && sessionToken === validToken) {
-    return true;
+  // Fallback: static secret is accepted ONLY in local dev.
+  // In production a static env secret must never act as a permanent,
+  // non-expiring master session token — sessions must be KV-backed.
+  if (import.meta.env.DEV) {
+    const validToken = getEnv(context, 'ADMIN_SESSION_SECRET');
+    if (validToken && sessionToken === validToken) {
+      return true;
+    }
   }
 
   return false;

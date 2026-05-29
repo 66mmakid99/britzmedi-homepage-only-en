@@ -144,22 +144,24 @@ export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => 
       });
     } catch (err) {
       console.error('[Admin Auth] Failed to store session in KV:', err);
-      // Fall back to static token
-      const sessionSecret = getEnv(locals, 'ADMIN_SESSION_SECRET');
-      if (sessionSecret) {
-        cookies.set('admin_session', sessionSecret, {
-          path: '/',
-          httpOnly: true,
-          secure: import.meta.env.PROD,
-          sameSite: 'lax',
-          maxAge: LOGIN_SECURITY.sessionMaxAge,
-        });
-        console.log('[Admin Auth] Login successful (fallback static token)');
-        const fbDb = locals?.runtime?.env?.DB;
-        if (fbDb) logActivity(fbDb, { type: 'admin_login', detail: 'Admin login (fallback)', ip: clientIP }).catch(() => {});
-        return redirect('/admin');
+      // Static-token fallback is dev-only. In production the middleware
+      // rejects the static secret, so issuing it here would only cause a
+      // redirect loop — fail closed and surface the KV outage instead.
+      if (import.meta.env.DEV) {
+        const sessionSecret = getEnv(locals, 'ADMIN_SESSION_SECRET');
+        if (sessionSecret) {
+          cookies.set('admin_session', sessionSecret, {
+            path: '/',
+            httpOnly: true,
+            secure: import.meta.env.PROD,
+            sameSite: 'lax',
+            maxAge: LOGIN_SECURITY.sessionMaxAge,
+          });
+          console.log('[Admin Auth] Login successful (dev fallback static token)');
+          return redirect('/admin');
+        }
       }
-      return redirect('/admin/login?error=invalid');
+      return redirect('/admin/login?error=session_unavailable');
     }
   } else {
     // Dev mode - no KV available, use static token fallback

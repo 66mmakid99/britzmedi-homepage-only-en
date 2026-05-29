@@ -14,8 +14,8 @@ interface FormatInput {
 }
 
 function buildUrl(input: FormatInput): string {
-  const base = input.contentType === 'news' ? '/news/' : '/blog/';
-  return `${SITE_URL}${base}${input.slug}`;
+  // Public /news section was removed; all published content lives under /blog/.
+  return `${SITE_URL}/blog/${input.slug}`;
 }
 
 function pickHashtags(category: string, count: number): string[] {

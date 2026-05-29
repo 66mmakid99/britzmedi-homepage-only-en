@@ -1,20 +1,14 @@
-// Content Hub news API — returns news items from news.json
+// Content Hub news API
 // GET /api/admin/content-hub/news
+// The public /news section and its news.json were removed; this endpoint now
+// returns an empty list so existing Content Hub / Social consumers keep working.
 
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import newsData from '../../../../data/news.json';
 
 export const GET: APIRoute = async () => {
-  try {
-    return new Response(JSON.stringify(newsData), {
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message || 'Failed to fetch news' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  return new Response(JSON.stringify([]), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 };

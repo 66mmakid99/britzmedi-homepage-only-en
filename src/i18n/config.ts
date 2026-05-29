@@ -57,7 +57,7 @@ export function addLanguageToPath(pathname: string, lang: Language): string {
 }
 
 // Route patterns that have localized ([lang]/...) versions.
-// Pages NOT matching these (e.g. /news, /confirm-subscription, /404) are English-only:
+// Pages NOT matching these (e.g. /confirm-subscription, /404) are English-only:
 // the language switcher must not link to a non-existent /xx/... URL, and SEOHead must
 // not emit hreflang alternates pointing at 404s.
 const LOCALIZED_ROUTE_PATTERNS: RegExp[] = [

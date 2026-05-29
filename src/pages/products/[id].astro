@@ -219,11 +219,11 @@ const breadcrumbSchema = {
 
       {product.images?.gallery && (
         <div class="grid md:grid-cols-3 gap-6">
-          {product.images.gallery.map((img: string) => (
+          {product.images.gallery.map((img: string, i: number) => (
             <div class="aspect-[4/3] rounded-xl overflow-hidden bg-white border border-slate-200 group cursor-pointer hover:shadow-xl transition-all duration-300">
               <img
                 src={img}
-                alt={product.name}
+                alt={`${product.name} — detail view ${i + 1}`}
                 width="800"
                 height="600"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
