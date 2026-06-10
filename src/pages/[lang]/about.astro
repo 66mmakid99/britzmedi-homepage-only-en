@@ -76,7 +76,7 @@ const getMilestoneDescription = (year: string) => {
               <div>
                 <span class="text-sm text-slate-500">{t('about.overview.ceo')}</span>
                 <p class="font-semibold text-slate-900">{company.ceo}</p>
-                <p class="text-sm text-slate-500">{t('about.overview.appointed')} {company.ceoAppointment}</p>
+                <p class="text-sm text-slate-500">{t('about.overview.appointed')} {new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : lang, { dateStyle: 'long' }).format(new Date(company.ceoAppointment))}</p>
               </div>
             </div>
 

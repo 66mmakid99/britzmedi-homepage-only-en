@@ -1,5 +1,6 @@
 // Export all translations
 import { en } from './en';
+import { ko } from './ko';
 import { ja } from './ja';
 import { zh } from './zh';
 import { th } from './th';
@@ -12,6 +13,7 @@ import type { Language } from '../config';
 
 export const translations = {
   en,
+  ko,
   ja,
   zh,
   th,

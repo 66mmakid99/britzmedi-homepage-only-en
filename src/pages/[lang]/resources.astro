@@ -32,7 +32,7 @@ const pageDescription = t('resources.heroDescription');
 const localizedUrl = (path: string) => `/${lang}${path}`;
 
 // Document-hub language for the profile badge (hub carries en/ko/ja/zh; others fall back to en)
-const hubLang = (['ja', 'zh'] as string[]).includes(lang) ? lang : 'en';
+const hubLang = (['ko', 'ja', 'zh'] as string[]).includes(lang) ? lang : 'en';
 
 // --- Live hub data (fail-open: any error keeps the static catalog rendering) ---
 let hubFamilies: HubDocFamily[] = [];

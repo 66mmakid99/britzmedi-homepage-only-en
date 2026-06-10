@@ -139,6 +139,25 @@ const handleRequest: MiddlewareHandler = async (context, next) => {
   const url = new URL(context.request.url);
   const pathname = url.pathname;
 
+  // Korean default for visitors from Korea (2026-06-10, co.kr consolidation).
+  // Only SSR routes reach this middleware (prerendered pages are served as static
+  // assets), so the redirect applies to the two SSR public entry points.
+  // Respect an explicit language choice (lang_pref cookie set by the switcher)
+  // and skip crawlers so SEO sees the canonical EN root with hreflang alternates.
+  if (
+    context.request.method === 'GET' &&
+    (pathname === '/' || pathname === '/resources' || pathname === '/resources/') &&
+    context.request.headers.get('CF-IPCountry') === 'KR' &&
+    !context.cookies.get('lang_pref')?.value &&
+    !/bot|crawler|spider|slurp|bingpreview|facebookexternalhit/i.test(context.request.headers.get('User-Agent') || '')
+  ) {
+    const target = pathname === '/' ? '/ko/' : '/ko/resources/';
+    return new Response(null, {
+      status: 302,
+      headers: { Location: target, 'Cache-Control': 'no-store', Vary: 'Cookie' },
+    });
+  }
+
   // Public routes - no auth needed
   const publicRoutes = ['/admin/login', '/api/admin/login'];
   if (publicRoutes.some(route => pathname === route)) {

@@ -63,7 +63,8 @@ const titleHasSpace = pageTitle.includes(' ');
 
         <!-- Acceptance of Terms -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">1. {lang === 'ja' ? '利用規約への同意' :
+          <h2 class="heading-2 mb-4">1. {lang === 'ko' ? '약관에 대한 동의' :
+            lang === 'ja' ? '利用規約への同意' :
             lang === 'zh' ? '条款的接受' :
             lang === 'th' ? 'การยอมรับข้อกำหนด' :
             lang === 'vi' ? 'Chấp nhận điều khoản' :
@@ -73,7 +74,8 @@ const titleHasSpace = pageTitle.includes(' ');
             lang === 'ar' ? 'قبول الشروط' :
             'Acceptance of Terms'}</h2>
           <p class="body-base mb-4">
-            {lang === 'ja' ? 'ウェブサイトにアクセスすることで、お客様は本利用規約およびプライバシーポリシーを読み、理解し、同意したものとみなされます。本規約のいずれかの部分に同意されない場合は、直ちにウェブサイトの使用を中止してください。' :
+            {lang === 'ko' ? '본 웹사이트에 접속함으로써 이용자는 본 이용약관 및 개인정보 처리방침을 읽고 이해하였으며, 그 내용에 구속되는 것에 동의한 것으로 간주됩니다. 본 약관의 일부라도 동의하지 않는 경우 즉시 웹사이트 이용을 중단하여야 합니다.' :
+             lang === 'ja' ? 'ウェブサイトにアクセスすることで、お客様は本利用規約およびプライバシーポリシーを読み、理解し、同意したものとみなされます。本規約のいずれかの部分に同意されない場合は、直ちにウェブサイトの使用を中止してください。' :
              lang === 'zh' ? '通过访问我们的网站，即表示您确认已阅读、理解并同意受本服务条款和隐私政策的约束。如果您不同意本条款的任何部分，您必须立即停止使用我们的网站。' :
              lang === 'th' ? 'โดยการเข้าถึงเว็บไซต์ของเรา คุณยอมรับว่าคุณได้อ่าน เข้าใจ และยอมรับที่จะผูกพันตามข้อกำหนดในการให้บริการเหล่านี้และนโยบายความเป็นส่วนตัวของเรา หากคุณไม่เห็นด้วยกับส่วนใดส่วนหนึ่งของข้อกำหนดเหล่านี้ คุณต้องหยุดใช้งานเว็บไซต์ของเราทันที' :
              lang === 'vi' ? 'Bằng cách truy cập trang web của chúng tôi, bạn xác nhận rằng bạn đã đọc, hiểu và đồng ý bị ràng buộc bởi các Điều khoản dịch vụ này và Chính sách bảo mật của chúng tôi. Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản này, bạn phải ngừng sử dụng trang web của chúng tôi ngay lập tức.' :
@@ -87,7 +89,8 @@ const titleHasSpace = pageTitle.includes(' ');
 
         <!-- Use License -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">2. {lang === 'ja' ? '使用ライセンス' :
+          <h2 class="heading-2 mb-4">2. {lang === 'ko' ? '이용 허락' :
+            lang === 'ja' ? '使用ライセンス' :
             lang === 'zh' ? '使用许可' :
             lang === 'th' ? 'ใบอนุญาตการใช้งาน' :
             lang === 'vi' ? 'Giấy phép sử dụng' :
@@ -97,7 +100,8 @@ const titleHasSpace = pageTitle.includes(' ');
             lang === 'ar' ? 'رخصة الاستخدام' :
             'Use License'}</h2>
           <p class="body-base mb-4">
-            {lang === 'ja' ? '私たちは、お客様に合法的な目的でウェブサイトにアクセスし使用するための限定的、非独占的、譲渡不可能なライセンスを付与します。お客様は以下に同意するものとします:' :
+            {lang === 'ko' ? '회사는 이용자에게 적법한 목적으로 웹사이트에 접속하고 이를 이용할 수 있는 제한적이고 비독점적이며 양도 불가능한 이용권을 부여합니다. 이용자는 다음 각 호의 행위를 하지 않을 것에 동의합니다:' :
+             lang === 'ja' ? '私たちは、お客様に合法的な目的でウェブサイトにアクセスし使用するための限定的、非独占的、譲渡不可能なライセンスを付与します。お客様は以下に同意するものとします:' :
              lang === 'zh' ? '我们授予您有限的、非排他性的、不可转让的许可，以合法目的访问和使用我们的网站。您同意不：' :
              lang === 'th' ? 'เราให้ใบอนุญาตที่จำกัด ไม่ผูกขาด และไม่สามารถโอนให้แก่คุณในการเข้าถึงและใช้งานเว็บไซต์ของเราเพื่อวัตถุประสงค์ที่ถูกกฎหมาย คุณตกลงที่จะไม่:' :
              lang === 'vi' ? 'Chúng tôi cấp cho bạn giấy phép hạn chế, không độc quyền, không thể chuyển nhượng để truy cập và sử dụng trang web của chúng tôi cho các mục đích hợp pháp. Bạn đồng ý không:' :
@@ -108,7 +112,8 @@ const titleHasSpace = pageTitle.includes(' ');
              'We grant you a limited, non-exclusive, non-transferable license to access and use our website for lawful purposes. You agree not to:'}
           </p>
           <ul class="list-disc list-inside space-y-2 text-slate-700">
-            <li>{lang === 'ja' ? 'ウェブサイトのコンテンツやサービスを複製、コピー、販売しない' :
+            <li>{lang === 'ko' ? '웹사이트의 콘텐츠 또는 서비스를 복제, 복사 또는 판매하는 행위' :
+              lang === 'ja' ? 'ウェブサイトのコンテンツやサービスを複製、コピー、販売しない' :
               lang === 'zh' ? '复制、拷贝或出售我们网站的任何内容或服务' :
               lang === 'th' ? 'ทำซ้ำ คัดลอก หรือขายเนื้อหาหรือบริการใดๆ จากเว็บไซต์ของเรา' :
               lang === 'vi' ? 'Sao chép, nhân bản hoặc bán bất kỳ nội dung hoặc dịch vụ nào từ trang web của chúng tôi' :
@@ -117,7 +122,8 @@ const titleHasSpace = pageTitle.includes(' ');
               lang === 'ru' ? 'Воспроизводить, дублировать, копировать или продавать любой контент или услуги нашего веб-сайта' :
               lang === 'ar' ? 'استنساخ أو نسخ أو بيع أي محتوى أو خدمات من موقعنا' :
               'Reproduce, duplicate, copy, or sell any content or services from our website'}</li>
-            <li>{lang === 'ja' ? 'ウェブサイトやシステムへの不正アクセスを試みない' :
+            <li>{lang === 'ko' ? '웹사이트 또는 시스템에 대한 무단 접근을 시도하는 행위' :
+              lang === 'ja' ? 'ウェブサイトやシステムへの不正アクセスを試みない' :
               lang === 'zh' ? '试图未经授权访问我们的网站或系统' :
               lang === 'th' ? 'พยายามเข้าถึงเว็บไซต์หรือระบบของเราโดยไม่ได้รับอนุญาต' :
               lang === 'vi' ? 'Cố gắng truy cập trái phép vào trang web hoặc hệ thống của chúng tôi' :
@@ -126,7 +132,8 @@ const titleHasSpace = pageTitle.includes(' ');
               lang === 'ru' ? 'Пытаться получить несанкционированный доступ к нашему веб-сайту или системам' :
               lang === 'ar' ? 'محاولة الوصول غير المصرح به إلى موقعنا أو أنظمتنا' :
               'Attempt to gain unauthorized access to our website or systems'}</li>
-            <li>{lang === 'ja' ? 'ウイルス、マルウェア、または破壊的なコードを送信しない' :
+            <li>{lang === 'ko' ? '바이러스, 악성코드 등 파괴적인 성격의 코드를 전송하는 행위' :
+              lang === 'ja' ? 'ウイルス、マルウェア、または破壊的なコードを送信しない' :
               lang === 'zh' ? '传输病毒、恶意软件或任何具有破坏性的代码' :
               lang === 'th' ? 'ส่งไวรัส มัลแวร์ หรือโค้ดใดๆ ที่มีลักษณะทำลาย' :
               lang === 'vi' ? 'Truyền virus, phần mềm độc hại hoặc bất kỳ mã nào có tính chất phá hoại' :
@@ -135,7 +142,8 @@ const titleHasSpace = pageTitle.includes(' ');
               lang === 'ru' ? 'Передавать вирусы, вредоносное ПО или любой код деструктивного характера' :
               lang === 'ar' ? 'نقل الفيروسات أو البرامج الضارة أو أي رمز ذي طبيعة مدمرة' :
               'Transmit viruses, malware, or any code of destructive nature'}</li>
-            <li>{lang === 'ja' ? '適用される法律または規制に違反しない' :
+            <li>{lang === 'ko' ? '관계 법령을 위반하는 행위' :
+              lang === 'ja' ? '適用される法律または規制に違反しない' :
               lang === 'zh' ? '违反任何适用的法律或法规' :
               lang === 'th' ? 'ละเมิดกฎหมายหรือระเบียบข้อบังคับที่บังคับใช้' :
               lang === 'vi' ? 'Vi phạm bất kỳ luật hoặc quy định hiện hành nào' :
@@ -149,7 +157,8 @@ const titleHasSpace = pageTitle.includes(' ');
 
         <!-- Intellectual Property -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">3. {lang === 'ja' ? '知的財産権' :
+          <h2 class="heading-2 mb-4">3. {lang === 'ko' ? '지식재산권' :
+            lang === 'ja' ? '知的財産権' :
             lang === 'zh' ? '知识产权' :
             lang === 'th' ? 'สิทธิ์ในทรัพย์สินทางปัญญา' :
             lang === 'vi' ? 'Quyền sở hữu trí tuệ' :
@@ -159,7 +168,8 @@ const titleHasSpace = pageTitle.includes(' ');
             lang === 'ar' ? 'حقوق الملكية الفكرية' :
             'Intellectual Property Rights'}</h2>
           <p class="body-base">
-            {lang === 'ja' ? 'テキスト、グラフィック、ロゴ、画像、ビデオ、ソフトウェアを含むウェブサイト上のすべてのコンテンツは、BRITZMEDI株式会社またはそのコンテンツ提供者の資産であり、国際著作権および知的財産法によって保護されています。当社の事前の書面による許可なく、ウェブサイトのコンテンツを複製、配布、送信、表示、または上演することはできません。' :
+            {lang === 'ko' ? '텍스트, 그래픽, 로고, 이미지, 영상 및 소프트웨어를 포함한 웹사이트의 모든 콘텐츠는 주식회사 BRITZMEDI 또는 해당 콘텐츠 제공자의 자산이며, 국제 저작권법 및 지식재산권 관련 법령에 따라 보호받습니다. 회사의 사전 서면 동의 없이 웹사이트의 콘텐츠를 복제, 배포, 전송, 게시 또는 사용할 수 없습니다.' :
+             lang === 'ja' ? 'テキスト、グラフィック、ロゴ、画像、ビデオ、ソフトウェアを含むウェブサイト上のすべてのコンテンツは、BRITZMEDI株式会社またはそのコンテンツ提供者の資産であり、国際著作権および知的財産法によって保護されています。当社の事前の書面による許可なく、ウェブサイトのコンテンツを複製、配布、送信、表示、または上演することはできません。' :
              lang === 'zh' ? '我们网站上的所有内容，包括文本、图形、标志、图像、视频和软件，均为BRITZMEDI株式会社或其内容提供商的财产，受国际版权和知识产权法保护。未经我们事先书面许可，您不得复制、分发、传输、展示或表演我们网站上的任何内容。' :
              lang === 'th' ? 'เนื้อหาทั้งหมดบนเว็บไซต์ของเรา รวมถึงข้อความ กราฟิก โลโก้ รูปภาพ วิดีโอ และซอฟต์แวร์ เป็นทรัพย์สินของ BRITZMEDI Co., Ltd. หรือซัพพลายเออร์เนื้อหา และได้รับการคุ้มครองโดยกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญาระหว่างประเทศ คุณไม่สามารถทำซ้ำ แจกจ่าย ส่ง แสดง หรือดำเนินการใดๆ กับเนื้อหาจากเว็บไซต์ของเราโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรจากเราก่อน' :
              lang === 'vi' ? 'Tất cả nội dung trên trang web của chúng tôi, bao gồm văn bản, đồ họa, logo, hình ảnh, video và phần mềm, là tài sản của BRITZMEDI Co., Ltd. hoặc các nhà cung cấp nội dung và được bảo vệ bởi luật bản quyền và sở hữu trí tuệ quốc tế. Bạn không được sao chép, phân phối, truyền tải, hiển thị hoặc thực hiện bất kỳ nội dung nào từ trang web của chúng tôi mà không có sự cho phép bằng văn bản trước của chúng tôi.' :
@@ -173,7 +183,8 @@ const titleHasSpace = pageTitle.includes(' ');
 
         <!-- Limitation of Liability -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">4. {lang === 'ja' ? '責任の制限' :
+          <h2 class="heading-2 mb-4">4. {lang === 'ko' ? '책임의 제한' :
+            lang === 'ja' ? '責任の制限' :
             lang === 'zh' ? '责任限制' :
             lang === 'th' ? 'ข้อจำกัดความรับผิด' :
             lang === 'vi' ? 'Giới hạn trách nhiệm' :
@@ -183,7 +194,8 @@ const titleHasSpace = pageTitle.includes(' ');
             lang === 'ar' ? 'تحديد المسؤولية' :
             'Limitation of Liability'}</h2>
           <p class="body-base">
-            {lang === 'ja' ? '法律で許容される最大限の範囲において、BRITZMEDI株式会社は、ウェブサイトまたはサービスの使用または使用不能から生じる間接的、偶発的、特別、結果的、または懲罰的損害について責任を負いません。これには、利益または収益の損失、データまたは情報の損失、事業の中断、人身傷害または財産の損害が含まれますが、これらに限定されません。' :
+            {lang === 'ko' ? '법률이 허용하는 최대한의 범위 내에서, 주식회사 BRITZMEDI는 웹사이트 또는 서비스의 이용 또는 이용 불능으로 인하여 발생하는 간접적, 부수적, 특별, 결과적 또는 징벌적 손해에 대하여 책임을 지지 않습니다. 여기에는 이익 또는 수익의 손실, 데이터 또는 정보의 손실, 영업 중단, 인적 손해 또는 재산상 손해가 포함되나 이에 한정되지 않습니다.' :
+             lang === 'ja' ? '法律で許容される最大限の範囲において、BRITZMEDI株式会社は、ウェブサイトまたはサービスの使用または使用不能から生じる間接的、偶発的、特別、結果的、または懲罰的損害について責任を負いません。これには、利益または収益の損失、データまたは情報の損失、事業の中断、人身傷害または財産の損害が含まれますが、これらに限定されません。' :
              lang === 'zh' ? '在法律允许的最大范围内，BRITZMEDI株式会社不对因您使用或无法使用我们的网站或服务而产生的任何间接、附带、特殊、后果性或惩罚性损害承担责任，包括但不限于利润或收入损失、数据或信息损失、业务中断、人身伤害或财产损失。' :
              lang === 'th' ? 'ในขอบเขตสูงสุดที่กฎหมายอนุญาต BRITZMEDI Co., Ltd. จะไม่รับผิดชอบต่อความเสียหายทางอ้อม โดยบังเอิญ พิเศษ สืบเนื่อง หรือเป็นการลงโทษที่เกิดขึ้นจากการใช้หรือการไม่สามารถใช้เว็บไซต์หรือบริการของเราได้ รวมถึงแต่ไม่จำกัดเพียงการสูญเสียกำไรหรือรายได้ การสูญเสียข้อมูลหรือข้อมูล การหยุดชะงักทางธุรกิจ การบาดเจ็บส่วนบุคคลหรือความเสียหายต่อทรัพย์สิน' :
              lang === 'vi' ? 'Trong phạm vi tối đa được pháp luật cho phép, BRITZMEDI Co., Ltd. sẽ không chịu trách nhiệm về bất kỳ thiệt hại gián tiếp, ngẫu nhiên, đặc biệt, hậu quả hoặc mang tính trừng phạt nào phát sinh từ việc bạn sử dụng hoặc không thể sử dụng trang web hoặc dịch vụ của chúng tôi, bao gồm nhưng không giới hạn ở việc mất lợi nhuận hoặc doanh thu, mất dữ liệu hoặc thông tin, gián đoạn kinh doanh, thương tích cá nhân hoặc thiệt hại tài sản.' :
@@ -197,7 +209,8 @@ const titleHasSpace = pageTitle.includes(' ');
 
         <!-- Governing Law -->
         <div class="mb-12">
-          <h2 class="heading-2 mb-4">5. {lang === 'ja' ? '準拠法と管轄' :
+          <h2 class="heading-2 mb-4">5. {lang === 'ko' ? '준거법 및 관할' :
+            lang === 'ja' ? '準拠法と管轄' :
             lang === 'zh' ? '管辖法律与司法管辖权' :
             lang === 'th' ? 'กฎหมายที่ใช้บังคับและเขตอำนาจศาล' :
             lang === 'vi' ? 'Luật điều chỉnh & Thẩm quyền' :
@@ -207,7 +220,8 @@ const titleHasSpace = pageTitle.includes(' ');
             lang === 'ar' ? 'القانون المعمول به والاختصاص القضائي' :
             'Governing Law & Jurisdiction'}</h2>
           <p class="body-base">
-            {lang === 'ja' ? 'この利用規約は、法律の抵触に関する原則に関係なく、大韓民国の法律に従って解釈され、準拠します。本規約またはウェブサイトの使用から生じる紛争の解決のため、大韓民国京畿道城南市に所在する裁判所の専属管轄権に同意するものとします。' :
+            {lang === 'ko' ? '본 이용약관은 국제사법 원칙과 관계없이 대한민국 법률에 따라 규율되고 해석됩니다. 이용자는 본 약관 또는 웹사이트 이용으로 인하여 발생하는 분쟁의 해결을 위하여 대한민국 경기도 성남시 소재 법원을 전속 관할 법원으로 하는 것에 동의합니다.' :
+             lang === 'ja' ? 'この利用規約は、法律の抵触に関する原則に関係なく、大韓民国の法律に従って解釈され、準拠します。本規約またはウェブサイトの使用から生じる紛争の解決のため、大韓民国京畿道城南市に所在する裁判所の専属管轄権に同意するものとします。' :
              lang === 'zh' ? '本服务条款受大韩民国法律管辖并据其解释，不考虑其法律冲突原则。您同意接受位于大韩民国京畿道城南市的法院对因本条款或您使用我们网站而产生的任何争议的专属管辖权。' :
              lang === 'th' ? 'ข้อกำหนดในการให้บริการเหล่านี้อยู่ภายใต้และตีความตามกฎหมายของสาธารณรัฐเกาหลี โดยไม่คำนึงถึงหลักความขัดแย้งของกฎหมาย คุณตกลงที่จะยอมรับเขตอำนาจศาลเฉพาะของศาลที่ตั้งอยู่ในซองนัม-ซี คยองกี-โด สาธารณรัฐเกาหลี สำหรับการแก้ไขข้อพิพาทใดๆ ที่เกิดขึ้นจากข้อกำหนดเหล่านี้หรือการใช้งานเว็บไซต์ของเรา' :
              lang === 'vi' ? 'Các Điều khoản dịch vụ này được điều chỉnh và giải thích theo luật pháp của Đại Hàn Dân Quốc, không tính đến các nguyên tắc xung đột pháp luật. Bạn đồng ý chịu sự thẩm quyền riêng biệt của các tòa án tại Seongnam-si, Gyeonggi-do, Đại Hàn Dân Quốc để giải quyết bất kỳ tranh chấp nào phát sinh từ các điều khoản này hoặc việc sử dụng trang web của chúng tôi.' :
@@ -230,7 +244,8 @@ const titleHasSpace = pageTitle.includes(' ');
               <span class="font-semibold">BRITZMEDI Co., Ltd.</span>
             </div>
             <div>
-              <span class="font-semibold">{lang === 'ja' ? 'メール:' :
+              <span class="font-semibold">{lang === 'ko' ? '이메일:' :
+                lang === 'ja' ? 'メール:' :
                 lang === 'zh' ? '邮箱:' :
                 lang === 'th' ? 'อีเมล:' :
                 lang === 'vi' ? 'Email:' :
@@ -241,7 +256,8 @@ const titleHasSpace = pageTitle.includes(' ');
                 'Email:'}</span> sh.lee@britzmedi.com
             </div>
             <div>
-              <span class="font-semibold">{lang === 'ja' ? '住所:' :
+              <span class="font-semibold">{lang === 'ko' ? '주소:' :
+                lang === 'ja' ? '住所:' :
                 lang === 'zh' ? '地址:' :
                 lang === 'th' ? 'ที่อยู่:' :
                 lang === 'vi' ? 'Địa chỉ:' :

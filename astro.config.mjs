@@ -20,6 +20,7 @@ export default defineConfig({
       // Localized homepages and the resources pages are SSR (prerender=false) so
       // the sitemap integration can't discover them automatically — list them explicitly.
       customPages: [
+        'https://britzmedi.com/ko/',
         'https://britzmedi.com/ja/',
         'https://britzmedi.com/zh/',
         'https://britzmedi.com/th/',
@@ -29,6 +30,7 @@ export default defineConfig({
         'https://britzmedi.com/ru/',
         'https://britzmedi.com/ar/',
         'https://britzmedi.com/resources/',
+        'https://britzmedi.com/ko/resources/',
         'https://britzmedi.com/ja/resources/',
         'https://britzmedi.com/zh/resources/',
         'https://britzmedi.com/th/resources/',
@@ -45,6 +47,7 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: {
           en: 'en-US',
+          ko: 'ko-KR',
           ja: 'ja-JP',
           zh: 'zh-CN',
           th: 'th-TH',

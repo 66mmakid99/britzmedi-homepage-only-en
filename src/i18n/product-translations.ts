@@ -18,6 +18,197 @@ type ProductTranslations = Record<string, Record<string, ProductTranslation>>;
 
 const translations: ProductTranslations = {
   // ═══════════════════════════════════════
+  // KOREAN (ko)
+  // ═══════════════════════════════════════
+  ko: {
+    'torr-rf': {
+      tagline: '혁신적인 Multi-wave RF 워크스테이션',
+      overview: 'TORR RF는 독자적인 Multi-wave 고주파(RF) 기술로 진피층과 피하조직층에 열에너지를 전달하는 비침습 의료기기입니다.',
+      description: 'TORR RF의 핵심 임상적 가치는 낮은 출력으로도 강력하면서 안전한 에너지를 목표 깊이까지 균일하게 전달하여, 표면 화상을 방지하면서 심부 조직 가열을 극대화하는 데 있습니다. FDA 510(k) 인허가(K212561)를 획득했으며, 피부 타이트닝·바디 컨투어링·통증 완화를 위해 설계되었습니다.',
+      keyTechnologies: [
+        {
+          name: '자동 원형 모션 헤드(특허)',
+          description: '핸드피스 헤드가 자동으로 회전(68rpm)하며 \'토로이달(도넛형)\' 열 영역을 형성합니다. RF 에너지를 핫스팟 없이 균일하게 분배하고 시술자의 피로를 줄여줍니다.',
+        },
+        {
+          name: '실시간 온도 제어',
+          description: '내장 센서가 피부 온도를 실시간으로 모니터링합니다. 설정된 안전 한계치(30°C~50°C 조절 가능)를 초과하면 RF 출력을 자동 차단하여 화상을 방지합니다.',
+        },
+        {
+          name: '바이브로 컴포트 모드',
+          description: '3D 진동 기술(분당 10,000회)이 신경학적 분산 효과(관문조절설, Gate Control Theory)로 열감을 완화하여, 열에 민감한 환자도 편안하게 시술받을 수 있습니다.',
+        },
+      ],
+      indications: [
+        '리프팅 & 피부 타이트닝 - 진피 깊은 층까지 열에너지를 전달하여 콜라겐 리모델링을 촉진',
+        '바디 컨투어링 & 셀룰라이트 - 셀룰라이트 외관의 일시적 감소에 대해 FDA 인허가 획득',
+        '혈관(혈액순환) - 국소 혈액순환의 일시적 개선에 대해 인허가 획득',
+        '통증 관리 - 경미한 근육통, 통증, 근육 경련 완화',
+      ],
+      specLabels: {
+        'Frequency': '주파수',
+        'Max Output Power': '최대 출력',
+        'Operation Modes': '동작 모드',
+        'Treatment Depth': '시술 깊이',
+        'Temperature Control': '온도 제어',
+        'User Interface': '사용자 인터페이스',
+        'Dimensions': '외형 치수',
+        'Weight': '중량',
+        'Power': '전원',
+        'Safety Class': '안전 등급',
+      },
+      specNotes: {
+        'Stable deep heating frequency': '안정적인 심부 가열 주파수',
+        'Low power, high efficiency': '저출력·고효율',
+        'Selectable via GUI': 'GUI에서 선택 가능',
+        'Adjustable Low/Deep Mode': 'Low/Deep 모드 조절 가능',
+        'Real-time monitoring & Auto-cut off': '실시간 모니터링 & 자동 차단',
+        'Intuitive GUI with Preset Memory': '프리셋 메모리를 갖춘 직관적인 GUI',
+      },
+      handpieces: [
+        { name: '라지 핸드피스(바디)', feature: '넓은 부위 컨투어링을 위한 자동 원형 모션(68rpm)' },
+        { name: '스몰 핸드피스(페이스)', feature: '얼굴 타이트닝과 볼 컨투어링에 최적화된 설계' },
+        { name: '마이크로 핸드피스(아이/섬세 부위)', feature: '눈가와 주름 부위를 위한 정밀 케어' },
+      ],
+      clinicalBenefits: [
+        '바이브로 컴포트 모드로 통증 없는 시술',
+        '균일한 에너지 전달로 시술자 피로 방지',
+        '실시간 안전 모니터링으로 화상 방지',
+        '소모품 카트리지 불필요 - 낮은 운영 비용',
+      ],
+      differentiators: [
+        {
+          feature: '오토모션 기술',
+          description: '기존 고정형 어플리케이터와 달리 회전 헤드(68rpm)가 넓은 시술 부위 전체에 에너지를 균일하게 분배합니다',
+        },
+        {
+          feature: '저출력·고효율',
+          description: '경쟁 장비가 최대 150W를 필요로 하는 반면, 55W만으로 효과적인 가열을 구현하여 안전성을 높였습니다',
+        },
+        {
+          feature: '비소모성 핸드피스',
+          description: '고가의 카트리지 교체 없이 장기간 사용할 수 있도록 설계된 내구성 높은 핸드피스',
+        },
+      ],
+    },
+    'ulblanc': {
+      tagline: '멀티 주파수 초음파 워크스테이션',
+      overview: 'ULBLANC은 듀얼 주파수 초음파 타이트닝과 음향 캐비테이션 기반 경피 약물 전달을 결합한 토탈 스킨케어 워크스테이션입니다.',
+      description: '피부 표면 손상 없이 효과적인 시술이 가능하며, 표피와 심부 조직을 모두 케어하는 다이내믹 듀얼 웨이브 기술을 탑재했습니다.',
+      keyTechnologies: [
+        {
+          name: 'Sono-I(다이내믹 듀얼 웨이브™)',
+          description: '서로 다른 초음파 주파수를 교차 적용하여 표피와 진피를 동시에 타깃합니다. 1/3 MHz로 진피 깊은 층을 타이트닝하고, 3/10 MHz로 표피를 진정시킵니다.',
+        },
+        {
+          name: 'i-Booster(소노포레시스)',
+          description: '28kHz 초음파로 음향 캐비테이션(마이크로젯 효과)을 발생시켜, 유효 성분의 심부 경피 전달을 위한 미세 통로를 열어줍니다.',
+        },
+      ],
+      indications: [
+        '피부 탄력 강화 및 타이트닝',
+        '주름 개선',
+        '유효 성분 흡수 촉진',
+        '피부 진정(여드름/홍조 피부에 적합)',
+      ],
+      specLabels: {
+        'Sono-I Frequency': 'Sono-I 주파수',
+        'i-Booster Frequency': 'i-Booster 주파수',
+        'Output Power': '출력',
+        'Treatment Modes': '시술 모드',
+        'Display': '디스플레이',
+        'Dimensions': '외형 치수',
+        'Weight': '중량',
+      },
+      specNotes: {
+        'Dual frequency modes': '듀얼 주파수 모드',
+        'For sonophoresis': '소노포레시스용',
+        'Adjustable intensity': '강도 조절 가능',
+      },
+      clinicalBenefits: [
+        '다운타임 없음 - 통증과 감염 위험이 없는 시술',
+        '매일 시술 가능',
+        '진정부터 리프팅까지 폭넓은 시술 범위',
+        '제품 흡수 효율 향상',
+      ],
+    },
+    'newchae-shot': {
+      tagline: '3-in-1 퍼스널 뷰티 디바이스',
+      overview: 'NEWCHAE SHOT은 전문가급 의료 기술을 컴팩트한 디자인에 통합한 홈케어 뷰티 디바이스입니다.',
+      description: 'RF 타이트닝, EMS 컨투어링, ELP 스킨 부스트 기술을 하나로 결합하여 집에서도 클리닉 수준의 결과를 제공합니다.',
+      keyTechnologies: [
+        {
+          name: 'RF 모드(타이트닝)',
+          description: '멀티채널 RF 스택 기술이 진피 깊은 층까지 열을 전달하여 콜라겐 재생을 촉진합니다.',
+        },
+        {
+          name: 'EMS 모드(V라인)',
+          description: '전기 근육 자극으로 얼굴 윤곽을 정돈하고 탄력을 끌어올립니다.',
+        },
+        {
+          name: 'ELP 모드(스킨 부스트)',
+          description: '일렉트로포레이션 기술로 스킨케어 제품의 흡수를 높여줍니다.',
+        },
+      ],
+      specLabels: {
+        'Product Name': '제품명',
+        'Model': '모델',
+        'Rating': '정격',
+        'RF Frequency / Power': 'RF 주파수 / 출력',
+        'EMS Frequency': 'EMS 주파수',
+        'ELP Frequency': 'ELP 주파수',
+        'Modes / Levels': '모드 / 단계',
+        'Vibration': '진동',
+        'Usage Time': '사용 시간',
+        'Battery': '배터리',
+        'Dimensions': '외형 치수',
+        'Weight': '중량',
+        'Certifications': '인증',
+      },
+      specNotes: {
+        'Multi-channel concentrated energy shot': '멀티채널 집중 에너지 샷',
+        'Electroporation multi-frequency': '일렉트로포레이션 멀티 주파수',
+        'Mode-specific patterns': '모드별 진동 패턴',
+        'Alert every 2 min 30 sec': '2분 30초마다 알림',
+        'Samsung SDI cell / USB-C charging / 5-6 uses per charge': '삼성SDI 셀 / USB-C 충전 / 1회 충전 시 5~6회 사용',
+      },
+      clinicalBenefits: [
+        '피부 밀도 128.48% 개선',
+        '모공 크기 26.74% 감소',
+        '표면 및 심부 탄력 개선',
+        '피부 광채 향상',
+      ],
+      differentiators: [
+        {
+          feature: '오토샷 시스템',
+          description: '에너지 출력을 집중시켜 정밀하게 전달',
+        },
+        {
+          feature: '3D 바이브레이션',
+          description: '분당 10,000회 진동으로 에너지 침투를 보조',
+        },
+      ],
+    },
+    'lumino-wave': {
+      tagline: '차세대 융복합(Convergence) 디바이스',
+      overview: 'LUMINO WAVE는 초음파와 레이저 에너지를 결합하여 시술 효과를 극대화하도록 설계된 차세대 에스테틱 디바이스입니다.',
+      description: '초음파로 유도한 마이크로버블이 레이저의 피부 침투 깊이를 높이는 원리를 활용한 LUMINO WAVE는 융복합 테라피(Convergence Therapy)의 차세대 진화를 보여줍니다. 현재 MFDS(식약처) 인증 절차를 진행 중이며, 2026년 하반기 출시 예정입니다.',
+      keyTechnologies: [
+        {
+          name: '초음파 + 레이저 융복합',
+          description: '초음파 진동과 레이저 조사가 동시에 이루어지는 융복합 테라피입니다. 초음파 효과로 빛의 산란이 최소화되어 레이저가 더 깊은 층까지 효율적으로 도달합니다.',
+        },
+      ],
+      clinicalBenefits: [
+        '더 낮은 출력/에너지로 치료 효과 구현',
+        '피부 자극과 부작용 최소화',
+        '리프팅 및 재생 효과 극대화',
+        '진피층까지 레이저 침투력 향상',
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════
   // JAPANESE (ja)
   // ═══════════════════════════════════════
   ja: {

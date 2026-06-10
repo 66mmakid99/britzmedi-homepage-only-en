@@ -7,10 +7,8 @@ https://www.britzmedi.com/*  https://britzmedi.com/:splat  301
 # Normalize trailing index.html
 /index.html  /  301
 
-# Korean path redirect (ko not in supported languages — redirect to English)
-/ko  /  301
-/ko/  /  301
-/ko/*  /:splat  301
+# Korean is a first-class language as of 2026-06-10 (/ko/* pages exist — no redirect)
+/ko/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /ko/about  301
 
 # Common old URL patterns (exact matches first, then splats)
 /home  /  301

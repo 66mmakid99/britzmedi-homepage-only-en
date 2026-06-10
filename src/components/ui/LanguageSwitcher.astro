@@ -101,4 +101,15 @@ const targetPath = (code: Language) =>
       }
     });
   });
+
+  // Remember an explicit language choice. The middleware uses this cookie to
+  // stop geo-defaulting Korean visitors once they have picked a language.
+  document.querySelectorAll('.language-dropdown a[hreflang]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const lang = link.getAttribute('hreflang');
+      if (lang) {
+        document.cookie = `lang_pref=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+      }
+    });
+  });
 </script>

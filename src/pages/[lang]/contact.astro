@@ -91,7 +91,8 @@ const t = useTranslations(lang);
 
           <div class="card-premium p-6">
             <h3 class="font-semibold text-slate-900 mb-4">
-              {lang === 'ja' ? '営業時間' :
+              {lang === 'ko' ? '영업시간' :
+               lang === 'ja' ? '営業時間' :
                lang === 'zh' ? '工作时间' :
                lang === 'th' ? 'เวลาทำการ' :
                lang === 'vi' ? 'Giờ làm việc' :
@@ -103,7 +104,8 @@ const t = useTranslations(lang);
             </h3>
             <div class="text-sm text-slate-600 space-y-2">
               <p>
-                {lang === 'ja' ? '月〜金: 09:00 - 18:00 (KST)' :
+                {lang === 'ko' ? '월~금: 09:00 - 18:00 (KST)' :
+                 lang === 'ja' ? '月〜金: 09:00 - 18:00 (KST)' :
                  lang === 'zh' ? '周一至周五: 09:00 - 18:00 (KST)' :
                  lang === 'th' ? 'จันทร์-ศุกร์: 09:00 - 18:00 (KST)' :
                  lang === 'vi' ? 'Thứ Hai-Thứ Sáu: 09:00 - 18:00 (KST)' :
@@ -138,7 +140,8 @@ const t = useTranslations(lang);
           <p class="text-slate-600 mt-1">크란츠테크노, 388 Dunchon-daero, Jungwon-gu</p>
           <p class="text-slate-600">Seongnam-si, Gyeonggi-do, Republic of Korea</p>
           <p class="text-primary-600 mt-3 group-hover:underline font-medium">
-            {lang === 'ja' ? 'Googleマップで見る →' :
+            {lang === 'ko' ? 'Google 지도에서 보기 →' :
+             lang === 'ja' ? 'Googleマップで見る →' :
              lang === 'zh' ? '在Google地图上查看 →' :
              lang === 'th' ? 'ดูบน Google Maps →' :
              lang === 'vi' ? 'Xem trên Google Maps →' :
