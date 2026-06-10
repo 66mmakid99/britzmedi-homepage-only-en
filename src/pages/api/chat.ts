@@ -7,10 +7,12 @@ import type { APIRoute } from 'astro';
 // Import knowledge base at build time (fs.readFileSync doesn't work on Cloudflare Workers)
 import knowledgeBaseContent from '../../data/chatbot-knowledge.md?raw';
 import { notifyNewLead } from '../../lib/email-notifications';
+import { CLAUDE_MODEL } from '../../lib/ai-models';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
   DB?: D1Database;
+  SESSION?: KVNamespace;
 }
 
 interface ChatMessage {
@@ -40,76 +42,92 @@ const spamDetection = new Map<string, {
   sessionStart: number;
 }>();
 
-// Rate limiting store (IP-based)
-const rateLimitStore = new Map<string, {
-  requests: number[];  // timestamps of recent requests
-  blocked: boolean;
-  blockedUntil: number;
-}>();
-
 // Rate limit configuration
 const RATE_LIMIT = {
   maxRequestsPerMinute: 10,   // Max 10 requests per minute per IP
-  maxRequestsPerHour: 60,     // Max 60 requests per hour per IP
-  blockDurationMs: 5 * 60 * 1000,  // 5 minute block after exceeding limits
+  windowMs: 60 * 1000,        // 1 minute fixed window
+  kvTtlSeconds: 120,          // KV record TTL (window + grace)
   maxConversationTurns: 50,   // Max 50 turns per session
 };
 
-// Check rate limit for IP
-function checkRateLimit(clientIP: string): { allowed: boolean; reason?: string; retryAfter?: number } {
-  const now = Date.now();
-  const oneMinuteAgo = now - 60 * 1000;
-  const oneHourAgo = now - 60 * 60 * 1000;
+// Session ID must be a client-safe opaque token
+const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
 
-  let record = rateLimitStore.get(clientIP);
+// History sanitization limits (server-side, client input is untrusted)
+const HISTORY_LIMITS = {
+  maxMessages: 20,            // Keep only the last 20 messages
+  maxMessageChars: 2000,      // Truncate each message to 2000 chars
+  maxTotalChars: 30000,       // Total history budget (drop oldest beyond it)
+};
 
-  // Initialize if new IP
-  if (!record) {
-    record = { requests: [], blocked: false, blockedUntil: 0 };
-    rateLimitStore.set(clientIP, record);
+// Validate and cap client-supplied history before forwarding to Claude
+function sanitizeHistory(history: unknown): ChatMessage[] {
+  if (!Array.isArray(history)) return [];
+
+  // Validate entry shape and truncate each message
+  const valid: ChatMessage[] = [];
+  for (const entry of history) {
+    if (!entry || typeof entry !== 'object') continue;
+    const { role, content } = entry as { role?: unknown; content?: unknown };
+    if ((role !== 'user' && role !== 'assistant') || typeof content !== 'string') continue;
+    valid.push({ role, content: content.slice(0, HISTORY_LIMITS.maxMessageChars) });
   }
 
-  // Check if currently blocked
-  if (record.blocked && now < record.blockedUntil) {
-    const retryAfter = Math.ceil((record.blockedUntil - now) / 1000);
-    return { allowed: false, reason: 'rate_limited', retryAfter };
+  // Keep only the most recent messages
+  const recent = valid.slice(-HISTORY_LIMITS.maxMessages);
+
+  // Enforce total budget — drop oldest messages beyond it
+  const kept: ChatMessage[] = [];
+  let totalChars = 0;
+  for (let i = recent.length - 1; i >= 0; i--) {
+    totalChars += recent[i].content.length;
+    if (totalChars > HISTORY_LIMITS.maxTotalChars) break;
+    kept.unshift(recent[i]);
   }
 
-  // Unblock if block period has passed
-  if (record.blocked && now >= record.blockedUntil) {
-    record.blocked = false;
-    record.requests = [];
+  return kept;
+}
+
+interface RateLimitRecord {
+  count: number;
+  windowStart: number;
+}
+
+// KV-based rate limit (10 req/min/IP). Fails open if KV is unavailable.
+async function checkRateLimit(
+  kv: KVNamespace | undefined,
+  clientIP: string,
+): Promise<{ allowed: boolean; reason?: string; retryAfter?: number }> {
+  if (!kv) return { allowed: true }; // fail-open when KV binding is missing
+
+  const key = `rl:chat:${clientIP}`;
+  try {
+    const now = Date.now();
+    const stored = await kv.get(key, { type: 'json' }) as RateLimitRecord | null;
+
+    let record = stored;
+    if (
+      !record ||
+      typeof record.count !== 'number' ||
+      typeof record.windowStart !== 'number' ||
+      now - record.windowStart >= RATE_LIMIT.windowMs
+    ) {
+      record = { count: 0, windowStart: now };
+    }
+
+    if (record.count >= RATE_LIMIT.maxRequestsPerMinute) {
+      const retryAfter = Math.max(1, Math.ceil((record.windowStart + RATE_LIMIT.windowMs - now) / 1000));
+      console.warn(`[RATE LIMIT] IP ${clientIP.slice(0, 15)}... blocked: ${record.count} req/min exceeded`);
+      return { allowed: false, reason: 'too_many_requests_minute', retryAfter };
+    }
+
+    record.count += 1;
+    await kv.put(key, JSON.stringify(record), { expirationTtl: RATE_LIMIT.kvTtlSeconds });
+    return { allowed: true };
+  } catch (e) {
+    console.warn('[RATE LIMIT] KV error, failing open:', e);
+    return { allowed: true }; // fail-open on KV errors
   }
-
-  // Clean old requests
-  record.requests = record.requests.filter(ts => ts > oneHourAgo);
-
-  // Count recent requests
-  const requestsLastMinute = record.requests.filter(ts => ts > oneMinuteAgo).length;
-  const requestsLastHour = record.requests.length;
-
-  // Check limits
-  if (requestsLastMinute >= RATE_LIMIT.maxRequestsPerMinute) {
-    record.blocked = true;
-    record.blockedUntil = now + RATE_LIMIT.blockDurationMs;
-    rateLimitStore.set(clientIP, record);
-    console.warn(`[RATE LIMIT] IP ${clientIP.slice(0, 15)}... blocked: ${requestsLastMinute} req/min exceeded`);
-    return { allowed: false, reason: 'too_many_requests_minute', retryAfter: 60 };
-  }
-
-  if (requestsLastHour >= RATE_LIMIT.maxRequestsPerHour) {
-    record.blocked = true;
-    record.blockedUntil = now + RATE_LIMIT.blockDurationMs;
-    rateLimitStore.set(clientIP, record);
-    console.warn(`[RATE LIMIT] IP ${clientIP.slice(0, 15)}... blocked: ${requestsLastHour} req/hour exceeded`);
-    return { allowed: false, reason: 'too_many_requests_hour', retryAfter: 300 };
-  }
-
-  // Add current request timestamp
-  record.requests.push(now);
-  rateLimitStore.set(clientIP, record);
-
-  return { allowed: true };
 }
 
 // Check conversation turn limit
@@ -122,17 +140,6 @@ function checkTurnLimit(sessionId: string): { allowed: boolean; turnCount: numbe
   }
 
   return { allowed: true, turnCount };
-}
-
-// Clean up old rate limit records periodically
-function cleanRateLimitStore() {
-  const oneHourAgo = Date.now() - 60 * 60 * 1000;
-  for (const [ip, record] of rateLimitStore.entries()) {
-    // Remove records with no recent activity
-    if (record.requests.length === 0 || record.requests[record.requests.length - 1] < oneHourAgo) {
-      rateLimitStore.delete(ip);
-    }
-  }
 }
 
 // API usage tracking for cost monitoring
@@ -411,31 +418,28 @@ async function getOrCreateConversation(
   clientIP: string,
   country: string | null,
   language: string | null,
-): Promise<number> {
+): Promise<{ conversationId: number; isNew: boolean }> {
   // If conversationId provided, verify it exists
   if (conversationId) {
     const existing = await db.prepare(
       'SELECT id FROM chat_conversations WHERE id = ? AND session_id = ?'
     ).bind(conversationId, sessionId).first<{ id: number }>();
-    if (existing) return existing.id;
+    if (existing) return { conversationId: existing.id, isNew: false };
   }
 
   // Check for recent active conversation with same session
   const recent = await db.prepare(
     "SELECT id FROM chat_conversations WHERE session_id = ? AND status = 'active' AND last_message_at > datetime('now', '-30 minutes') ORDER BY id DESC LIMIT 1"
   ).bind(sessionId).first<{ id: number }>();
-  if (recent) return recent.id;
+  if (recent) return { conversationId: recent.id, isNew: false };
 
-  // Create new conversation
+  // Create new conversation — isNew is returned to the caller so the
+  // first-message notification uses a request-local value (no shared state)
   const result = await db.prepare(
     'INSERT INTO chat_conversations (session_id, visitor_ip, visitor_country, visitor_language) VALUES (?, ?, ?, ?)'
   ).bind(sessionId, clientIP, country, language).run();
-  const newId = result.meta.last_row_id as number;
 
-  // Flag: this is a brand new conversation (used for first-message notification)
-  (db as any).__newConversation = true;
-
-  return newId;
+  return { conversationId: result.meta!.last_row_id as number, isNew: true };
 }
 
 async function saveMessage(
@@ -471,9 +475,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Generate session ID from request if not provided
+    // Validate client-supplied session ID (opaque token, no IP/raw data allowed)
+    if (body.sessionId && (typeof body.sessionId !== 'string' || !SESSION_ID_PATTERN.test(body.sessionId))) {
+      return new Response(JSON.stringify({ error: 'Invalid sessionId' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Generate session ID if not provided
     const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('cf-connecting-ip') || 'unknown';
-    const sessionId = body.sessionId || `${clientIP}-${Date.now()}`;
+    const sessionId = body.sessionId || crypto.randomUUID();
 
     // Get D1 database for conversation persistence
     const runtime = (locals as any).runtime;
@@ -500,13 +512,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Clean up old rate limit records periodically (1% chance per request)
-    if (Math.random() < 0.01) {
-      cleanRateLimitStore();
-    }
-
-    // Check rate limit
-    const rateLimitCheck = checkRateLimit(clientIP);
+    // Check rate limit (KV-based, fail-open if KV unavailable)
+    const rateLimitCheck = await checkRateLimit(env?.SESSION, clientIP);
     if (!rateLimitCheck.allowed) {
       console.warn(`[RATE LIMIT] Blocked request from ${clientIP.slice(0, 15)}... (${rateLimitCheck.reason})`);
       return new Response(JSON.stringify({
@@ -594,11 +601,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       let conversationId = body.conversationId;
       if (db) {
         try {
-          conversationId = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
+          const conversation = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
+          conversationId = conversation.conversationId;
           await saveMessage(db, conversationId, 'user', body.message, 0);
           await saveMessage(db, conversationId, 'assistant', fallbackMessage, 0);
-          if ((db as any).__newConversation) {
-            (db as any).__newConversation = false;
+          if (conversation.isNew) {
             notifyNewLead(env, {
               type: 'chatbot',
               message: body.message.substring(0, 200),
@@ -620,12 +627,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Build message history
+    // Build message history (client input is untrusted — validate, cap, truncate)
     const messages = [
-      ...(body.history || []).map(msg => ({
-        role: msg.role,
-        content: msg.content
-      })),
+      ...sanitizeHistory(body.history),
       {
         role: 'user' as const,
         content: body.message
@@ -641,7 +645,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: 2048,
         system: buildSystemPrompt(body.context),
         messages
@@ -680,13 +684,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     let conversationId = body.conversationId;
     if (db) {
       try {
-        conversationId = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
+        const conversation = await getOrCreateConversation(db, sessionId, body.conversationId, clientIP, visitorCountry, visitorLanguage);
+        conversationId = conversation.conversationId;
         await saveMessage(db, conversationId, 'user', body.message, 0);
         await saveMessage(db, conversationId, 'assistant', assistantMessage, inputTokens + outputTokens);
 
-        // Notify on brand new conversation (first message only)
-        if ((db as any).__newConversation) {
-          (db as any).__newConversation = false;
+        // Notify on brand new conversation (first message only) — request-local flag
+        if (conversation.isNew) {
           notifyNewLead(env, {
             type: 'chatbot',
             message: body.message.substring(0, 200),

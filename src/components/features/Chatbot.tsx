@@ -110,7 +110,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     setIsLoading(true);
 
     try {
-      const historyData = messages.slice(-10).map(m => ({
+      // Never send more than the last 20 messages (mirrors the server-side cap)
+      const historyData = messages.slice(-20).map(m => ({
         role: String(m.role),
         content: String(m.content)
       }));
