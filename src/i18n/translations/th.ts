@@ -9,7 +9,7 @@ export const th: TranslationKeys = {
     certifications: 'การรับรอง',
     resources: 'ทรัพยากร',
     blog: 'บล็อก',
-    news: 'ข่าวสาร',
+    menu: 'เมนู',
     faq: 'คำถามที่พบบ่อย',
     contact: 'ติดต่อ',
     contactUs: 'ติดต่อเรา',
@@ -44,6 +44,7 @@ export const th: TranslationKeys = {
     hero: {
       title: 'นวัตกรรมทางการแพทย์ด้านความงาม',
       subtitle: 'ได้รับการอนุมัติ FDA 510(k) | ได้รับการรับรอง ISO 13485 | ผลิตตามมาตรฐาน GMP',
+      badge: 'อุปกรณ์การแพทย์ที่ผ่านการรับรอง FDA 510(k)',
       cta: 'สำรวจผลิตภัณฑ์ของเรา',
       ctaSecondary: 'เป็นผู้จัดจำหน่าย',
     },
@@ -65,6 +66,8 @@ export const th: TranslationKeys = {
   products: {
     title: 'ผลิตภัณฑ์',
     subtitle: 'อุปกรณ์การแพทย์นวัตกรรมใหม่',
+    heroDescription: 'อุปกรณ์การแพทย์ที่ผ่านการรับรอง FDA 510(k) และ ISO 13485',
+    upcomingProducts: 'ผลิตภัณฑ์ที่กำลังจะเปิดตัว',
     category: {
       all: 'สินค้าทั้งหมด',
       medicalDevice: 'เครื่องมือทางการแพทย์',
@@ -92,6 +95,8 @@ export const th: TranslationKeys = {
       benefits: 'ประโยชน์',
       tipSize: 'ขนาดหัว',
       depth: 'ความลึก',
+      whyChoose: 'ทำไมต้องเลือก',
+      whyProduct: 'ทำไมต้องเป็น {name}?',
       flagshipProduct: 'สินค้าเรือธง',
       comingH22026: 'เปิดตัวครึ่งหลังปี 2026',
       medicalDevice: 'อุปกรณ์ทางการแพทย์',
@@ -194,7 +199,7 @@ export const th: TranslationKeys = {
       subtitle: 'BRITZMEDI ผลิตอุปกรณ์ทุกชิ้นภายในบริษัทที่โรงงานซึ่งจดทะเบียนกับ FDA และได้รับการรับรอง GMP — รากฐานด้านคุณภาพที่อยู่เบื้องหลังความร่วมมือด้านการจัดจำหน่ายทั่วโลกของเรา',
       infrastructure: {
         title: 'โครงสร้างพื้นฐานการผลิต',
-        description: 'บริษัทของเราดำเนินงานโรงงานผลิตเฉพาะทางในฮวาซอง-ซี ที่ได้รับอนุญาตจากกระทรวงความปลอดภัยอาหารและยา',
+        description: 'บริษัทของเราดำเนินงานโรงงานผลิตเฉพาะทางในซองนัม-ซี ที่ได้รับอนุญาตจากกระทรวงความปลอดภัยอาหารและยา',
         mfdsLicense: 'หมายเลขใบอนุญาต MFDS',
         gmpCertified: 'การผลิตที่ได้รับการรับรอง GMP',
         isoCertified: 'ได้รับการรับรอง ISO 13485:2016',
@@ -230,6 +235,9 @@ export const th: TranslationKeys = {
     readMore: 'อ่านเพิ่มเติม',
     backToBlog: 'กลับไปบล็อก',
     share: 'แชร์',
+    relatedResources: 'แหล่งข้อมูลที่เกี่ยวข้อง',
+    tableOfContents: 'สารบัญ',
+    relatedArticles: 'บทความที่เกี่ยวข้อง',
     faq: 'คำถามที่พบบ่อย',
     home: 'หน้าแรก',
     categories: {
@@ -242,14 +250,6 @@ export const th: TranslationKeys = {
       medicalDevices: 'อุปกรณ์การแพทย์',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'FDA 510(k): คู่มือฉบับสมบูรณ์สำหรับผู้จัดจำหน่ายอุปกรณ์การแพทย์',
-        description: 'ทุกสิ่งที่ผู้จัดจำหน่ายต้องรู้เกี่ยวกับการอนุมัติ FDA 510(k) ตั้งแต่ขั้นตอนกระบวนการและค่าใช้จ่ายไปจนถึงความสำคัญต่อธุรกิจของคุณ',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: 'เทคโนโลยี RF ในการแพทย์เสริมความงาม: คลินิกเพิ่ม ROI สูงสุดด้วยอุปกรณ์คลื่นวิทยุอย่างไร',
-        description: 'คู่มือเทคโนโลยี RF ฉบับสมบูรณ์สำหรับเจ้าของคลินิกและผู้ซื้ออุปกรณ์',
-      },
       'korean-beauty-device-market': {
         title: 'ตลาดอุปกรณ์เสริมความงามเกาหลี: ทำไมผู้จัดจำหน่ายทั่วโลกจึงร่วมมือกับผู้ผลิตเกาหลี',
         description: 'ข้อมูลตลาด ภูมิทัศน์ด้านกฎระเบียบ และโอกาสในการเป็นพันธมิตรในอุตสาหกรรมอุปกรณ์เสริมความงามเกาหลี',
@@ -293,7 +293,6 @@ export const th: TranslationKeys = {
       privacy: 'ฉันยินยอมให้เก็บรวบรวมและใช้ข้อมูลส่วนบุคคลของฉันเพื่อตอบคำถามของฉัน',
       submit: 'ส่งคำถาม',
       submitting: 'กำลังส่ง...',
-      distributionPartnership: 'พันธมิตรการจัดจำหน่าย',
       howDidYouHear: 'คุณรู้จักเราได้อย่างไร?',
       emailWarningTitle: 'แนะนำให้ใช้อีเมลบริษัท',
       emailWarningBody: 'อีเมลฟรี (Gmail, Yahoo ฯลฯ) อาจได้รับการตอบกลับช้ากว่า กรุณาใช้อีเมลบริษัทเพื่อการตอบสนองที่รวดเร็วยิ่งขึ้น',
@@ -361,7 +360,7 @@ export const th: TranslationKeys = {
       website: 'เว็บไซต์',
     },
     map: {
-      location: 'ฮวาซอง-ซี, คยองกี-โด, สาธารณรัฐเกาหลี',
+      location: 'ซองนัม-ซี, คยองกี-โด, สาธารณรัฐเกาหลี',
     },
   },
 

@@ -1,6 +1,6 @@
 ---
 // Enhanced SEO Head Component
-import { getAlternateUrls, defaultLang, supportedLanguages, isLocalizedRoute } from '../../i18n/config';
+import { getAlternateUrls, getLangFromUrl, defaultLang, supportedLanguages, isLocalizedRoute, type Language } from '../../i18n/config';
 
 interface Props {
   title: string;
@@ -43,6 +43,35 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`
 // Emitting alternates for English-only pages (e.g. /confirm-subscription) declares 404 URLs to Google.
 const hasLocalizedVersions = isLocalizedRoute(Astro.url.pathname);
 const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
+
+// Open Graph locale per page language
+const currentLang = getLangFromUrl(Astro.url);
+const ogLocaleMap: Record<Language, string> = {
+  en: 'en_US',
+  ja: 'ja_JP',
+  zh: 'zh_CN',
+  th: 'th_TH',
+  vi: 'vi_VN',
+  es: 'es_ES',
+  fr: 'fr_FR',
+  ru: 'ru_RU',
+  ar: 'ar_SA',
+};
+const languageNameMap: Record<Language, string> = {
+  en: 'English',
+  ja: 'Japanese',
+  zh: 'Chinese',
+  th: 'Thai',
+  vi: 'Vietnamese',
+  es: 'Spanish',
+  fr: 'French',
+  ru: 'Russian',
+  ar: 'Arabic',
+};
+const ogLocale = ogLocaleMap[currentLang];
+const ogLocaleAlternates = supportedLanguages
+  .filter((lang) => lang !== currentLang)
+  .map((lang) => ogLocaleMap[lang]);
 ---
 
 <!-- Primary Meta Tags -->
@@ -85,7 +114,10 @@ const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
 <meta property="og:image" content={ogImageUrl} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:locale" content="en_US" />
+<meta property="og:locale" content={ogLocale} />
+{hasLocalizedVersions && ogLocaleAlternates.map((locale) => (
+  <meta property="og:locale:alternate" content={locale} />
+))}
 <meta property="og:site_name" content="BRITZMEDI" />
 
 {/* Article-specific OG tags */}
@@ -116,7 +148,7 @@ const alternateUrls = getAlternateUrls(Astro.url.pathname, siteUrl);
 <meta name="author" content="BRITZMEDI Co., Ltd." />
 <meta name="publisher" content="BRITZMEDI Co., Ltd." />
 <meta name="copyright" content="BRITZMEDI Co., Ltd." />
-<meta name="language" content="English" />
+<meta name="language" content={languageNameMap[currentLang]} />
 <meta name="revisit-after" content="7 days" />
 <meta name="distribution" content="global" />
 <meta name="rating" content="general" />

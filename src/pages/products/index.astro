@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { products, productCategories } from '../../content/products';
+import { company } from '../../content/company';
 
 const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medical devices. FDA 510(k) cleared TORR RF, ULBLANC ultrasound system, NEWCHAE SHOT, and upcoming LUMINO WAVE.";
 ---
@@ -66,7 +67,7 @@ const pageDescription = "Explore BRITZMEDI's complete lineup of aesthetic medica
           <div class="text-sm text-slate-500">Certified</div>
         </div>
         <div class="text-center">
-          <div class="text-3xl font-bold text-primary-600 mb-1">11+</div>
+          <div class="text-3xl font-bold text-primary-600 mb-1">{company.intellectualProperty.registeredPatents}+</div>
           <div class="text-sm text-slate-500">Patents</div>
         </div>
       </div>

@@ -9,7 +9,7 @@ export const es: TranslationKeys = {
     certifications: 'Certificaciones',
     resources: 'Recursos',
     blog: 'Blog',
-    news: 'Noticias',
+    menu: 'Menú',
     faq: 'Preguntas Frecuentes',
     contact: 'Contacto',
     contactUs: 'Contáctenos',
@@ -44,6 +44,7 @@ export const es: TranslationKeys = {
     hero: {
       title: 'Soluciones Médicas Estéticas Innovadoras',
       subtitle: 'FDA 510(k) Aprobado | ISO 13485 Certificado | Fabricación GMP',
+      badge: 'Dispositivos médicos con autorización FDA 510(k)',
       cta: 'Explorar Productos',
       ctaSecondary: 'Convertirse en Distribuidor',
     },
@@ -65,6 +66,8 @@ export const es: TranslationKeys = {
   products: {
     title: 'Productos',
     subtitle: 'Dispositivos Médicos Innovadores',
+    heroDescription: 'Dispositivos médicos con autorización FDA 510(k) y certificación ISO 13485',
+    upcomingProducts: 'Próximos Productos',
     category: {
       all: 'Todos los Productos',
       medicalDevice: 'Dispositivos Médicos',
@@ -92,6 +95,8 @@ export const es: TranslationKeys = {
       benefits: 'Beneficios',
       tipSize: 'Tamaño de Punta',
       depth: 'Profundidad',
+      whyChoose: 'Por qué elegir',
+      whyProduct: '¿Por qué {name}?',
       flagshipProduct: 'Producto Insignia',
       comingH22026: 'Próximamente H2 2026',
       medicalDevice: 'Dispositivo Médico',
@@ -194,7 +199,7 @@ export const es: TranslationKeys = {
       subtitle: 'BRITZMEDI fabrica cada dispositivo internamente en su instalación registrada en la FDA y certificada GMP — la base de calidad que respalda nuestras alianzas de distribución global.',
       infrastructure: {
         title: 'Infraestructura de Fabricación',
-        description: 'Nuestra empresa opera una instalación de fabricación dedicada en Hwaseong-si, autorizada por el Ministerio de Seguridad Alimentaria y de Medicamentos.',
+        description: 'Nuestra empresa opera una instalación de fabricación dedicada en Seongnam-si, autorizada por el Ministerio de Seguridad Alimentaria y de Medicamentos.',
         mfdsLicense: 'Licencia MFDS No.',
         gmpCertified: 'Fabricación Certificada GMP',
         isoCertified: 'Certificado ISO 13485:2016',
@@ -230,6 +235,9 @@ export const es: TranslationKeys = {
     readMore: 'Leer más',
     backToBlog: 'Volver al Blog',
     share: 'Compartir',
+    relatedResources: 'Recursos relacionados',
+    tableOfContents: 'Índice de contenidos',
+    relatedArticles: 'Artículos relacionados',
     faq: 'Preguntas frecuentes',
     home: 'Inicio',
     categories: {
@@ -242,14 +250,6 @@ export const es: TranslationKeys = {
       medicalDevices: 'Dispositivos médicos',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'Aprobación FDA 510(k): Guía completa para distribuidores de dispositivos médicos',
-        description: 'Todo lo que los distribuidores necesitan saber sobre la aprobación FDA 510(k) — desde los pasos del proceso y costos hasta su importancia para su negocio.',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: 'Tecnología RF en Medicina Estética: Cómo las clínicas maximizan el ROI con dispositivos de radiofrecuencia',
-        description: 'Guía completa de tecnología RF para propietarios de clínicas y compradores de equipos.',
-      },
       'korean-beauty-device-market': {
         title: 'Mercado de dispositivos estéticos coreanos: Por qué los distribuidores globales se asocian con fabricantes coreanos',
         description: 'Datos de mercado, panorama regulatorio y oportunidades de asociación en la industria de dispositivos estéticos coreanos.',
@@ -293,7 +293,6 @@ export const es: TranslationKeys = {
       privacy: 'Acepto la recopilación y uso de mi información personal con el propósito de responder a mi consulta.',
       submit: 'Enviar Consulta',
       submitting: 'Enviando...',
-      distributionPartnership: 'Asociación de Distribución',
       howDidYouHear: '¿Cómo nos conoció?',
       emailWarningTitle: 'Se recomienda el correo empresarial.',
       emailWarningBody: 'Los correos gratuitos (Gmail, Yahoo, etc.) reciben menor prioridad. Use su correo empresarial para una respuesta más rápida.',
@@ -361,7 +360,7 @@ export const es: TranslationKeys = {
       website: 'Sitio Web',
     },
     map: {
-      location: 'Hwaseong-si, Gyeonggi-do, República de Corea',
+      location: 'Seongnam-si, Gyeonggi-do, República de Corea',
     },
   },
 

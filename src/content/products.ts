@@ -120,7 +120,7 @@ export const productCategories = [
   {
     id: "medical-device",
     name: "Medical Devices",
-    description: "KFDA-certified professional aesthetic medical devices",
+    description: "MFDS-certified professional aesthetic medical devices",
   },
   {
     id: "cosmetic",

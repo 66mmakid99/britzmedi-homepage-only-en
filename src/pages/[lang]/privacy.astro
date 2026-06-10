@@ -13,6 +13,10 @@ const { lang } = Astro.params as { lang: Language };
 const t = useTranslations(lang);
 
 const pageDescription = t('privacy.intro.p1');
+
+// Two-line styled title only works for titles with spaces (ja/zh/th have none)
+const pageTitle = t('privacy.title');
+const titleHasSpace = pageTitle.includes(' ');
 ---
 
 <BaseLayout
@@ -26,8 +30,14 @@ const pageDescription = t('privacy.intro.p1');
       <div class="max-w-3xl">
         <span class="label mb-3 block">{t('privacy.heroLabel')}</span>
         <h1 class="heading-1 mb-6">
-          {t('privacy.title').split(' ')[0]}<br />
-          <span class="text-primary-600">{t('privacy.title').split(' ').slice(1).join(' ')}</span>
+          {titleHasSpace ? (
+            <>
+              {pageTitle.split(' ')[0]}<br />
+              <span class="text-primary-600">{pageTitle.split(' ').slice(1).join(' ')}</span>
+            </>
+          ) : (
+            <span>{pageTitle}</span>
+          )}
         </h1>
         <p class="body-large text-slate-600">
           {t('privacy.lastUpdated')}

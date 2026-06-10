@@ -448,7 +448,7 @@ const breadcrumbSchema = {
     {tocHeadings.length > 2 && (
       <nav class="blog-toc">
         <details open>
-          <summary class="blog-toc-title">{t('blog.tableOfContents') || 'Table of Contents'}</summary>
+          <summary class="blog-toc-title">{t('blog.tableOfContents')}</summary>
           <ol class="blog-toc-list">
             {tocHeadings.map(h => (
               <li><a href={`#${h.id}`}>{h.text}</a></li>
@@ -484,7 +484,7 @@ const breadcrumbSchema = {
     <!-- Related Resources -->
     {post.relatedResources?.length > 0 && (
       <section class="blog-related-resources">
-        <h2>Related Resources</h2>
+        <h2>{t('blog.relatedResources')}</h2>
         <div class="resources-grid">
           {post.relatedResources.map((resource: { type: string; title: string; url: string; source: string }) => (
             <a href={resource.url} target="_blank" rel="noopener noreferrer" class="resource-card">
@@ -527,7 +527,7 @@ const breadcrumbSchema = {
     <!-- Related Posts -->
     {relatedPosts.length > 0 && (
       <section class="blog-related-posts">
-        <h2>{t('blog.relatedArticles') || 'Related Articles'}</h2>
+        <h2>{t('blog.relatedArticles')}</h2>
         <div class="related-posts-grid">
           {relatedPosts.map(rp => (
             <a href={`/${lang}/blog/${rp.slug}`} class="related-post-card">

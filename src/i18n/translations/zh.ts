@@ -9,7 +9,7 @@ export const zh: TranslationKeys = {
     certifications: '认证',
     resources: '资源',
     blog: '博客',
-    news: '新闻',
+    menu: '菜单',
     faq: '常见问题',
     contact: '联系我们',
     contactUs: '联系我们',
@@ -44,6 +44,7 @@ export const zh: TranslationKeys = {
     hero: {
       title: '创新美容医疗解决方案',
       subtitle: 'FDA 510(k) 认证 | ISO 13485 认证 | GMP 生产',
+      badge: 'FDA 510(k)认证医疗器械',
       cta: '探索我们的产品',
       ctaSecondary: '成为经销商',
     },
@@ -65,6 +66,8 @@ export const zh: TranslationKeys = {
   products: {
     title: '产品',
     subtitle: '创新医疗设备',
+    heroDescription: 'FDA 510(k)认证和ISO 13485认证的医美设备',
+    upcomingProducts: '即将推出的产品',
     category: {
       all: '所有产品',
       medicalDevice: '医疗设备',
@@ -92,6 +95,8 @@ export const zh: TranslationKeys = {
       benefits: '优势',
       tipSize: '探头尺寸',
       depth: '深度',
+      whyChoose: '选择理由',
+      whyProduct: '为什么选择{name}？',
       flagshipProduct: '旗舰产品',
       comingH22026: '2026年下半年上市',
       medicalDevice: '医疗设备',
@@ -194,7 +199,7 @@ export const zh: TranslationKeys = {
       subtitle: 'BRITZMEDI在其通过FDA注册、GMP认证的工厂内自主生产每一台设备——这正是支撑我们全球分销合作伙伴关系的质量基石。',
       infrastructure: {
         title: '制造基础设施',
-        description: '我公司在华城市运营经食品药品安全部授权的专用制造设施。',
+        description: '我公司在城南市运营经食品药品安全部授权的专用制造设施。',
         mfdsLicense: 'MFDS许可证号',
         gmpCertified: 'GMP认证制造',
         isoCertified: 'ISO 13485:2016认证',
@@ -230,6 +235,9 @@ export const zh: TranslationKeys = {
     readMore: '阅读更多',
     backToBlog: '返回博客',
     share: '分享',
+    relatedResources: '相关资源',
+    tableOfContents: '目录',
+    relatedArticles: '相关文章',
     faq: '常见问题',
     home: '首页',
     categories: {
@@ -242,14 +250,6 @@ export const zh: TranslationKeys = {
       medicalDevices: '医疗器械',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'FDA 510(k)审批：医疗器械经销商完整指南',
-        description: '经销商需要了解的关于FDA 510(k)审批的一切——从流程步骤和费用到对您业务的重要性。',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: '美容医疗中的RF技术：诊所如何通过射频设备最大化投资回报',
-        description: '面向诊所业主和设备买家的RF技术综合指南。',
-      },
       'korean-beauty-device-market': {
         title: '韩国美容设备市场：全球经销商为何选择与韩国制造商合作',
         description: '韩国美容设备行业的市场数据、监管环境和合作机会。',
@@ -293,7 +293,6 @@ export const zh: TranslationKeys = {
       privacy: '我同意收集和使用我的个人信息以回复我的咨询。',
       submit: '提交咨询',
       submitting: '提交中...',
-      distributionPartnership: '分销合作',
       howDidYouHear: '您是如何了解到我们的？',
       emailWarningTitle: '建议使用公司邮箱。',
       emailWarningBody: '使用免费邮箱（Gmail、Yahoo等）可能导致回复优先级降低。请使用公司邮箱以获得更快的回复。',
@@ -361,7 +360,7 @@ export const zh: TranslationKeys = {
       website: '网站',
     },
     map: {
-      location: '韩国京畿道华城市',
+      location: '韩国京畿道城南市',
     },
   },
 

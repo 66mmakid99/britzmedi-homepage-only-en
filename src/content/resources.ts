@@ -7,6 +7,12 @@ export interface Resource {
   category: 'product-brochure' | 'technical-docs' | 'marketing' | 'certificates' | 'videos';
   thumbnail?: string;
   driveUrl: string;
+  /**
+   * Set to false when the file has not been uploaded yet (placeholder driveUrl).
+   * Unavailable resources are shown with a "Request via Contact" CTA instead of
+   * the gated download flow. Omitted/true = downloadable.
+   */
+  available?: boolean;
   fileSize?: string;
   language?: string;
   product?: string;
@@ -52,6 +58,7 @@ export const resources: Resource[] = [
     type: 'pdf',
     category: 'product-brochure',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '3.5 MB',
     language: 'English',
     product: 'NEWCHAE SHOT',
@@ -76,6 +83,7 @@ export const resources: Resource[] = [
     type: 'pdf',
     category: 'technical-docs',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '1.2 MB',
     language: 'English',
     product: 'TORR RF',
@@ -111,6 +119,7 @@ export const resources: Resource[] = [
     type: 'ppt',
     category: 'marketing',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '12.5 MB',
     language: 'English',
   },
@@ -121,6 +130,7 @@ export const resources: Resource[] = [
     type: 'image',
     category: 'marketing',
     driveUrl: 'https://drive.google.com/drive/folders/PLACEHOLDER',
+    available: false,
     fileSize: '45 MB (ZIP)',
     product: 'TORR RF',
   },
@@ -174,6 +184,7 @@ export const resources: Resource[] = [
     type: 'pdf',
     category: 'certificates',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '0.8 MB',
   },
   {
@@ -183,6 +194,7 @@ export const resources: Resource[] = [
     type: 'pdf',
     category: 'certificates',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '0.6 MB',
   },
   
@@ -194,6 +206,7 @@ export const resources: Resource[] = [
     type: 'video',
     category: 'videos',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '85 MB',
     language: 'English',
     product: 'TORR RF',
@@ -205,6 +218,7 @@ export const resources: Resource[] = [
     type: 'video',
     category: 'videos',
     driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
+    available: false,
     fileSize: '120 MB',
     language: 'English',
   },

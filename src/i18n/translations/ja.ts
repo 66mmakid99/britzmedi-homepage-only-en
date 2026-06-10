@@ -9,7 +9,7 @@ export const ja: TranslationKeys = {
     certifications: '認証',
     resources: 'リソース',
     blog: 'ブログ',
-    news: 'ニュース',
+    menu: 'メニュー',
     faq: 'よくある質問',
     contact: 'お問い合わせ',
     contactUs: 'お問い合わせ',
@@ -44,6 +44,7 @@ export const ja: TranslationKeys = {
     hero: {
       title: '革新的な美容医療ソリューション',
       subtitle: 'FDA 510(k) 認可 | ISO 13485 認証 | GMP 製造',
+      badge: 'FDA 510(k)承認医療機器',
       cta: '製品を見る',
       ctaSecondary: 'ディストリビューターになる',
     },
@@ -65,6 +66,8 @@ export const ja: TranslationKeys = {
   products: {
     title: '製品',
     subtitle: '革新的な医療機器',
+    heroDescription: 'FDA 510(k)承認およびISO 13485認証の美容医療機器',
+    upcomingProducts: '発売予定の製品',
     category: {
       all: 'すべての製品',
       medicalDevice: '医療機器',
@@ -92,6 +95,8 @@ export const ja: TranslationKeys = {
       benefits: '効果',
       tipSize: 'チップサイズ',
       depth: '深度',
+      whyChoose: '選ばれる理由',
+      whyProduct: 'なぜ{name}なのか？',
       flagshipProduct: 'フラッグシップ製品',
       comingH22026: '2026年下半期発売予定',
       medicalDevice: '医療機器',
@@ -194,7 +199,7 @@ export const ja: TranslationKeys = {
       subtitle: 'BRITZMEDIはFDA登録・GMP認証施設において、すべての機器を自社で製造しています。これがグローバル販売パートナーシップを支える品質基盤です。',
       infrastructure: {
         title: '製造インフラ',
-        description: '食品医薬品安全処の認可を受けた華城市の専用製造施設を運営しています。',
+        description: '食品医薬品安全処の認可を受けた城南市の専用製造施設を運営しています。',
         mfdsLicense: 'MFDS許可番号',
         gmpCertified: 'GMP認証製造',
         isoCertified: 'ISO 13485:2016認証',
@@ -230,6 +235,9 @@ export const ja: TranslationKeys = {
     readMore: '続きを読む',
     backToBlog: 'ブログに戻る',
     share: '共有',
+    relatedResources: '関連資料',
+    tableOfContents: '目次',
+    relatedArticles: '関連記事',
     faq: 'よくある質問',
     home: 'ホーム',
     categories: {
@@ -242,14 +250,6 @@ export const ja: TranslationKeys = {
       medicalDevices: '医療機器',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'FDA 510(k)認可：医療機器ディストリビューターのための完全ガイド',
-        description: 'FDA 510(k)認可について、プロセスの手順やコストからビジネスへの影響まで、ディストリビューターが知っておくべきすべてのこと。',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: '美容医療におけるRF技術：クリニックがRFデバイスでROIを最大化する方法',
-        description: 'クリニックオーナーとデバイスバイヤーのためのRF技術総合ガイド。',
-      },
       'korean-beauty-device-market': {
         title: '韓国美容機器市場：世界のディストリビューターが韓国メーカーと提携する理由',
         description: '韓国美容機器業界の市場データ、規制環境、パートナーシップの機会。',
@@ -293,7 +293,6 @@ export const ja: TranslationKeys = {
       privacy: '私の問い合わせに対応するため、個人情報の収集および使用に同意します。',
       submit: 'お問い合わせを送信',
       submitting: '送信中...',
-      distributionPartnership: '販売代理店パートナーシップ',
       howDidYouHear: '弊社をどのようにお知りになりましたか？',
       emailWarningTitle: '会社のメールアドレスを推奨。',
       emailWarningBody: '無料メール（Gmail、Yahooなど）はご対応の優先度が下がる場合があります。迅速なご返答のため、会社のメールアドレスのご使用をお勧めします。',
@@ -361,7 +360,7 @@ export const ja: TranslationKeys = {
       website: 'ウェブサイト',
     },
     map: {
-      location: '大韓民国 京畿道 華城市',
+      location: '大韓民国 京畿道 城南市',
     },
   },
 

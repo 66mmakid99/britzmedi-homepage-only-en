@@ -7,7 +7,7 @@ export const en = {
     certifications: 'Certifications',
     resources: 'Resources',
     blog: 'Blog',
-    news: 'News',
+    menu: 'Menu',
     faq: 'FAQ',
     contact: 'Contact',
     contactUs: 'Contact Us',
@@ -42,6 +42,7 @@ export const en = {
     hero: {
       title: 'Innovative Aesthetic Medical Solutions',
       subtitle: 'FDA 510(k) Cleared | ISO 13485 Certified | GMP Manufacturing',
+      badge: 'FDA 510(k) Cleared Medical Devices',
       cta: 'Explore Our Products',
       ctaSecondary: 'Become a Distributor',
     },
@@ -63,6 +64,8 @@ export const en = {
   products: {
     title: 'Products',
     subtitle: 'Innovative Medical Devices',
+    heroDescription: 'FDA 510(k) Cleared and ISO 13485 Certified Medical Devices',
+    upcomingProducts: 'Upcoming Products',
     category: {
       all: 'All Products',
       medicalDevice: 'Medical Devices',
@@ -90,6 +93,8 @@ export const en = {
       benefits: 'Benefits',
       tipSize: 'Tip Size',
       depth: 'Depth',
+      whyChoose: 'Why Choose',
+      whyProduct: 'Why {name}?',
       flagshipProduct: 'Flagship Product',
       comingH22026: 'Coming H2 2026',
       medicalDevice: 'Medical Device',
@@ -192,7 +197,7 @@ export const en = {
       subtitle: 'BRITZMEDI manufactures every device in-house at its FDA-registered, GMP-certified facility — the quality foundation behind our global distribution partnerships.',
       infrastructure: {
         title: 'Manufacturing Infrastructure',
-        description: 'Our company operates a dedicated manufacturing facility in Hwaseong-si, authorized by the Ministry of Food and Drug Safety.',
+        description: 'Our company operates a dedicated manufacturing facility in Seongnam-si, authorized by the Ministry of Food and Drug Safety.',
         mfdsLicense: 'MFDS License No.',
         gmpCertified: 'GMP Certified Manufacturing',
         isoCertified: 'ISO 13485:2016 Certified',
@@ -228,6 +233,9 @@ export const en = {
     readMore: 'Read More',
     backToBlog: 'Back to Blog',
     share: 'Share',
+    relatedResources: 'Related Resources',
+    tableOfContents: 'Table of Contents',
+    relatedArticles: 'Related Articles',
     faq: 'Frequently Asked Questions',
     home: 'Home',
     categories: {
@@ -240,14 +248,6 @@ export const en = {
       medicalDevices: 'Medical Devices',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'FDA 510(k) Clearance: The Complete Guide for Medical Device Distributors',
-        description: 'Everything distributors need to know about FDA 510(k) clearance — from process steps and costs to why it matters for your business.',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: 'RF Technology in Aesthetic Medicine: How Clinics Maximize ROI with Radiofrequency Devices',
-        description: 'A comprehensive guide to RF technology for clinic owners and device buyers.',
-      },
       'korean-beauty-device-market': {
         title: 'Korean Aesthetic Device Market: Why Global Distributors Are Partnering with Korean Manufacturers',
         description: 'Market data, regulatory landscape, and partnership opportunities in the Korean aesthetic device industry.',
@@ -291,7 +291,6 @@ export const en = {
       privacy: 'I agree to the collection and use of my personal information for the purpose of responding to my inquiry.',
       submit: 'Submit Inquiry',
       submitting: 'Submitting...',
-      distributionPartnership: 'Distribution Partnership',
       howDidYouHear: 'How did you hear about us?',
       emailWarningTitle: 'Company email recommended.',
       emailWarningBody: 'Free email addresses (Gmail, Yahoo, etc.) result in lower priority processing. Please use your company email for faster response.',
@@ -359,7 +358,7 @@ export const en = {
       website: 'Website',
     },
     map: {
-      location: 'Hwaseong-si, Gyeonggi-do, Republic of Korea',
+      location: 'Seongnam-si, Gyeonggi-do, Republic of Korea',
     },
   },
 

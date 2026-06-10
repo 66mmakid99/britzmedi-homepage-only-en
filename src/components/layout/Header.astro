@@ -112,15 +112,7 @@ const isActivePath = (href: string) => {
     <!-- Header -->
     <div class="flex items-center justify-between h-16 px-5 border-b border-slate-100">
       <span class="text-lg font-bold text-slate-900">
-        {currentLang === 'ja' ? 'メニュー' :
-         currentLang === 'zh' ? '菜单' :
-         currentLang === 'th' ? 'เมนู' :
-         currentLang === 'vi' ? 'Menu' :
-         currentLang === 'es' ? 'Menú' :
-         currentLang === 'fr' ? 'Menu' :
-         currentLang === 'ru' ? 'Меню' :
-         currentLang === 'ar' ? 'القائمة' :
-         'Menu'}
+        {t('nav.menu')}
       </span>
       <button
         type="button"

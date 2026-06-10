@@ -153,21 +153,33 @@ const typeColors: Record<string, string> = {
                 )}
               </div>
 
-              <!-- Download Button -->
-              <a
-                href={resource.driveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="resource-download-btn flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
-                data-resource-id={resource.id}
-                data-resource-title={resource.title}
-                data-resource-category={resource.category}
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                {t('resources.download')}
-              </a>
+              <!-- Download Button (or Request CTA when the file is not yet available) -->
+              {resource.available !== false ? (
+                <a
+                  href={resource.driveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="resource-download-btn flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
+                  data-resource-id={resource.id}
+                  data-resource-title={resource.title}
+                  data-resource-category={resource.category}
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {t('resources.download')}
+                </a>
+              ) : (
+                <a
+                  href={`${localizedUrl('/contact')}?resource=${resource.id}`}
+                  class="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {t('resources.ctaRequest')}
+                </a>
+              )}
             </div>
           </div>
         ))}

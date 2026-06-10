@@ -21,11 +21,21 @@ https://www.britzmedi.com/*  https://britzmedi.com/:splat  301
 /enquiry  /contact  301
 /product/*  /products/:splat  301
 
+# Deleted blog posts (indexed SEO URLs — exact matches)
+/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /about  301
+/ja/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /ja/about  301
+/zh/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /zh/about  301
+/th/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /th/about  301
+/vi/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /vi/about  301
+/es/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /es/about  301
+/fr/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /fr/about  301
+/ru/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /ru/about  301
+/ar/blog/oem-odm-aesthetic-medical-device-manufacturing-distributors  /ar/about  301
+
 # Admin legacy redirects
 /admin/blog-manager  /admin/content-hub  301
 /admin/blog-manager/*  /admin/content-hub  301
 /admin/youtube-to-blog  /admin/content-hub  301
-/admin/subscribers  /admin/content-hub  301
 /admin/homepage  /admin/settings/site-editor  301
 /admin/health  /admin  301
 /admin/activity  /admin  301

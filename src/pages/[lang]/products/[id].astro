@@ -419,9 +419,9 @@ const productSchema = {
       <div class="container">
         <div class="max-w-2xl mb-12">
           <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold bg-white/20 text-white rounded-full mb-4">
-            Why Choose
+            {t('products.details.whyChoose')}
           </span>
-          <h2 class="text-3xl lg:text-4xl font-bold mb-4">Why {product.name}?</h2>
+          <h2 class="text-3xl lg:text-4xl font-bold mb-4">{t('products.details.whyProduct', { name: product.name })}</h2>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">

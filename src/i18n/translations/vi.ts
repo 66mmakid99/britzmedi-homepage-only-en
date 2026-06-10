@@ -9,7 +9,7 @@ export const vi: TranslationKeys = {
     certifications: 'Chứng nhận',
     resources: 'Tài nguyên',
     blog: 'Blog',
-    news: 'Tin tức',
+    menu: 'Menu',
     faq: 'Câu hỏi thường gặp',
     contact: 'Liên hệ',
     contactUs: 'Liên hệ với chúng tôi',
@@ -44,6 +44,7 @@ export const vi: TranslationKeys = {
     hero: {
       title: 'Giải pháp thẩm mỹ y tế sáng tạo',
       subtitle: 'Được FDA phê duyệt 510(k) | Chứng nhận ISO 13485 | Sản xuất theo GMP',
+      badge: 'Thiết bị y tế được FDA 510(k) phê duyệt',
       cta: 'Khám phá sản phẩm',
       ctaSecondary: 'Trở thành nhà phân phối',
     },
@@ -65,6 +66,8 @@ export const vi: TranslationKeys = {
   products: {
     title: 'Sản phẩm',
     subtitle: 'Thiết bị y tế tiên tiến',
+    heroDescription: 'Thiết bị y tế được FDA 510(k) phê duyệt và đạt chứng nhận ISO 13485',
+    upcomingProducts: 'Sản phẩm sắp ra mắt',
     category: {
       all: 'Tất cả sản phẩm',
       medicalDevice: 'Thiết bị y tế',
@@ -92,6 +95,8 @@ export const vi: TranslationKeys = {
       benefits: 'Lợi ích',
       tipSize: 'Kích thước đầu',
       depth: 'Độ sâu',
+      whyChoose: 'Vì sao chọn',
+      whyProduct: 'Vì sao chọn {name}?',
       flagshipProduct: 'Sản phẩm chủ lực',
       comingH22026: 'Ra mắt nửa cuối 2026',
       medicalDevice: 'Thiết bị y tế',
@@ -194,7 +199,7 @@ export const vi: TranslationKeys = {
       subtitle: 'BRITZMEDI sản xuất toàn bộ thiết bị tại nhà máy nội bộ đã đăng ký FDA và được chứng nhận GMP — nền tảng chất lượng đứng sau các quan hệ đối tác phân phối toàn cầu của chúng tôi.',
       infrastructure: {
         title: 'Cơ sở hạ tầng sản xuất',
-        description: 'Công ty chúng tôi vận hành cơ sở sản xuất chuyên dụng tại Hwaseong-si, được Bộ An toàn Thực phẩm và Dược phẩm cấp phép.',
+        description: 'Công ty chúng tôi vận hành cơ sở sản xuất chuyên dụng tại Seongnam-si, được Bộ An toàn Thực phẩm và Dược phẩm cấp phép.',
         mfdsLicense: 'Số giấy phép MFDS',
         gmpCertified: 'Sản xuất được chứng nhận GMP',
         isoCertified: 'Được chứng nhận ISO 13485:2016',
@@ -230,6 +235,9 @@ export const vi: TranslationKeys = {
     readMore: 'Đọc thêm',
     backToBlog: 'Quay lại Blog',
     share: 'Chia sẻ',
+    relatedResources: 'Tài nguyên liên quan',
+    tableOfContents: 'Mục lục',
+    relatedArticles: 'Bài viết liên quan',
     faq: 'Câu hỏi thường gặp',
     home: 'Trang chủ',
     categories: {
@@ -242,14 +250,6 @@ export const vi: TranslationKeys = {
       medicalDevices: 'Thiết bị y tế',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'FDA 510(k): Hướng dẫn đầy đủ cho nhà phân phối thiết bị y tế',
-        description: 'Tất cả những gì nhà phân phối cần biết về chứng nhận FDA 510(k) — từ quy trình và chi phí đến tầm quan trọng đối với doanh nghiệp của bạn.',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: 'Công nghệ RF trong Y học Thẩm mỹ: Phòng khám tối đa hóa ROI với thiết bị tần số vô tuyến',
-        description: 'Hướng dẫn toàn diện về công nghệ RF dành cho chủ phòng khám và người mua thiết bị.',
-      },
       'korean-beauty-device-market': {
         title: 'Thị trường thiết bị thẩm mỹ Hàn Quốc: Tại sao nhà phân phối toàn cầu hợp tác với nhà sản xuất Hàn Quốc',
         description: 'Dữ liệu thị trường, cảnh quan pháp lý và cơ hội hợp tác trong ngành thiết bị thẩm mỹ Hàn Quốc.',
@@ -293,7 +293,6 @@ export const vi: TranslationKeys = {
       privacy: 'Tôi đồng ý với việc thu thập và sử dụng thông tin cá nhân của tôi để phản hồi yêu cầu của tôi.',
       submit: 'Gửi yêu cầu',
       submitting: 'Đang gửi...',
-      distributionPartnership: 'Hợp tác phân phối',
       howDidYouHear: 'Bạn biết đến chúng tôi qua đâu?',
       emailWarningTitle: 'Khuyến nghị dùng email công ty.',
       emailWarningBody: 'Email miễn phí (Gmail, Yahoo, v.v.) có thể bị xử lý với mức độ ưu tiên thấp hơn. Vui lòng dùng email công ty để được phản hồi nhanh hơn.',
@@ -361,7 +360,7 @@ export const vi: TranslationKeys = {
       website: 'Website',
     },
     map: {
-      location: 'Hwaseong-si, Gyeonggi-do, Hàn Quốc',
+      location: 'Seongnam-si, Gyeonggi-do, Hàn Quốc',
     },
   },
 

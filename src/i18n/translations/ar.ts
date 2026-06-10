@@ -9,7 +9,7 @@ export const ar: TranslationKeys = {
     certifications: 'الشهادات',
     resources: 'الموارد',
     blog: 'مدونة',
-    news: 'أخبار',
+    menu: 'القائمة',
     faq: 'الأسئلة الشائعة',
     contact: 'اتصل بنا',
     contactUs: 'اتصل بنا',
@@ -44,6 +44,7 @@ export const ar: TranslationKeys = {
     hero: {
       title: 'حلول طبية تجميلية مبتكرة',
       subtitle: 'موافقة FDA 510(k) | شهادة ISO 13485 | تصنيع GMP',
+      badge: 'أجهزة طبية معتمدة من FDA 510(k)',
       cta: 'استكشف منتجاتنا',
       ctaSecondary: 'كن موزعاً',
     },
@@ -65,6 +66,8 @@ export const ar: TranslationKeys = {
   products: {
     title: 'المنتجات',
     subtitle: 'أجهزة طبية مبتكرة',
+    heroDescription: 'أجهزة طبية حاصلة على تصريح FDA 510(k) وشهادة ISO 13485',
+    upcomingProducts: 'المنتجات القادمة',
     category: {
       all: 'جميع المنتجات',
       medicalDevice: 'الأجهزة الطبية',
@@ -92,6 +95,8 @@ export const ar: TranslationKeys = {
       benefits: 'المزايا',
       tipSize: 'حجم الرأس',
       depth: 'العمق',
+      whyChoose: 'لماذا تختار',
+      whyProduct: 'لماذا {name}؟',
       flagshipProduct: 'المنتج الرئيسي',
       comingH22026: 'قريباً النصف الثاني 2026',
       medicalDevice: 'جهاز طبي',
@@ -194,7 +199,7 @@ export const ar: TranslationKeys = {
       subtitle: 'تُصنّع BRITZMEDI كل جهاز داخلياً في منشأتها المسجَّلة لدى FDA والمعتمدة وفق GMP — وهو أساس الجودة الذي تقوم عليه شراكات التوزيع العالمية لدينا.',
       infrastructure: {
         title: 'البنية التحتية للتصنيع',
-        description: 'تدير شركتنا منشأة تصنيع مخصصة في هواسونج-سي، مرخصة من وزارة سلامة الغذاء والدواء.',
+        description: 'تدير شركتنا منشأة تصنيع مخصصة في سونغنام-سي، مرخصة من وزارة سلامة الغذاء والدواء.',
         mfdsLicense: 'رقم ترخيص MFDS',
         gmpCertified: 'تصنيع معتمد GMP',
         isoCertified: 'معتمد ISO 13485:2016',
@@ -230,6 +235,9 @@ export const ar: TranslationKeys = {
     readMore: 'اقرأ المزيد',
     backToBlog: 'العودة إلى المدونة',
     share: 'مشاركة',
+    relatedResources: 'مصادر ذات صلة',
+    tableOfContents: 'جدول المحتويات',
+    relatedArticles: 'مقالات ذات صلة',
     faq: 'الأسئلة الشائعة',
     home: 'الرئيسية',
     categories: {
@@ -242,14 +250,6 @@ export const ar: TranslationKeys = {
       medicalDevices: 'الأجهزة الطبية',
     },
     posts: {
-      'fda-510k-clearance-process': {
-        title: 'موافقة FDA 510(k): الدليل الكامل لموزعي الأجهزة الطبية',
-        description: 'كل ما يحتاج الموزعون معرفته حول موافقة FDA 510(k) — من خطوات العملية والتكاليف إلى أهميتها لعملك.',
-      },
-      'rf-technology-aesthetic-medicine': {
-        title: 'تقنية RF في الطب التجميلي: كيف تعظم العيادات عائد الاستثمار بأجهزة الترددات الراديوية',
-        description: 'دليل شامل لتقنية RF لأصحاب العيادات ومشتري الأجهزة.',
-      },
       'korean-beauty-device-market': {
         title: 'سوق أجهزة التجميل الكورية: لماذا يتعاون الموزعون العالميون مع الشركات المصنعة الكورية',
         description: 'بيانات السوق والمشهد التنظيمي وفرص الشراكة في صناعة أجهزة التجميل الكورية.',
@@ -293,7 +293,6 @@ export const ar: TranslationKeys = {
       privacy: 'أوافق على جمع واستخدام معلوماتي الشخصية لغرض الرد على استفساري.',
       submit: 'إرسال الاستفسار',
       submitting: 'جار الإرسال...',
-      distributionPartnership: 'شراكة التوزيع',
       howDidYouHear: 'كيف عرفت عنا؟',
       emailWarningTitle: 'يُنصح باستخدام بريد الشركة.',
       emailWarningBody: 'تحصل عناوين البريد المجانية (Gmail، Yahoo، إلخ) على أولوية معالجة أقل. استخدم بريد شركتك للحصول على رد أسرع.',
@@ -361,7 +360,7 @@ export const ar: TranslationKeys = {
       website: 'الموقع الإلكتروني',
     },
     map: {
-      location: 'هواسونج-سي، غيونغي-دو، جمهورية كوريا',
+      location: 'سونغنام-سي، غيونغي-دو، جمهورية كوريا',
     },
   },
 
