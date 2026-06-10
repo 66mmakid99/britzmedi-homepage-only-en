@@ -3,12 +3,30 @@ export const prerender = false;
 
 import '../../styles/global.css';
 
-// If already authenticated, redirect to dashboard
+// If already authenticated, redirect to dashboard.
+// Validates the session the same way middleware does: KV lookup first,
+// static secret fallback only in local dev.
 const sessionToken = Astro.cookies.get('admin_session')?.value;
 if (sessionToken) {
-  // Verify token
-  const validToken = import.meta.env.ADMIN_SESSION_SECRET;
-  if (sessionToken === validToken) {
+  let validSession = false;
+
+  const sessionKV = (Astro.locals as any)?.runtime?.env?.SESSION as KVNamespace | undefined;
+  if (sessionKV) {
+    try {
+      const sessionData = await sessionKV.get(`session:${sessionToken}`);
+      if (sessionData) validSession = true;
+    } catch (err) {
+      console.error('[Admin Auth] KV session lookup failed on login page:', err);
+    }
+  }
+
+  if (!validSession && import.meta.env.DEV) {
+    const validToken = (Astro.locals as any)?.runtime?.env?.ADMIN_SESSION_SECRET
+      || import.meta.env.ADMIN_SESSION_SECRET;
+    if (validToken && sessionToken === validToken) validSession = true;
+  }
+
+  if (validSession) {
     return Astro.redirect('/admin');
   }
 }

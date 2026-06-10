@@ -28,6 +28,7 @@ const navGroups = [
       { label: 'Analytics', href: '/admin/analytics', icon: 'analytics' },
       { label: 'AEO Engine', href: '/admin/aeo-engine', icon: 'aeo' },
       { label: 'Social Media', href: '/admin/social', icon: 'social' },
+      { label: 'Subscribers', href: '/admin/subscribers', icon: 'subscribers' },
     ],
   },
   {
@@ -41,7 +42,8 @@ const navGroups = [
     label: 'Settings',
     items: [
       { label: 'Site Editor', href: '/admin/settings/site-editor', icon: 'homepage' },
-      { label: 'Keystatic CMS', href: '/keystatic', icon: 'cms', external: true },
+      // Keystatic is local-mode only — middleware blocks it in production, so only show in dev.
+      ...(import.meta.env.DEV ? [{ label: 'Keystatic CMS', href: '/keystatic', icon: 'cms', external: true }] : []),
       { label: 'System', href: '/admin/settings/system', icon: 'health' },
     ],
   },
@@ -179,10 +181,9 @@ const icons: Record<string, string> = {
                 rel={(item as any).external ? 'noopener noreferrer' : undefined}
               >
                 <svg style="width:18px; height:18px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  {icons[item.icon].includes(' M') || icons[item.icon].includes(' m')
-                    ? <path stroke-linecap="round" stroke-linejoin="round" d={icons[item.icon]} />
-                    : <path stroke-linecap="round" stroke-linejoin="round" d={icons[item.icon]} />
-                  }
+                  {icons[item.icon].split(/\s+(?=M)/).map(d => (
+                    <path stroke-linecap="round" stroke-linejoin="round" d={d} />
+                  ))}
                 </svg>
                 <span>{item.label}</span>
                 {(item as any).external && (

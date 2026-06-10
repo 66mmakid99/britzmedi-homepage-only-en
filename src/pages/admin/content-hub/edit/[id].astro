@@ -5,8 +5,14 @@ import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import ContentEditor from '../../../../components/admin/content-hub/ContentEditor.tsx';
 
 const { id } = Astro.params;
+
+// Validate id is a positive integer — Number('abc') is NaN and would break the editor.
+const contentId = Number(id);
+if (!id || !/^\d+$/.test(id) || !Number.isInteger(contentId) || contentId <= 0) {
+  return Astro.redirect('/admin/content-hub');
+}
 ---
 
 <AdminLayout title="Edit Content">
-  <ContentEditor client:only="react" contentId={Number(id)} />
+  <ContentEditor client:only="react" contentId={contentId} />
 </AdminLayout>

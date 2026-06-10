@@ -46,6 +46,19 @@ interface SEOBrief {
   latest_impressions: number | null;
 }
 
+interface AuditDetail {
+  id: number;
+  status: 'pass' | 'warning' | 'critical';
+  issues: string[];
+}
+
+interface AuditSummary {
+  total: number;
+  passed: number;
+  critical: number;
+  warnings: number;
+}
+
 type Tab = 'pipeline' | 'all' | 'seo_briefs' | 'progress' | 'quality';
 type SourceFilter = 'all' | 'youtube' | 'file' | 'seo_brief' | 'manual';
 type StatusFilter = 'all' | 'brief' | 'generating' | 'draft' | 'review' | 'approved' | 'published' | 'archived';
@@ -234,6 +247,9 @@ export default function ContentHubDashboard() {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const [auditResults, setAuditResults] = useState<Record<number, AuditDetail> | null>(null);
+  const [auditSummary, setAuditSummary] = useState<AuditSummary | null>(null);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -370,6 +386,36 @@ export default function ContentHubDashboard() {
     setSelectedItem(null);
   }, []);
 
+  // Run the content audit (fact-check / citations / self-promotion) on published items.
+  // Cheap server-side heuristics — no AI cost.
+  const handleRunAudit = useCallback(async () => {
+    setAuditLoading(true);
+    try {
+      const res = await fetch('/api/admin/content-hub/audit');
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || 'Audit failed');
+      }
+      const data = await res.json();
+      const byId: Record<number, AuditDetail> = {};
+      for (const d of (data.details || []) as AuditDetail[]) {
+        byId[d.id] = d;
+      }
+      setAuditResults(byId);
+      setAuditSummary({
+        total: data.total || 0,
+        passed: data.passed || 0,
+        critical: data.critical || 0,
+        warnings: data.warnings || 0,
+      });
+      showToast(`Audit complete: ${data.passed}/${data.total} published items passed`, 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to run content audit');
+    } finally {
+      setAuditLoading(false);
+    }
+  }, []);
+
   // ─── Bulk Actions ──────────────────────────────────────────
 
   const toggleSelectAll = useCallback(() => {
@@ -460,7 +506,8 @@ export default function ContentHubDashboard() {
   }
   const totalCount = items.length;
 
-  // Quality sorted (ascending by word count as proxy for quality; real quality would be from API)
+  // Quality tab list: sorted by word count ascending (shortest first).
+  // This is a length heuristic only — real per-item checks come from the audit endpoint.
   const qualitySorted = [...items]
     .filter(item => item.status !== 'brief' && item.status !== 'generating')
     .sort((a, b) => (a.word_count || 0) - (b.word_count || 0));
@@ -935,7 +982,36 @@ export default function ContentHubDashboard() {
 
             {/* ─── Quality Tab ─── */}
             {tab === 'quality' && (
-              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+              <div>
+                {/* Honest label + audit runner: the list below is word-count order, not a quality score */}
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-700">Shortest content first</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Sorted by word count — a length heuristic, not a quality score.
+                      Run the content audit for real fact-check, citation, and self-promotion checks on published items.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleRunAudit}
+                    disabled={auditLoading}
+                    className="flex-shrink-0 px-4 py-2 text-xs font-medium text-white bg-slate-900 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {auditLoading ? 'Auditing...' : 'Run Content Audit'}
+                  </button>
+                </div>
+
+                {/* Audit summary */}
+                {auditSummary && (
+                  <div className="flex items-center gap-3 mb-4 text-xs">
+                    <span className="px-2.5 py-1 bg-green-100 text-green-700 font-medium rounded-full">{auditSummary.passed} pass</span>
+                    <span className="px-2.5 py-1 bg-orange-100 text-orange-700 font-medium rounded-full">{auditSummary.warnings} warning</span>
+                    <span className="px-2.5 py-1 bg-red-100 text-red-700 font-medium rounded-full">{auditSummary.critical} critical</span>
+                    <span className="text-slate-400">{auditSummary.total} published items audited</span>
+                  </div>
+                )}
+
+                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
                 {/* Header */}
                 <div className="px-4 py-3 bg-slate-50 rounded-t-xl">
                   <div className="flex items-center justify-between text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -944,6 +1020,7 @@ export default function ContentHubDashboard() {
                     <span className="w-20 text-center">Source</span>
                     <span className="w-20 text-center">Status</span>
                     <span className="w-24 text-center">Words</span>
+                    <span className="w-24 text-center">Audit</span>
                     <span className="w-24 text-right">SEO</span>
                   </div>
                 </div>
@@ -992,6 +1069,31 @@ export default function ContentHubDashboard() {
                             <span className="text-slate-300">--</span>
                           )}
                         </div>
+                        <div className="w-24 flex justify-center text-xs">
+                          {auditResults && auditResults[item.id] ? (
+                            <span
+                              title={auditResults[item.id].issues.length > 0 ? auditResults[item.id].issues.join('\n') : 'No issues found'}
+                              className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                                auditResults[item.id].status === 'pass' ? 'bg-green-100 text-green-700' :
+                                auditResults[item.id].status === 'warning' ? 'bg-orange-100 text-orange-700' :
+                                'bg-red-100 text-red-700'
+                              }`}
+                            >
+                              {auditResults[item.id].status === 'pass'
+                                ? 'Pass'
+                                : auditResults[item.id].status === 'warning'
+                                  ? `${auditResults[item.id].issues.length} warn`
+                                  : 'Critical'}
+                            </span>
+                          ) : (
+                            <span
+                              className="text-slate-300"
+                              title={auditResults ? 'Audit covers published items only' : 'Run Content Audit to check published items'}
+                            >
+                              --
+                            </span>
+                          )}
+                        </div>
                         <div className="w-24 text-right text-xs">
                           {item.seo_gap_score !== null ? (
                             <span className={`font-medium ${
@@ -1008,6 +1110,7 @@ export default function ContentHubDashboard() {
                     );
                   })
                 )}
+                </div>
               </div>
             )}
           </div>

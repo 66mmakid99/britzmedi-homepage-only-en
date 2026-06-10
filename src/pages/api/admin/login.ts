@@ -3,15 +3,9 @@ import { logActivity } from '../../../lib/activity-log';
 
 export const prerender = false;
 
-// Login attempt tracking (in-memory, per-worker)
-const loginAttempts = new Map<string, {
-  failures: number;
-  lockedUntil: number;
-}>();
-
 const LOGIN_SECURITY = {
   maxAttempts: 5,
-  lockoutMs: 15 * 60 * 1000, // 15 minutes
+  lockoutTtl: 900, // 15 minutes in seconds (KV expirationTtl)
   sessionMaxAge: 60 * 60 * 24, // 24 hours in seconds
 };
 
@@ -47,44 +41,74 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
   return result === 0;
 }
 
-// Check login attempt limit
-function checkLoginAttempts(ip: string): { allowed: boolean; remainingMs?: number } {
-  const now = Date.now();
-  const record = loginAttempts.get(ip);
-
-  if (!record) return { allowed: true };
-
-  // Check if locked out
-  if (record.lockedUntil > now) {
-    return { allowed: false, remainingMs: record.lockedUntil - now };
-  }
-
-  // Reset if lockout expired
-  if (record.lockedUntil > 0 && record.lockedUntil <= now) {
-    loginAttempts.delete(ip);
-    return { allowed: true };
-  }
-
-  return { allowed: true };
+// Brute-force lockout tracking in KV (shared across isolates).
+// Key: lockout:{ip}, value: JSON { count, firstAt }, TTL 15 minutes.
+// Fail-open on KV errors so admins are never locked out by a KV blip.
+interface LockoutRecord {
+  count: number;
+  firstAt: number;
 }
 
-// Record a failed attempt
-function recordFailedAttempt(ip: string): void {
-  const now = Date.now();
-  const record = loginAttempts.get(ip) || { failures: 0, lockedUntil: 0 };
-  record.failures++;
-
-  if (record.failures >= LOGIN_SECURITY.maxAttempts) {
-    record.lockedUntil = now + LOGIN_SECURITY.lockoutMs;
-    console.log(`[Admin Auth] IP ${ip} locked out for 15 minutes after ${record.failures} failed attempts`);
+async function readLockoutRecord(kv: KVNamespace | undefined, ip: string): Promise<LockoutRecord | null> {
+  if (!kv) return null;
+  try {
+    const raw = (await kv.get(`lockout:${ip}`)) as string | null;
+    if (!raw) return null;
+    const record = JSON.parse(raw) as LockoutRecord;
+    if (typeof record?.count !== 'number') return null;
+    return record;
+  } catch (err) {
+    console.error('[Admin Auth] KV lockout lookup failed (fail-open):', err);
+    return null;
   }
+}
 
-  loginAttempts.set(ip, record);
+// Check login attempt limit
+async function checkLoginAttempts(kv: KVNamespace | undefined, ip: string): Promise<{ allowed: boolean; remainingMs?: number }> {
+  const record = await readLockoutRecord(kv, ip);
+  if (!record || record.count < LOGIN_SECURITY.maxAttempts) {
+    return { allowed: true };
+  }
+  // Locked. The KV key expires lockoutTtl seconds after the last failed attempt;
+  // estimate remaining time from firstAt, clamped to [1min, lockoutTtl].
+  const elapsed = Date.now() - (record.firstAt || Date.now());
+  const remainingMs = Math.min(
+    Math.max(LOGIN_SECURITY.lockoutTtl * 1000 - elapsed, 60 * 1000),
+    LOGIN_SECURITY.lockoutTtl * 1000,
+  );
+  return { allowed: false, remainingMs };
+}
+
+// Record a failed attempt; returns the updated failure count (0 = KV unavailable, fail-open)
+async function recordFailedAttempt(kv: KVNamespace | undefined, ip: string): Promise<number> {
+  if (!kv) return 0;
+  try {
+    const existing = await readLockoutRecord(kv, ip);
+    const record: LockoutRecord = {
+      count: (existing?.count || 0) + 1,
+      firstAt: existing?.firstAt || Date.now(),
+    };
+    await kv.put(`lockout:${ip}`, JSON.stringify(record), {
+      expirationTtl: LOGIN_SECURITY.lockoutTtl,
+    });
+    if (record.count >= LOGIN_SECURITY.maxAttempts) {
+      console.log(`[Admin Auth] IP ${ip} locked out for 15 minutes after ${record.count} failed attempts`);
+    }
+    return record.count;
+  } catch (err) {
+    console.error('[Admin Auth] KV lockout write failed (fail-open):', err);
+    return 0;
+  }
 }
 
 // Clear attempts on successful login
-function clearAttempts(ip: string): void {
-  loginAttempts.delete(ip);
+async function clearAttempts(kv: KVNamespace | undefined, ip: string): Promise<void> {
+  if (!kv) return;
+  try {
+    await kv.delete(`lockout:${ip}`);
+  } catch (err) {
+    console.error('[Admin Auth] KV lockout clear failed:', err);
+  }
 }
 
 export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => {
@@ -92,8 +116,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => 
     || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || 'unknown';
 
+  const lockoutKV = getSessionKV(locals);
+
   // Check login attempt limit
-  const attemptCheck = checkLoginAttempts(clientIP);
+  const attemptCheck = await checkLoginAttempts(lockoutKV, clientIP);
   if (!attemptCheck.allowed) {
     const minutes = Math.ceil((attemptCheck.remainingMs || 0) / 60000);
     console.log(`[Admin Auth] Blocked login attempt from locked IP: ${clientIP}`);
@@ -118,15 +144,17 @@ export const POST: APIRoute = async ({ request, cookies, redirect, locals }) => 
   // Timing-safe password validation
   const passwordValid = await timingSafeEqual(password, adminPassword);
   if (!passwordValid) {
-    recordFailedAttempt(clientIP);
-    const record = loginAttempts.get(clientIP);
-    const remaining = LOGIN_SECURITY.maxAttempts - (record?.failures || 0);
+    const failures = await recordFailedAttempt(lockoutKV, clientIP);
+    if (failures >= LOGIN_SECURITY.maxAttempts) {
+      return redirect(`/admin/login?error=locked&minutes=${Math.ceil(LOGIN_SECURITY.lockoutTtl / 60)}`);
+    }
+    const remaining = LOGIN_SECURITY.maxAttempts - failures;
     console.log(`[Admin Auth] Invalid password from ${clientIP} (${remaining} attempts remaining)`);
-    return redirect(`/admin/login?error=invalid${remaining <= 2 ? `&remaining=${remaining}` : ''}`);
+    return redirect(`/admin/login?error=invalid${failures > 0 && remaining <= 2 ? `&remaining=${remaining}` : ''}`);
   }
 
   // Password correct - clear failed attempts
-  clearAttempts(clientIP);
+  await clearAttempts(lockoutKV, clientIP);
 
   // Generate random session token
   const sessionToken = crypto.randomUUID();
