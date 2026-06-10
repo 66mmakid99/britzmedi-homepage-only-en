@@ -501,6 +501,12 @@ export const ru: TranslationKeys = {
     heroTitle2: 'ресурсов',
     heroDescription: 'Получите доступ к брошюрам продукции, техническим документам, маркетинговым материалам, сертификатам и видео. Все ресурсы доступны для скачивания.',
     allResources: 'Все ресурсы',
+    allProducts: 'Все продукты',
+    allTypes: 'Все типы',
+    companyWide: 'Компания и сертификаты',
+    documentsCount: 'Документов: {count}',
+    availableOnRequest: 'Доступно по запросу',
+    viewProduct: 'Смотреть продукт',
     categories: {
       productBrochure: 'Брошюры продукции',
       technicalDocs: 'Техническая документация',

@@ -232,3 +232,42 @@ export const getResourcesByProduct = (product: string) =>
 
 export const getResourceById = (id: string) =>
   resources.find(r => r.id === id);
+
+// --- Product-grouped library model (resources page redesign 2026-06-10) ---
+
+export interface ResourceProductGroup {
+  id: string;
+  /** Display name (brand names stay untranslated; 'company' uses an i18n key) */
+  name: string;
+  /** Matches Resource.product; null = resources without a product (company-wide) */
+  productMatch: string | null;
+  image: string | null;
+  href: string | null;
+}
+
+export const resourceProductGroups: ResourceProductGroup[] = [
+  { id: 'torr-rf', name: 'TORR RF', productMatch: 'TORR RF', image: '/images/products/torr-rf.webp', href: '/products/torr-rf' },
+  { id: 'ulblanc', name: 'ULBLANC', productMatch: 'ULBLANC', image: '/images/products/ulblanc.webp', href: '/products/ulblanc' },
+  { id: 'newchae-shot', name: 'NEWCHAE SHOT', productMatch: 'NEWCHAE SHOT', image: '/images/products/newchae-shot.webp', href: '/products/newchae-shot' },
+  { id: 'company', name: 'Company & Certifications', productMatch: null, image: null, href: null },
+];
+
+const categoryOrder: Record<Resource['category'], number> = {
+  'product-brochure': 0,
+  'technical-docs': 1,
+  'marketing': 2,
+  'certificates': 3,
+  'videos': 4,
+};
+
+/** Resources belonging to a group, sorted by category order then title */
+export const getResourcesByGroup = (groupId: string): Resource[] => {
+  const group = resourceProductGroups.find(g => g.id === groupId);
+  if (!group) return [];
+  const items = group.productMatch === null
+    ? resources.filter(r => !r.product)
+    : resources.filter(r => r.product === group.productMatch);
+  return [...items].sort((a, b) =>
+    (categoryOrder[a.category] - categoryOrder[b.category]) || a.title.localeCompare(b.title)
+  );
+};

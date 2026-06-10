@@ -499,6 +499,12 @@ export const en = {
     heroTitle2: 'Center',
     heroDescription: 'Access product brochures, technical documents, marketing materials, certificates, and videos. All resources are available for download.',
     allResources: 'All Resources',
+    allProducts: 'All Products',
+    allTypes: 'All Types',
+    companyWide: 'Company & Certifications',
+    documentsCount: '{count} documents',
+    availableOnRequest: 'Available on request',
+    viewProduct: 'View Product',
     categories: {
       productBrochure: 'Product Brochures',
       technicalDocs: 'Technical Documents',

@@ -501,6 +501,12 @@ export const ja: TranslationKeys = {
     heroTitle2: 'センター',
     heroDescription: '製品パンフレット、技術文書、マーケティング資料、証明書、ビデオにアクセスできます。すべてのリソースがダウンロード可能です。',
     allResources: 'すべてのリソース',
+    allProducts: 'すべての製品',
+    allTypes: 'すべての種類',
+    companyWide: '会社・認証資料',
+    documentsCount: '資料{count}件',
+    availableOnRequest: 'リクエストでご提供',
+    viewProduct: '製品を見る',
     categories: {
       productBrochure: '製品パンフレット',
       technicalDocs: '技術文書',

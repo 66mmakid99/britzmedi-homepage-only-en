@@ -501,6 +501,12 @@ export const es: TranslationKeys = {
     heroTitle2: 'Recursos',
     heroDescription: 'Acceda a folletos de productos, documentos técnicos, materiales de marketing, certificados y videos. Todos los recursos están disponibles para descargar.',
     allResources: 'Todos los Recursos',
+    allProducts: 'Todos los productos',
+    allTypes: 'Todos los tipos',
+    companyWide: 'Empresa y certificaciones',
+    documentsCount: '{count} documentos',
+    availableOnRequest: 'Disponible bajo petición',
+    viewProduct: 'Ver producto',
     categories: {
       productBrochure: 'Folletos de Productos',
       technicalDocs: 'Documentos Técnicos',

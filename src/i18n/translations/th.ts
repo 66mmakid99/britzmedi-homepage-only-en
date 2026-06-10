@@ -501,6 +501,12 @@ export const th: TranslationKeys = {
     heroTitle2: 'ทรัพยากร',
     heroDescription: 'เข้าถึงโบรชัวร์ผลิตภัณฑ์ เอกสารทางเทคนิค สื่อการตลาด ใบรับรอง และวิดีโอ ทรัพยากรทั้งหมดพร้อมให้ดาวน์โหลด',
     allResources: 'ทรัพยากรทั้งหมด',
+    allProducts: 'ผลิตภัณฑ์ทั้งหมด',
+    allTypes: 'ทุกประเภท',
+    companyWide: 'บริษัทและการรับรอง',
+    documentsCount: 'เอกสาร {count} รายการ',
+    availableOnRequest: 'ขอรับได้ตามคำขอ',
+    viewProduct: 'ดูผลิตภัณฑ์',
     categories: {
       productBrochure: 'โบรชัวร์ผลิตภัณฑ์',
       technicalDocs: 'เอกสารทางเทคนิค',

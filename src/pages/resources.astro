@@ -1,14 +1,34 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ResourceGateModal from '../components/features/ResourceGateModal.tsx';
-import { resources, resourceCategories, getResourcesByCategory } from '../content/resources';
+import { resources, resourceCategories, resourceProductGroups, getResourcesByGroup } from '../content/resources';
+import { products } from '../content/products';
 import { useTranslations } from '../i18n';
 
 const t = useTranslations('en');
 
-const pageDescription = t('resources.heroDescription');
+// Build product sections (only groups that actually have resources)
+const sections = resourceProductGroups
+  .map(group => ({ group, items: getResourcesByGroup(group.id) }))
+  .filter(s => s.items.length > 0);
 
-// Icon mapping for file types
+// Product taglines for section subtitles
+const taglineFor = (groupId: string): string => {
+  if (groupId === 'company') {
+    return 'Corporate documents, quality system certificates, and regulatory records.';
+  }
+  return products.find(p => p.id === groupId)?.tagline || '';
+};
+
+// File-extension label shown on the leading tile
+const typeExt: Record<string, string> = {
+  pdf: 'PDF',
+  ppt: 'PPT',
+  video: 'MP4',
+  image: 'ZIP',
+  brochure: 'PDF',
+};
+
 const typeIcons: Record<string, string> = {
   pdf: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
   ppt: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
@@ -17,15 +37,22 @@ const typeIcons: Record<string, string> = {
   brochure: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
 };
 
-const typeColors: Record<string, string> = {
-  pdf: 'bg-red-100 text-red-600',
-  ppt: 'bg-orange-100 text-orange-600',
-  video: 'bg-purple-100 text-purple-600',
-  image: 'bg-green-100 text-green-600',
-  brochure: 'bg-blue-100 text-blue-600',
+const typeTile: Record<string, string> = {
+  pdf: 'bg-red-50 text-red-600 ring-red-100',
+  ppt: 'bg-orange-50 text-orange-600 ring-orange-100',
+  video: 'bg-purple-50 text-purple-600 ring-purple-100',
+  image: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+  brochure: 'bg-blue-50 text-blue-600 ring-blue-100',
 };
 
-// Map category IDs to translation keys
+const categoryDot: Record<string, string> = {
+  'product-brochure': 'bg-blue-500',
+  'technical-docs': 'bg-slate-500',
+  'marketing': 'bg-amber-500',
+  'certificates': 'bg-emerald-500',
+  'videos': 'bg-purple-500',
+};
+
 const getCategoryName = (categoryId: string): string => {
   const categoryMap: Record<string, string> = {
     'product-brochure': t('resources.categories.productBrochure'),
@@ -36,6 +63,9 @@ const getCategoryName = (categoryId: string): string => {
   };
   return categoryMap[categoryId] || categoryId;
 };
+
+const groupDisplayName = (groupId: string, fallback: string): string =>
+  groupId === 'company' ? t('resources.companyWide') : fallback;
 ---
 
 <BaseLayout
@@ -44,7 +74,7 @@ const getCategoryName = (categoryId: string): string => {
   keywords={["BRITZMEDI downloads", "product brochures", "technical specifications", "TORR RF brochure", "medical device resources", "certification documents", "product catalog"]}
 >
   <!-- Hero Section -->
-  <section class="relative overflow-hidden bg-gradient-hero py-16 lg:py-24">
+  <section class="relative overflow-hidden bg-gradient-hero py-16 lg:py-20">
     <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/5 rounded-full blur-3xl"></div>
     <div class="container relative">
       <div class="max-w-3xl">
@@ -60,21 +90,51 @@ const getCategoryName = (categoryId: string): string => {
     </div>
   </section>
 
-  <!-- Category Filter -->
-  <section class="sticky top-16 lg:top-20 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200/50">
+  <!-- Filter Toolbar: product tabs + type chips -->
+  <section class="sticky top-16 lg:top-20 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200/60">
     <div class="container">
-      <nav class="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
+      <!-- Product tabs -->
+      <nav class="flex gap-2 pt-3 pb-2 overflow-x-auto scrollbar-hide" aria-label="Filter by product">
         <button
-          class="resource-filter-btn active shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-          data-filter="all"
+          class="product-tab shrink-0 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full ring-1 ring-slate-200 transition-colors"
+          data-group="all"
+          aria-pressed="true"
         >
-          {t('resources.allResources')}
+          {t('resources.allProducts')}
+          <span class="tab-count text-xs font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">{resources.length}</span>
+        </button>
+        {sections.map(({ group, items }) => (
+          <button
+            class="product-tab shrink-0 inline-flex items-center gap-2 pl-2 pr-4 py-1.5 text-sm font-semibold text-slate-600 rounded-full ring-1 ring-slate-200 hover:ring-primary-300 hover:text-primary-700 transition-colors"
+            data-group={group.id}
+            aria-pressed="false"
+          >
+            {group.image ? (
+              <img src={group.image} alt="" loading="lazy" class="w-7 h-7 rounded-full object-cover bg-white ring-1 ring-slate-200" />
+            ) : (
+              <span class="w-7 h-7 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center ring-1 ring-primary-100">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </span>
+            )}
+            {groupDisplayName(group.id, group.name)}
+            <span class="tab-count text-xs font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">{items.length}</span>
+          </button>
+        ))}
+      </nav>
+      <!-- Type chips -->
+      <nav class="flex items-center gap-1.5 pb-3 overflow-x-auto scrollbar-hide" aria-label="Filter by material type">
+        <button class="type-chip active shrink-0 px-3 py-1 text-xs font-semibold rounded-md transition-colors" data-type="all" aria-pressed="true">
+          {t('resources.allTypes')}
         </button>
         {resourceCategories.map((category) => (
           <button
-            class="resource-filter-btn shrink-0 px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-            data-filter={category.id}
+            class="type-chip shrink-0 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-slate-500 hover:text-slate-800 rounded-md transition-colors"
+            data-type={category.id}
+            aria-pressed="false"
           >
+            <span class={`w-1.5 h-1.5 rounded-full ${categoryDot[category.id]}`}></span>
             {getCategoryName(category.id)}
           </button>
         ))}
@@ -82,112 +142,135 @@ const getCategoryName = (categoryId: string): string => {
     </div>
   </section>
 
-  <!-- Resources Grid -->
-  <section class="section bg-white">
-    <div class="container">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="resources-grid">
-        {resources.map((resource) => (
-          <div
-            class="resource-card card-premium overflow-hidden group"
-            data-category={resource.category}
-          >
-            <!-- Thumbnail -->
-            <div class="aspect-video bg-slate-100 relative overflow-hidden">
-              {resource.thumbnail ? (
+  <!-- Product-grouped document library -->
+  <section class="section bg-slate-50/60">
+    <div class="container space-y-12">
+      {sections.map(({ group, items }, index) => (
+        <section class="resource-section scroll-mt-36" data-group-section={group.id}>
+          <!-- Section header panel -->
+          <header class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-slate-50 to-primary-50/70 ring-1 ring-slate-200/70">
+            <span class="pointer-events-none absolute -bottom-6 left-6 text-[88px] leading-none font-black tracking-tighter text-slate-900/[0.04] select-none" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div class="relative grid md:grid-cols-[1fr_auto] items-center gap-6 p-6 sm:p-8">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-widest text-primary-600 mb-2">
+                  {group.id === 'company' ? t('resources.heroLabel') : t('nav.products')}
+                </p>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">
+                  {groupDisplayName(group.id, group.name)}
+                </h2>
+                <p class="text-sm sm:text-base text-slate-600 max-w-xl mb-4">{taglineFor(group.id)}</p>
+                <div class="flex flex-wrap items-center gap-3">
+                  <span
+                    class="section-count inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-slate-700 bg-white rounded-full ring-1 ring-slate-200"
+                    data-count-template={t('resources.documentsCount', { count: '{count}' })}
+                  >
+                    <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {t('resources.documentsCount', { count: items.length })}
+                  </span>
+                  {group.href && (
+                    <a href={group.href} class="inline-flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700">
+                      {t('resources.viewProduct')}
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </div>
+              {group.image ? (
                 <img
-                  src={resource.thumbnail}
-                  alt={resource.title}
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  src={group.image}
+                  alt={group.name}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  class="hidden md:block h-36 lg:h-44 w-auto object-contain drop-shadow-xl justify-self-end"
                 />
               ) : (
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <div class={`w-16 h-16 rounded-2xl flex items-center justify-center ${typeColors[resource.type]}`}>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={typeIcons[resource.type]} />
-                    </svg>
+                <div class="hidden md:flex h-36 w-36 items-center justify-center justify-self-end rounded-2xl bg-white/70 ring-1 ring-slate-200">
+                  <svg class="w-16 h-16 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </header>
+
+          <!-- Document rows -->
+          <div class="resource-rows mt-4 rounded-2xl bg-white ring-1 ring-slate-200/80 divide-y divide-slate-100 overflow-hidden shadow-sm">
+            {items.map((resource) => (
+              <article
+                class="resource-row group flex items-center gap-4 p-4 sm:px-6 sm:py-5 hover:bg-primary-50/30 transition-colors"
+                data-group={group.id}
+                data-category={resource.category}
+              >
+                <!-- Type tile -->
+                <div class={`shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl ring-1 flex flex-col items-center justify-center gap-0.5 ${typeTile[resource.type]}`}>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d={typeIcons[resource.type]} />
+                  </svg>
+                  <span class="text-[9px] font-extrabold tracking-wider leading-none">{typeExt[resource.type]}</span>
+                </div>
+
+                <!-- Title + meta -->
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-semibold text-slate-900 group-hover:text-primary-700 transition-colors truncate">
+                    {resource.title}
+                  </h3>
+                  <p class="text-sm text-slate-500 truncate mt-0.5">{resource.description}</p>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-slate-400">
+                    <span class="inline-flex items-center gap-1.5 font-medium text-slate-500">
+                      <span class={`w-1.5 h-1.5 rounded-full ${categoryDot[resource.category]}`}></span>
+                      {getCategoryName(resource.category)}
+                    </span>
+                    {resource.language && <span>{resource.language}</span>}
+                    {resource.fileSize && <span>{resource.fileSize}</span>}
+                    {resource.available === false && (
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 font-semibold text-amber-700 bg-amber-50 rounded-full ring-1 ring-amber-100">
+                        {t('resources.availableOnRequest')}
+                      </span>
+                    )}
                   </div>
                 </div>
-              )}
 
-              <!-- Type Badge -->
-              <div class="absolute top-3 left-3">
-                <span class={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold uppercase rounded-md ${typeColors[resource.type]}`}>
-                  {resource.type}
-                </span>
-              </div>
-
-              <!-- Product Badge -->
-              {resource.product && (
-                <div class="absolute top-3 right-3">
-                  <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-white/90 text-slate-700 rounded-md backdrop-blur-sm">
-                    {resource.product}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <!-- Content -->
-            <div class="p-5">
-               <h2 class="font-semibold text-slate-900 mb-2 group-hover:text-primary-600 transition-colors">
-                 {resource.title}
-               </h2>
-              <p class="text-sm text-slate-600 mb-4 line-clamp-2">
-                {resource.description}
-              </p>
-
-              <!-- Meta -->
-              <div class="flex items-center justify-between text-xs text-slate-500 mb-4">
-                {resource.fileSize && (
-                  <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                <!-- Action -->
+                {resource.available !== false ? (
+                  <button
+                    type="button"
+                    class="resource-download-btn shrink-0 inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-semibold text-primary-700 bg-primary-50 hover:bg-primary-600 hover:text-white rounded-xl transition-colors cursor-pointer"
+                    data-gate-resource-id={resource.id}
+                    data-resource-title={resource.title}
+                    data-resource-category={resource.category}
+                    aria-label={`${t('resources.download')}: ${resource.title}`}
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    {resource.fileSize}
-                  </span>
-                )}
-                {resource.language && (
-                  <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    <span class="hidden sm:inline">{t('resources.download')}</span>
+                  </button>
+                ) : (
+                  <a
+                    href={`/contact?resource=${resource.id}`}
+                    class="shrink-0 inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    aria-label={`${t('resources.ctaRequest')}: ${resource.title}`}
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    {resource.language}
-                  </span>
+                    <span class="hidden sm:inline">{t('resources.ctaRequest')}</span>
+                  </a>
                 )}
-              </div>
-
-              <!-- Download Button (gated) / Request CTA (file not yet uploaded) -->
-              {resource.available !== false ? (
-                <button
-                  type="button"
-                  class="resource-download-btn flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors cursor-pointer"
-                  data-gate-resource-id={resource.id}
-                  data-resource-title={resource.title}
-                  data-resource-category={resource.category}
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  {t('resources.download')}
-                </button>
-              ) : (
-                <a
-                  href={`/contact?resource=${resource.id}`}
-                  class="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Request via Contact
-                </a>
-              )}
-            </div>
+              </article>
+            ))}
           </div>
-        ))}
-      </div>
+        </section>
+      ))}
 
       <!-- Empty State -->
       <div id="no-resources" class="hidden py-16 text-center">
-        <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div class="w-16 h-16 bg-white ring-1 ring-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -224,54 +307,98 @@ const getCategoryName = (categoryId: string): string => {
 </BaseLayout>
 
 <script>
-  // Resource filtering
-  const filterButtons = document.querySelectorAll('.resource-filter-btn');
-  const resourceCards = document.querySelectorAll('.resource-card');
-  const noResourcesMessage = document.getElementById('no-resources');
+  // Two-axis filtering: product group tabs x material type chips
+  const productTabs = document.querySelectorAll<HTMLElement>('.product-tab');
+  const typeChips = document.querySelectorAll<HTMLElement>('.type-chip');
+  const rows = document.querySelectorAll<HTMLElement>('.resource-row');
+  const groupSections = document.querySelectorAll<HTMLElement>('[data-group-section]');
+  const emptyState = document.getElementById('no-resources');
 
-  filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const filter = button.getAttribute('data-filter');
+  let activeGroup = 'all';
+  let activeType = 'all';
 
-      // Update active state
-      filterButtons.forEach(btn => {
-        btn.classList.remove('active', 'bg-primary-100', 'text-primary-700');
-        btn.classList.add('text-slate-600');
-      });
-      button.classList.add('active', 'bg-primary-100', 'text-primary-700');
-      button.classList.remove('text-slate-600');
+  function applyFilters() {
+    let totalVisible = 0;
+    const visibleByGroup: Record<string, number> = {};
+    const typeMatchByGroup: Record<string, number> = {};
+    let typeMatchTotal = 0;
 
-      // Filter resources
-      let visibleCount = 0;
-      resourceCards.forEach(card => {
-        const category = card.getAttribute('data-category');
-        if (filter === 'all' || category === filter) {
-          card.classList.remove('hidden');
-          visibleCount++;
-        } else {
-          card.classList.add('hidden');
-        }
-      });
+    rows.forEach(row => {
+      const g = row.dataset.group || '';
+      const c = row.dataset.category || '';
+      const typeOk = activeType === 'all' || c === activeType;
+      const groupOk = activeGroup === 'all' || g === activeGroup;
+      const visible = typeOk && groupOk;
 
-      // Show/hide empty state
-      if (noResourcesMessage) {
-        if (visibleCount === 0) {
-          noResourcesMessage.classList.remove('hidden');
-        } else {
-          noResourcesMessage.classList.add('hidden');
-        }
+      row.classList.toggle('hidden', !visible);
+      if (visible) {
+        totalVisible++;
+        visibleByGroup[g] = (visibleByGroup[g] || 0) + 1;
       }
+      if (typeOk) {
+        typeMatchByGroup[g] = (typeMatchByGroup[g] || 0) + 1;
+        typeMatchTotal++;
+      }
+    });
+
+    groupSections.forEach(section => {
+      const g = section.dataset.groupSection || '';
+      const count = visibleByGroup[g] || 0;
+      section.classList.toggle('hidden', count === 0);
+      const countEl = section.querySelector<HTMLElement>('.section-count');
+      if (countEl) {
+        const template = countEl.dataset.countTemplate || '{count}';
+        // Keep the leading icon, replace only the text node
+        const last = countEl.lastChild;
+        if (last) last.textContent = ' ' + template.replace('{count}', String(count));
+      }
+    });
+
+    // Tab count badges reflect the active type filter
+    productTabs.forEach(tab => {
+      const g = tab.dataset.group || 'all';
+      const badge = tab.querySelector<HTMLElement>('.tab-count');
+      if (badge) badge.textContent = String(g === 'all' ? typeMatchTotal : (typeMatchByGroup[g] || 0));
+    });
+
+    if (emptyState) emptyState.classList.toggle('hidden', totalVisible > 0);
+  }
+
+  function setActive(buttons: NodeListOf<HTMLElement>, active: HTMLElement, activeClasses: string[], inactiveClasses: string[]) {
+    buttons.forEach(btn => {
+      const isActive = btn === active;
+      btn.setAttribute('aria-pressed', String(isActive));
+      btn.classList.toggle('active', isActive);
+      activeClasses.forEach(cls => btn.classList.toggle(cls, isActive));
+      inactiveClasses.forEach(cls => btn.classList.toggle(cls, !isActive));
+    });
+  }
+
+  productTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeGroup = tab.dataset.group || 'all';
+      setActive(productTabs, tab,
+        ['bg-primary-600', 'text-white', 'ring-primary-600'],
+        ['text-slate-600']);
+      applyFilters();
     });
   });
 
-  // Initialize first button as active
-  const firstButton = filterButtons[0] as HTMLElement;
-  if (firstButton) {
-    firstButton.classList.add('bg-primary-100', 'text-primary-700');
-    firstButton.classList.remove('text-slate-600');
-  }
+  typeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      activeType = chip.dataset.type || 'all';
+      setActive(typeChips, chip,
+        ['bg-slate-900', 'text-white'],
+        ['text-slate-500']);
+      applyFilters();
+    });
+  });
 
-  // Download tracking now handled by ResourceGateModal component
+  // Initial active states
+  const firstTab = productTabs[0];
+  if (firstTab) setActive(productTabs, firstTab, ['bg-primary-600', 'text-white', 'ring-primary-600'], ['text-slate-600']);
+  const firstChip = typeChips[0];
+  if (firstChip) setActive(typeChips, firstChip, ['bg-slate-900', 'text-white'], ['text-slate-500']);
 </script>
 
 <style>
@@ -283,10 +410,8 @@ const getCategoryName = (categoryId: string): string => {
     display: none;
   }
 
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .product-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
   }
 </style>

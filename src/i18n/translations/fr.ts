@@ -501,6 +501,12 @@ export const fr: TranslationKeys = {
     heroTitle2: 'ressources',
     heroDescription: 'Accédez aux brochures produits, documents techniques, supports marketing, certificats et vidéos. Toutes les ressources sont disponibles en téléchargement.',
     allResources: 'Toutes les ressources',
+    allProducts: 'Tous les produits',
+    allTypes: 'Tous les types',
+    companyWide: 'Entreprise et certifications',
+    documentsCount: '{count} documents',
+    availableOnRequest: 'Disponible sur demande',
+    viewProduct: 'Voir le produit',
     categories: {
       productBrochure: 'Brochures produits',
       technicalDocs: 'Documents techniques',

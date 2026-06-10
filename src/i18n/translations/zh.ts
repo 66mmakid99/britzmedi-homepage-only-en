@@ -501,6 +501,12 @@ export const zh: TranslationKeys = {
     heroTitle2: '中心',
     heroDescription: '访问产品手册、技术文档、营销材料、证书和视频。所有资源均可下载。',
     allResources: '所有资源',
+    allProducts: '全部产品',
+    allTypes: '全部类型',
+    companyWide: '公司与认证',
+    documentsCount: '{count} 份资料',
+    availableOnRequest: '可应要求提供',
+    viewProduct: '查看产品',
     categories: {
       productBrochure: '产品手册',
       technicalDocs: '技术文档',

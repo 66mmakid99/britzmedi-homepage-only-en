@@ -501,6 +501,12 @@ export const ar: TranslationKeys = {
     heroTitle2: 'الموارد',
     heroDescription: 'الوصول إلى كتيبات المنتجات والمستندات الفنية ومواد التسويق والشهادات ومقاطع الفيديو. جميع الموارد متاحة للتحميل.',
     allResources: 'جميع الموارد',
+    allProducts: 'جميع المنتجات',
+    allTypes: 'جميع الأنواع',
+    companyWide: 'الشركة والشهادات',
+    documentsCount: '{count} مستندات',
+    availableOnRequest: 'متاح عند الطلب',
+    viewProduct: 'عرض المنتج',
     categories: {
       productBrochure: 'كتيبات المنتجات',
       technicalDocs: 'المستندات الفنية',

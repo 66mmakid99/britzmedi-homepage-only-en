@@ -501,6 +501,12 @@ export const vi: TranslationKeys = {
     heroTitle2: 'Tài nguyên',
     heroDescription: 'Truy cập brochure sản phẩm, tài liệu kỹ thuật, tài liệu tiếp thị, chứng chỉ và video. Tất cả tài nguyên đều có sẵn để tải xuống.',
     allResources: 'Tất cả tài nguyên',
+    allProducts: 'Tất cả sản phẩm',
+    allTypes: 'Tất cả loại',
+    companyWide: 'Công ty & Chứng nhận',
+    documentsCount: '{count} tài liệu',
+    availableOnRequest: 'Cung cấp theo yêu cầu',
+    viewProduct: 'Xem sản phẩm',
     categories: {
       productBrochure: 'Brochure sản phẩm',
       technicalDocs: 'Tài liệu kỹ thuật',
