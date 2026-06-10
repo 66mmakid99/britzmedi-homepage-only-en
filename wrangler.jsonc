@@ -10,19 +10,28 @@
 	"observability": {
     "enabled": true
   },
-  // D1 Database for leads
+  // D1: leads + read-only binding to the ops.britzmedi.com document hub
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "britzmedi-leads",
       "database_id": "b42c1b3d-bb23-4559-9a25-3d8811d975dc"
+    },
+    {
+      "binding": "OPS_DB",
+      "database_name": "ops-britzmedi-db",
+      "database_id": "04bcb903-8e6e-4a33-ade5-e9fb557fbb13"
     }
   ],
-  // KV for sessions (Astro sessions)
+  // KV: sessions + read-only binding to the ops document hub binaries (company profile)
   "kv_namespaces": [
     {
       "binding": "SESSION",
       "id": "27c7cd159fc64df89f218371597e716c"
+    },
+    {
+      "binding": "DOCS_KV",
+      "id": "e5a7ca32976140e3a10c10c5a0ed780f"
     }
   ],
   // R2 bucket for blog images

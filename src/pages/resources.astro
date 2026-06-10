@@ -232,6 +232,12 @@ const groupDisplayName = (groupId: string, fallback: string): string =>
                         {t('resources.availableOnRequest')}
                       </span>
                     )}
+                    {resource.hub && (
+                      <span class="hub-meta hidden items-center gap-1.5 px-2 py-0.5 font-semibold text-primary-700 bg-primary-50 rounded-full ring-1 ring-primary-100" data-hub-lang="en">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+                        <span class="hub-version"></span>
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -399,6 +405,30 @@ const groupDisplayName = (groupId: string, fallback: string): string =>
   if (firstTab) setActive(productTabs, firstTab, ['bg-primary-600', 'text-white', 'ring-primary-600'], ['text-slate-600']);
   const firstChip = typeChips[0];
   if (firstChip) setActive(typeChips, firstChip, ['bg-slate-900', 'text-white'], ['text-slate-500']);
+
+  // Live version metadata for hub-synced resources (ops.britzmedi.com document hub)
+  const hubBadges = document.querySelectorAll<HTMLElement>('.hub-meta');
+  if (hubBadges.length) {
+    fetch('/api/resources/hub')
+      .then(r => (r.ok ? r.json() : null))
+      .then((data: { profile?: Array<{ lang: string; version: string; updatedAt: string | null; pdfSizeBytes: number | null }> } | null) => {
+        const docs = data?.profile;
+        if (!docs?.length) return;
+        hubBadges.forEach(el => {
+          const lang = el.dataset.hubLang || 'en';
+          const doc = docs.find(d => d.lang === lang) || docs.find(d => d.lang === 'en');
+          if (!doc) return;
+          const parts = [`v${doc.version}`];
+          if (doc.updatedAt) parts.push(doc.updatedAt);
+          if (doc.pdfSizeBytes) parts.push(`${(doc.pdfSizeBytes / 1048576).toFixed(1)} MB`);
+          const label = el.querySelector('.hub-version');
+          if (label) label.textContent = parts.join(' · ');
+          el.classList.remove('hidden');
+          el.classList.add('inline-flex');
+        });
+      })
+      .catch(() => {});
+  }
 </script>
 
 <style>

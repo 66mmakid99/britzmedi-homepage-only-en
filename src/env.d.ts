@@ -95,7 +95,11 @@ interface R2Objects {
 // Cloudflare Runtime Environment
 interface CloudflareEnv {
   DB: D1Database;
+  /** Read-only binding to the ops.britzmedi.com document hub D1 (profile_documents) */
+  OPS_DB: D1Database;
   SESSION: KVNamespace;
+  /** Read-only binding to the ops document hub binaries (company profile PDFs/PPTX) */
+  DOCS_KV: KVNamespace;
   BLOG_IMAGES: R2Bucket;
   ANTHROPIC_API_KEY?: string;
   GEMINI_API_KEY?: string;

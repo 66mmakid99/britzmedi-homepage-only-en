@@ -13,6 +13,12 @@ export interface Resource {
    * the gated download flow. Omitted/true = downloadable.
    */
   available?: boolean;
+  /**
+   * True when the file is served live from the ops.britzmedi.com document hub
+   * (always-current version via /api/resources/profile-file/{lang}/{format}).
+   * Pages hydrate version/size/language metadata from /api/resources/hub.
+   */
+  hub?: boolean;
   fileSize?: string;
   language?: string;
   product?: string;
@@ -113,15 +119,16 @@ export const resources: Resource[] = [
     product: 'TORR RF',
   },
   {
+    // Live-synced from the ops.britzmedi.com document hub (versioned, multilingual).
+    // driveUrl is a stable route that always streams the CURRENT published version.
     id: 'company-presentation',
     title: 'BRITZMEDI Company Presentation',
     description: 'Corporate presentation covering company history, products, certifications, and partnership opportunities.',
-    type: 'ppt',
+    type: 'pdf',
     category: 'marketing',
-    driveUrl: 'https://drive.google.com/file/d/PLACEHOLDER/view',
-    available: false,
-    fileSize: '12.5 MB',
-    language: 'English',
+    driveUrl: '/api/resources/profile-file/en/pdf',
+    hub: true,
+    language: 'English · 한국어 · 日本語 · 中文',
   },
   {
     id: 'product-images-torr-rf',
