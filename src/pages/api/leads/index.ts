@@ -20,6 +20,19 @@ interface Env {
   GMAIL_REFRESH_TOKEN?: string;
 }
 
+// ── Auto-reply draft: single source of product truth ─────────────
+// status pinned to business reality (2026-06-09): TORR RF / NEWCHAE SHOT 판매중,
+// ULBLANC 버전업 중, LUMINO WAVE 출시 전. 폼·답장이 같은 목록을 본다.
+const PRODUCT_CATALOG: Record<string, { name: string; status: 'available' | 'coming_soon'; blurb: string }> = {
+  'torr-rf':      { name: 'TORR RF',      status: 'available',   blurb: 'Professional medical RF device for clinics (US FDA 510(k) + Korea MFDS/KFDA approval; NO CE). Multi-wave RF for skin tightening, body contouring, wrinkle reduction. For licensed medical professionals.' },
+  'newchae-shot': { name: 'NEWCHAE SHOT', status: 'available',   blurb: 'Personal home-use consumer beauty RF device adapted from TORR RF technology. NOT a medical device, NOT microneedling, NOT an injection system. Safe for home use without medical supervision.' },
+  'ulblanc':      { name: 'ULBLANC',      status: 'coming_soon', blurb: 'Currently being upgraded to a new version — we will notify interested partners when it is available for their market.' },
+  'lumino-wave':  { name: 'LUMINO WAVE',  status: 'coming_soon', blurb: 'Pre-launch — not yet released. We will notify interested partners at launch.' },
+};
+function displayInterest(slug: string): string {
+  return PRODUCT_CATALOG[slug]?.name || slug;
+}
+
 // IP-based rate limiting for lead submissions
 const leadRateLimitStore = new Map<string, number[]>();
 
@@ -224,11 +237,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // 2. Check free email — save but flag
     const isFree = isFreeEmail(data.email);
 
-    // Build enrichment_data with referral_source if provided
-    let enrichmentData = null;
-    if (data.referral_source) {
-      enrichmentData = JSON.stringify({ referral_source: data.referral_source });
-    }
+    // Build enrichment_data (referral_source + inquiry_type) if provided
+    const enrichment: Record<string, unknown> = {};
+    if (data.referral_source) enrichment.referral_source = data.referral_source;
+    if (data.inquiry_type) enrichment.inquiry_type = data.inquiry_type;
+    const enrichmentData = Object.keys(enrichment).length ? JSON.stringify(enrichment) : null;
 
     // 3. Intelligent 5-axis scoring (pre-research)
     const interestedProducts = Array.isArray(data.interested_products) ? data.interested_products : [];
@@ -387,9 +400,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // 6. AI Draft: generate personalized response → save to Gmail Drafts → notify
     const ctx = (locals as any)?.runtime?.ctx;
     if (ctx?.waitUntil && env?.ANTHROPIC_API_KEY && env?.GMAIL_CLIENT_ID && source === 'website') {
+      const productLines = Object.values(PRODUCT_CATALOG)
+        .map((p) => `  - ${p.name} [${p.status === 'available' ? 'AVAILABLE' : 'COMING SOON / being prepared'}]: ${p.blurb}`)
+        .join('\n');
+      const interestDisplay = interestedProducts.map(displayInterest).join(', ') || '(not specified)';
+      const inquiryType = data.inquiry_type || '(not specified)';
+      const leadGrade = initialScoring.grade;
+      const leadScore = initialScoring.total;
       ctx.waitUntil((async () => {
         let draftBody = '';
-        let draftSubject = `Thank you for your interest - ${interestedProducts[0] || 'BRITZMEDI'}`;
+        const primaryInterest = interestedProducts[0];
+        let draftSubject = primaryInterest
+          ? `Thank you for your interest in ${displayInterest(primaryInterest)} - BRITZMEDI`
+          : 'Thank you for your inquiry - BRITZMEDI';
         let gmailOk = false;
 
         try {
@@ -405,34 +428,57 @@ export const POST: APIRoute = async ({ request, locals }) => {
               max_tokens: 1024,
               messages: [{
                 role: 'user',
-                content: `You are Sungho Lee, Overseas Sales & Marketing Director at BRITZMEDI (sh.lee@britzmedi.com).
+                content: `You are Sungho Lee, Overseas Sales & Marketing Director at BRITZMEDI (sh.lee@britzmedi.com), a Korean aesthetic device manufacturer. Write a FIRST-CONTACT reply to a lead who just submitted our website inquiry form. A human (you) reviews this draft in Gmail before sending — write it as a ready-to-send, personal reply.
 
-BRITZMEDI CONTEXT:
-- Korean aesthetic device company
-- Current products (ONLY these two):
-  1. TORR RF — Professional medical RF device for clinics (FDA 510k, CE). Skin tightening, body contouring, wrinkle reduction. Multi-wave RF technology. Requires licensed medical professional.
-  2. NEWCHAE SHOT — Personal home-use beauty device (NOT medical device, NOT microneedling). Consumer RF device adapted from TORR RF technology. Safe for home use without medical supervision.
-- Do NOT mention any other products (ULBLANC, LUMINO WAVE, etc. are not currently sold).
-- If the lead asked about a product we don't sell, acknowledge their interest but naturally redirect to TORR RF or NEWCHAE SHOT.
-- NEVER describe NEWCHAE SHOT as medical device, injection system, or microneedling device.
+PRODUCTS (only these exist; never invent products or specs):
+${productLines}
+- ULBLANC and LUMINO WAVE are COMING SOON (ULBLANC is being upgraded to a new version; LUMINO WAVE is pre-launch). If a lead is interested in either, acknowledge it, say it is being prepared for international release and you will notify them when it is available for their market. Do NOT say it is unavailable or that it doesn't exist, and do NOT redirect or bait-and-switch them to a different product.
+- NEVER describe NEWCHAE SHOT as a medical device, injection system, or microneedling device.
 
-LEAD INFO:
-- Company: ${data.company_name || 'N/A'}
-- Website: ${data.company_website || 'N/A'}
-- Name: ${data.contact_name || 'N/A'}
-- Title: ${data.job_title || 'N/A'}
-- Country: ${data.country || 'N/A'}
-- Interested in: ${interestedProducts.join(', ')}
-- Their message: ${data.message || '(none)'}
+WHAT WE OFFER (important):
+- For B2B, BRITZMEDI offers ONLY country-level distributorship (총판) of our finished products. We do NOT offer OEM or ODM.
+- If the lead asks for OEM / ODM or private-label manufacturing, politely decline that specific request and instead invite them to consider becoming our country distributor for TORR RF / NEWCHAE SHOT.
 
-SALES RULES (MUST FOLLOW):
-1. This is a FIRST CONTACT reply. Keep it light — thank them, briefly acknowledge their interest.
-2. Do NOT propose calls, video meetings, or visits. That comes later after basic documents are exchanged.
-3. Ask them to submit their company profile and import license via our online form (say "I will send you a short online form to collect your company details and import documentation").
-4. Keep under 120 words. Short and professional.
-5. Start with "Dear ${data.contact_name || 'there'}," — no subject line.
-6. Plain text only (no HTML, no markdown).
-7. End with:
+REGULATORY SAFETY (critical — legal risk):
+- Verified clearances: TORR RF holds US FDA 510(k) and Korea MFDS (KFDA) approval — and nothing else. TORR RF does NOT have CE; never claim CE (or any other country's approval) for TORR RF. Do NOT attribute TORR RF's clearances to NEWCHAE SHOT, ULBLANC, or LUMINO WAVE.
+- If the lead asks about a SPECIFIC indication's clearance (e.g. body contouring) or a SPECIFIC country's approval (PMDA, TGA, ANVISA, NMPA, MFDS, etc.), do NOT assert it is approved — say you will confirm the exact regulatory scope for their market and follow up. Never put an unverified regulatory claim in writing.
+
+LEAD (every field below was ALREADY collected by our form — do NOT ask for any of it again):
+- Company: ${data.company_name || 'N/A'} | Website: ${data.company_website || 'N/A'}
+- Name: ${data.contact_name || 'there'} | Title: ${data.job_title || 'N/A'} | Country: ${data.country || 'N/A'}
+- Interested in: ${interestDisplay}
+- Inquiry type (their selected intent): ${inquiryType}  (distributor = wants a country distributorship; product_info = wants product information / where to buy)
+- Internal lead grade (NEVER reveal to the lead): ${leadGrade} (${leadScore}/100)
+- Their message: ${data.message || '(none provided)'}
+- Reply language: ALWAYS reply in the language the lead wrote their message in (even if it differs from their country's language). Only when the message is empty or unclear, use the main business language of their country; if still unsure, English.
+
+CHOOSE the track from inquiry type + interested products + message:
+- DISTRIBUTOR (inquiry_type 'distributor', or message implies importing / reselling / exclusive rights): warmly acknowledge their market and signal we are open to a country distributorship. The next step is our short online Distributor Qualification — direct them to complete it at this EXACT link, placed on its own line: https://britzmedi-partners.pages.dev/distributor/verify . Briefly explain that it takes only a few minutes: they verify their business email and securely upload ONE qualifying document, and our partnership team reviews qualified submissions and responds within about 24 hours. List the acceptable documents as a bullet list (per the ALWAYS-BULLET rule):
+- Business registration certificate
+- Medical-device distribution or import license
+- Equivalent regulatory authorization
+Do NOT ask them to email documents to you, and do NOT re-ask for the company name or country already provided — the qualification form is how they submit everything.
+- PRODUCT-INFO / BUYER (inquiry_type 'product_info', a product SKU, or an end-user title such as director / owner / doctor / 院長): answer their product questions. Explain that internationally we supply through country distributors — offer to connect them with the distributor for their market. If they themselves are interested in distributing or reselling, invite them to start our Distributor Qualification at https://britzmedi-partners.pages.dev/distributor/verify . Do NOT ask an end-user for an import license.
+- COMING-SOON only (ULBLANC / LUMINO WAVE): acknowledge interest, explain it is being prepared, and that you will notify them at release. Make no deal promises.
+
+RESOURCES (for DISTRIBUTOR and PRODUCT-INFO inquiries, add a short "Resources:" list near the end so they can review our company and product brochures — use ONLY these official links, never invent or alter a URL):
+- Product details & brochure: https://britzmedi.com/products/<slug>  (use slug "torr-rf" or "newchae-shot" matching their interested product; for multiple or general interest use https://britzmedi.com/products)
+- Company & product brochures (download center): https://britzmedi.com/resources
+Present this as a labeled "Resources:" block with each link on its own line starting with "- ". Omit it for coming-soon-only inquiries.
+
+UNIVERSAL RULES (MUST follow):
+1. If the lead asked specific questions (price, MOQ, margin, warranty, training, regulatory, availability, brochure, catalog), acknowledge EACH one explicitly. For any figure or fact you don't have, say you will confirm and follow up — never guess, never leave a question unanswered.
+2. Do NOT re-ask for anything already listed in LEAD above (company, website, name, title, country, interests).
+3. The distributor next step is our REAL online Distributor Qualification form — whenever you mention it you MUST include the exact link given in the DISTRIBUTOR track. Never say "I will send you a form" without the link, and never invent or alter a URL.
+3a. ALWAYS-BULLET RULE (mandatory, no exceptions): any time your reply asks the lead for TWO OR MORE things — documents, details, or items — you MUST format them as a vertical bullet list: one short lead-in line ending with a colon, then EACH item on its OWN line beginning with "- " (a plain hyphen and a space). This applies in EVERY reply. NEVER combine two or more requested items into a single comma-separated sentence, even when prose would read more smoothly. The exact required format:
+To proceed, please complete our Distributor Qualification and upload one of:
+- Business registration certificate
+- Medical-device distribution or import license
+- Equivalent regulatory authorization
+4. Do NOT propose a call, video meeting, or visit (company policy: later). You MAY offer a concrete next step that needs no meeting — e.g. preparing a quotation, sending a brochure, or reviewing their documents.
+5. Tone and length scale with grade: A/B = warmer and more substantive (up to ~150 words); C/D = concise (~80–110 words).
+6. Plain text only (no markdown, no HTML). Do NOT write a subject line in the body — the email subject is set separately.
+7. Open with a warm, natural, human greeting that must NOT look auto-generated or like a mail-merge. The lead entered their name as: "${data.contact_name || '(none)'}". If it looks like a real personal name, address them naturally in proper Title Case — by first name ("Dear Virat,") or "Dear Mr./Ms. [Surname],". If that name field is empty, is an all-caps run-together blob (e.g. "VIRATJOSHI"), contains digits or symbols, looks like a company name, or is otherwise not a clean human name, do NOT echo it verbatim — open with "Dear Sir/Madam,". End EXACTLY with:
 
 Warm regards,
 

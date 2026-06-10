@@ -201,11 +201,11 @@ Comprehensive skincare workstation combining dual-frequency ultrasound for tight
 
 ---
 
-## 4. OEM/ODM Capabilities
+## 4. Manufacturing & Distribution
 
-- **FDA Registered Contract Manufacturer** (Owner/Operator Number: 10088936)
-- Full-cycle manufacturing: Design → Development → Mass production
-- End-to-end support for clients lacking R&D infrastructure
+- **FDA Registered Contract Manufacturer** (Owner/Operator Number: 10088936) — we manufacture our own devices to U.S. standards
+- GMP-certified, ISO 13485 full-cycle in-house manufacturing (Design → Development → Mass production)
+- International supply is handled exclusively through country-level distribution partners
 
 ---
 
@@ -234,9 +234,6 @@ A: Yes. It features real-time temperature monitoring with automatic cutoff (30-5
 ### Distribution
 **Q: Do you offer distribution partnerships?**
 A: Yes, we welcome distribution partnerships. Please contact us through the inquiry form for details.
-
-**Q: Do you provide OEM/ODM services?**
-A: Yes, we are an FDA-registered contract manufacturer and offer end-to-end development services from design to mass production.
 
 ### Pricing
 **Q: What are the product prices?**

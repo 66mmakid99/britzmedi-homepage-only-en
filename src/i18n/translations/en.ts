@@ -188,8 +188,8 @@ export const en = {
     },
     manufacturing: {
       label: 'Manufacturing',
-      title: 'Manufacturing & OEM/ODM Capabilities',
-      subtitle: 'BRITZMEDI possesses full-cycle manufacturing capabilities and offers development services for global partners.',
+      title: 'In-House Manufacturing Excellence',
+      subtitle: 'BRITZMEDI manufactures every device in-house at its FDA-registered, GMP-certified facility — the quality foundation behind our global distribution partnerships.',
       infrastructure: {
         title: 'Manufacturing Infrastructure',
         description: 'Our company operates a dedicated manufacturing facility in Hwaseong-si, authorized by the Ministry of Food and Drug Safety.',
@@ -198,13 +198,13 @@ export const en = {
         isoCertified: 'ISO 13485:2016 Certified',
       },
       oem: {
-        title: 'OEM/ODM Readiness',
-        description: 'Officially registered with the U.S. FDA as a Contract Manufacturer, verifying our capability to produce medical devices meeting stringent U.S. standards.',
+        title: 'Trusted Manufacturing Credentials',
+        description: 'Officially registered with the U.S. FDA as a Contract Manufacturer, verifying our capability to produce medical devices that meet stringent U.S. standards.',
         fdaRegistered: 'FDA Registered Contract Manufacturer',
         ownerOperator: 'Owner/Operator No.',
-        e2eSupport: 'End-to-end product development support',
+        e2eSupport: 'In-house R&D and full-cycle production',
       },
-      cta: 'Discuss Partnership Opportunities',
+      cta: 'Discuss Distribution Partnership',
     },
     mission: {
       title: 'Our Mission',
@@ -292,11 +292,12 @@ export const en = {
       submit: 'Submit Inquiry',
       submitting: 'Submitting...',
       distributionPartnership: 'Distribution Partnership',
-      oemOdm: 'OEM/ODM Inquiry',
       howDidYouHear: 'How did you hear about us?',
       emailWarningTitle: 'Company email recommended.',
       emailWarningBody: 'Free email addresses (Gmail, Yahoo, etc.) result in lower priority processing. Please use your company email for faster response.',
       softEmailWarning: 'We recommend using your company email for faster response.',
+      inquiryType: 'What are you looking for?',
+      comingSoon: 'Coming soon',
     },
     placeholders: {
       companyName: 'Your Company Name',
@@ -317,6 +318,11 @@ export const en = {
       aiAssistant: 'AI Assistant (ChatGPT, etc.)',
       other: 'Other',
     },
+    inquiryType: {
+      distributor: 'Become a country distributor',
+      distributorDesc: 'Distribute BRITZMEDI products in your market',
+      productInfo: 'Product information / where to buy',
+    },
     hints: {
       businessEmail: 'Please use your company email address',
     },
@@ -333,6 +339,7 @@ export const en = {
       companyWebsiteRequired: 'Company website is required.',
       businessWebsiteRequired: 'Please enter a valid business website URL.',
       selectAtLeastOne: 'Please select at least one product or service.',
+      inquiryTypeRequired: 'Please tell us what you are looking for.',
     },
     success: {
       title: 'Inquiry submitted successfully!',
@@ -417,10 +424,6 @@ export const en = {
       'shipping-international': {
         question: 'Do you ship internationally?',
         answer: 'Yes, we ship to distributors and partners worldwide. Our products are manufactured in our GMP-certified facility in Korea and shipped according to international medical device shipping standards. Shipping terms and logistics will be discussed during partnership negotiations.',
-      },
-      'oem-odm-services': {
-        question: 'Do you offer OEM/ODM services?',
-        answer: 'Yes, BRITZMEDI is an FDA-registered contract manufacturer (Owner Operator Number: 10088936) offering comprehensive OEM/ODM services. We provide end-to-end development services from design to manufacturing, leveraging our GMP-certified facility and experienced R&D team. Contact us to discuss your specific requirements.',
       },
       'training-provided': {
         question: 'Do you provide training for your devices?',

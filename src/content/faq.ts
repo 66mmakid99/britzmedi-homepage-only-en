@@ -86,13 +86,7 @@ export const faqItems: FAQItem[] = [
     answer: 'Yes, we ship to distributors and partners worldwide. Our products are manufactured in our GMP-certified facility in Korea and shipped according to international medical device shipping standards. Shipping terms and logistics will be discussed during partnership negotiations.',
     category: 'ordering',
   },
-  {
-    id: 'oem-odm-services',
-    question: 'Do you offer OEM/ODM services?',
-    answer: 'Yes, BRITZMEDI is an FDA-registered contract manufacturer (Owner Operator Number: 10088936) offering comprehensive OEM/ODM services. We provide end-to-end development services from design to manufacturing, leveraging our GMP-certified facility and experienced R&D team. <a href="/contact" class="text-primary-600 hover:underline font-medium">Contact us</a> to discuss your specific requirements.',
-    category: 'ordering',
-  },
-  
+
   // Technical
   {
     id: 'training-provided',

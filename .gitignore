@@ -36,3 +36,15 @@ Thumbs.db
 
 # Misc
 nul
+
+# bkit state
+.bkit/
+
+# scratch DB output
+db/
+
+# large local media (hero videos live in R2)
+public/videos/
+
+# local audit scratch
+SITE-AUDIT-2026-06-10.md

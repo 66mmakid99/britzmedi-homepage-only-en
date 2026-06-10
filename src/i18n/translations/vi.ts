@@ -190,8 +190,8 @@ export const vi: TranslationKeys = {
     },
     manufacturing: {
       label: 'Sản xuất',
-      title: 'Năng lực sản xuất & OEM/ODM',
-      subtitle: 'BRITZMEDI sở hữu năng lực sản xuất toàn chu trình và cung cấp dịch vụ phát triển cho đối tác toàn cầu.',
+      title: 'Năng lực sản xuất nội bộ vượt trội',
+      subtitle: 'BRITZMEDI sản xuất toàn bộ thiết bị tại nhà máy nội bộ đã đăng ký FDA và được chứng nhận GMP — nền tảng chất lượng đứng sau các quan hệ đối tác phân phối toàn cầu của chúng tôi.',
       infrastructure: {
         title: 'Cơ sở hạ tầng sản xuất',
         description: 'Công ty chúng tôi vận hành cơ sở sản xuất chuyên dụng tại Hwaseong-si, được Bộ An toàn Thực phẩm và Dược phẩm cấp phép.',
@@ -200,13 +200,13 @@ export const vi: TranslationKeys = {
         isoCertified: 'Được chứng nhận ISO 13485:2016',
       },
       oem: {
-        title: 'Sẵn sàng OEM/ODM',
+        title: 'Chứng nhận sản xuất đáng tin cậy',
         description: 'Đã đăng ký chính thức với FDA Hoa Kỳ với tư cách là Nhà sản xuất theo hợp đồng, xác minh năng lực sản xuất thiết bị y tế đáp ứng các tiêu chuẩn nghiêm ngặt của Hoa Kỳ.',
         fdaRegistered: 'Nhà sản xuất theo hợp đồng đã đăng ký FDA',
         ownerOperator: 'Số Owner/Operator',
-        e2eSupport: 'Hỗ trợ phát triển sản phẩm toàn diện',
+        e2eSupport: 'R&D nội bộ và sản xuất trọn chu trình',
       },
-      cta: 'Thảo luận cơ hội hợp tác',
+      cta: 'Thảo luận hợp tác phân phối',
     },
     mission: {
       title: 'Sứ mệnh của chúng tôi',
@@ -294,11 +294,12 @@ export const vi: TranslationKeys = {
       submit: 'Gửi yêu cầu',
       submitting: 'Đang gửi...',
       distributionPartnership: 'Hợp tác phân phối',
-      oemOdm: 'Yêu cầu OEM/ODM',
       howDidYouHear: 'Bạn biết đến chúng tôi qua đâu?',
       emailWarningTitle: 'Khuyến nghị dùng email công ty.',
       emailWarningBody: 'Email miễn phí (Gmail, Yahoo, v.v.) có thể bị xử lý với mức độ ưu tiên thấp hơn. Vui lòng dùng email công ty để được phản hồi nhanh hơn.',
       softEmailWarning: 'Khuyến nghị sử dụng email công ty để được phản hồi nhanh hơn.',
+      inquiryType: 'Bạn đang tìm kiếm điều gì?',
+      comingSoon: 'Sắp ra mắt',
     },
     placeholders: {
       companyName: 'Tên công ty của bạn',
@@ -319,6 +320,11 @@ export const vi: TranslationKeys = {
       aiAssistant: 'Trợ lý AI (ChatGPT, v.v.)',
       other: 'Khác',
     },
+    inquiryType: {
+      distributor: 'Trở thành nhà phân phối độc quyền',
+      distributorDesc: 'Phân phối sản phẩm BRITZMEDI tại thị trường của bạn',
+      productInfo: 'Thông tin sản phẩm / nơi mua hàng',
+    },
     hints: {
       businessEmail: 'Vui lòng sử dụng địa chỉ email công ty của bạn',
     },
@@ -335,6 +341,7 @@ export const vi: TranslationKeys = {
       companyWebsiteRequired: 'Website công ty là bắt buộc.',
       businessWebsiteRequired: 'Vui lòng nhập URL website doanh nghiệp hợp lệ.',
       selectAtLeastOne: 'Vui lòng chọn ít nhất một sản phẩm hoặc dịch vụ.',
+      inquiryTypeRequired: 'Vui lòng cho chúng tôi biết bạn đang tìm kiếm điều gì.',
     },
     success: {
       title: 'Yêu cầu đã được gửi thành công!',
@@ -419,10 +426,6 @@ export const vi: TranslationKeys = {
       'shipping-international': {
         question: 'Các bạn có giao hàng quốc tế không?',
         answer: 'Có, chúng tôi giao hàng cho các nhà phân phối và đối tác trên toàn thế giới. Sản phẩm của chúng tôi được sản xuất tại cơ sở được chứng nhận GMP ở Hàn Quốc và được vận chuyển theo tiêu chuẩn vận chuyển thiết bị y tế quốc tế. Các điều khoản vận chuyển và logistics sẽ được thảo luận trong quá trình đàm phán hợp tác.',
-      },
-      'oem-odm-services': {
-        question: 'Các bạn có cung cấp dịch vụ OEM/ODM không?',
-        answer: 'Có, BRITZMEDI là nhà sản xuất theo hợp đồng được đăng ký với FDA (Owner Operator Number: 10088936) cung cấp dịch vụ OEM/ODM toàn diện. Chúng tôi cung cấp dịch vụ phát triển từ đầu đến cuối từ thiết kế đến sản xuất, tận dụng cơ sở được chứng nhận GMP và đội ngũ R&D giàu kinh nghiệm. Liên hệ với chúng tôi để thảo luận về yêu cầu cụ thể của bạn.',
       },
       'training-provided': {
         question: 'Các bạn có cung cấp đào tạo cho thiết bị không?',

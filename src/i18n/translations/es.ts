@@ -190,8 +190,8 @@ export const es: TranslationKeys = {
     },
     manufacturing: {
       label: 'Fabricación',
-      title: 'Capacidades de Fabricación y OEM/ODM',
-      subtitle: 'BRITZMEDI posee capacidades de fabricación de ciclo completo y ofrece servicios de desarrollo para socios globales.',
+      title: 'Excelencia en Fabricación Propia',
+      subtitle: 'BRITZMEDI fabrica cada dispositivo internamente en su instalación registrada en la FDA y certificada GMP — la base de calidad que respalda nuestras alianzas de distribución global.',
       infrastructure: {
         title: 'Infraestructura de Fabricación',
         description: 'Nuestra empresa opera una instalación de fabricación dedicada en Hwaseong-si, autorizada por el Ministerio de Seguridad Alimentaria y de Medicamentos.',
@@ -200,13 +200,13 @@ export const es: TranslationKeys = {
         isoCertified: 'Certificado ISO 13485:2016',
       },
       oem: {
-        title: 'Preparación OEM/ODM',
+        title: 'Credenciales de Fabricación de Confianza',
         description: 'Registrado oficialmente en la FDA de EE.UU. como Fabricante por Contrato, verificando nuestra capacidad para producir dispositivos médicos que cumplen con los estrictos estándares estadounidenses.',
         fdaRegistered: 'Fabricante por Contrato Registrado en FDA',
         ownerOperator: 'No. de Owner/Operator',
-        e2eSupport: 'Soporte integral de desarrollo de productos',
+        e2eSupport: 'I+D propio y producción de ciclo completo',
       },
-      cta: 'Discutir Oportunidades de Asociación',
+      cta: 'Hablemos de la Alianza de Distribución',
     },
     mission: {
       title: 'Nuestra Misión',
@@ -294,11 +294,12 @@ export const es: TranslationKeys = {
       submit: 'Enviar Consulta',
       submitting: 'Enviando...',
       distributionPartnership: 'Asociación de Distribución',
-      oemOdm: 'Consulta OEM/ODM',
       howDidYouHear: '¿Cómo nos conoció?',
       emailWarningTitle: 'Se recomienda el correo empresarial.',
       emailWarningBody: 'Los correos gratuitos (Gmail, Yahoo, etc.) reciben menor prioridad. Use su correo empresarial para una respuesta más rápida.',
       softEmailWarning: 'Le recomendamos usar su correo empresarial para una respuesta más rápida.',
+      inquiryType: '¿Qué está buscando?',
+      comingSoon: 'Próximamente',
     },
     placeholders: {
       companyName: 'Nombre de Su Empresa',
@@ -319,6 +320,11 @@ export const es: TranslationKeys = {
       aiAssistant: 'Asistente de IA (ChatGPT, etc.)',
       other: 'Otro',
     },
+    inquiryType: {
+      distributor: 'Convertirse en distribuidor exclusivo del país',
+      distributorDesc: 'Distribuir los productos de BRITZMEDI en su mercado',
+      productInfo: 'Información del producto / dónde comprar',
+    },
     hints: {
       businessEmail: 'Por favor use su correo electrónico empresarial',
     },
@@ -335,6 +341,7 @@ export const es: TranslationKeys = {
       companyWebsiteRequired: 'El sitio web de la empresa es obligatorio.',
       businessWebsiteRequired: 'Por favor ingrese una URL de sitio web empresarial válida.',
       selectAtLeastOne: 'Por favor seleccione al menos un producto o servicio.',
+      inquiryTypeRequired: 'Por favor indíquenos qué está buscando.',
     },
     success: {
       title: '¡Consulta enviada exitosamente!',
@@ -419,10 +426,6 @@ export const es: TranslationKeys = {
       'shipping-international': {
         question: '¿Realizan envíos internacionales?',
         answer: 'Sí, enviamos a distribuidores y socios en todo el mundo. Nuestros productos se fabrican en nuestra instalación certificada GMP en Corea y se envían según los estándares internacionales de envío de dispositivos médicos. Los términos de envío y logística se discutirán durante las negociaciones de asociación.',
-      },
-      'oem-odm-services': {
-        question: '¿Ofrecen servicios de OEM/ODM?',
-        answer: 'Sí, BRITZMEDI es un fabricante por contrato registrado en la FDA (Owner Operator Number: 10088936) que ofrece servicios integrales de OEM/ODM. Proporcionamos servicios de desarrollo de extremo a extremo desde el diseño hasta la fabricación, aprovechando nuestra instalación certificada GMP y nuestro experimentado equipo de I+D. Contáctenos para discutir sus requisitos específicos.',
       },
       'training-provided': {
         question: '¿Proporcionan capacitación para sus dispositivos?',

@@ -91,10 +91,6 @@ export function scoreLead(data: {
     productScore += 5;
     productReasons.push('Distribution/Partnership interest');
   }
-  if (data.interestedIn.some(p => /oem|odm/i.test(p))) {
-    productScore += 5;
-    productReasons.push('OEM/ODM inquiry');
-  }
   breakdown.product_interest = { score: Math.min(productScore, 20), max: 20, reason: productReasons.join(', ') };
 
   // === 4. Engagement Signals (20 pts) ===

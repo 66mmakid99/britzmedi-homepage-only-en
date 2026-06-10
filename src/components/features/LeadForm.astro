@@ -19,10 +19,16 @@ const productOptions = products.map(p => ({
   label: p.name,
 }));
 
-// Additional interest options (translated)
-const additionalOptions = [
-  { value: 'distribution', label: t('contact.form.distributionPartnership') },
-  { value: 'oem-odm', label: t('contact.form.oemOdm') },
+// Mark coming-soon products (ULBLANC version-up, LUMINO WAVE pre-launch) — selectable for interest, badged
+const comingSoonIds = new Set(['ulblanc', 'lumino-wave']);
+const sortedProductOptions = productOptions
+  .map((o) => ({ ...o, comingSoon: comingSoonIds.has(o.value) }))
+  .sort((a, b) => Number(a.comingSoon) - Number(b.comingSoon));
+
+// Inquiry type — the actionable intent. Only country distributorship is offered for B2B.
+const inquiryTypeOptions = [
+  { value: 'distributor', label: t('contact.inquiryType.distributor'), desc: t('contact.inquiryType.distributorDesc') },
+  { value: 'product_info', label: t('contact.inquiryType.productInfo'), desc: '' },
 ];
 
 // i18n strings to inject into the script via data-i18n
@@ -39,6 +45,7 @@ const i18nStrings = {
   countryRequired: t('contact.validation.countryRequired'),
   businessEmailRequired: t('contact.validation.businessEmailRequired'),
   selectAtLeastOne: t('contact.validation.selectAtLeastOne'),
+  inquiryTypeRequired: t('contact.validation.inquiryTypeRequired'),
   submitting: t('contact.form.submitting'),
   submitInquiry: t('contact.form.submit'),
   successTitle: t('contact.success.title'),
@@ -191,7 +198,7 @@ const i18nStrings = {
             <span class="font-normal text-slate-500 ml-1">({t('contact.form.selectAtLeastOne')})</span>
           </label>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {productOptions.map((option) => (
+            {sortedProductOptions.map((option) => (
               <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
                 <input
                   type="checkbox"
@@ -200,21 +207,37 @@ const i18nStrings = {
                   class="w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
                 />
                 <span class="text-sm font-medium text-slate-700">{option.label}</span>
-              </label>
-            ))}
-            {additionalOptions.map((option) => (
-              <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
-                <input
-                  type="checkbox"
-                  name="interestedIn"
-                  value={option.value}
-                  class="w-5 h-5 text-primary-600 border-slate-300 rounded focus:ring-primary-500"
-                />
-                <span class="text-sm font-medium text-slate-700">{option.label}</span>
+                {option.comingSoon && (
+                  <span class="ml-auto text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">{t('contact.form.comingSoon')}</span>
+                )}
               </label>
             ))}
           </div>
           <p id="interestedInError" class="hidden mt-1.5 text-xs text-red-500"></p>
+        </div>
+
+        <!-- Inquiry Type (what are you looking for) -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-3">
+            {t('contact.form.inquiryType')} <span class="text-red-500">*</span>
+          </label>
+          <div class="grid sm:grid-cols-2 gap-3">
+            {inquiryTypeOptions.map((option) => (
+              <label class="flex items-start gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
+                <input
+                  type="radio"
+                  name="inquiryType"
+                  value={option.value}
+                  class="mt-0.5 w-5 h-5 text-primary-600 border-slate-300 focus:ring-primary-500"
+                />
+                <span>
+                  <span class="block text-sm font-medium text-slate-700">{option.label}</span>
+                  {option.desc && <span class="block text-xs text-slate-500 mt-0.5">{option.desc}</span>}
+                </span>
+              </label>
+            ))}
+          </div>
+          <p id="inquiryTypeError" class="hidden mt-1.5 text-xs text-red-500"></p>
         </div>
 
         <!-- Message (Optional) -->
@@ -531,7 +554,7 @@ const i18nStrings = {
   }
 
   function clearAllErrors() {
-    ['companyName', 'companyWebsite', 'yourName', 'jobTitle', 'businessEmail', 'country', 'interestedIn'].forEach(clearFieldError);
+    ['companyName', 'companyWebsite', 'yourName', 'jobTitle', 'businessEmail', 'country', 'interestedIn', 'inquiryType'].forEach(clearFieldError);
   }
 
   // Form submission
@@ -593,6 +616,13 @@ const i18nStrings = {
       hasErrors = true;
     }
 
+    // Validate Inquiry Type (radio)
+    const inquiryType = formData.get('inquiryType') as string;
+    if (!inquiryType) {
+      showFieldError('inquiryType', I18N.inquiryTypeRequired || 'Please tell us what you are looking for.');
+      hasErrors = true;
+    }
+
     if (hasErrors) {
       return;
     }
@@ -611,6 +641,7 @@ const i18nStrings = {
         email: businessEmail,
         country: country,
         interested_products: interestedIn,
+        inquiry_type: inquiryType,
         message: message,
         referral_source: referralSource || undefined,
         source: 'website',

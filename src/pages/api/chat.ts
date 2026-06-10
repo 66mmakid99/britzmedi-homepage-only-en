@@ -767,9 +767,9 @@ function generateFollowUpSuggestions(
     suggestions.push('What payment terms are available?');
     suggestions.push('Can I request a demo unit?');
   } else if (lowerMessage.includes('oem') || lowerMessage.includes('odm') || lowerResponse.includes('oem')) {
-    suggestions.push('What OEM services do you offer?');
-    suggestions.push('What is the minimum order for OEM?');
-    suggestions.push('Can you customize device branding?');
+    suggestions.push('How do I become a country distributor?');
+    suggestions.push('Which products are available for distribution?');
+    suggestions.push('What are the minimum order quantities?');
   }
   // General conversation suggestions
   else if (lowerMessage.includes('hello') || lowerMessage.includes('hi ') || lowerMessage.length < 20) {

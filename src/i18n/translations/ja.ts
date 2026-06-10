@@ -190,8 +190,8 @@ export const ja: TranslationKeys = {
     },
     manufacturing: {
       label: '製造',
-      title: '製造およびOEM/ODM能力',
-      subtitle: 'BRITZMEDIは製造の全サイクルを保有し、グローバルパートナー向けの開発サービスを提供しています。',
+      title: '自社製造の卓越性',
+      subtitle: 'BRITZMEDIはFDA登録・GMP認証施設において、すべての機器を自社で製造しています。これがグローバル販売パートナーシップを支える品質基盤です。',
       infrastructure: {
         title: '製造インフラ',
         description: '食品医薬品安全処の認可を受けた華城市の専用製造施設を運営しています。',
@@ -200,13 +200,13 @@ export const ja: TranslationKeys = {
         isoCertified: 'ISO 13485:2016認証',
       },
       oem: {
-        title: 'OEM/ODM対応',
+        title: '信頼される製造実績',
         description: '米国FDAに契約製造業者として正式登録されており、米国基準に適合した医療機器の製造能力が検証されています。',
         fdaRegistered: 'FDA登録契約製造業者',
         ownerOperator: 'Owner/Operator番号',
-        e2eSupport: '製品開発の全工程をサポート',
+        e2eSupport: '自社R&Dとフルサイクル生産',
       },
-      cta: 'パートナーシップについてお問い合わせ',
+      cta: '販売パートナーシップについて相談する',
     },
     mission: {
       title: 'ミッション',
@@ -294,11 +294,12 @@ export const ja: TranslationKeys = {
       submit: 'お問い合わせを送信',
       submitting: '送信中...',
       distributionPartnership: '販売代理店パートナーシップ',
-      oemOdm: 'OEM/ODMに関するお問い合わせ',
       howDidYouHear: '弊社をどのようにお知りになりましたか？',
       emailWarningTitle: '会社のメールアドレスを推奨。',
       emailWarningBody: '無料メール（Gmail、Yahooなど）はご対応の優先度が下がる場合があります。迅速なご返答のため、会社のメールアドレスのご使用をお勧めします。',
       softEmailWarning: '迅速なご返答のため、会社のメールアドレスのご使用をお勧めします。',
+      inquiryType: 'どのような情報をお探しですか？',
+      comingSoon: '近日公開',
     },
     placeholders: {
       companyName: '貴社名',
@@ -319,6 +320,11 @@ export const ja: TranslationKeys = {
       aiAssistant: 'AIアシスタント（ChatGPTなど）',
       other: 'その他',
     },
+    inquiryType: {
+      distributor: '国内総代理店になる',
+      distributorDesc: '貴社の市場でBRITZMEDI製品を販売する',
+      productInfo: '製品情報・購入先について',
+    },
     hints: {
       businessEmail: '会社のメールアドレスをご使用ください',
     },
@@ -335,6 +341,7 @@ export const ja: TranslationKeys = {
       companyWebsiteRequired: '会社ウェブサイトは必須です。',
       businessWebsiteRequired: '有効なビジネスウェブサイトURLを入力してください。',
       selectAtLeastOne: '少なくとも1つの製品またはサービスを選択してください。',
+      inquiryTypeRequired: 'お探しの情報をお知らせください。',
     },
     success: {
       title: 'お問い合わせが正常に送信されました！',
@@ -419,10 +426,6 @@ export const ja: TranslationKeys = {
       'shipping-international': {
         question: '海外配送は可能ですか？',
         answer: 'はい、世界中の販売代理店およびパートナーに配送しています。製品は韓国のGMP認証施設で製造され、国際医療機器配送基準に従って出荷されます。配送条件と物流はパートナーシップ交渉時に協議します。',
-      },
-      'oem-odm-services': {
-        question: 'OEM/ODMサービスを提供していますか？',
-        answer: 'はい、BRITZMEDIはFDA登録契約製造業者（Owner Operator Number: 10088936）として、包括的なOEM/ODMサービスを提供しています。GMP認証施設と経験豊富なR&Dチームを活用し、設計から製造までのエンドツーエンドの開発サービスを提供しています。具体的なご要件についてはお問い合わせください。',
       },
       'training-provided': {
         question: 'デバイスのトレーニングは提供されますか？',

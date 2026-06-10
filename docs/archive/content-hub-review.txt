@@ -1,0 +1,3121 @@
+===== src/components/admin/content-hub/ContentHubDashboard.tsx =====
+// Content Hub Dashboard — enhanced main component with Pipeline, All Content, SEO Briefs, and Quality tabs
+
+import { useState, useEffect, useCallback } from 'react';
+import { ContentItemCard } from './ContentItemCard';
+import { SEOBriefCard } from './SEOBriefCard';
+import { GenerateModal } from './GenerateModal';
+
+// ─── Types ──────────────────────────────────────────────────────
+
+interface ContentItem {
+  id: number;
+  source_type: 'youtube' | 'file' | 'seo_brief' | 'manual';
+  source_id: string | null;
+  source_url: string | null;
+  title: string;
+  slug: string | null;
+  content: string | null;
+  excerpt: string | null;
+  category: string | null;
+  tags: string | null;
+  featured_image: string | null;
+  seo_keyword: string | null;
+  seo_gap_score: number | null;
+  seo_target_position: number | null;
+  status: 'brief' | 'generating' | 'draft' | 'review' | 'approved' | 'published' | 'archived';
+  author: string;
+  word_count: number | null;
+  estimated_read_time: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface SEOBrief {
+  id: number;
+  keyword: string;
+  tier: number;
+  category: string;
+  target_position: number;
+  priority: string;
+  content_type: string;
+  status: string;
+  latest_position: number | null;
+  latest_impressions: number | null;
+}
+
+type Tab = 'pipeline' | 'all' | 'seo_briefs' | 'quality';
+type SourceFilter = 'all' | 'youtube' | 'file' | 'seo_brief' | 'manual';
+type StatusFilter = 'all' | 'brief' | 'generating' | 'draft' | 'review' | 'approved' | 'published' | 'archived';
+
+// ─── Constants ──────────────────────────────────────────────────
+
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'pipeline', label: 'Pipeline' },
+  { value: 'all', label: 'All Content' },
+  { value: 'seo_briefs', label: 'SEO Briefs' },
+  { value: 'quality', label: 'Quality' },
+];
+
+const SOURCE_FILTERS: { value: SourceFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'file', label: 'File' },
+  { value: 'seo_brief', label: 'SEO Brief' },
+  { value: 'manual', label: 'Manual' },
+];
+
+const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'brief', label: 'Brief' },
+  { value: 'generating', label: 'Generating' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'review', label: 'Review' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'published', label: 'Published' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const PIPELINE_COLUMNS = [
+  { status: 'brief', label: 'Brief', color: 'bg-slate-500' },
+  { status: 'generating', label: 'Generating', color: 'bg-yellow-500' },
+  { status: 'draft', label: 'Draft', color: 'bg-blue-500' },
+  { status: 'review', label: 'Review', color: 'bg-orange-500' },
+  { status: 'approved', label: 'Approved', color: 'bg-green-500' },
+  { status: 'published', label: 'Published', color: 'bg-emerald-500' },
+  { status: 'archived', label: 'Archived', color: 'bg-slate-400' },
+];
+
+const STATUS_BADGE: Record<string, string> = {
+  brief: 'bg-slate-100 text-slate-600',
+  generating: 'bg-yellow-100 text-yellow-700',
+  draft: 'bg-blue-100 text-blue-700',
+  review: 'bg-orange-100 text-orange-700',
+  approved: 'bg-green-100 text-green-700',
+  published: 'bg-emerald-100 text-emerald-700',
+  archived: 'bg-slate-100 text-slate-500',
+};
+
+const SOURCE_BADGE: Record<string, { label: string; className: string }> = {
+  youtube: { label: 'YouTube', className: 'bg-red-100 text-red-700' },
+  file: { label: 'File', className: 'bg-sky-100 text-sky-700' },
+  seo_brief: { label: 'SEO', className: 'bg-purple-100 text-purple-700' },
+  manual: { label: 'Manual', className: 'bg-slate-100 text-slate-600' },
+};
+
+const TRANSITION_ACTIONS: Record<string, { target: string; label: string; style: string; confirm?: string }[]> = {
+  brief: [
+    { target: 'generating', label: 'Start Generating', style: 'bg-yellow-600 hover:bg-yellow-700 text-white' },
+    { target: 'draft', label: 'Move to Draft', style: 'bg-blue-600 hover:bg-blue-700 text-white' },
+  ],
+  generating: [
+    { target: 'draft', label: 'Move to Draft', style: 'bg-blue-600 hover:bg-blue-700 text-white' },
+    { target: 'brief', label: 'Back to Brief', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+  ],
+  draft: [
+    { target: 'review', label: 'Submit for Review', style: 'bg-orange-600 hover:bg-orange-700 text-white' },
+  ],
+  review: [
+    { target: 'approved', label: 'Approve', style: 'bg-green-600 hover:bg-green-700 text-white' },
+    { target: 'draft', label: 'Back to Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+  ],
+  approved: [
+    { target: 'published', label: 'Publish', style: 'bg-emerald-600 hover:bg-emerald-700 text-white' },
+    { target: 'draft', label: 'Back to Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+  ],
+  published: [
+    { target: 'archived', label: 'Archive', style: 'bg-slate-600 hover:bg-slate-700 text-white', confirm: 'Archive this content? It will be removed from the live site.' },
+    { target: 'draft', label: 'Unpublish', style: 'bg-red-100 hover:bg-red-200 text-red-700', confirm: 'Unpublish this content? It will be removed from the live site.' },
+  ],
+  archived: [
+    { target: 'draft', label: 'Reopen as Draft', style: 'bg-slate-200 hover:bg-slate-300 text-slate-700' },
+  ],
+};
+
+// ─── Helpers ────────────────────────────────────────────────────
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
+}
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ─── Pipeline Card (compact for kanban) ─────────────────────────
+
+function PipelineCard({
+  item,
+  selected,
+  onClick,
+}: {
+  item: ContentItem;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const sourceBadge = SOURCE_BADGE[item.source_type] || SOURCE_BADGE.manual;
+
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left bg-white rounded-lg border transition-all hover:shadow-md cursor-pointer ${
+        selected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200 hover:border-slate-300'
+      }`}
+    >
+      {/* Thumbnail */}
+      {item.featured_image && (
+        <div className="h-24 w-full overflow-hidden rounded-t-lg bg-slate-100">
+          <img src={item.featured_image} alt="" className="w-full h-full object-cover" loading="lazy" />
+        </div>
+      )}
+
+      <div className="p-3 space-y-2">
+        <h4 className="text-sm font-medium text-slate-900 line-clamp-2 leading-tight">
+          {item.title}
+        </h4>
+
+        <div className="flex items-center justify-between gap-2">
+          <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${sourceBadge.className}`}>
+            {sourceBadge.label}
+          </span>
+          {item.word_count !== null && item.word_count > 0 && (
+            <span className="text-[10px] text-slate-400">{item.word_count.toLocaleString()}w</span>
+          )}
+        </div>
+
+        {item.seo_keyword && (
+          <div className="flex items-center gap-1 text-[10px] text-purple-600 truncate">
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+            </svg>
+            <span className="truncate">{item.seo_keyword}</span>
+          </div>
+        )}
+
+        {item.category && (
+          <span className="inline-block text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded">
+            {item.category}
+          </span>
+        )}
+      </div>
+    </button>
+  );
+}
+
+// ─── Main Component ─────────────────────────────────────────────
+
+export default function ContentHubDashboard() {
+  // State
+  const [tab, setTab] = useState<Tab>('pipeline');
+  const [items, setItems] = useState<ContentItem[]>([]);
+  const [seoBriefs, setSeoBriefs] = useState<SEOBrief[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [seoBriefsLoading, setSeoBriefsLoading] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [search, setSearch] = useState('');
+  const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [generatePrefill, setGeneratePrefill] = useState<{ keyword?: string; title?: string; content_type?: string; tier?: number } | undefined>(undefined);
+  const [transitionLoading, setTransitionLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // ─── Data fetching ──────────────────────────────────────────
+
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (sourceFilter !== 'all') params.set('source_type', sourceFilter);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (search.trim()) params.set('search', search.trim());
+
+      const res = await fetch(`/api/admin/content-hub/items?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch content items');
+      const data = await res.json();
+      setItems(data.items || data || []);
+    } catch (err) {
+      console.error('Failed to fetch content items:', err);
+      setError('Failed to load content items');
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [sourceFilter, statusFilter, search]);
+
+  const fetchSeoBriefs = useCallback(async () => {
+    setSeoBriefsLoading(true);
+    try {
+      const res = await fetch('/api/admin/content-hub/seo-briefs');
+      if (!res.ok) throw new Error('Failed to fetch SEO briefs');
+      const data = await res.json();
+      setSeoBriefs(data.briefs || data || []);
+    } catch (err) {
+      console.error('Failed to fetch SEO briefs:', err);
+      setSeoBriefs([]);
+    } finally {
+      setSeoBriefsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  useEffect(() => {
+    if (tab === 'seo_briefs' && seoBriefs.length === 0) {
+      fetchSeoBriefs();
+    }
+  }, [tab, seoBriefs.length, fetchSeoBriefs]);
+
+  // ─── Actions ────────────────────────────────────────────────
+
+  const handleSelectItem = useCallback((item: ContentItem) => {
+    setSelectedItem(prev => prev?.id === item.id ? null : item);
+  }, []);
+
+  const handleTransition = useCallback(async (itemId: number, targetStatus: string, confirm?: string) => {
+    if (confirm && !window.confirm(confirm)) return;
+
+    setTransitionLoading(targetStatus);
+    try {
+      const res = await fetch(`/api/admin/content-hub/items/${itemId}/transition`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: targetStatus }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Transition failed');
+      }
+
+      setSelectedItem(null);
+      fetchItems();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to transition');
+    } finally {
+      setTransitionLoading(null);
+    }
+  }, [fetchItems]);
+
+  const handleGenerateFromBrief = useCallback((brief: SEOBrief) => {
+    setGeneratePrefill({
+      keyword: brief.keyword,
+      content_type: brief.content_type,
+      tier: brief.tier,
+    });
+    setShowGenerateModal(true);
+  }, []);
+
+  const handleNewContent = useCallback(() => {
+    setGeneratePrefill(undefined);
+    setShowGenerateModal(true);
+  }, []);
+
+  const handleGenerated = useCallback((_contentId: number) => {
+    fetchItems();
+    if (tab === 'seo_briefs') {
+      fetchSeoBriefs();
+    }
+  }, [fetchItems, fetchSeoBriefs, tab]);
+
+  const closeDetail = useCallback(() => {
+    setSelectedItem(null);
+  }, []);
+
+  // ─── Derived data ──────────────────────────────────────────
+
+  const statusCounts: Record<string, number> = {};
+  for (const item of items) {
+    statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
+  }
+  const totalCount = items.length;
+
+  // Quality sorted (ascending by word count as proxy for quality; real quality would be from API)
+  const qualitySorted = [...items]
+    .filter(item => item.status !== 'brief' && item.status !== 'generating')
+    .sort((a, b) => (a.word_count || 0) - (b.word_count || 0));
+
+  // ─── Render ─────────────────────────────────────────────────
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Content Hub</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Pipeline, content management, SEO briefs, and quality
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-500">
+            <span className="font-medium">{totalCount}</span> items
+          </span>
+          <button
+            onClick={handleNewContent}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Content
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-slate-200 p-1 w-fit">
+        {TABS.map(t => (
+          <button
+            key={t.value}
+            onClick={() => { setTab(t.value); closeDetail(); }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              tab === t.value
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Source + Status filters (for All Content and Pipeline tabs) */}
+      {(tab === 'all' || tab === 'pipeline') && (
+        <div className="space-y-3 mb-6">
+          {/* Source filter pills */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-500 mr-1">Source:</span>
+            {SOURCE_FILTERS.map(sf => (
+              <button
+                key={sf.value}
+                onClick={() => setSourceFilter(sf.value)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                  sourceFilter === sf.value
+                    ? 'bg-slate-900 text-white border-slate-900'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                }`}
+              >
+                {sf.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Status filter pills (All Content only) */}
+          {tab === 'all' && (
+            <div className="flex items-center gap-1 bg-white rounded-xl border border-slate-200 p-1">
+              {STATUS_FILTERS.map(sf => {
+                const count = sf.value === 'all' ? totalCount : (statusCounts[sf.value] || 0);
+                return (
+                  <button
+                    key={sf.value}
+                    onClick={() => setStatusFilter(sf.value)}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      statusFilter === sf.value
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    {sf.label}
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                      statusFilter === sf.value ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Search */}
+          {tab === 'all' && (
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search content..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => { setError(null); fetchItems(); }} className="text-red-600 hover:text-red-800 text-xs font-medium">
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading && tab !== 'seo_briefs' ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full" />
+        </div>
+      ) : (
+        <div className="flex gap-6">
+          {/* Main area */}
+          <div className={`flex-1 ${selectedItem ? 'min-w-0' : ''}`}>
+
+            {/* ─── Pipeline Tab ─── */}
+            {tab === 'pipeline' && (
+              <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: '400px' }}>
+                {PIPELINE_COLUMNS.map(col => {
+                  const columnItems = items.filter(item => item.status === col.status);
+                  return (
+                    <div key={col.status} className="flex-shrink-0 w-56">
+                      {/* Column header */}
+                      <div className="flex items-center gap-2 mb-3 px-1">
+                        <div className={`w-2.5 h-2.5 rounded-full ${col.color}`} />
+                        <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
+                        <span className="text-xs px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-full">
+                          {columnItems.length}
+                        </span>
+                      </div>
+
+                      {/* Cards */}
+                      <div className="space-y-2 min-h-[200px] bg-slate-50 rounded-xl p-2 border border-slate-100">
+                        {columnItems.length === 0 ? (
+                          <p className="text-xs text-slate-400 text-center py-8">No items</p>
+                        ) : (
+                          columnItems.map(item => (
+                            <PipelineCard
+                              key={item.id}
+                              item={item}
+                              selected={selectedItem?.id === item.id}
+                              onClick={() => handleSelectItem(item)}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ─── All Content Tab ─── */}
+            {tab === 'all' && (
+              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                {items.length === 0 ? (
+                  <div className="text-center py-12">
+                    <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <p className="text-sm text-slate-400">No content items found</p>
+                    <button
+                      onClick={handleNewContent}
+                      className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      Create your first content
+                    </button>
+                  </div>
+                ) : (
+                  items.map(item => (
+                    <ContentItemCard
+                      key={item.id}
+                      item={item}
+                      selected={selectedItem?.id === item.id}
+                      onClick={() => handleSelectItem(item)}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* ─── SEO Briefs Tab ─── */}
+            {tab === 'seo_briefs' && (
+              <div>
+                {seoBriefsLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="animate-spin w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full" />
+                  </div>
+                ) : seoBriefs.length === 0 ? (
+                  <div className="bg-white rounded-xl border border-slate-200 text-center py-12">
+                    <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p className="text-sm text-slate-400">No SEO briefs available</p>
+                    <p className="text-xs text-slate-400 mt-1">SEO briefs are generated from keyword gap analysis</p>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Summary header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4 text-xs text-slate-500">
+                        <span><span className="font-medium text-slate-700">{seoBriefs.length}</span> briefs</span>
+                        <span><span className="font-medium text-red-600">{seoBriefs.filter(b => b.tier === 1).length}</span> T1</span>
+                        <span><span className="font-medium text-orange-600">{seoBriefs.filter(b => b.tier === 2).length}</span> T2</span>
+                        <span><span className="font-medium text-blue-600">{seoBriefs.filter(b => b.tier === 3).length}</span> T3</span>
+                        <span><span className="font-medium text-purple-600">{seoBriefs.filter(b => b.tier === 4).length}</span> T4</span>
+                      </div>
+                      <button
+                        onClick={fetchSeoBriefs}
+                        className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                      >
+                        Refresh
+                      </button>
+                    </div>
+
+                    {/* Brief cards grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {seoBriefs.map(brief => (
+                        <SEOBriefCard
+                          key={brief.id}
+                          brief={brief}
+                          onGenerate={handleGenerateFromBrief}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ─── Quality Tab ─── */}
+            {tab === 'quality' && (
+              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                {/* Header */}
+                <div className="px-4 py-3 bg-slate-50 rounded-t-xl">
+                  <div className="flex items-center justify-between text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    <span className="w-8">#</span>
+                    <span className="flex-1">Content</span>
+                    <span className="w-20 text-center">Source</span>
+                    <span className="w-20 text-center">Status</span>
+                    <span className="w-24 text-center">Words</span>
+                    <span className="w-24 text-right">SEO</span>
+                  </div>
+                </div>
+
+                {qualitySorted.length === 0 ? (
+                  <p className="text-sm text-slate-400 text-center py-12">No content with quality data available</p>
+                ) : (
+                  qualitySorted.map((item, i) => {
+                    const sourceBadge = SOURCE_BADGE[item.source_type] || SOURCE_BADGE.manual;
+                    const statusStyle = STATUS_BADGE[item.status] || STATUS_BADGE.draft;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleSelectItem(item)}
+                        className={`w-full text-left flex items-center gap-2 px-4 py-3 hover:bg-slate-50 transition-colors ${
+                          selectedItem?.id === item.id ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <span className="w-8 text-xs text-slate-400">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-slate-900 truncate">{item.title}</h4>
+                          {item.seo_keyword && (
+                            <span className="text-[10px] text-purple-500 truncate block">{item.seo_keyword}</span>
+                          )}
+                        </div>
+                        <div className="w-20 flex justify-center">
+                          <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${sourceBadge.className}`}>
+                            {sourceBadge.label}
+                          </span>
+                        </div>
+                        <div className="w-20 flex justify-center">
+                          <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${statusStyle}`}>
+                            {capitalize(item.status)}
+                          </span>
+                        </div>
+                        <div className="w-24 text-center text-xs text-slate-500">
+                          {item.word_count !== null ? (
+                            <span className={`font-medium ${
+                              (item.word_count || 0) >= 1500 ? 'text-green-600' :
+                              (item.word_count || 0) >= 800 ? 'text-blue-600' :
+                              (item.word_count || 0) >= 300 ? 'text-orange-600' : 'text-red-500'
+                            }`}>
+                              {item.word_count?.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">--</span>
+                          )}
+                        </div>
+                        <div className="w-24 text-right text-xs">
+                          {item.seo_gap_score !== null ? (
+                            <span className={`font-medium ${
+                              (item.seo_gap_score || 0) >= 80 ? 'text-green-600' :
+                              (item.seo_gap_score || 0) >= 50 ? 'text-blue-600' : 'text-orange-600'
+                            }`}>
+                              Gap: {item.seo_gap_score}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">--</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ─── Detail Sidebar ─── */}
+          {selectedItem && (
+            <div className="w-80 flex-shrink-0">
+              <div className="sticky top-20 bg-white rounded-xl border border-slate-200 overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
+                  <h3 className="text-sm font-semibold text-slate-700 truncate">{selectedItem.title}</h3>
+                  <button onClick={closeDetail} className="text-slate-400 hover:text-slate-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="p-4 space-y-4">
+                  {/* Status + Source badges */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-slate-500">Status:</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${STATUS_BADGE[selectedItem.status] || ''}`}>
+                      {capitalize(selectedItem.status)}
+                    </span>
+                    <span className="text-xs text-slate-500 ml-2">Source:</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${(SOURCE_BADGE[selectedItem.source_type] || SOURCE_BADGE.manual).className}`}>
+                      {(SOURCE_BADGE[selectedItem.source_type] || SOURCE_BADGE.manual).label}
+                    </span>
+                  </div>
+
+                  {/* SEO info */}
+                  {(selectedItem.seo_keyword || selectedItem.seo_gap_score !== null) && (
+                    <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 space-y-1">
+                      {selectedItem.seo_keyword && (
+                        <div className="text-xs">
+                          <span className="text-purple-500">Keyword: </span>
+                          <span className="text-purple-800 font-medium">{selectedItem.seo_keyword}</span>
+                        </div>
+                      )}
+                      {selectedItem.seo_gap_score !== null && (
+                        <div className="text-xs">
+                          <span className="text-purple-500">Gap Score: </span>
+                          <span className="text-purple-800 font-semibold">{selectedItem.seo_gap_score}</span>
+                        </div>
+                      )}
+                      {selectedItem.seo_target_position !== null && (
+                        <div className="text-xs">
+                          <span className="text-purple-500">Target Position: </span>
+                          <span className="text-purple-800 font-semibold">#{selectedItem.seo_target_position}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Details */}
+                  <div className="space-y-1.5 text-xs text-slate-500">
+                    {selectedItem.category && (
+                      <div>Category: <span className="text-slate-700">{selectedItem.category}</span></div>
+                    )}
+                    {selectedItem.author && (
+                      <div>Author: <span className="text-slate-700">{selectedItem.author}</span></div>
+                    )}
+                    {selectedItem.word_count !== null && selectedItem.word_count > 0 && (
+                      <div>Word Count: <span className="text-slate-700">{selectedItem.word_count.toLocaleString()}</span></div>
+                    )}
+                    {selectedItem.estimated_read_time && (
+                      <div>Read Time: <span className="text-slate-700">{selectedItem.estimated_read_time}</span></div>
+                    )}
+                    {selectedItem.tags && (
+                      <div>
+                        Tags: <span className="text-slate-700">{selectedItem.tags}</span>
+                      </div>
+                    )}
+                    <div>Updated: <span className="text-slate-700">{formatDate(selectedItem.updated_at)}</span></div>
+                    <div>Created: <span className="text-slate-700">{formatDate(selectedItem.created_at)}</span></div>
+                    {selectedItem.published_at && (
+                      <div>Published: <span className="text-slate-700">{formatDate(selectedItem.published_at)}</span></div>
+                    )}
+                    {selectedItem.slug && (
+                      <div className="truncate">Slug: <span className="text-slate-700">{selectedItem.slug}</span></div>
+                    )}
+                    {selectedItem.source_url && (
+                      <div className="truncate">
+                        Source:{' '}
+                        <a
+                          href={selectedItem.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {selectedItem.source_url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Excerpt */}
+                  {selectedItem.excerpt && (
+                    <div className="bg-slate-50 rounded-lg p-3">
+                      <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">{selectedItem.excerpt}</p>
+                    </div>
+                  )}
+
+                  {/* Transition Actions */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <h4 className="text-xs font-medium text-slate-500 mb-2">Actions</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {(TRANSITION_ACTIONS[selectedItem.status] || []).map(action => (
+                        <button
+                          key={action.target}
+                          onClick={() => handleTransition(selectedItem.id, action.target, action.confirm)}
+                          disabled={!!transitionLoading}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${action.style} ${
+                            transitionLoading === action.target ? 'opacity-50' : ''
+                          } disabled:opacity-50`}
+                        >
+                          {transitionLoading === action.target ? 'Processing...' : action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Links */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    {selectedItem.slug && (
+                      <a
+                        href={`/admin/content-hub/edit/${selectedItem.id}`}
+                        className="block w-full text-center px-3 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                      >
+                        Open Editor
+                      </a>
+                    )}
+                    {selectedItem.status === 'published' && selectedItem.slug && (
+                      <a
+                        href={`/blog/${selectedItem.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full text-center px-3 py-2 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200"
+                      >
+                        View on Site
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Generate Modal */}
+      <GenerateModal
+        isOpen={showGenerateModal}
+        onClose={() => setShowGenerateModal(false)}
+        onGenerated={handleGenerated}
+        prefill={generatePrefill}
+      />
+    </div>
+  );
+}
+
+===== src/components/admin/content-hub/ContentItemCard.tsx =====
+// Content item card — shows status, source type, title, SEO info, word count
+
+interface ContentItem {
+  id: number;
+  source_type: 'youtube' | 'file' | 'seo_brief' | 'manual';
+  source_id: string | null;
+  source_url: string | null;
+  title: string;
+  slug: string | null;
+  content: string | null;
+  excerpt: string | null;
+  category: string | null;
+  tags: string | null;
+  featured_image: string | null;
+  seo_keyword: string | null;
+  seo_gap_score: number | null;
+  seo_target_position: number | null;
+  status: 'brief' | 'generating' | 'draft' | 'review' | 'approved' | 'published' | 'archived';
+  author: string;
+  word_count: number | null;
+  estimated_read_time: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ContentItemCardProps {
+  item: ContentItem;
+  selected: boolean;
+  onClick: () => void;
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  brief: 'bg-slate-100 text-slate-600',
+  generating: 'bg-yellow-100 text-yellow-700',
+  draft: 'bg-blue-100 text-blue-700',
+  review: 'bg-orange-100 text-orange-700',
+  approved: 'bg-green-100 text-green-700',
+  published: 'bg-emerald-100 text-emerald-700',
+  archived: 'bg-slate-100 text-slate-500',
+};
+
+const SOURCE_BADGE: Record<string, { label: string; className: string }> = {
+  youtube: { label: 'YouTube', className: 'bg-red-100 text-red-700' },
+  file: { label: 'File', className: 'bg-sky-100 text-sky-700' },
+  seo_brief: { label: 'SEO', className: 'bg-purple-100 text-purple-700' },
+  manual: { label: 'Manual', className: 'bg-slate-100 text-slate-600' },
+};
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
+}
+
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function ContentItemCard({ item, selected, onClick }: ContentItemCardProps) {
+  const statusStyle = STATUS_BADGE[item.status] || STATUS_BADGE.brief;
+  const sourceBadge = SOURCE_BADGE[item.source_type] || SOURCE_BADGE.manual;
+
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition-colors ${
+        selected ? 'bg-blue-50' : ''
+      }`}
+    >
+      {/* Thumbnail */}
+      <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+        {item.featured_image ? (
+          <img src={item.featured_image} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-300">
+            {item.source_type === 'youtube' ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            ) : item.source_type === 'seo_brief' ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm font-medium text-slate-900 truncate">{item.title}</h4>
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          {/* Source badge */}
+          <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${sourceBadge.className}`}>
+            {sourceBadge.label}
+          </span>
+          {/* Status badge */}
+          <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${statusStyle}`}>
+            {capitalize(item.status)}
+          </span>
+          {/* SEO keyword */}
+          {item.seo_keyword && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-purple-600">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+              </svg>
+              {item.seo_keyword}
+              {item.seo_gap_score !== null && (
+                <span className="font-medium">({item.seo_gap_score})</span>
+              )}
+            </span>
+          )}
+          {/* Word count */}
+          {item.word_count !== null && item.word_count > 0 && (
+            <span className="text-[10px] text-slate-400">
+              {item.word_count.toLocaleString()} words
+            </span>
+          )}
+          {/* Read time */}
+          {item.estimated_read_time && (
+            <span className="text-[10px] text-slate-400">
+              {item.estimated_read_time}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Date */}
+      <div className="text-xs text-slate-400 flex-shrink-0">
+        {formatDate(item.updated_at || item.created_at)}
+      </div>
+    </button>
+  );
+}
+
+===== src/components/admin/content-hub/GenerateModal.tsx =====
+// AI content generation modal — form for keyword, content type, tone, etc.
+
+import { useState } from 'react';
+
+interface GenerateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onGenerated: (contentId: number) => void;
+  prefill?: {
+    keyword?: string;
+    title?: string;
+    content_type?: string;
+    tier?: number;
+  };
+}
+
+const CONTENT_TYPES = [
+  { value: 'blog', label: 'Blog Post' },
+  { value: 'faq', label: 'FAQ' },
+  { value: 'guide', label: 'Guide' },
+  { value: 'product_page', label: 'Product Page' },
+];
+
+const TONE_OPTIONS = [
+  { value: 'professional', label: 'Professional' },
+  { value: 'technical', label: 'Technical' },
+  { value: 'conversational', label: 'Conversational' },
+  { value: 'educational', label: 'Educational' },
+];
+
+export function GenerateModal({ isOpen, onClose, onGenerated, prefill }: GenerateModalProps) {
+  const [title, setTitle] = useState(prefill?.title || '');
+  const [keyword, setKeyword] = useState(prefill?.keyword || '');
+  const [contentType, setContentType] = useState(prefill?.content_type || 'blog');
+  const [additionalKeywords, setAdditionalKeywords] = useState('');
+  const [wordCount, setWordCount] = useState(1500);
+  const [tone, setTone] = useState('professional');
+  const [includeFaq, setIncludeFaq] = useState(true);
+  const [instructions, setInstructions] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!keyword.trim()) {
+      setError('Primary keyword is required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const payload = {
+        title: title.trim() || undefined,
+        keyword: keyword.trim(),
+        content_type: contentType,
+        additional_keywords: additionalKeywords
+          .split(',')
+          .map(k => k.trim())
+          .filter(Boolean),
+        word_count: wordCount,
+        tone,
+        include_faq: includeFaq,
+        instructions: instructions.trim() || undefined,
+      };
+
+      const res = await fetch('/api/admin/content-hub/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to generate content');
+      }
+
+      onGenerated(data.content_id || data.id);
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!title.trim() && !keyword.trim()) {
+      setError('Title or keyword is required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const payload = {
+        source_type: 'manual',
+        title: title.trim() || keyword.trim(),
+        seo_keyword: keyword.trim() || null,
+        category: contentType,
+        status: 'brief',
+        author: 'admin',
+      };
+
+      const res = await fetch('/api/admin/content-hub/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to save draft');
+      }
+
+      onGenerated(data.id);
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!loading) {
+      setTitle(prefill?.title || '');
+      setKeyword(prefill?.keyword || '');
+      setContentType(prefill?.content_type || 'blog');
+      setAdditionalKeywords('');
+      setWordCount(1500);
+      setTone('professional');
+      setIncludeFaq(true);
+      setInstructions('');
+      setError(null);
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">
+              {prefill?.keyword ? 'Generate from SEO Brief' : 'New Content'}
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Generate content with AI or save as a draft
+            </p>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={loading}
+            className="p-1 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Loading overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-10 rounded-2xl">
+            <div className="animate-spin w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full mb-3" />
+            <p className="text-sm font-medium text-slate-700">Generating content with AI...</p>
+            <p className="text-xs text-slate-400 mt-1">This may take a minute</p>
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Error */}
+          {error && (
+            <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          {/* Tier indicator for SEO briefs */}
+          {prefill?.tier && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Generating from Tier {prefill.tier} SEO brief
+            </div>
+          )}
+
+          {/* Title */}
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Title
+              <span className="text-slate-400 ml-1">(optional, AI will generate if blank)</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Enter title or leave blank for AI to generate"
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            />
+          </div>
+
+          {/* Primary Keyword */}
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Primary Keyword <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={keyword}
+              onChange={e => setKeyword(e.target.value)}
+              placeholder="e.g., medical device sterilization"
+              required
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            />
+          </div>
+
+          {/* Content Type */}
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">Content Type</label>
+            <select
+              value={contentType}
+              onChange={e => setContentType(e.target.value)}
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            >
+              {CONTENT_TYPES.map(ct => (
+                <option key={ct.value} value={ct.value}>{ct.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Additional Keywords */}
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Additional Keywords
+              <span className="text-slate-400 ml-1">(comma-separated)</span>
+            </label>
+            <input
+              type="text"
+              value={additionalKeywords}
+              onChange={e => setAdditionalKeywords(e.target.value)}
+              placeholder="e.g., EtO sterilization, gamma radiation, ISO 11135"
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            />
+          </div>
+
+          {/* Word Count + Tone in row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Word Count</label>
+              <input
+                type="number"
+                value={wordCount}
+                onChange={e => setWordCount(Math.max(300, Math.min(5000, parseInt(e.target.value) || 1500)))}
+                min={300}
+                max={5000}
+                step={100}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Tone</label>
+              <select
+                value={tone}
+                onChange={e => setTone(e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              >
+                {TONE_OPTIONS.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Include FAQ checkbox */}
+          <div className="flex items-center gap-2">
+            <input
+              id="include-faq"
+              type="checkbox"
+              checked={includeFaq}
+              onChange={e => setIncludeFaq(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="include-faq" className="text-sm text-slate-700 cursor-pointer">
+              Include FAQ section
+            </label>
+          </div>
+
+          {/* Special Instructions */}
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Special Instructions
+              <span className="text-slate-400 ml-1">(optional)</span>
+            </label>
+            <textarea
+              value={instructions}
+              onChange={e => setInstructions(e.target.value)}
+              rows={3}
+              placeholder="Any specific requirements, angles, or points to cover..."
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              disabled={loading}
+              className="px-4 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              Save as Draft
+            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={loading}
+                className="px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !keyword.trim()}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Generate with AI
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+===== src/components/admin/content-hub/SEOBriefCard.tsx =====
+// SEO Brief card — keyword, tier, gap score, priority, generate button
+
+interface SEOBrief {
+  id: number;
+  keyword: string;
+  tier: number;
+  category: string;
+  target_position: number;
+  priority: string;
+  content_type: string;
+  status: string;
+  latest_position: number | null;
+  latest_impressions: number | null;
+}
+
+interface SEOBriefCardProps {
+  brief: SEOBrief;
+  onGenerate: (brief: SEOBrief) => void;
+}
+
+const TIER_BADGE: Record<number, { label: string; className: string }> = {
+  1: { label: 'T1', className: 'bg-red-100 text-red-700 border-red-200' },
+  2: { label: 'T2', className: 'bg-orange-100 text-orange-700 border-orange-200' },
+  3: { label: 'T3', className: 'bg-blue-100 text-blue-700 border-blue-200' },
+  4: { label: 'T4', className: 'bg-purple-100 text-purple-700 border-purple-200' },
+};
+
+const PRIORITY_BADGE: Record<string, string> = {
+  critical: 'bg-red-100 text-red-700',
+  high: 'bg-orange-100 text-orange-700',
+  medium: 'bg-yellow-100 text-yellow-700',
+  low: 'bg-slate-100 text-slate-600',
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  pending: 'bg-slate-100 text-slate-600',
+  in_progress: 'bg-blue-100 text-blue-700',
+  generated: 'bg-green-100 text-green-700',
+  published: 'bg-emerald-100 text-emerald-700',
+};
+
+function formatNumber(n: number): string {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function capitalize(str: string): string {
+  return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+export function SEOBriefCard({ brief, onGenerate }: SEOBriefCardProps) {
+  const tier = TIER_BADGE[brief.tier] || TIER_BADGE[4];
+  const priorityStyle = PRIORITY_BADGE[brief.priority] || PRIORITY_BADGE.medium;
+  const statusStyle = STATUS_BADGE[brief.status] || STATUS_BADGE.pending;
+  const isGenerated = brief.status === 'generated' || brief.status === 'published';
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow">
+      {/* Top row: tier + keyword + priority */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full border ${tier.className}`}>
+            {tier.label}
+          </span>
+          <h4 className="text-sm font-semibold text-slate-900 truncate">{brief.keyword}</h4>
+        </div>
+        <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full flex-shrink-0 ${priorityStyle}`}>
+          {capitalize(brief.priority)}
+        </span>
+      </div>
+
+      {/* Meta row */}
+      <div className="flex items-center gap-3 mb-3 text-xs text-slate-500">
+        {/* Category */}
+        <span className="inline-flex items-center gap-1">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+          {brief.category}
+        </span>
+        {/* Content type */}
+        <span className="inline-flex items-center gap-1">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          {capitalize(brief.content_type)}
+        </span>
+        {/* Target position */}
+        <span className="inline-flex items-center gap-1">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          Target #{brief.target_position}
+        </span>
+      </div>
+
+      {/* Metrics row (if available) */}
+      {(brief.latest_position !== null || brief.latest_impressions !== null) && (
+        <div className="flex items-center gap-4 mb-3 px-3 py-2 bg-slate-50 rounded-lg">
+          {brief.latest_position !== null && (
+            <div className="text-xs">
+              <span className="text-slate-400">Position: </span>
+              <span className={`font-semibold ${
+                brief.latest_position <= 3 ? 'text-green-600' :
+                brief.latest_position <= 10 ? 'text-blue-600' :
+                brief.latest_position <= 20 ? 'text-orange-600' : 'text-red-600'
+              }`}>
+                #{brief.latest_position}
+              </span>
+            </div>
+          )}
+          {brief.latest_impressions !== null && (
+            <div className="text-xs">
+              <span className="text-slate-400">Impressions: </span>
+              <span className="font-semibold text-slate-700">{formatNumber(brief.latest_impressions)}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bottom row: status + action */}
+      <div className="flex items-center justify-between">
+        <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${statusStyle}`}>
+          {capitalize(brief.status)}
+        </span>
+        <button
+          onClick={() => onGenerate(brief)}
+          disabled={isGenerated}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+            isGenerated
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          {isGenerated ? 'Already Generated' : 'Generate Content'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+===== src/lib/content-pipeline/content-generator.ts =====
+// Claude API-powered SEO content generator for the Content Hub
+// Uses streaming SSE to avoid Cloudflare Workers 30-second timeout
+
+// ── Interfaces ──────────────────────────────────────────────────
+
+export interface GenerateRequest {
+  keyword: string;
+  title: string;
+  content_type: 'blog' | 'faq' | 'guide' | 'product_page';
+  additional_keywords: string[];
+  instructions?: string;
+  word_count?: number;
+  include_faq: boolean;
+  include_schema: boolean;
+  tone: string;
+}
+
+export interface GenerateResult {
+  title: string;
+  slug: string;
+  meta_description: string;
+  content: string;
+  excerpt: string;
+  faq: Array<{ question: string; answer: string }>;
+  schema_type: string;
+  internal_links: Array<{ text: string; url: string }>;
+  estimated_read_time: string;
+  word_count: number;
+  tags: string[];
+  category: string;
+}
+
+// ── System prompt ───────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are a content strategist for BRITZMEDI, a Korean medical device company specializing in RF aesthetic devices (TORR RF, UlBlanc, NewChae, LuminoWave).
+
+Target audience: medical device distributors, clinic owners, aesthetic practitioners worldwide.
+
+BRITZMEDI products:
+- TORR RF: Toroidal RF technology, monopolar RF for skin tightening, FDA 510(k) clearance pending
+- UlBlanc: Fractional RF microneedling device
+- NewChae: LED therapy device
+- LuminoWave: Sonoillumination technology (ultrasound + light)
+
+Always write in professional, authoritative English. Include clinical evidence and data where relevant. Naturally mention BRITZMEDI products when contextually appropriate (don't force it).
+
+IMPORTANT: Return your response as a single valid JSON object. Do NOT wrap it in markdown code fences. Do NOT include any text before or after the JSON.`;
+
+// ── Claude API streaming call ───────────────────────────────────
+
+interface ClaudeMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+/**
+ * Call Claude API with streaming to avoid CF Workers timeout.
+ * Streams tokens and accumulates the full text.
+ */
+async function callClaude(
+  apiKey: string,
+  systemPrompt: string,
+  messages: ClaudeMessage[],
+  maxTokens = 8192,
+  onProgress?: (chunk: string, accumulated: string) => void
+): Promise<string> {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: maxTokens,
+      stream: true,
+      system: systemPrompt,
+      messages,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Claude API error (${res.status}): ${errText}`);
+  }
+
+  if (!res.body) {
+    throw new Error('Claude returned no response body');
+  }
+
+  // Read SSE stream
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  let buffer = '';
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (!data || data === '[DONE]') continue;
+
+      try {
+        const event = JSON.parse(data);
+
+        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+          text += event.delta.text;
+          if (onProgress) {
+            onProgress(event.delta.text, text);
+          }
+        }
+
+        if (event.type === 'message_delta' && event.usage) {
+          outputTokens = event.usage.output_tokens || 0;
+        }
+
+        if (event.type === 'message_start' && event.message?.usage) {
+          inputTokens = event.message.usage.input_tokens || 0;
+        }
+      } catch {
+        // Skip non-JSON lines
+      }
+    }
+  }
+
+  if (!text) {
+    throw new Error('Claude returned no text');
+  }
+
+  console.log(`[ContentGenerator] Tokens used: ${inputTokens} in / ${outputTokens} out`);
+  return text;
+}
+
+// ── Helpers ─────────────────────────────────────────────────────
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80)
+    .replace(/^-|-$/g, '');
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function countWords(html: string): number {
+  const text = stripHtml(html);
+  if (!text) return 0;
+  return text.split(/\s+/).filter(w => w.length > 0).length;
+}
+
+function estimateReadTime(wordCount: number): string {
+  const minutes = Math.max(1, Math.ceil(wordCount / 200));
+  return `${minutes} min read`;
+}
+
+/**
+ * Extract JSON from Claude's response, handling optional markdown code fences.
+ */
+function extractJson(raw: string): string {
+  let cleaned = raw.trim();
+
+  // Remove markdown code fences if present
+  cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+  cleaned = cleaned.trim();
+
+  // Find the outermost JSON object boundaries
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
+
+  return cleaned;
+}
+
+// ── User prompt builder ─────────────────────────────────────────
+
+function buildUserPrompt(req: GenerateRequest): string {
+  const contentTypeLabels: Record<GenerateRequest['content_type'], string> = {
+    blog: 'blog post',
+    faq: 'FAQ article',
+    guide: 'comprehensive guide',
+    product_page: 'product page',
+  };
+
+  const targetWords = req.word_count || 1500;
+  const label = contentTypeLabels[req.content_type];
+
+  const parts: string[] = [
+    `Generate a ${label} optimized for the keyword "${req.keyword}".`,
+    '',
+    `Title: ${req.title}`,
+    `Primary keyword: ${req.keyword}`,
+  ];
+
+  if (req.additional_keywords.length > 0) {
+    parts.push(`Secondary keywords: ${req.additional_keywords.join(', ')}`);
+  }
+
+  parts.push(`Target word count: ${targetWords}`);
+  parts.push(`Tone: ${req.tone}`);
+
+  if (req.instructions) {
+    parts.push(`Additional instructions: ${req.instructions}`);
+  }
+
+  if (req.include_faq) {
+    parts.push('Include 5-7 FAQ items relevant to the topic.');
+  }
+
+  if (req.include_schema) {
+    parts.push('Include schema type recommendation.');
+  }
+
+  parts.push('');
+  parts.push('Respond with a JSON object containing:');
+  parts.push('- title: SEO-optimized title (50-70 characters)');
+  parts.push('- slug: URL-friendly slug derived from the title');
+  parts.push('- meta_description: compelling description under 160 characters');
+  parts.push('- content: full article in clean HTML (use h2, h3, p, ul, ol, li, strong, em tags - NO markdown, NO html/head/body wrappers)');
+  parts.push('- excerpt: 2-3 sentence summary for previews');
+  parts.push('- faq: array of {question, answer} objects (empty array if FAQ not requested)');
+  parts.push('- schema_type: recommended schema.org type (e.g. "Article", "FAQPage", "HowTo")');
+  parts.push('- internal_links: suggested internal links as [{text, url}] using BRITZMEDI site paths like /products, /contact, /blog');
+  parts.push('- tags: array of relevant tags (5-10)');
+  parts.push('- category: article category (e.g. "aesthetic-technology", "clinical-insights", "industry-trends", "product-guides")');
+
+  return parts.join('\n');
+}
+
+// ── Main generator function ─────────────────────────────────────
+
+/**
+ * Generate SEO-optimized content using Claude API with streaming.
+ *
+ * @param apiKey - Claude API key
+ * @param req - Content generation request parameters
+ * @param onProgress - Optional callback for streaming progress
+ * @returns Structured content result ready for publishing
+ */
+export async function generateSEOContent(
+  apiKey: string,
+  req: GenerateRequest,
+  onProgress?: (chunk: string, accumulated: string) => void
+): Promise<GenerateResult> {
+  const userPrompt = buildUserPrompt(req);
+
+  const result = await callClaude(
+    apiKey,
+    SYSTEM_PROMPT,
+    [{ role: 'user', content: userPrompt }],
+    8192,
+    onProgress
+  );
+
+  // Parse JSON from Claude's response
+  const jsonStr = extractJson(result);
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(jsonStr);
+  } catch (parseErr) {
+    console.error('[ContentGenerator] Failed to parse JSON response:', parseErr);
+    console.error('[ContentGenerator] Raw response (first 500 chars):', result.slice(0, 500));
+
+    // Return a best-effort fallback using the raw text as content
+    const fallbackContent = `<div>${result}</div>`;
+    const fallbackWordCount = countWords(fallbackContent);
+    return {
+      title: req.title,
+      slug: generateSlug(req.title),
+      meta_description: '',
+      content: fallbackContent,
+      excerpt: stripHtml(result).slice(0, 200),
+      faq: [],
+      schema_type: 'Article',
+      internal_links: [],
+      estimated_read_time: estimateReadTime(fallbackWordCount),
+      word_count: fallbackWordCount,
+      tags: [],
+      category: 'uncategorized',
+    };
+  }
+
+  // Extract and validate fields with sensible defaults
+  const content = (parsed.content as string) || '';
+  const wordCount = countWords(content);
+  const slug = (parsed.slug as string) || generateSlug((parsed.title as string) || req.title);
+
+  // Parse FAQ array safely
+  let faq: Array<{ question: string; answer: string }> = [];
+  if (Array.isArray(parsed.faq)) {
+    faq = (parsed.faq as Array<Record<string, unknown>>)
+      .filter(item => typeof item.question === 'string' && typeof item.answer === 'string')
+      .map(item => ({
+        question: item.question as string,
+        answer: item.answer as string,
+      }));
+  }
+
+  // Parse internal_links array safely
+  let internalLinks: Array<{ text: string; url: string }> = [];
+  if (Array.isArray(parsed.internal_links)) {
+    internalLinks = (parsed.internal_links as Array<Record<string, unknown>>)
+      .filter(item => typeof item.text === 'string' && typeof item.url === 'string')
+      .map(item => ({
+        text: item.text as string,
+        url: item.url as string,
+      }));
+  }
+
+  // Parse tags array safely
+  let tags: string[] = [];
+  if (Array.isArray(parsed.tags)) {
+    tags = (parsed.tags as unknown[])
+      .filter((t): t is string => typeof t === 'string');
+  }
+
+  return {
+    title: (parsed.title as string) || req.title,
+    slug,
+    meta_description: (parsed.meta_description as string) || (parsed.metaDescription as string) || '',
+    content,
+    excerpt: (parsed.excerpt as string) || '',
+    faq,
+    schema_type: (parsed.schema_type as string) || (parsed.schemaType as string) || 'Article',
+    internal_links: internalLinks,
+    estimated_read_time: estimateReadTime(wordCount),
+    word_count: wordCount,
+    tags,
+    category: (parsed.category as string) || 'uncategorized',
+  };
+}
+
+===== src/lib/content-pipeline/publisher.ts =====
+// Publisher for Content Hub items
+// Commits content as Keystatic blog post JSON to GitHub
+
+import { commitFileToGitHub } from '../youtube-to-blog/github';
+
+// ── Interfaces ──────────────────────────────────────────────────
+
+export interface ContentItem {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  category: string;
+  tags: string;              // JSON string
+  featured_image: string | null;
+  seo_keyword: string | null;
+  seo_secondary_keywords: string | null;  // JSON string
+  faq: string | null;        // JSON string
+  schema_type: string | null;
+  author: string;
+  published_at: string | null;
+}
+
+export interface PublishResult {
+  success: boolean;
+  commitSha: string;
+  htmlUrl: string;
+  slug: string;
+}
+
+// ── Helpers ─────────────────────────────────────────────────────
+
+/**
+ * Parse a JSON string array safely. Returns empty array on failure.
+ */
+function parseJsonArray(value: string | null | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return value.split(',').map(s => s.trim()).filter(Boolean);
+  }
+}
+
+/**
+ * Parse FAQ JSON string into structured array.
+ */
+function parseFaqArray(value: string | null | undefined): Array<{ question: string; answer: string }> | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return null;
+    return parsed
+      .filter((item: Record<string, unknown>) =>
+        typeof item.question === 'string' && typeof item.answer === 'string'
+      )
+      .map((item: Record<string, unknown>) => ({
+        question: item.question as string,
+        answer: item.answer as string,
+      }));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Build FAQ Schema.org JSON-LD from FAQ array.
+ */
+function buildFaqSchemaJsonLd(
+  faqs: Array<{ question: string; answer: string }> | null
+): Record<string, unknown> | null {
+  if (!faqs || faqs.length === 0) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+// ── Build blog post JSON ────────────────────────────────────────
+
+/**
+ * Build Keystatic-compatible blog post JSON from a ContentItem.
+ * Output format matches the structure expected by the blog rendering pages
+ * and is consistent with buildBlogPostJson from youtube-to-blog/github.ts.
+ */
+export function buildContentPostJson(item: ContentItem): string {
+  const tags = parseJsonArray(item.tags);
+  const keywords = buildKeywordsList(item);
+  const faqs = parseFaqArray(item.faq);
+  const now = new Date().toISOString();
+
+  // Build schema JSON-LD: prefer FAQ schema if FAQs exist, otherwise Article
+  let schemaJsonLd: Record<string, unknown> | null = null;
+  if (faqs && faqs.length > 0) {
+    schemaJsonLd = buildFaqSchemaJsonLd(faqs);
+  } else if (item.schema_type) {
+    schemaJsonLd = {
+      '@context': 'https://schema.org',
+      '@type': item.schema_type,
+      headline: item.title,
+      description: item.excerpt,
+      author: {
+        '@type': 'Organization',
+        name: 'BRITZMEDI',
+      },
+      datePublished: item.published_at || now,
+      dateModified: now,
+    };
+  }
+
+  return JSON.stringify({
+    title: item.title,
+    slug: item.slug,
+    status: 'published',
+    content: item.content,
+    excerpt: item.excerpt,
+    metaDescription: item.excerpt.slice(0, 160),
+    keywords,
+    tags,
+    category: item.category || 'uncategorized',
+    featuredImage: item.featured_image || null,
+    youtubeEmbedUrl: null,
+    youtubeUrl: null,
+    author: item.author || 'BRITZMEDI Team',
+    publishedAt: item.published_at || now,
+    updatedAt: now,
+    doctor: null,
+    schemaJsonLd,
+  }, null, 2);
+}
+
+/**
+ * Combine primary and secondary keywords into a single array.
+ */
+function buildKeywordsList(item: ContentItem): string[] {
+  const keywords: string[] = [];
+
+  if (item.seo_keyword) {
+    keywords.push(item.seo_keyword);
+  }
+
+  const secondary = parseJsonArray(item.seo_secondary_keywords);
+  for (const kw of secondary) {
+    if (!keywords.includes(kw)) {
+      keywords.push(kw);
+    }
+  }
+
+  return keywords;
+}
+
+// ── Publish to GitHub ───────────────────────────────────────────
+
+/**
+ * Publish a content item to GitHub as a Keystatic blog post JSON file.
+ *
+ * Commits the file to `src/content/blog/{slug}.json` on the main branch.
+ * If the file already exists it will be updated (GitHub API handles SHA lookup).
+ *
+ * @param item - The content item to publish
+ * @param githubToken - GitHub personal access token with repo write access
+ * @param githubRepo - Repository in "owner/repo" format
+ * @returns Publish result with commit SHA and URL
+ */
+export async function publishContentItem(
+  item: ContentItem,
+  githubToken: string,
+  githubRepo: string
+): Promise<PublishResult> {
+  // 1. Build the blog post JSON
+  const postJson = buildContentPostJson(item);
+
+  // 2. Determine file path in the repository
+  const filePath = `src/content/blog/${item.slug}.json`;
+
+  // 3. Commit to GitHub
+  const commitMessage = `feat(content): publish "${item.title}"`;
+
+  const { sha, html_url } = await commitFileToGitHub(
+    githubToken,
+    githubRepo,
+    filePath,
+    postJson,
+    commitMessage
+  );
+
+  return {
+    success: true,
+    commitSha: sha,
+    htmlUrl: html_url,
+    slug: item.slug,
+  };
+}
+
+===== src/pages/api/admin/content-hub/generate.ts =====
+// Content Hub Generate API - Generate SEO content using Claude AI
+// POST /api/admin/content-hub/generate
+
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+import { logActivity } from '../../../../lib/activity-log';
+import { generateSEOContent } from '../../../../lib/content-pipeline/content-generator';
+
+interface Env {
+  DB: D1Database;
+  ANTHROPIC_API_KEY: string;
+}
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 200);
+}
+
+function estimateReadTime(wordCount: number): string {
+  const minutes = Math.max(1, Math.ceil(wordCount / 200));
+  return `${minutes} min read`;
+}
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const env = runtime?.env as Env | undefined;
+    const db = env?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const apiKey = env?.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await request.json();
+    const {
+      keyword,
+      title: rawTitle,
+      content_type,
+      additional_keywords,
+      instructions,
+      word_count: targetWordCount,
+      include_faq,
+      tone,
+    } = body;
+
+    if (!keyword) {
+      return new Response(JSON.stringify({ error: 'keyword is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Call the content generator
+    const generated = await generateSEOContent({
+      apiKey,
+      keyword,
+      title: rawTitle || undefined,
+      contentType: content_type || 'blog',
+      additionalKeywords: additional_keywords || [],
+      instructions: instructions || undefined,
+      wordCount: targetWordCount || 1500,
+      includeFaq: include_faq !== false,
+      tone: tone || 'professional',
+    });
+
+    const title = generated.title || rawTitle || `${keyword} - BRITZMEDI Guide`;
+    const slug = generateSlug(generated.slug || title);
+    const wordCount = generated.content ? generated.content.split(/\s+/).length : 0;
+
+    // Check slug uniqueness, append suffix if needed
+    let finalSlug = slug;
+    const existingSlug = await db.prepare(
+      'SELECT id FROM content_items WHERE slug = ?'
+    ).bind(finalSlug).first();
+
+    if (existingSlug) {
+      finalSlug = `${slug}-${Date.now()}`;
+    }
+
+    const now = new Date().toISOString();
+
+    // Save generated content to content_items as 'draft'
+    const result = await db.prepare(
+      `INSERT INTO content_items (
+        source_type, title, slug, content, excerpt, category, tags,
+        seo_keyword, seo_secondary_keywords, schema_type, faq,
+        status, author, word_count, estimated_read_time, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      'seo_brief',
+      title,
+      finalSlug,
+      generated.content || null,
+      generated.excerpt || null,
+      generated.category || 'medical-devices',
+      generated.tags ? JSON.stringify(generated.tags) : null,
+      keyword,
+      additional_keywords ? JSON.stringify(additional_keywords) : null,
+      generated.schemaType || 'Article',
+      generated.faq ? JSON.stringify(generated.faq) : null,
+      'draft',
+      'BRITZMEDI Research Team',
+      wordCount,
+      estimateReadTime(wordCount),
+      now,
+      now,
+    ).run();
+
+    const contentId = result.meta?.last_row_id;
+
+    logActivity(db, {
+      type: 'blog_created',
+      detail: `AI-generated content: "${title}" (keyword: ${keyword})`,
+    }).catch(() => {});
+
+    return new Response(JSON.stringify({
+      content_id: contentId,
+      title,
+      slug: finalSlug,
+      word_count: wordCount,
+      message: 'Content generated and saved as draft',
+    }), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Generate API] Error:', error);
+
+    // Differentiate between generator errors and other errors
+    const isGeneratorError = error?.message?.includes('Claude') || error?.message?.includes('API');
+    return new Response(JSON.stringify({
+      error: isGeneratorError ? 'Content generation failed' : 'Failed to generate content',
+      details: error?.message,
+    }), {
+      status: isGeneratorError ? 502 : 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+===== src/pages/api/admin/content-hub/items.ts =====
+// Content Hub Items API - List and create content items
+// GET /api/admin/content-hub/items?source_type=seo_brief&status=draft&search=keyword&limit=50&offset=0
+// POST /api/admin/content-hub/items - Create new content item
+
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+import { logActivity } from '../../../../lib/activity-log';
+
+interface Env {
+  DB: D1Database;
+}
+
+const VALID_SOURCE_TYPES = ['youtube', 'file', 'seo_brief', 'manual'];
+const VALID_STATUSES = ['brief', 'generating', 'draft', 'review', 'approved', 'published', 'archived'];
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 200);
+}
+
+export const GET: APIRoute = async ({ request, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const url = new URL(request.url);
+    const sourceType = url.searchParams.get('source_type');
+    const status = url.searchParams.get('status');
+    const search = url.searchParams.get('search');
+    const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '50', 10) || 50, 1), 200);
+    const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10) || 0, 0);
+
+    let query = `SELECT id, source_type, source_id, source_url, title, slug, excerpt,
+                        category, tags, featured_image, seo_keyword, seo_secondary_keywords,
+                        seo_gap_score, seo_target_position, schema_type, status, author,
+                        word_count, estimated_read_time, published_at, created_at, updated_at
+                 FROM content_items WHERE 1=1`;
+    let countQuery = 'SELECT COUNT(*) as total FROM content_items WHERE 1=1';
+    const params: (string | number)[] = [];
+    const countParams: (string | number)[] = [];
+
+    if (sourceType) {
+      if (!VALID_SOURCE_TYPES.includes(sourceType)) {
+        return new Response(JSON.stringify({ error: `Invalid source_type. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}` }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      query += ' AND source_type = ?';
+      countQuery += ' AND source_type = ?';
+      params.push(sourceType);
+      countParams.push(sourceType);
+    }
+
+    if (status) {
+      if (!VALID_STATUSES.includes(status)) {
+        return new Response(JSON.stringify({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      query += ' AND status = ?';
+      countQuery += ' AND status = ?';
+      params.push(status);
+      countParams.push(status);
+    }
+
+    if (search) {
+      query += ' AND (title LIKE ? OR excerpt LIKE ? OR seo_keyword LIKE ? OR category LIKE ?)';
+      countQuery += ' AND (title LIKE ? OR excerpt LIKE ? OR seo_keyword LIKE ? OR category LIKE ?)';
+      const pattern = `%${search}%`;
+      params.push(pattern, pattern, pattern, pattern);
+      countParams.push(pattern, pattern, pattern, pattern);
+    }
+
+    query += ' ORDER BY updated_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const [itemsResult, totalResult] = await Promise.all([
+      db.prepare(query).bind(...params).all(),
+      db.prepare(countQuery).bind(...countParams).first<{ total: number }>(),
+    ]);
+
+    return new Response(JSON.stringify({
+      items: itemsResult.results || [],
+      total: totalResult?.total || 0,
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Items API] GET error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch content items', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await request.json();
+    const {
+      source_type,
+      title,
+      slug: rawSlug,
+      content,
+      excerpt,
+      category,
+      tags,
+      seo_keyword,
+      seo_secondary_keywords,
+      seo_gap_score,
+      seo_target_position,
+      schema_type,
+      faq,
+      status: rawStatus,
+      author,
+      source_id,
+      source_url,
+      featured_image,
+      word_count,
+      estimated_read_time,
+    } = body;
+
+    // Validate required fields
+    if (!source_type || !title) {
+      return new Response(JSON.stringify({ error: 'source_type and title are required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!VALID_SOURCE_TYPES.includes(source_type)) {
+      return new Response(JSON.stringify({ error: `Invalid source_type. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const status = rawStatus || 'draft';
+    if (!VALID_STATUSES.includes(status)) {
+      return new Response(JSON.stringify({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Generate slug from title if not provided
+    const slug = rawSlug ? rawSlug.trim() : generateSlug(title);
+
+    // Check for slug uniqueness
+    const existing = await db.prepare(
+      'SELECT id FROM content_items WHERE slug = ?'
+    ).bind(slug).first();
+
+    if (existing) {
+      return new Response(JSON.stringify({ error: `Slug "${slug}" already exists. Please provide a unique slug.` }), {
+        status: 409,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Serialize array/object fields to JSON strings
+    const tagsStr = tags ? (typeof tags === 'string' ? tags : JSON.stringify(tags)) : null;
+    const faqStr = faq ? (typeof faq === 'string' ? faq : JSON.stringify(faq)) : null;
+    const seoSecondaryStr = seo_secondary_keywords
+      ? (typeof seo_secondary_keywords === 'string' ? seo_secondary_keywords : JSON.stringify(seo_secondary_keywords))
+      : null;
+
+    const now = new Date().toISOString();
+
+    const result = await db.prepare(
+      `INSERT INTO content_items (
+        source_type, source_id, source_url, title, slug, content, excerpt,
+        category, tags, featured_image, seo_keyword, seo_secondary_keywords,
+        seo_gap_score, seo_target_position, schema_type, faq, status, author,
+        word_count, estimated_read_time, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      source_type,
+      source_id || null,
+      source_url || null,
+      title.trim(),
+      slug,
+      content || null,
+      excerpt || null,
+      category || null,
+      tagsStr,
+      featured_image || null,
+      seo_keyword || null,
+      seoSecondaryStr,
+      seo_gap_score ?? null,
+      seo_target_position ?? null,
+      schema_type || null,
+      faqStr,
+      status,
+      author || 'BRITZMEDI Research Team',
+      word_count ?? null,
+      estimated_read_time || null,
+      now,
+      now,
+    ).run();
+
+    const insertedId = result.meta?.last_row_id;
+
+    logActivity(db, {
+      type: 'blog_created',
+      detail: `Content item created: "${title}" (source: ${source_type}, status: ${status})`,
+    }).catch(() => {});
+
+    return new Response(JSON.stringify({
+      id: insertedId,
+      slug,
+      message: 'Content item created successfully',
+    }), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Items API] POST error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to create content item', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+===== src/pages/api/admin/content-hub/items/[id].ts =====
+// Content Hub Single Item API - Get, update, or delete a content item
+// GET /api/admin/content-hub/items/:id - Get item details
+// PATCH /api/admin/content-hub/items/:id - Update item fields (saves revision)
+// DELETE /api/admin/content-hub/items/:id - Delete item
+
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+import { logActivity } from '../../../../../lib/activity-log';
+
+interface Env {
+  DB: D1Database;
+}
+
+const VALID_STATUSES = ['brief', 'generating', 'draft', 'review', 'approved', 'published', 'archived'];
+
+// Fields that are allowed to be updated via PATCH
+const UPDATABLE_FIELDS = [
+  'title', 'slug', 'content', 'excerpt', 'category', 'tags',
+  'featured_image', 'seo_keyword', 'seo_secondary_keywords',
+  'seo_gap_score', 'seo_target_position', 'schema_type', 'faq',
+  'status', 'author', 'word_count', 'estimated_read_time',
+  'source_type', 'source_id', 'source_url',
+];
+
+// Fields that store JSON strings and may be passed as objects/arrays
+const JSON_FIELDS = ['tags', 'faq', 'seo_secondary_keywords'];
+
+export const GET: APIRoute = async ({ params, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const item = await db.prepare(
+      'SELECT * FROM content_items WHERE id = ?'
+    ).bind(params.id).first();
+
+    if (!item) {
+      return new Response(JSON.stringify({ error: 'Content item not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ item }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Item API] GET error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch content item', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+export const PATCH: APIRoute = async ({ params, request, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const id = params.id;
+
+    // Fetch current item for revision snapshot
+    const currentItem = await db.prepare(
+      'SELECT * FROM content_items WHERE id = ?'
+    ).bind(id).first<any>();
+
+    if (!currentItem) {
+      return new Response(JSON.stringify({ error: 'Content item not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await request.json();
+
+    // Validate status if being changed
+    if (body.status !== undefined && !VALID_STATUSES.includes(body.status)) {
+      return new Response(JSON.stringify({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check slug uniqueness if being changed
+    if (body.slug !== undefined && body.slug !== currentItem.slug) {
+      const existing = await db.prepare(
+        'SELECT id FROM content_items WHERE slug = ? AND id != ?'
+      ).bind(body.slug, id).first();
+
+      if (existing) {
+        return new Response(JSON.stringify({ error: `Slug "${body.slug}" already exists` }), {
+          status: 409,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Build dynamic UPDATE query
+    const updates: string[] = [];
+    const values: (string | number | null)[] = [];
+
+    for (const field of UPDATABLE_FIELDS) {
+      if (body[field] !== undefined) {
+        let value = body[field];
+
+        // Serialize JSON fields
+        if (JSON_FIELDS.includes(field) && value !== null && typeof value !== 'string') {
+          value = JSON.stringify(value);
+        }
+
+        updates.push(`${field} = ?`);
+        values.push(value);
+      }
+    }
+
+    if (updates.length === 0) {
+      return new Response(JSON.stringify({ error: 'No valid fields to update' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const now = new Date().toISOString();
+    updates.push('updated_at = ?');
+    values.push(now);
+    values.push(id!);
+
+    // Save revision before updating
+    try {
+      await db.prepare(
+        `INSERT INTO content_revisions (
+          content_id, title, content, excerpt, status, changed_by, change_note, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        currentItem.id,
+        currentItem.title,
+        currentItem.content || null,
+        currentItem.excerpt || null,
+        currentItem.status,
+        body._changed_by || 'admin',
+        body._change_note || 'Content updated',
+        now,
+      ).run();
+    } catch (revErr: any) {
+      console.warn('[Content Hub Item API] Failed to save revision:', revErr.message);
+      // Continue with update even if revision fails
+    }
+
+    // Perform update
+    await db.prepare(
+      `UPDATE content_items SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...values).run();
+
+    // Fetch updated item
+    const updatedItem = await db.prepare(
+      'SELECT * FROM content_items WHERE id = ?'
+    ).bind(id).first();
+
+    logActivity(db, {
+      type: 'content_transition',
+      detail: `Content item #${id} "${currentItem.title}" updated`,
+    }).catch(() => {});
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Content item updated successfully',
+      item: updatedItem,
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Item API] PATCH error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to update content item', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+export const DELETE: APIRoute = async ({ params, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const id = params.id;
+
+    // Verify item exists
+    const item = await db.prepare(
+      'SELECT id, title, status FROM content_items WHERE id = ?'
+    ).bind(id).first<any>();
+
+    if (!item) {
+      return new Response(JSON.stringify({ error: 'Content item not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Prevent deleting published items directly
+    if (item.status === 'published') {
+      return new Response(JSON.stringify({
+        error: 'Cannot delete a published item. Archive it first.',
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Delete revisions first, then the item
+    await db.batch([
+      db.prepare('DELETE FROM content_revisions WHERE content_id = ?').bind(id),
+      db.prepare('DELETE FROM content_items WHERE id = ?').bind(id),
+    ]);
+
+    logActivity(db, {
+      type: 'content_transition',
+      detail: `Content item #${id} "${item.title}" deleted`,
+    }).catch(() => {});
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Content item deleted successfully',
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Item API] DELETE error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to delete content item', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+===== src/pages/api/admin/content-hub/items/[id]/transition.ts =====
+// Content Hub Item State Transition API
+// POST /api/admin/content-hub/items/:id/transition
+// Body: { action: 'start_generate' | 'complete_generate' | 'submit_review' | 'approve' | 'reject' | 'publish' | 'archive' }
+
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+import { logActivity } from '../../../../../../lib/activity-log';
+
+interface Env {
+  DB: D1Database;
+}
+
+// Transition rules: action -> { from: requiredCurrentStatus, to: newStatus }
+const TRANSITION_RULES: Record<string, { from: string; to: string }> = {
+  start_generate:    { from: 'brief',     to: 'generating' },
+  complete_generate: { from: 'generating', to: 'draft' },
+  submit_review:     { from: 'draft',      to: 'review' },
+  approve:           { from: 'review',     to: 'approved' },
+  reject:            { from: 'review',     to: 'draft' },
+  publish:           { from: 'approved',   to: 'published' },
+  archive:           { from: 'published',  to: 'archived' },
+};
+
+const VALID_ACTIONS = Object.keys(TRANSITION_RULES);
+
+export const POST: APIRoute = async ({ params, request, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const db = (runtime?.env as Env | undefined)?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const id = params.id;
+    const body = await request.json();
+    const { action } = body as { action: string };
+
+    if (!action) {
+      return new Response(JSON.stringify({ error: 'action is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!VALID_ACTIONS.includes(action)) {
+      return new Response(JSON.stringify({
+        error: `Invalid action "${action}". Must be one of: ${VALID_ACTIONS.join(', ')}`,
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Fetch current item
+    const item = await db.prepare(
+      'SELECT id, title, slug, status FROM content_items WHERE id = ?'
+    ).bind(id).first<any>();
+
+    if (!item) {
+      return new Response(JSON.stringify({ error: 'Content item not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const rule = TRANSITION_RULES[action];
+
+    // Validate current status matches the required "from" status
+    if (item.status !== rule.from) {
+      return new Response(JSON.stringify({
+        error: `Cannot perform "${action}" on item with status "${item.status}". Required status: "${rule.from}".`,
+        currentStatus: item.status,
+        requiredStatus: rule.from,
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const now = new Date().toISOString();
+    const previousStatus = item.status;
+    const newStatus = rule.to;
+
+    // Build update query
+    const updateFields: string[] = ['status = ?', 'updated_at = ?'];
+    const updateValues: (string | number | null)[] = [newStatus, now];
+
+    // Set published_at when publishing
+    if (action === 'publish') {
+      updateFields.push('published_at = ?');
+      updateValues.push(now);
+    }
+
+    updateValues.push(id!);
+
+    await db.prepare(
+      `UPDATE content_items SET ${updateFields.join(', ')} WHERE id = ?`
+    ).bind(...updateValues).run();
+
+    // Save a revision to track the transition
+    try {
+      await db.prepare(
+        `INSERT INTO content_revisions (
+          content_id, title, content, excerpt, status, changed_by, change_note, created_at
+        ) VALUES (?, ?, NULL, NULL, ?, ?, ?, ?)`
+      ).bind(
+        item.id,
+        item.title,
+        newStatus,
+        body._changed_by || 'admin',
+        `Status transition: ${previousStatus} -> ${newStatus} (action: ${action})`,
+        now,
+      ).run();
+    } catch (revErr: any) {
+      console.warn('[Content Hub Transition] Failed to save revision:', revErr.message);
+    }
+
+    logActivity(db, {
+      type: 'content_transition',
+      detail: `"${item.title}" ${previousStatus} -> ${newStatus} (${action})`,
+    }).catch(() => {});
+
+    return new Response(JSON.stringify({
+      success: true,
+      previousStatus,
+      newStatus,
+      action,
+      message: `Content item transitioned from "${previousStatus}" to "${newStatus}"`,
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Transition API] Error:', error);
+    return new Response(JSON.stringify({ error: 'Transition failed', details: error?.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+===== src/pages/api/admin/content-hub/publish.ts =====
+// Content Hub Publish API - Publish content item to GitHub (Keystatic blog)
+// POST /api/admin/content-hub/publish
+
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+import { commitFileToGitHub } from '../../../../lib/youtube-to-blog/github';
+import { logActivity } from '../../../../lib/activity-log';
+
+interface Env {
+  DB: D1Database;
+  GITHUB_TOKEN: string;
+  GITHUB_REPO: string;
+}
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  try {
+    const runtime = (locals as any).runtime;
+    const env = runtime?.env as Env | undefined;
+    const db = env?.DB;
+
+    if (!db) {
+      return new Response(JSON.stringify({ error: 'Database not available' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const githubToken = env?.GITHUB_TOKEN;
+    const githubRepo = env?.GITHUB_REPO;
+
+    if (!githubToken || !githubRepo) {
+      return new Response(JSON.stringify({ error: 'GitHub credentials not configured (GITHUB_TOKEN, GITHUB_REPO)' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await request.json();
+    const { content_id } = body;
+
+    if (!content_id) {
+      return new Response(JSON.stringify({ error: 'content_id is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Load content item from D1
+    const item = await db.prepare(
+      'SELECT * FROM content_items WHERE id = ?'
+    ).bind(content_id).first<any>();
+
+    if (!item) {
+      return new Response(JSON.stringify({ error: 'Content item not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Only approved or draft items can be published
+    if (!['approved', 'draft'].includes(item.status)) {
+      return new Response(JSON.stringify({
+        error: `Cannot publish item with status "${item.status}". Must be "approved" or "draft".`,
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!item.content) {
+      return new Response(JSON.stringify({ error: 'Content item has no content to publish' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!item.slug) {
+      return new Response(JSON.stringify({ error: 'Content item has no slug' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const now = new Date().toISOString();
+
+    // Parse JSON fields safely
+    let tags: string[] = [];
+    let keywords: string[] = [];
+    let faqData: any = null;
+
+    try {
+      tags = item.tags ? JSON.parse(item.tags) : [];
+    } catch { tags = []; }
+
+    try {
+      keywords = item.seo_secondary_keywords ? JSON.parse(item.seo_secondary_keywords) : [];
+    } catch { keywords = []; }
+
+    // Include the primary keyword
+    if (item.seo_keyword && !keywords.includes(item.seo_keyword)) {
+      keywords.unshift(item.seo_keyword);
+    }
+
+    try {
+      faqData = item.faq ? JSON.parse(item.faq) : null;
+    } catch { faqData = null; }
+
+    // Build blog post JSON (compatible with existing blog system)
+    const blogPostJson = JSON.stringify({
+      title: item.title,
+      slug: item.slug,
+      status: 'published',
+      content: item.content,
+      excerpt: item.excerpt || '',
+      metaDescription: item.excerpt || '',
+      keywords,
+      tags: Array.isArray(tags) ? tags : [],
+      category: item.category || 'medical-devices',
+      featuredImage: item.featured_image || null,
+      youtubeEmbedUrl: null,
+      youtubeUrl: item.source_url || null,
+      author: item.author || 'BRITZMEDI Research Team',
+      publishedAt: now,
+      updatedAt: now,
+      doctor: null,
+      schemaJsonLd: item.schema_type ? {
+        '@context': 'https://schema.org',
+        '@type': item.schema_type || 'Article',
+        headline: item.title,
+        description: item.excerpt || '',
+        keywords: keywords.join(', '),
+        datePublished: now,
+        dateModified: now,
+        author: {
+          '@type': 'Organization',
+          name: item.author || 'BRITZMEDI Research Team',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'BRITZMEDI',
+          url: 'https://britzmedi.com',
+        },
+      } : null,
+      faq: faqData,
+      sourceType: item.source_type,
+      seoKeyword: item.seo_keyword,
+    }, null, 2);
+
+    // Commit to GitHub
+    const filePath = `src/content/blog/${item.slug}.json`;
+    const commitMessage = `feat: publish content "${item.title}"`;
+
+    const commitResult = await commitFileToGitHub(
+      githubToken,
+      githubRepo,
+      filePath,
+      blogPostJson,
+      commitMessage,
+    );
+
+    // Update status to published in D1
+    await db.prepare(
+      `UPDATE content_items SET status = 'published', published_at = ?, updated_at = ? WHERE id = ?`
+    ).bind(now, now, content_id).run();
+
+    // Save revision for the publish event
+    try {
+      await db.prepare(
+        `INSERT INTO content_revisions (
+          content_id, title, content, excerpt, status, changed_by, change_note, created_at
+        ) VALUES (?, ?, NULL, NULL, 'published', 'admin', 'Published to GitHub', ?)`
+      ).bind(content_id, item.title, now).run();
+    } catch (revErr: any) {
+      console.warn('[Content Hub Publish] Failed to save revision:', revErr.message);
+    }
+
+    logActivity(db, {
+      type: 'blog_published',
+      detail: `Content Hub: "${item.title}" published to GitHub (${item.slug})`,
+    }).catch(() => {});
+
+    return new Response(JSON.stringify({
+      success: true,
+      commitSha: commitResult.sha,
+      htmlUrl: commitResult.html_url,
+      slug: item.slug,
+      message: `Content published successfully to ${filePath}`,
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[Content Hub Publish API] Error:', error);
+
+    const isGitHubError = error?.message?.includes('GitHub');
+    return new Response(JSON.stringify({
+      error: isGitHubError ? 'GitHub publishing failed' : 'Failed to publish content',
+      details: error?.message,
+    }), {
+      status: isGitHubError ? 502 : 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+===== src/pages/api/admin/content-hub/seo-briefs.ts =====
+// SEO Briefs Proxy API - Fetches keyword data from SEO Workers API
+// GET /api/admin/content-hub/seo-briefs
+
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+
+const SEO_API_URL = 'https://britzmedi-seo.mmakid.workers.dev/api/keywords';
+const FETCH_TIMEOUT_MS = 10000;
+
+export const GET: APIRoute = async () => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(SEO_API_URL, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'BRITZMEDI-ContentHub/1.0',
+        },
+        signal: controller.signal,
+      });
+    } catch (fetchErr: any) {
+      clearTimeout(timeoutId);
+
+      // Network error or timeout - return fallback
+      console.warn('[SEO Briefs API] SEO API unreachable:', fetchErr.message);
+      return new Response(JSON.stringify({
+        briefs: [],
+        connected: false,
+        error: 'SEO API is currently unreachable',
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      console.warn('[SEO Briefs API] SEO API returned status:', response.status);
+      return new Response(JSON.stringify({
+        briefs: [],
+        connected: false,
+        error: `SEO API returned status ${response.status}`,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const data = await response.json();
+
+    // Normalize response - handle different response shapes from the SEO API
+    const briefs = Array.isArray(data) ? data : (data.keywords || data.briefs || data.data || []);
+
+    return new Response(JSON.stringify({
+      briefs,
+      connected: true,
+      total: briefs.length,
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('[SEO Briefs API] Error:', error);
+    return new Response(JSON.stringify({
+      briefs: [],
+      connected: false,
+      error: error?.message || 'Failed to fetch SEO briefs',
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+

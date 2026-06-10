@@ -190,8 +190,8 @@ export const fr: TranslationKeys = {
     },
     manufacturing: {
       label: 'Fabrication',
-      title: 'Capacités de fabrication et OEM/ODM',
-      subtitle: 'BRITZMEDI possède des capacités de fabrication sur l\'ensemble du cycle et offre des services de développement pour ses partenaires internationaux.',
+      title: 'Excellence de la fabrication en interne',
+      subtitle: "BRITZMEDI fabrique chaque dispositif en interne dans son usine enregistrée FDA et certifiée GMP — le socle de qualité qui sous-tend nos partenariats de distribution à l'international.",
       infrastructure: {
         title: 'Infrastructure de fabrication',
         description: 'Notre entreprise exploite une installation de fabrication dédiée à Hwaseong-si, autorisée par le Ministère de la Sécurité Alimentaire et Pharmaceutique.',
@@ -200,13 +200,13 @@ export const fr: TranslationKeys = {
         isoCertified: 'Certifié ISO 13485:2016',
       },
       oem: {
-        title: 'Prêt pour l\'OEM/ODM',
+        title: 'Des références de fabrication de confiance',
         description: 'Officiellement enregistré auprès de la FDA américaine en tant que fabricant sous contrat, attestant de notre capacité à produire des dispositifs médicaux conformes aux normes américaines les plus strictes.',
         fdaRegistered: 'Fabricant sous contrat enregistré FDA',
         ownerOperator: 'N° Owner/Operator',
-        e2eSupport: 'Accompagnement complet du développement produit',
+        e2eSupport: 'R&D interne et production sur l\'ensemble du cycle',
       },
-      cta: 'Discuter des opportunités de partenariat',
+      cta: 'Discuter d\'un partenariat de distribution',
     },
     mission: {
       title: 'Notre mission',
@@ -294,11 +294,12 @@ export const fr: TranslationKeys = {
       submit: 'Envoyer la demande',
       submitting: 'Envoi en cours...',
       distributionPartnership: 'Partenariat de distribution',
-      oemOdm: 'Demande OEM/ODM',
       howDidYouHear: 'Comment avez-vous entendu parler de nous ?',
       emailWarningTitle: 'E-mail professionnel recommandé.',
       emailWarningBody: 'Les adresses e-mail gratuites (Gmail, Yahoo, etc.) sont traitées avec une priorité moindre. Utilisez votre e-mail professionnel pour une réponse plus rapide.',
       softEmailWarning: 'Nous vous recommandons d\'utiliser votre e-mail professionnel pour une réponse plus rapide.',
+      inquiryType: 'Que recherchez-vous ?',
+      comingSoon: 'Bientôt disponible',
     },
     placeholders: {
       companyName: 'Nom de votre entreprise',
@@ -319,6 +320,11 @@ export const fr: TranslationKeys = {
       aiAssistant: 'Assistant IA (ChatGPT, etc.)',
       other: 'Autre',
     },
+    inquiryType: {
+      distributor: 'Devenir distributeur exclusif',
+      distributorDesc: 'Distribuer les produits BRITZMEDI sur votre marché',
+      productInfo: 'Informations produits / où acheter',
+    },
     hints: {
       businessEmail: 'Veuillez utiliser votre adresse e-mail professionnelle',
     },
@@ -335,6 +341,7 @@ export const fr: TranslationKeys = {
       companyWebsiteRequired: 'Le site web de l\'entreprise est requis.',
       businessWebsiteRequired: 'Veuillez saisir une URL de site web professionnel valide.',
       selectAtLeastOne: 'Veuillez sélectionner au moins un produit ou service.',
+      inquiryTypeRequired: 'Veuillez nous indiquer ce que vous recherchez.',
     },
     success: {
       title: 'Demande envoyée avec succès !',
@@ -419,10 +426,6 @@ export const fr: TranslationKeys = {
       'shipping-international': {
         question: 'Livrez-vous à l\'international ?',
         answer: 'Oui, nous livrons aux distributeurs et partenaires dans le monde entier. Nos produits sont fabriqués dans notre usine certifiée GMP en Corée et expédiés selon les normes internationales d\'expédition de dispositifs médicaux. Les conditions d\'expédition et la logistique seront discutées lors des négociations de partenariat.',
-      },
-      'oem-odm-services': {
-        question: 'Proposez-vous des services OEM/ODM ?',
-        answer: 'Oui, BRITZMEDI est un fabricant sous contrat enregistré auprès de la FDA (Owner Operator Number : 10088936) offrant des services OEM/ODM complets. Nous fournissons des services de développement de bout en bout, de la conception à la fabrication, en tirant parti de notre usine certifiée GMP et de notre équipe R&D expérimentée. Contactez-nous pour discuter de vos besoins spécifiques.',
       },
       'training-provided': {
         question: 'Proposez-vous des formations pour vos appareils ?',

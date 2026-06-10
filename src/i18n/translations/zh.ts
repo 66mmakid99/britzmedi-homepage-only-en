@@ -190,8 +190,8 @@ export const zh: TranslationKeys = {
     },
     manufacturing: {
       label: '制造',
-      title: '制造与OEM/ODM能力',
-      subtitle: 'BRITZMEDI拥有完整的制造周期能力，为全球合作伙伴提供开发服务。',
+      title: '自有制造卓越实力',
+      subtitle: 'BRITZMEDI在其通过FDA注册、GMP认证的工厂内自主生产每一台设备——这正是支撑我们全球分销合作伙伴关系的质量基石。',
       infrastructure: {
         title: '制造基础设施',
         description: '我公司在华城市运营经食品药品安全部授权的专用制造设施。',
@@ -200,13 +200,13 @@ export const zh: TranslationKeys = {
         isoCertified: 'ISO 13485:2016认证',
       },
       oem: {
-        title: 'OEM/ODM准备',
+        title: '值得信赖的制造资质',
         description: '已在美国FDA正式注册为合同制造商，验证了我们生产符合美国标准的医疗器械的能力。',
         fdaRegistered: 'FDA注册合同制造商',
         ownerOperator: 'Owner/Operator编号',
-        e2eSupport: '端到端产品开发支持',
+        e2eSupport: '自有研发与全周期生产',
       },
-      cta: '洽谈合作机会',
+      cta: '洽谈分销合作',
     },
     mission: {
       title: '我们的使命',
@@ -294,11 +294,12 @@ export const zh: TranslationKeys = {
       submit: '提交咨询',
       submitting: '提交中...',
       distributionPartnership: '分销合作',
-      oemOdm: 'OEM/ODM咨询',
       howDidYouHear: '您是如何了解到我们的？',
       emailWarningTitle: '建议使用公司邮箱。',
       emailWarningBody: '使用免费邮箱（Gmail、Yahoo等）可能导致回复优先级降低。请使用公司邮箱以获得更快的回复。',
       softEmailWarning: '建议使用公司邮箱以获得更快的回复。',
+      inquiryType: '您想了解什么？',
+      comingSoon: '即将推出',
     },
     placeholders: {
       companyName: '您的公司名称',
@@ -319,6 +320,11 @@ export const zh: TranslationKeys = {
       aiAssistant: 'AI助手（ChatGPT等）',
       other: '其他',
     },
+    inquiryType: {
+      distributor: '成为国家总代理商',
+      distributorDesc: '在您所在市场分销 BRITZMEDI 产品',
+      productInfo: '产品信息 / 购买渠道',
+    },
     hints: {
       businessEmail: '请使用您的公司电子邮箱',
     },
@@ -335,6 +341,7 @@ export const zh: TranslationKeys = {
       companyWebsiteRequired: '公司网站为必填项。',
       businessWebsiteRequired: '请输入有效的企业网站URL。',
       selectAtLeastOne: '请至少选择一项产品或服务。',
+      inquiryTypeRequired: '请告诉我们您想了解的内容。',
     },
     success: {
       title: '咨询提交成功！',
@@ -419,10 +426,6 @@ export const zh: TranslationKeys = {
       'shipping-international': {
         question: '你们提供国际配送吗？',
         answer: '是的，我们向全球经销商和合作伙伴配送。产品在韩国的GMP认证设施制造，按照国际医疗器械运输标准发货。配送条款和物流将在合作谈判中讨论。',
-      },
-      'oem-odm-services': {
-        question: '你们提供OEM/ODM服务吗？',
-        answer: '是的，BRITZMEDI是FDA注册的合同制造商（Owner Operator Number: 10088936），提供全面的OEM/ODM服务。我们利用GMP认证设施和经验丰富的研发团队，提供从设计到制造的端到端开发服务。如需讨论具体需求，请联系我们。',
       },
       'training-provided': {
         question: '你们提供设备培训吗？',

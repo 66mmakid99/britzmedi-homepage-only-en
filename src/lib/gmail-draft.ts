@@ -32,11 +32,20 @@ async function getAccessToken(creds: GmailCredentials): Promise<string> {
   return data.access_token;
 }
 
+// RFC 2047 B-encode a header value when it contains non-ASCII, to prevent mojibake
+// in email clients (raw UTF-8 bytes in headers get misread as Latin-1, e.g. "–" → "â€“").
+function encodeMimeHeader(value: string): string {
+  if (!/[^\x00-\x7F]/.test(value)) return value;
+  const bytes = new TextEncoder().encode(value);
+  const b64 = btoa(Array.from(bytes, (b) => String.fromCodePoint(b)).join(''));
+  return `=?UTF-8?B?${b64}?=`;
+}
+
 function buildRawEmail(draft: DraftEmail): string {
   const message = [
     `From: sh.lee@britzmedi.com`,
-    `To: ${draft.toName} <${draft.to}>`,
-    `Subject: ${draft.subject}`,
+    `To: ${encodeMimeHeader(draft.toName)} <${draft.to}>`,
+    `Subject: ${encodeMimeHeader(draft.subject)}`,
     `MIME-Version: 1.0`,
     `Content-Type: text/html; charset=utf-8`,
     '',

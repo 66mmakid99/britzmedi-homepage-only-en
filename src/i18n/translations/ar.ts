@@ -190,8 +190,8 @@ export const ar: TranslationKeys = {
     },
     manufacturing: {
       label: 'التصنيع',
-      title: 'قدرات التصنيع وOEM/ODM',
-      subtitle: 'تمتلك BRITZMEDI قدرات تصنيع شاملة وتقدم خدمات التطوير للشركاء العالميين.',
+      title: 'التميّز في التصنيع الداخلي',
+      subtitle: 'تُصنّع BRITZMEDI كل جهاز داخلياً في منشأتها المسجَّلة لدى FDA والمعتمدة وفق GMP — وهو أساس الجودة الذي تقوم عليه شراكات التوزيع العالمية لدينا.',
       infrastructure: {
         title: 'البنية التحتية للتصنيع',
         description: 'تدير شركتنا منشأة تصنيع مخصصة في هواسونج-سي، مرخصة من وزارة سلامة الغذاء والدواء.',
@@ -200,13 +200,13 @@ export const ar: TranslationKeys = {
         isoCertified: 'معتمد ISO 13485:2016',
       },
       oem: {
-        title: 'جاهزية OEM/ODM',
+        title: 'اعتمادات تصنيع موثوقة',
         description: 'مسجلة رسمياً لدى FDA الأمريكية كمصنع متعاقد، مما يثبت قدرتنا على إنتاج أجهزة طبية تلبي المعايير الأمريكية الصارمة.',
         fdaRegistered: 'مصنع متعاقد مسجل لدى FDA',
         ownerOperator: 'رقم المالك/المشغل',
-        e2eSupport: 'دعم شامل لتطوير المنتجات',
+        e2eSupport: 'بحث وتطوير داخلي وإنتاج متكامل الدورة',
       },
-      cta: 'مناقشة فرص الشراكة',
+      cta: 'مناقشة شراكة التوزيع',
     },
     mission: {
       title: 'مهمتنا',
@@ -294,11 +294,12 @@ export const ar: TranslationKeys = {
       submit: 'إرسال الاستفسار',
       submitting: 'جار الإرسال...',
       distributionPartnership: 'شراكة التوزيع',
-      oemOdm: 'استفسار OEM/ODM',
       howDidYouHear: 'كيف عرفت عنا؟',
       emailWarningTitle: 'يُنصح باستخدام بريد الشركة.',
       emailWarningBody: 'تحصل عناوين البريد المجانية (Gmail، Yahoo، إلخ) على أولوية معالجة أقل. استخدم بريد شركتك للحصول على رد أسرع.',
       softEmailWarning: 'ننصح باستخدام بريد شركتك للحصول على رد أسرع.',
+      inquiryType: 'عمَّ تبحث؟',
+      comingSoon: 'قريباً',
     },
     placeholders: {
       companyName: 'اسم شركتك',
@@ -319,6 +320,11 @@ export const ar: TranslationKeys = {
       aiAssistant: 'مساعد ذكاء اصطناعي (ChatGPT، إلخ)',
       other: 'أخرى',
     },
+    inquiryType: {
+      distributor: 'كن موزعاً حصرياً في بلدك',
+      distributorDesc: 'وزّع منتجات BRITZMEDI في سوقك',
+      productInfo: 'معلومات المنتج / أماكن الشراء',
+    },
     hints: {
       businessEmail: 'يرجى استخدام عنوان البريد الإلكتروني الخاص بشركتك',
     },
@@ -335,6 +341,7 @@ export const ar: TranslationKeys = {
       companyWebsiteRequired: 'موقع الشركة مطلوب.',
       businessWebsiteRequired: 'يرجى إدخال عنوان URL صالح لموقع الشركة.',
       selectAtLeastOne: 'الرجاء تحديد منتج أو خدمة واحدة على الأقل.',
+      inquiryTypeRequired: 'يرجى إخبارنا عمَّ تبحث.',
     },
     success: {
       title: 'تم إرسال الاستفسار بنجاح!',
@@ -419,10 +426,6 @@ export const ar: TranslationKeys = {
       'shipping-international': {
         question: 'هل تقومون بالشحن دولياً؟',
         answer: 'نعم، نقوم بالشحن للموزعين والشركاء في جميع أنحاء العالم. يتم تصنيع منتجاتنا في منشأتنا الحاصلة على شهادة GMP في كوريا ويتم شحنها وفقاً لمعايير شحن الأجهزة الطبية الدولية. سيتم مناقشة شروط الشحن والخدمات اللوجستية أثناء مفاوضات الشراكة.',
-      },
-      'oem-odm-services': {
-        question: 'هل تقدمون خدمات OEM/ODM؟',
-        answer: 'نعم، BRITZMEDI هي شركة تصنيع تعاقدية مسجلة لدى FDA (رقم المالك/المشغل: 10088936) تقدم خدمات OEM/ODM شاملة. نحن نقدم خدمات تطوير شاملة من التصميم إلى التصنيع، مستفيدين من منشأتنا الحاصلة على شهادة GMP وفريق البحث والتطوير ذو الخبرة. اتصل بنا لمناقشة متطلباتك المحددة.',
       },
       'training-provided': {
         question: 'هل تقدمون تدريباً على أجهزتكم؟',
