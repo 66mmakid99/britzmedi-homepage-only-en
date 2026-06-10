@@ -28,10 +28,10 @@ const translations: ProductTranslations = {
       // 효능 단정·비교광고·FDA 적응증 나열 금지 — 설계 특성 중심 서술 유지할 것.
       tagline: '깊게, 그리고 부드럽게',
       overview: 'TORR RF는 고주파 전류를 사용하여 조직의 응고에 사용하는 범용전기수술기입니다. 발생한 고주파 에너지는 설정된 출력 조건에 따라 체표면을 균일하게 가열하도록 설계되었으며, 전극 표면 온도는 실시간으로 감지되어 기준 온도에 도달하면 자동으로 출력이 차단됩니다.',
-      description: '자극은 줄이고, 편안함은 높이고. TORR RF는 표면 온도 모니터링, 출력 차단 알고리즘, 핸드피스 구조 설계를 기반으로 일정한 시술 조건을 유지하도록 제작되어, 시술자가 보다 균일한 조건을 확보하는 데 도움을 줍니다. 미국 FDA 510(k) 인허가(K212561)를 받은 제품입니다.',
+      description: '자극은 줄이고, 편안함은 높이고. TORR RF는 표면 온도 모니터링, 출력 차단 알고리즘, 핸드피스 구조 설계를 기반으로 일정한 시술 조건을 유지하도록 제작되어, 시술자가 보다 균일한 조건을 확보하는 데 도움을 줍니다. 미국 FDA 510(k) 인증(Clearance, K212561)을 받은 제품입니다. 국내 허가 사용목적은 페이지 하단 필수 표시문구를 참조하십시오.',
       keyTechnologies: [
         {
-          name: '자동 원형 모션 헤드(특허)',
+          name: '자동 원형 모션 헤드',
           description: '핸드피스 헤드가 자동으로 회전하며 고주파 에너지를 균일하게 분배하도록 설계되었습니다. 넓은 부위 시술 시 안정적인 운용을 돕습니다.',
         },
         {
@@ -50,7 +50,7 @@ const translations: ProductTranslations = {
         'Frequency': '주파수',
         'Max Output Power': '최대 출력',
         'Operation Modes': '동작 모드',
-        'Treatment Depth': '시술 깊이',
+        'Treatment Depth': '열전달 깊이(설계 사양)',
         'Temperature Control': '온도 제어',
         'User Interface': '사용자 인터페이스',
         'Dimensions': '외형 치수',
@@ -59,7 +59,7 @@ const translations: ProductTranslations = {
         'Safety Class': '안전 등급',
       },
       specNotes: {
-        'Stable deep heating frequency': '안정적인 심부 가열 주파수',
+        'Stable deep heating frequency': '안정적인 가열 주파수',
         'Low power, high efficiency': '저출력 설계',
         'Selectable via GUI': 'GUI에서 선택 가능',
         'Adjustable Low/Deep Mode': 'Low/Deep 모드 조절 가능',
@@ -73,9 +73,9 @@ const translations: ProductTranslations = {
       ],
       clinicalBenefits: [
         '별도의 마취 과정 없이 바로 시술이 가능합니다',
-        '소요 시간은 부위·시술 조건에 따라 다르나 대체로 10~15분 이내에 진행됩니다',
+        '소요 시간은 부위·시술 조건에 따라 의료진 판단으로 달라질 수 있으나 대체로 10~15분 이내에 진행됩니다',
         '체표면을 가열하는 방식으로, 시술 후 일상생활 복귀는 의료진이 개인별 피부 상태에 맞춰 안내합니다',
-        '소모품 카트리지가 없는 핸드피스 구성으로 운영 부담을 줄였습니다',
+        '소모품 카트리지 없이 운용하는 핸드피스 구성입니다',
       ],
       differentiators: [
         {
@@ -131,10 +131,10 @@ const translations: ProductTranslations = {
         'Adjustable intensity': '강도 조절 가능',
       },
       clinicalBenefits: [
-        '절개 없이 진행되는 비침습 방식의 시술',
+        '피부 표면 손상 없이 진행되는 시술',
         '시술 주기와 횟수는 의료진 판단에 따라 안내됩니다',
-        '진정부터 리프팅까지 폭넓은 시술 범위',
-        'i-Booster 기술 기반의 경피 전달 설계',
+        '시술 목적에 따라 의료진이 모드를 선택할 수 있습니다',
+        'i-Booster 초음파 모드 기반의 시술 설계',
       ],
     },
     'newchae-shot': {

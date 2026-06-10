@@ -43,8 +43,8 @@ export const ko: TranslationKeys = {
   home: {
     hero: {
       title: '혁신적인 미용 의료 솔루션',
-      subtitle: 'FDA 510(k) 인허가 | ISO 13485 인증 | GMP 제조시설',
-      badge: 'FDA 510(k) 인허가 의료기기',
+      subtitle: 'FDA 510(k) 인증 | ISO 13485 인증 | GMP 제조시설',
+      badge: 'FDA 510(k) 인증 의료기기',
       cta: '제품 살펴보기',
       ctaSecondary: '총판 파트너 문의',
     },
@@ -66,7 +66,7 @@ export const ko: TranslationKeys = {
   products: {
     title: '제품',
     subtitle: '혁신적인 의료기기',
-    heroDescription: 'FDA 510(k) 인허가와 ISO 13485 인증을 획득한 의료기기',
+    heroDescription: 'FDA 510(k) 인증과 ISO 13485 인증을 획득한 의료기기',
     upcomingProducts: '출시 예정 제품',
     category: {
       all: '전체 제품',
@@ -92,9 +92,9 @@ export const ko: TranslationKeys = {
       technicalData: '기술 사양',
       accessories: '액세서리',
       handpieceConfig: '핸드피스 구성',
-      benefits: '주요 이점',
+      benefits: '특징',
       tipSize: '팁 사이즈',
-      depth: '도달 깊이',
+      depth: '열전달 깊이',
       whyChoose: '선택해야 하는 이유',
       whyProduct: '왜 {name}인가?',
       flagshipProduct: '플래그십 제품',
@@ -143,7 +143,7 @@ export const ko: TranslationKeys = {
     history: {
       label: '연혁',
       title: '회사 연혁 및 주요 성과',
-      subtitle: '기업부설연구소에서 출발하여 FDA 인허가를 보유한 글로벌 의료기기 제조기업으로 성장해 왔습니다.',
+      subtitle: '기업부설연구소에서 출발하여 FDA 인증을 보유한 글로벌 의료기기 제조기업으로 성장해 왔습니다.',
     },
     milestones: {
       '2017': {
@@ -155,8 +155,8 @@ export const ko: TranslationKeys = {
         description: 'MFDS(식약처) GMP(의료기기 제조 및 품질관리 기준) 인증 획득',
       },
       '2022': {
-        title: 'FDA 인허가 및 ISO 인증',
-        description: 'TORR RF FDA 510(k) 인허가(K212561) 및 ISO 13485:2016 인증 획득',
+        title: 'FDA 인증 및 ISO 인증',
+        description: 'TORR RF FDA 510(k) 인증(K212561) 및 ISO 13485:2016 인증 획득',
       },
       '2025': {
         title: '벤처기업 재확인',
@@ -384,11 +384,11 @@ export const ko: TranslationKeys = {
     items: {
       'what-is-torr-rf': {
         question: 'TORR RF는 어떤 제품이며 주요 용도는 무엇인가요?',
-        answer: 'TORR RF는 당사의 플래그십 제품으로, FDA 510(k) 인허가를 받은 의료기기입니다. 혁신적인 Multi-wave 고주파(RF) 기술로 진피층과 피하조직층에 열 에너지를 전달하며, 피부 타이트닝, 주름 개선, 바디 컨투어링 등 비침습 미용 시술에 주로 사용됩니다. 특허받은 분할 전극 설계를 적용해 에너지를 정밀하게 전달합니다.',
+        answer: 'TORR RF는 당사의 플래그십 제품으로, FDA 510(k) 인증을 받은 의료기기입니다. 혁신적인 Multi-wave 고주파(RF) 기술로 진피층과 피하조직층에 열 에너지를 전달하며, 피부 타이트닝, 주름 개선, 바디 컨투어링 등 비침습 미용 시술에 주로 사용됩니다. 특허받은 분할 전극 설계를 적용해 에너지를 정밀하게 전달합니다.',
       },
       'torr-rf-fda-cleared': {
-        question: 'TORR RF는 FDA 인허가를 받았나요?',
-        answer: '네, TORR RF는 2022년 FDA 510(k) 인허가(K212561)를 획득했습니다. 이는 미국 식품의약국(FDA)이 요구하는 안전성과 유효성 기준을 충족하여 미국 시장에서 판매할 수 있음을 의미합니다.',
+        question: 'TORR RF는 FDA 인증을 받았나요?',
+        answer: '네, TORR RF는 2022년 FDA 510(k) 인증(Clearance, K212561)을 획득했습니다. 이는 미국 식품의약국(FDA)이 요구하는 안전성과 유효성 기준을 충족하여 미국 시장에서 판매할 수 있음을 의미합니다.',
       },
       'ulblanc-features': {
         question: 'ULBLANC은 다른 초음파 장비와 무엇이 다른가요?',
@@ -404,7 +404,7 @@ export const ko: TranslationKeys = {
       },
       'company-history': {
         question: 'BRITZMEDI는 언제 설립되었나요?',
-        answer: 'BRITZMEDI는 2017년 10월 23일 대한민국에서 설립되었습니다. 기업부설연구소로 출발하여 현재는 FDA 인허가, ISO 13485 인증, 벤처기업 인증을 보유한 글로벌 의료기기 제조기업으로 성장했습니다.',
+        answer: 'BRITZMEDI는 2017년 10월 23일 대한민국에서 설립되었습니다. 기업부설연구소로 출발하여 현재는 FDA 인증, ISO 13485 인증, 벤처기업 인증을 보유한 글로벌 의료기기 제조기업으로 성장했습니다.',
       },
       'company-location': {
         question: 'BRITZMEDI는 어디에 있나요?',
@@ -448,7 +448,7 @@ export const ko: TranslationKeys = {
       },
       'regulatory-approvals': {
         question: '제품들은 어떤 인허가를 보유하고 있나요?',
-        answer: '제품별로 시장에 따라 다양한 인허가를 보유하고 있습니다. TORR RF는 미국 시장을 위한 FDA 510(k) 인허가와 한국 MFDS(식약처) 인증을 받았으며, 모든 제품이 한국 MFDS(식약처) 인증을 보유하고 있습니다. 인허가 범위를 지속적으로 확대하고 있으며, 요청하시면 목표 시장에 대한 구체적인 인증 정보를 제공해 드립니다.',
+        answer: '제품별로 시장에 따라 다양한 인허가를 보유하고 있습니다. TORR RF는 미국 시장을 위한 FDA 510(k) 인증과 한국 MFDS(식약처) 인증을 받았으며, 모든 제품이 한국 MFDS(식약처) 인증을 보유하고 있습니다. 인허가 범위를 지속적으로 확대하고 있으며, 요청하시면 목표 시장에 대한 구체적인 인증 정보를 제공해 드립니다.',
       },
     },
   },
@@ -482,7 +482,7 @@ export const ko: TranslationKeys = {
     ctaViewProducts: '제품 보기',
     status: {
       certified: '인증 완료',
-      cleared: '인허가 완료',
+      cleared: '인증 완료',
       registered: '등록 완료',
       inPreparation: '준비 중',
       planned: '계획 중',
@@ -559,7 +559,7 @@ export const ko: TranslationKeys = {
 
   // Footer
   footer: {
-    description: '대한민국에서 FDA 인허가 기술로 미용 의료의 혁신을 선도합니다.',
+    description: '대한민국에서 FDA 인증 기술로 미용 의료의 혁신을 선도합니다.',
     products: '제품',
     company: '회사',
     resources: '자료실',
@@ -576,7 +576,7 @@ export const ko: TranslationKeys = {
       certificates: '인증서',
     },
     badges: {
-      fdaCleared: 'FDA 510(k) 인허가',
+      fdaCleared: 'FDA 510(k) 인증',
       iso: 'ISO 13485',
       gmp: 'GMP 인증',
     },
