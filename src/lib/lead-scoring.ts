@@ -24,6 +24,7 @@ export function scoreLead(data: {
   jobTitle?: string;
   country: string;
   interestedIn: string[];
+  inquiryType?: string;
   message?: string;
   source?: string;
   isFreeEmail: boolean;
@@ -87,7 +88,9 @@ export function scoreLead(data: {
     productScore += 5;
     productReasons.push('Interested in flagship TORR RF');
   }
-  if (data.interestedIn.some(p => /distribution|partner/i.test(p))) {
+  // Distributor intent: inquiry_type from the form (primary signal) or
+  // legacy 'distribution'/'partner' values in interested_products (fallback).
+  if (data.inquiryType === 'distributor' || data.interestedIn.some(p => /distribution|partner/i.test(p))) {
     productScore += 5;
     productReasons.push('Distribution/Partnership interest');
   }

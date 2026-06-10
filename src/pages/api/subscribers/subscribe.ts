@@ -4,12 +4,24 @@
 import type { APIRoute } from 'astro';
 import { sendEmail } from '../../../lib/youtube-to-blog/email';
 import { logActivity } from '../../../lib/activity-log';
+import { escapeHtml } from '../../../lib/email-guards';
 
 export const prerender = false;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_LANGUAGES = ['en', 'ko', 'zh', 'ja', 'es', 'pt-br', 'de', 'ar'];
 const VALID_CATEGORIES = ['medical-devices', 'aesthetics', 'company-news', 'industry-insights'];
+
+// Confirmation tokens expire after 48h (the confirmation email promises this)
+export const CONFIRMATION_TOKEN_TTL_MS = 48 * 60 * 60 * 1000;
+
+// SQLite CURRENT_TIMESTAMP is 'YYYY-MM-DD HH:MM:SS' in UTC
+export function isConfirmationTokenExpired(subscribedAt: string | null | undefined): boolean {
+  if (!subscribedAt) return false; // no timestamp — don't lock the user out
+  const ts = Date.parse(subscribedAt.includes('T') ? subscribedAt : `${subscribedAt.replace(' ', 'T')}Z`);
+  if (Number.isNaN(ts)) return false;
+  return Date.now() - ts > CONFIRMATION_TOKEN_TTL_MS;
+}
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
@@ -43,8 +55,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // Check if already subscribed
-    const existing = await db.prepare('SELECT id, status FROM subscribers WHERE email = ?')
-      .bind(email).first<{ id: number; status: string }>();
+    const existing = await db.prepare('SELECT id, status, subscribed_at FROM subscribers WHERE email = ?')
+      .bind(email).first<{ id: number; status: string; subscribed_at: string | null }>();
 
     if (existing) {
       if (existing.status === 'active') {
@@ -55,7 +67,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      if (existing.status === 'pending') {
+      if (existing.status === 'pending' && !isConfirmationTokenExpired(existing.subscribed_at)) {
         return new Response(JSON.stringify({
           success: true,
           message: 'A confirmation email was already sent. Please check your inbox.',
@@ -63,7 +75,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      // Was unsubscribed - resubscribe with new token
+      // Was unsubscribed, or pending with an expired token — resubscribe with a new token
     }
 
     const confirmationToken = crypto.randomUUID();
@@ -154,7 +166,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 };
 
-function buildConfirmationEmail(name: string, confirmUrl: string, lang: string): string {
+export function buildConfirmationEmail(name: string, confirmUrl: string, lang: string): string {
+  const safeName = escapeHtml(name);
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #1e293b; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -166,7 +179,7 @@ function buildConfirmationEmail(name: string, confirmUrl: string, lang: string):
         <h2 style="margin: 0 0 16px; color: #1e293b; font-size: 18px;">Confirm Your Subscription</h2>
 
         <p style="color: #475569; line-height: 1.7; margin: 0 0 24px;">
-          Hi ${name},<br><br>
+          Hi ${safeName},<br><br>
           Thank you for subscribing to BRITZMEDI Insights! Please confirm your email address by clicking the button below.
         </p>
 

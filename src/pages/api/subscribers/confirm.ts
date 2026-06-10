@@ -4,6 +4,8 @@
 import type { APIRoute } from 'astro';
 import { sendEmail } from '../../../lib/youtube-to-blog/email';
 import { notifyNewLead } from '../../../lib/email-notifications';
+import { escapeHtml } from '../../../lib/email-guards';
+import { isConfirmationTokenExpired } from './subscribe';
 
 export const prerender = false;
 
@@ -26,8 +28,8 @@ export const GET: APIRoute = async ({ request, locals, redirect }) => {
     }
 
     const subscriber = await db.prepare(
-      'SELECT id, email, name, status FROM subscribers WHERE confirmation_token = ?'
-    ).bind(token).first<{ id: number; email: string; name: string | null; status: string }>();
+      'SELECT id, email, name, status, subscribed_at FROM subscribers WHERE confirmation_token = ?'
+    ).bind(token).first<{ id: number; email: string; name: string | null; status: string; subscribed_at: string | null }>();
 
     if (!subscriber) {
       return redirect('/confirm-subscription?status=invalid');
@@ -35,6 +37,17 @@ export const GET: APIRoute = async ({ request, locals, redirect }) => {
 
     if (subscriber.status === 'active') {
       return redirect('/confirm-subscription?status=already');
+    }
+
+    // Enforce 48h token expiry (the confirmation email promises this).
+    // Clear the stale token; /api/subscribers/subscribe re-issues one on re-subscribe.
+    // 'invalid' is the existing confirm-subscription.astro status covering
+    // "invalid or has expired. Please try subscribing again."
+    if (isConfirmationTokenExpired(subscriber.subscribed_at)) {
+      await db.prepare(
+        'UPDATE subscribers SET confirmation_token = NULL WHERE id = ?'
+      ).bind(subscriber.id).run().catch(() => {});
+      return redirect('/confirm-subscription?status=invalid');
     }
 
     // Activate subscription
@@ -74,6 +87,7 @@ export const GET: APIRoute = async ({ request, locals, redirect }) => {
 };
 
 function buildWelcomeEmail(name: string, baseUrl: string): string {
+  const safeName = escapeHtml(name);
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: #1e293b; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -85,7 +99,7 @@ function buildWelcomeEmail(name: string, baseUrl: string): string {
         <h2 style="margin: 0 0 16px; color: #1e293b; font-size: 18px;">Welcome to BRITZMEDI Insights!</h2>
 
         <p style="color: #475569; line-height: 1.7; margin: 0 0 16px;">
-          Hi ${name},
+          Hi ${safeName},
         </p>
 
         <p style="color: #475569; line-height: 1.7; margin: 0 0 16px;">

@@ -7,6 +7,19 @@ import type { APIRoute } from 'astro';
 import type { BlogPost } from '../../../lib/youtube-to-blog/schemas';
 import { publishPost } from '../../../lib/youtube-to-blog/publish';
 
+// Approval links expire after 7 days (the approval email promises this).
+// send-approval.ts sets updated_at = datetime('now') when issuing the token,
+// so updated_at is the token issuance time.
+const APPROVAL_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+// SQLite datetime('now') is 'YYYY-MM-DD HH:MM:SS' in UTC
+function isApprovalTokenExpired(issuedAtRaw: string | null | undefined): boolean {
+  if (!issuedAtRaw) return false; // no timestamp — don't brick the flow
+  const issuedAt = Date.parse(issuedAtRaw.includes('T') ? issuedAtRaw : `${issuedAtRaw.replace(' ', 'T')}Z`);
+  if (Number.isNaN(issuedAt)) return false;
+  return Date.now() - issuedAt > APPROVAL_TOKEN_TTL_MS;
+}
+
 export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url);
   const token = url.searchParams.get('token');
@@ -35,6 +48,20 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     if (!post) {
       return htmlResponse('Invalid or expired approval token', 404);
+    }
+
+    // Enforce 7-day expiry on the approval token
+    if (isApprovalTokenExpired(post.updated_at || post.created_at)) {
+      await db.prepare(`
+        UPDATE blog_posts SET approval_token = NULL, updated_at = datetime('now') WHERE id = ?
+      `).bind(post.id).run().catch(() => {});
+
+      return htmlResponse(`
+        <h2 style="color: #dc2626;">Approval Link Expired</h2>
+        <p><strong>${post.title}</strong></p>
+        <p>This approval link has expired (links are valid for 7 days). Please send a new approval request from the editor.</p>
+        <a href="/admin/youtube-to-blog/${post.id}" style="color: #2563eb;">Go to Editor</a>
+      `, 410);
     }
 
     if (action === 'approve') {
