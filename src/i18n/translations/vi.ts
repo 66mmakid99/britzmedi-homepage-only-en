@@ -71,7 +71,7 @@ export const vi: TranslationKeys = {
     category: {
       all: 'Tất cả sản phẩm',
       medicalDevice: 'Thiết bị y tế',
-      cosmetic: 'Mỹ phẩm',
+      cosmetic: 'Thiết bị làm đẹp',
     },
     status: {
       available: 'Có sẵn',

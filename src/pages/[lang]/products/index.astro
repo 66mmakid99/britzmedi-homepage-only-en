@@ -25,8 +25,16 @@ const withTranslatedCopy = (list: Product[]) =>
     };
   });
 
-const availableProducts = withTranslatedCopy(products.filter(p => p.status === 'available'));
+// 의료기기와 비의료기기(미용기기)는 반드시 별도 섹션으로 — 공산품이 '의료기기' 제목 아래 노출되면
+// 의료기기 오인 광고(의료기기법 제26조제7항) 리스크 (ko 심의 리뷰 2026-06-10)
+const availableMedical = withTranslatedCopy(products.filter(p => p.status === 'available' && p.category === 'medical-device'));
+const availableBeauty = withTranslatedCopy(products.filter(p => p.status === 'available' && p.category !== 'medical-device'));
 const comingSoonProducts = withTranslatedCopy(products.filter(p => p.status === 'coming-soon'));
+
+const availableSections = [
+  { title: t('products.category.medicalDevice'), items: availableMedical, beautyNote: false },
+  { title: t('products.category.cosmetic'), items: availableBeauty, beautyNote: true },
+].filter(s => s.items.length > 0);
 ---
 
 <BaseLayout
@@ -47,16 +55,20 @@ const comingSoonProducts = withTranslatedCopy(products.filter(p => p.status === 
     </div>
   </section>
 
-  <!-- Available Products -->
+  <!-- Available Products (by category: medical devices / beauty devices) -->
+  {availableSections.map((section) => (
   <section class="section bg-white">
     <div class="container">
       <div class="mb-10">
         <span class="label mb-2">{t('products.status.available')}</span>
-        <h2 class="heading-2">{t('products.category.medicalDevice')}</h2>
+        <h2 class="heading-2">{section.title}</h2>
+        {section.beautyNote && lang === 'ko' && (
+          <p class="body-small text-slate-500 mt-2">아래 제품은 의료기기가 아닌 가정용 미용기기(공산품)입니다.</p>
+        )}
       </div>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-        {availableProducts.map((product) => (
+        {section.items.map((product) => (
           <a
             href={`/${lang}/products/${product.id}`}
             class="group card-premium p-6 lg:p-7"
@@ -115,6 +127,7 @@ const comingSoonProducts = withTranslatedCopy(products.filter(p => p.status === 
       </div>
     </div>
   </section>
+  ))}
 
   <!-- Coming Soon Products -->
   {comingSoonProducts.length > 0 && (

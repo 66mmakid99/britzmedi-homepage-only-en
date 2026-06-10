@@ -71,7 +71,7 @@ export const ar: TranslationKeys = {
     category: {
       all: 'جميع المنتجات',
       medicalDevice: 'الأجهزة الطبية',
-      cosmetic: 'مستحضرات التجميل',
+      cosmetic: 'أجهزة التجميل',
     },
     status: {
       available: 'متوفر',

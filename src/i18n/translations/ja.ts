@@ -71,7 +71,7 @@ export const ja: TranslationKeys = {
     category: {
       all: 'すべての製品',
       medicalDevice: '医療機器',
-      cosmetic: '化粧品',
+      cosmetic: 'ビューティーデバイス',
     },
     status: {
       available: '販売中',

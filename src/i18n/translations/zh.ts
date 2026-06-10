@@ -71,7 +71,7 @@ export const zh: TranslationKeys = {
     category: {
       all: '所有产品',
       medicalDevice: '医疗设备',
-      cosmetic: '化妆品',
+      cosmetic: '美容仪器',
     },
     status: {
       available: '在售',

@@ -71,7 +71,7 @@ export const fr: TranslationKeys = {
     category: {
       all: 'Tous les produits',
       medicalDevice: 'Dispositifs médicaux',
-      cosmetic: 'Cosmétiques',
+      cosmetic: 'Appareils de beauté',
     },
     status: {
       available: 'Disponible',

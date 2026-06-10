@@ -71,7 +71,7 @@ export const th: TranslationKeys = {
     category: {
       all: 'สินค้าทั้งหมด',
       medicalDevice: 'เครื่องมือทางการแพทย์',
-      cosmetic: 'เครื่องสำอาง',
+      cosmetic: 'อุปกรณ์บิวตี้',
     },
     status: {
       available: 'มีจำหน่าย',

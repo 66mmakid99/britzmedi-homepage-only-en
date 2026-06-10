@@ -71,7 +71,7 @@ export const ru: TranslationKeys = {
     category: {
       all: 'Вся продукция',
       medicalDevice: 'Медицинские устройства',
-      cosmetic: 'Косметика',
+      cosmetic: 'Бьюти-устройства',
     },
     status: {
       available: 'В наличии',

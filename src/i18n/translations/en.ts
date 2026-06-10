@@ -69,7 +69,7 @@ export const en = {
     category: {
       all: 'All Products',
       medicalDevice: 'Medical Devices',
-      cosmetic: 'Cosmetics',
+      cosmetic: 'Beauty Devices',
     },
     status: {
       available: 'Available',

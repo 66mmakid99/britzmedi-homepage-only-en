@@ -44,7 +44,7 @@ export const ko: TranslationKeys = {
     hero: {
       title: '혁신적인 미용 의료 솔루션',
       subtitle: 'FDA 510(k) 인증 | ISO 13485 인증 | GMP 제조시설',
-      badge: 'FDA 510(k) 인증 의료기기',
+      badge: 'FDA 510(k) 인증 의료기기 (TORR RF)',
       cta: '제품 살펴보기',
       ctaSecondary: '총판 파트너 문의',
     },
@@ -54,7 +54,7 @@ export const ko: TranslationKeys = {
     },
     products: {
       title: '주요 제품',
-      subtitle: '에스테틱 전문가를 위한 첨단 의료기기',
+      subtitle: '에스테틱 전문가를 위한 첨단 의료기기부터 홈 뷰티 디바이스까지',
     },
     certifications: {
       title: '글로벌 인증',
@@ -66,12 +66,12 @@ export const ko: TranslationKeys = {
   products: {
     title: '제품',
     subtitle: '혁신적인 의료기기',
-    heroDescription: 'FDA 510(k) 인증과 ISO 13485 인증을 획득한 의료기기',
+    heroDescription: 'FDA 510(k) 인증을 획득한 TORR RF를 비롯해 ISO 13485 인증 체계에서 개발·제조하는 미용 의료기기, 그리고 뷰티 디바이스 라인업을 소개합니다.',
     upcomingProducts: '출시 예정 제품',
     category: {
       all: '전체 제품',
       medicalDevice: '의료기기',
-      cosmetic: '화장품',
+      cosmetic: '뷰티 디바이스',
     },
     status: {
       available: '판매 중',
@@ -100,7 +100,7 @@ export const ko: TranslationKeys = {
       flagshipProduct: '플래그십 제품',
       comingH22026: '2026년 하반기 출시 예정',
       medicalDevice: '의료기기',
-      medicalCosmetic: '메디컬 코스메틱',
+      medicalCosmetic: '홈 뷰티 디바이스',
       model: '모델',
       requestQuote: '견적 요청',
       requestDemo: '데모 요청',
@@ -182,7 +182,7 @@ export const ko: TranslationKeys = {
       title: '핵심 기술',
       convergence: {
         name: '융복합 테라피',
-        description: '초음파와 레이저를 결합해 피부 침투 효과를 극대화하는 기술',
+        description: '초음파와 레이저를 동시에 적용해 레이저가 더 깊은 피부층까지 효율적으로 도달하도록 돕는 기술',
       },
       multiwave: {
         name: 'Multi-wave RF 기술',
@@ -206,7 +206,7 @@ export const ko: TranslationKeys = {
       },
       oem: {
         title: '신뢰할 수 있는 제조 역량',
-        description: '미국 FDA에 위탁제조업체(Contract Manufacturer)로 정식 등록되어, 엄격한 미국 기준에 부합하는 의료기기 제조 역량을 공식적으로 검증받았습니다.',
+        description: '미국 FDA에 위탁제조업체(Contract Manufacturer)로 정식 등록되어 있으며, FDA 510(k) 인증(K212561)을 획득한 의료기기를 자체 제조해 온 경험을 바탕으로 미국 시장 기준에 대응하는 제조 체계를 갖추고 있습니다.',
         fdaRegistered: 'FDA 등록 위탁제조업체',
         ownerOperator: 'Owner/Operator 번호',
         e2eSupport: '자체 R&D와 전 주기 생산 체계',
@@ -215,7 +215,7 @@ export const ko: TranslationKeys = {
     },
     mission: {
       title: '미션',
-      description: '전 세계 전문가에게 혁신적이고 안전하며 효과적인 미용 의료 솔루션을 제공합니다.',
+      description: '전 세계 전문가에게 안전성과 유효성을 최우선 가치로 하는 혁신적인 미용 의료 솔루션을 제공하고자 합니다.',
     },
     team: {
       title: '리더십',
@@ -384,23 +384,23 @@ export const ko: TranslationKeys = {
     items: {
       'what-is-torr-rf': {
         question: 'TORR RF는 어떤 제품이며 주요 용도는 무엇인가요?',
-        answer: 'TORR RF는 당사의 플래그십 제품으로, FDA 510(k) 인증을 받은 의료기기입니다. 혁신적인 Multi-wave 고주파(RF) 기술로 진피층과 피하조직층에 열 에너지를 전달하며, 피부 타이트닝, 주름 개선, 바디 컨투어링 등 비침습 미용 시술에 주로 사용됩니다. 특허받은 분할 전극 설계를 적용해 에너지를 정밀하게 전달합니다.',
+        answer: 'TORR RF는 당사의 플래그십 제품으로, 고주파 전류를 사용하여 조직의 응고에 사용하는 범용전기수술기입니다(식약처 허가 제22-156호, 미국 FDA 510(k) 인증 K212561). Multi-wave 고주파(RF) 기술과 자동 원형 모션 헤드 설계로 설정된 출력 조건에 따라 체표면을 균일하게 가열하도록 설계되어, 비침습 시술 환경에서 안정적인 운용을 돕습니다. 구체적인 적용 부위와 시술 방식은 의료진의 판단에 따릅니다.',
       },
       'torr-rf-fda-cleared': {
         question: 'TORR RF는 FDA 인증을 받았나요?',
-        answer: '네, TORR RF는 2022년 FDA 510(k) 인증(Clearance, K212561)을 획득했습니다. 이는 미국 식품의약국(FDA)이 요구하는 안전성과 유효성 기준을 충족하여 미국 시장에서 판매할 수 있음을 의미합니다.',
+        answer: '네, TORR RF는 2022년 FDA 510(k) 인증(Clearance, K212561)을 획득했습니다. 510(k) 클리어런스는 미국에서 합법적으로 유통 중인 의료기기와 동등한 수준의 안전성과 유효성을 갖추었음(실질적 동등성, Substantial Equivalence)을 FDA로부터 인정받아 미국 시장에서 판매할 수 있음을 의미합니다.',
       },
       'ulblanc-features': {
         question: 'ULBLANC은 다른 초음파 장비와 무엇이 다른가요?',
-        answer: 'ULBLANC은 듀얼 주파수 초음파 기술과 경피 약물 전달을 위한 음향 캐비테이션 기술(i-Booster 기술)을 결합한 토탈 스킨케어 워크스테이션입니다. 이 독자적인 조합으로 피부 타이트닝 효과와 스킨케어 제품의 흡수율 향상을 동시에 구현하여, 에스테틱 클리닉에서 다양하게 활용할 수 있는 솔루션입니다.',
+        answer: 'ULBLANC은 듀얼 주파수 초음파 기술과 유효 성분의 경피 전달을 위한 음향 캐비테이션 기술(i-Booster 기술)을 결합한 멀티 모드 스킨케어 워크스테이션입니다. 이 독자적인 조합은 피부 타이트닝과 스킨케어 제품의 흡수율 향상을 동시에 지원하도록 설계되어, 에스테틱 클리닉에서 다양하게 활용할 수 있는 솔루션입니다.',
       },
       'newchae-shot-home-use': {
         question: 'NEWCHAE SHOT은 가정에서 사용할 수 있나요?',
-        answer: '네, NEWCHAE SHOT은 홈케어를 위해 설계된 3-in-1 개인용 뷰티 디바이스입니다. 전문가급 의료 기술을 컴팩트하고 사용하기 쉬운 형태에 담아 멀티채널 에너지 전달 방식을 적용했으며, 가정에서도 전문가 수준의 스킨케어 효과를 경험하실 수 있습니다.',
+        answer: '네, NEWCHAE SHOT은 홈케어를 위해 설계된 3-in-1 개인용 뷰티 디바이스(공산품)입니다. 전문가용 에스테틱 장비를 개발해 온 당사의 기술력을 바탕으로 RF·EMS·일렉트로포레이션(ELP) 3가지 모드와 멀티채널 에너지 전달 방식을 컴팩트하고 사용하기 쉬운 형태에 담아, 가정에서 간편하게 사용할 수 있도록 설계되었습니다. 본 제품은 의료기기가 아닙니다.',
       },
       'lumino-wave-availability': {
         question: 'LUMINO WAVE는 언제 출시되나요?',
-        answer: 'LUMINO WAVE는 2026년 하반기 출시를 목표로 하고 있습니다. 이 차세대 장비에는 초음파와 레이저를 결합해 피부 침투 효과를 극대화하는 당사의 혁신적인 융복합 테라피(Convergence Therapy) 기술이 적용됩니다. 출시 소식을 받아보시려면 영업팀에 문의해 주십시오.',
+        answer: 'LUMINO WAVE는 2026년 하반기 출시를 목표로 현재 식약처(MFDS) 허가 심사가 진행 중인 차세대 장비입니다. 초음파와 레이저를 결합하는 당사의 융복합 테라피(Convergence Therapy) 기술이 적용될 예정이며, 국내 허가 완료 전에는 판매되지 않습니다. 출시 소식을 받아보시려면 영업팀에 문의해 주십시오.',
       },
       'company-history': {
         question: 'BRITZMEDI는 언제 설립되었나요?',
@@ -448,7 +448,7 @@ export const ko: TranslationKeys = {
       },
       'regulatory-approvals': {
         question: '제품들은 어떤 인허가를 보유하고 있나요?',
-        answer: '제품별로 시장에 따라 다양한 인허가를 보유하고 있습니다. TORR RF는 미국 시장을 위한 FDA 510(k) 인증과 한국 MFDS(식약처) 인증을 받았으며, 모든 제품이 한국 MFDS(식약처) 인증을 보유하고 있습니다. 인허가 범위를 지속적으로 확대하고 있으며, 요청하시면 목표 시장에 대한 구체적인 인증 정보를 제공해 드립니다.',
+        answer: '제품별로 시장에 따라 보유 인허가가 다릅니다. TORR RF는 미국 FDA 510(k) 인증(K212561)과 한국 MFDS(식약처) 허가(제22-156호)를 보유하고 있으며, ULBLANC은 MFDS 인증(제21-4685호)을 받았습니다. NEWCHAE SHOT은 KC·CE·VCCI 인증을 받은 개인용 뷰티 디바이스(공산품, 의료기기 아님)이며, LUMINO WAVE는 현재 MFDS 허가 심사가 진행 중입니다(2026년 하반기 목표). 목표 시장별 구체적인 인증 정보는 요청 시 제공해 드립니다.',
       },
     },
   },
@@ -464,7 +464,7 @@ export const ko: TranslationKeys = {
     qualitySubtitle: '폭넓은 인증 체계를 통해 품질과 환자 안전에 대한 당사의 의지를 입증합니다.',
     technicalLabel: '규격 준수',
     technicalTitle: '기술 안전 표준',
-    technicalSubtitle: '당사 장비는 엄격한 국제 안전 표준에 따라 설계·시험되며, FDA 510(k) 및 MFDS(식약처) 심사 과정에서 이를 검증받았습니다.',
+    technicalSubtitle: '당사 장비는 엄격한 국제 안전 표준에 따라 설계·시험되며, TORR RF는 FDA 510(k) 및 MFDS(식약처) 심사, ULBLANC은 MFDS(식약처) 인증 과정에서 이를 검증받았습니다.',
     powerRequirements: '전원 사양',
     voltage: '전압',
     protectionClass: '보호 등급',
