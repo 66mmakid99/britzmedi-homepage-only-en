@@ -522,4 +522,16 @@ const productSchema = {
     handleImageLoad();
   }
 </script>
+{pt?.regulatoryNotice && pt.regulatoryNotice.length > 0 && (
+  <section class="py-6 bg-slate-100 border-t border-slate-200">
+    <div class="container">
+      <div class="max-w-4xl mx-auto space-y-1 text-center">
+        {pt.regulatoryNotice.map((line) => (
+          <p class="text-xs text-slate-500">{line}</p>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
 </BaseLayout>
