@@ -17,6 +17,13 @@ const pageDescription = t('certifications.qualitySubtitle');
 
 // Helper to generate language-aware URLs
 const localizedUrl = (path: string) => `/${lang}${path}`;
+
+// ko 전용 인증 설명 오버라이드 — FDA 영어 설명에 포함된 FDA 적응증(근육통 완화·셀룰라이트 외관 개선)은
+// 국내 허가 사용목적('조직의 응고') 외 효능이라 ko 페이지에 나열 금지(의료기기 광고 규제).
+const koCertDescriptions: Record<string, string> = {
+  'FDA 510(k)': 'FDA가 기존에 합법적으로 유통 중인 제품과의 실질적 동등성(Substantial Equivalence)을 인정한 510(k) 인증입니다.',
+};
+const koFdaDisclaimer = '"FDA Cleared(인증)"는 FDA가 해당 기기를 기존에 합법적으로 유통 중인 제품과 실질적으로 동등하다고 판단했음을 의미하며, 고위험(3등급) 기기에 적용되는 PMA 절차인 "FDA 승인(Approval)"과는 다릅니다.';
 ---
 
 <BaseLayout
@@ -97,7 +104,7 @@ const localizedUrl = (path: string) => `/${lang}${path}`;
             <p class="text-sm text-slate-500 mb-4">{cert.fullName}</p>
 
             <!-- Description -->
-            <p class="body-small mb-4">{cert.description}</p>
+            <p class="body-small mb-4">{lang === 'ko' ? (koCertDescriptions[cert.name] ?? cert.description) : cert.description}</p>
 
             <!-- Details -->
             <div class="space-y-2 pt-4 border-t border-slate-100">
@@ -254,7 +261,7 @@ const localizedUrl = (path: string) => `/${lang}${path}`;
           </div>
           <div>
             <h3 class="font-semibold text-slate-900 mb-2">{t('certifications.fdaNote')}</h3>
-            <p class="text-sm text-slate-600">{fdaDisclaimer}</p>
+            <p class="text-sm text-slate-600">{lang === 'ko' ? koFdaDisclaimer : fdaDisclaimer}</p>
           </div>
         </div>
       </div>

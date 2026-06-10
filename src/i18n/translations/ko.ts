@@ -50,7 +50,7 @@ export const ko: TranslationKeys = {
     },
     features: {
       title: 'BRITZMEDI를 선택해야 하는 이유',
-      subtitle: '전 세계 전문가들이 신뢰하는 파트너',
+      subtitle: '전 세계 파트너와 함께하는 글로벌 의료기기 제조기업',
     },
     products: {
       title: '주요 제품',
@@ -58,14 +58,14 @@ export const ko: TranslationKeys = {
     },
     certifications: {
       title: '글로벌 인증',
-      subtitle: '가장 엄격한 국제 기준을 충족합니다',
+      subtitle: '엄격한 국제 기준에 따라 인증을 취득하고 있습니다',
     },
   },
 
   // Products
   products: {
     title: '제품',
-    subtitle: '혁신적인 의료기기',
+    subtitle: 'BRITZMEDI 제품 라인업',
     heroDescription: 'FDA 510(k) 인증을 획득한 TORR RF를 비롯해 ISO 13485 인증 체계에서 개발·제조하는 미용 의료기기, 그리고 뷰티 디바이스 라인업을 소개합니다.',
     upcomingProducts: '출시 예정 제품',
     category: {
@@ -98,7 +98,7 @@ export const ko: TranslationKeys = {
       whyChoose: '선택해야 하는 이유',
       whyProduct: '왜 {name}인가?',
       flagshipProduct: '플래그십 제품',
-      comingH22026: '2026년 하반기 출시 예정',
+      comingH22026: '2026년 하반기 출시 목표',
       medicalDevice: '의료기기',
       medicalCosmetic: '홈 뷰티 디바이스',
       model: '모델',
@@ -143,7 +143,7 @@ export const ko: TranslationKeys = {
     history: {
       label: '연혁',
       title: '회사 연혁 및 주요 성과',
-      subtitle: '기업부설연구소에서 출발하여 FDA 인증을 보유한 글로벌 의료기기 제조기업으로 성장해 왔습니다.',
+      subtitle: '기업부설연구소에서 출발하여 FDA 510(k) 인증 제품을 보유한 글로벌 의료기기 제조기업으로 성장해 왔습니다.',
     },
     milestones: {
       '2017': {
@@ -186,11 +186,11 @@ export const ko: TranslationKeys = {
       },
       multiwave: {
         name: 'Multi-wave RF 기술',
-        description: '분할 전극 설계를 적용한 특허 RF 열 에너지 시스템',
+        description: '분할 전극 설계를 적용한 RF 열 에너지 시스템',
       },
       transdermal: {
         name: '경피 전달 기술',
-        description: '음향 캐비테이션 기술로 유효 성분을 피부 깊숙이 흡수시키는 기술',
+        description: '음향 캐비테이션 기술을 활용한 경피 전달 기술',
       },
     },
     manufacturing: {
@@ -404,7 +404,7 @@ export const ko: TranslationKeys = {
       },
       'company-history': {
         question: 'BRITZMEDI는 언제 설립되었나요?',
-        answer: 'BRITZMEDI는 2017년 10월 23일 대한민국에서 설립되었습니다. 기업부설연구소로 출발하여 현재는 FDA 인증, ISO 13485 인증, 벤처기업 인증을 보유한 글로벌 의료기기 제조기업으로 성장했습니다.',
+        answer: 'BRITZMEDI는 2017년 10월 23일 대한민국에서 설립되었습니다. 기업부설연구소로 출발하여 현재는 TORR RF의 미국 FDA 510(k) 인증을 비롯해 ISO 13485 인증, 벤처기업 인증을 보유한 글로벌 의료기기 제조기업으로 성장했습니다.',
       },
       'company-location': {
         question: 'BRITZMEDI는 어디에 있나요?',
@@ -412,7 +412,7 @@ export const ko: TranslationKeys = {
       },
       'rd-capabilities': {
         question: 'BRITZMEDI는 자체 R&D 역량을 갖추고 있나요?',
-        answer: '네, BRITZMEDI는 전담 연구 인력을 갖춘 기업부설연구소를 운영하고 있습니다. 11건 이상의 특허(국내 10건, 해외 1건)와 5건의 상표권을 등록했으며, 연구개발유형 벤처기업 인증은 미용 의료 기술 혁신에 대한 당사의 의지를 보여줍니다.',
+        answer: '네, BRITZMEDI는 전담 연구 인력을 갖춘 기업부설연구소를 운영하고 있습니다. 특허 11건(국내 10건, 해외 1건)과 상표권 5건을 등록했으며, 연구개발유형 벤처기업 인증은 미용 의료 기술 혁신에 대한 당사의 의지를 보여줍니다.',
       },
       'become-distributor': {
         question: 'BRITZMEDI 총판이 되려면 어떻게 해야 하나요?',
@@ -444,7 +444,7 @@ export const ko: TranslationKeys = {
       },
       'gmp-certified': {
         question: '제조시설은 GMP 인증을 받았나요?',
-        answer: '네, 당사 제조시설은 MFDS(식약처)로부터 GMP(의료기기 제조 및 품질관리 기준) 인증을 받았습니다. 2021년에 획득한 이 인증은 제품이 품질 기준에 따라 일관되게 생산되고 관리되고 있음을 보증합니다.',
+        answer: '네, 당사 제조시설은 MFDS(식약처)로부터 GMP(의료기기 제조 및 품질관리 기준) 인증을 받았습니다. 2021년에 획득한 이 인증은 제품이 품질 기준에 따라 일관되게 생산·관리되고 있음을 의미합니다.',
       },
       'regulatory-approvals': {
         question: '제품들은 어떤 인허가를 보유하고 있나요?',
@@ -475,13 +475,13 @@ export const ko: TranslationKeys = {
     tableProduct: '제품',
     tableStatus: '상태',
     tableNotes: '비고',
-    fdaNote: 'FDA 인허가 관련 안내',
+    fdaNote: 'FDA 510(k) 인증 관련 안내',
     ctaTitle: '인증 서류가 필요하신가요?',
     ctaSubtitle: '인증서 사본, 시험성적서, 상세 인허가 정보가 필요하시면 문의해 주십시오.',
     ctaRequest: '서류 요청',
     ctaViewProducts: '제품 보기',
     status: {
-      certified: '인증 완료',
+      certified: '취득 완료',
       cleared: '인증 완료',
       registered: '등록 완료',
       inPreparation: '준비 중',
@@ -559,7 +559,7 @@ export const ko: TranslationKeys = {
 
   // Footer
   footer: {
-    description: '대한민국에서 FDA 인증 기술로 미용 의료의 혁신을 선도합니다.',
+    description: 'FDA 510(k) 인증 제품을 보유한 대한민국의 미용 의료기기 제조기업입니다.',
     products: '제품',
     company: '회사',
     resources: '자료실',

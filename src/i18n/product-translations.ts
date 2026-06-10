@@ -9,7 +9,7 @@ export interface ProductTranslation {
   indications?: string[];
   specLabels?: Record<string, string>;
   specNotes?: Record<string, string>;
-  handpieces?: { name: string; feature: string }[];
+  handpieces?: { name: string; feature: string; depth?: string }[];
   clinicalBenefits?: string[];
   differentiators?: { feature: string; description: string }[];
   /** 의료기기 필수 표시문구 등 규제 고지 (페이지 하단 렌더, 현재 ko 전용) */
@@ -133,6 +133,26 @@ const translations: ProductTranslations = {
         'For sonophoresis': '소노포레시스용',
         'Adjustable intensity': '강도 조절 가능',
       },
+      // 영어 원본 2개 인덱스와 1:1 정렬 — 미작성 시 영어 효능 문구('comprehensive facial treatment' 등)가 폴백 노출됨.
+      handpieces: [
+        { name: 'Sono-I 핸드피스(페이스)', feature: '듀얼 주파수 초음파를 얼굴 부위에 적용하도록 설계된 핸드피스입니다.', depth: '표피~진피(설계 사양)' },
+        { name: 'i-Booster 핸드피스', feature: '28kHz 소노포레시스(초음파 도입) 모드 전용으로 설계된 핸드피스입니다.', depth: '소노포레시스 적용(설계 사양)' },
+      ],
+      // 영어 원본 3개 인덱스와 1:1 정렬 — 미작성 시 '10x better absorption', 'ACNE/Flushing Safe' 등이 폴백 노출됨.
+      differentiators: [
+        {
+          feature: '다이내믹 듀얼 웨이브™',
+          description: '한 세션 안에서 서로 다른 초음파 주파수 모드를 교차 적용할 수 있도록 설계된 주파수 전환 기술입니다.',
+        },
+        {
+          feature: '소노포레시스 통합',
+          description: '28kHz 음향 캐비테이션(소노포레시스) 모드를 본체에 통합하여 별도 장비 없이 운용할 수 있는 구성입니다.',
+        },
+        {
+          feature: '출력·모드 조절 설계',
+          description: '시술 부위와 피부 상태에 따라 의료진이 출력 강도와 모드를 조절할 수 있도록 설계되었습니다.',
+        },
+      ],
       clinicalBenefits: [
         '피부 표면을 보존하도록 설계된 비침습 시술 방식',
         '시술 주기와 횟수는 의료진 판단에 따라 안내됩니다',
@@ -162,7 +182,7 @@ const translations: ProductTranslations = {
         },
         {
           name: 'ELP 모드(스킨 부스트)',
-          description: '일렉트로포레이션 기술로 스킨케어 제품의 흡수를 높여줍니다.',
+          description: '일렉트로포레이션 방식으로 스킨케어 제품이 피부(각질층)에 고르게 스며들도록 돕습니다.',
         },
       ],
       // 공산품 — '허가 정보/사용목적' 섹션은 의료기기 오인 광고 리스크로 의도적 미렌더(빈 배열이 영어 폴백 차단). 번역 추가 금지.
@@ -231,8 +251,8 @@ const translations: ProductTranslations = {
     'lumino-wave': {
       // 허가 전 의료기기(MFDS 심사 중) — 의료기기법 제24조제2항제6호: 효능·효과 표방 금지.
       // 전 항목 '개발 중/~를 목표로 한 설계' 서술 유지. 허가 완료 전 효능 단정 복원 금지.
-      tagline: '차세대 융복합(Convergence) 디바이스',
-      overview: 'LUMINO WAVE는 초음파와 레이저 에너지를 결합하는 융복합(Convergence) 방식의 차세대 에스테틱 디바이스로, 현재 MFDS(식약처) 허가 심사가 진행 중입니다.',
+      tagline: '초음파·레이저 융복합(Convergence) 디바이스',
+      overview: 'LUMINO WAVE는 초음파와 레이저 에너지를 결합하는 융복합(Convergence) 방식의 에스테틱 디바이스로, 현재 MFDS(식약처) 허가 심사가 진행 중입니다.',
       description: '초음파로 유도한 마이크로버블이 레이저의 피부 침투 깊이를 높이는 원리를 활용한 융복합 테라피(Convergence Therapy) 디바이스로 개발 중인 제품입니다. 현재 MFDS(식약처) 허가·인증 절차가 진행 중이며, 2026년 하반기 출시를 목표로 하고 있습니다. 본 제품은 아직 국내 의료기기 허가·인증을 받지 않았습니다.',
       keyTechnologies: [
         {

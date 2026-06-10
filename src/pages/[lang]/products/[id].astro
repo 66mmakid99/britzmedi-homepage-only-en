@@ -67,7 +67,7 @@ const handpieces = product.handpieces?.map((hp, i) => {
   return {
     name: pt?.handpieces?.[i]?.name ?? hp.name,
     tipSize: hp.tipSize,
-    depth: hp.depth,
+    depth: pt?.handpieces?.[i]?.depth ?? hp.depth,
     feature: pt?.handpieces?.[i]?.feature ?? hp.feature,
     imageSrc: imageKey ? product.images?.handpieces?.[imageKey] : undefined,
   };
@@ -81,6 +81,12 @@ const differentiators = product.differentiators?.map((diff, i) => ({
 }));
 
 const pageDescription = `${product.name} - ${tagline}. ${overview}`;
+
+// 허가 전 의료기기(예: LUMINO WAVE): MFDS 허가·인증이 없는 coming-soon 제품.
+// ko 페이지에서는 의료기기법상 허가 전 판매·거래 유인(견적/데모 CTA) 금지 — 문의 버튼만 노출.
+const isPreApproval = product.status === 'coming-soon'
+  && !product.certifications?.some((c: any) => c.name.includes('MFDS') && ['Approved', 'Certified', 'Cleared'].includes(c.status));
+const hidePurchaseCta = lang === 'ko' && isPreApproval;
 
 // Product JSON-LD Schema
 const productSchema = {
@@ -99,7 +105,7 @@ const productSchema = {
     'url': 'https://britzmedi.com'
   },
   'model': product.model,
-  'category': product.category === 'medical-device' ? 'Medical Device' : 'Medical Cosmetic',
+  'category': product.category === 'medical-device' ? 'Medical Device' : 'Home Beauty Device',
   'url': `https://britzmedi.com/${lang}/products/${product.id}`,
   ...(product.certifications?.some((c: any) => c.name === 'FDA' && c.status === 'Cleared') ? {
     'additionalProperty': [{
@@ -108,14 +114,17 @@ const productSchema = {
       'value': 'FDA 510(k) Cleared'
     }]
   } : {}),
-  'offers': {
-    '@type': 'Offer',
-    'availability': product.status === 'coming-soon' ? 'https://schema.org/PreOrder' : 'https://schema.org/InStock',
-    'priceCurrency': 'USD',
-    'price': '0',
-    'priceValidUntil': '2027-12-31',
-    'url': `https://britzmedi.com/${lang}/contact?product=${product.id}`
-  }
+  // 허가 전(coming-soon) 제품은 offers 자체를 비노출 — 사전주문(PreOrder) 표기는 허가 전 판매 유인으로 해석될 소지.
+  ...(product.status !== 'coming-soon' ? {
+    'offers': {
+      '@type': 'Offer',
+      'availability': 'https://schema.org/InStock',
+      'priceCurrency': 'USD',
+      'price': '0',
+      'priceValidUntil': '2027-12-31',
+      'url': `https://britzmedi.com/${lang}/contact?product=${product.id}`
+    }
+  } : {})
 };
 ---
 
@@ -213,8 +222,8 @@ const productSchema = {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                       </svg>
                     )}
-                    <span class="text-sm font-medium">{cert.name}</span>
-                    {cert.detail && <span class="text-xs opacity-75">({cert.detail})</span>}
+                    <span class="text-sm font-medium">{lang === 'ko' && cert.name === 'KC (EMC)' ? 'KC 전파법 적합등록(EMC)' : cert.name}</span>
+                    {cert.detail && <span class="text-xs opacity-75">({lang === 'ko' && cert.status === 'Under Review' ? '허가 심사 진행 중 · 일정은 심사 결과에 따라 변동될 수 있음' : cert.detail})</span>}
                   </div>
                 ))}
               </div>
@@ -223,18 +232,29 @@ const productSchema = {
 
           <!-- CTA -->
           <div class="flex flex-wrap gap-4">
-            <a
-              href={`/${lang}/contact`}
-              class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
-            >
-              {t('products.details.requestQuote')}
-            </a>
-            <a
-              href={`/${lang}/contact`}
-              class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-lg transition-colors"
-            >
-              {t('products.details.requestDemo')}
-            </a>
+            {hidePurchaseCta ? (
+              <a
+                href={`/${lang}/contact`}
+                class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+              >
+                {t('nav.contact')}
+              </a>
+            ) : (
+              <>
+                <a
+                  href={`/${lang}/contact`}
+                  class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                >
+                  {t('products.details.requestQuote')}
+                </a>
+                <a
+                  href={`/${lang}/contact`}
+                  class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  {t('products.details.requestDemo')}
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -484,7 +504,7 @@ const productSchema = {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
-            {t('products.details.requestDemo')}
+            {hidePurchaseCta ? t('nav.contact') : t('products.details.requestDemo')}
           </a>
           <a
             href={`/${lang}/resources`}

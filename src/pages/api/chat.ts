@@ -811,25 +811,25 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   // Product inquiries (EN + KO)
   if (lowerMessage.includes('torr') || lowerMessage.includes('rf') || lowerMessage.includes('토르') || lowerMessage.includes('고주파')) {
     return korean
-      ? "TORR RF (MTX-C1)는 FDA 510(k) 인증을 받은 멀티웨이브 RF 시스템입니다. 특허받은 Auto Circular Motion 기술로 균일한 에너지 분포를 제공하며, 실시간 온도 제어와 Vibro-Comfort 시스템으로 환자 편의성을 높였습니다. 자세한 내용은 /contact 페이지에서 문의해 주세요."
+      ? "TORR RF (MTX-C1)는 FDA 510(k) 인증을 받은 멀티웨이브 RF 시스템입니다. Auto Circular Motion 기술로 고주파 에너지를 균일하게 분배하도록 설계되었으며, 실시간 온도 제어와 Vibro-Comfort 시스템으로 시술 시 편의를 돕습니다. 자세한 내용은 /contact 페이지에서 문의해 주세요."
       : "TORR RF (MTX-C1) is our flagship FDA 510(k) cleared Multi-Wave RF system. It features patented Auto Circular Motion technology for even energy distribution, real-time temperature control, and the Vibro-Comfort system for patient comfort. Would you like to learn more about its specifications or discuss partnership opportunities?";
   }
 
   if (lowerMessage.includes('ulblanc') || lowerMessage.includes('ultrasound') || lowerMessage.includes('울블랑') || lowerMessage.includes('초음파')) {
     return korean
-      ? "ULBLANC (i-Booster)은 이중 주파수 초음파 시스템으로, 1MHz + 3MHz Dynamic Dual Wave 기술과 i-Booster 소노포레시스를 지원합니다. MFDS 인증을 받았으며 피부 탄력 시술에 탁월합니다. /contact에서 문의해 주세요."
+      ? "ULBLANC (i-Booster)은 1MHz + 3MHz Dynamic Dual Wave 기술과 i-Booster 소노포레시스 기술을 결합한 멀티 모드 스킨케어 워크스테이션으로, MFDS 인증(제21-4685호)을 받은 의료기기입니다. 자세한 내용은 /contact에서 문의해 주세요."
       : "ULBLANC (i-Booster) is our dual-frequency ultrasound system featuring Dynamic Dual Wave technology (1MHz + 3MHz) and i-Booster sonophoresis for enhanced product absorption. It's MFDS certified and excellent for skin elasticity treatments. Would you like more details?";
   }
 
   if (lowerMessage.includes('newchae') || lowerMessage.includes('home device') || lowerMessage.includes('뉴채') || lowerMessage.includes('홈디바이스') || lowerMessage.includes('홈케어')) {
     return korean
-      ? "NEWCHAE SHOT은 TORR RF 핸드피스 기술을 개인용으로 적용한 홈뷰티 디바이스입니다. 의료기기가 아닌 개인용 미용기기로, 전문가 없이도 가정에서 안전하게 사용할 수 있습니다. /contact에서 문의해 주세요."
+      ? "NEWCHAE SHOT은 가정에서 사용하도록 설계된 3-in-1 개인용 뷰티 디바이스입니다. 의료기기가 아닌 개인용 미용기기(공산품)이며, 사용 방법은 제품 설명서를 참조해 주세요. 자세한 내용은 /contact에서 문의해 주세요."
       : "NEWCHAE SHOT is a personal home-use beauty device that applies TORR RF handpiece technology for consumer skincare. It is NOT a medical device — it's designed for safe, at-home use without medical supervision. For more details, visit /contact.";
   }
 
   if (lowerMessage.includes('lumino') || lowerMessage.includes('led') || lowerMessage.includes('루미노') || lowerMessage.includes('엘이디')) {
     return korean
-      ? "LUMINO WAVE는 다중 파장 LED 광치료 디바이스입니다. 클리닉과 메디컬 스파를 위한 전문 장비입니다. /contact에서 문의해 주세요."
+      ? "LUMINO WAVE는 초음파와 레이저를 결합한 융복합(Convergence) 방식의 디바이스로, 2026년 하반기 출시를 목표로 현재 국내 인허가 절차를 진행 중입니다. 자세한 내용은 /contact에서 문의해 주세요."
       : "LUMINO WAVE is a professional LED phototherapy device with multiple wavelengths, designed for aesthetic clinics and medical spas. For details, visit /contact.";
   }
 
@@ -850,14 +850,14 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   // Products overview (KO)
   if (lowerMessage.includes('제품') || lowerMessage.includes('뭐 만') || lowerMessage.includes('뭐 팔') || lowerMessage.includes('어떤 제품') || lowerMessage.includes('products')) {
     return korean
-      ? "BRITZMEDI의 주요 제품은 4가지입니다: TORR RF (FDA 인증 멀티웨이브 RF), ULBLANC (이중주파수 초음파), NEWCHAE SHOT (홈뷰티 디바이스), LUMINO WAVE (초음파+레이저 융합, 출시 예정). 자세한 내용은 /products 또는 /contact에서 확인하세요."
+      ? "BRITZMEDI의 주요 제품은 4가지입니다: TORR RF (FDA 510(k) 인증 멀티웨이브 RF), ULBLANC (이중주파수 초음파), NEWCHAE SHOT (홈뷰티 디바이스, 공산품), LUMINO WAVE (초음파+레이저 융복합, 국내 인허가 진행 중). 자세한 내용은 /products 또는 /contact에서 확인하세요."
       : "Thanks for reaching out! We specialize in aesthetic medical devices - TORR RF (FDA 510(k) cleared), ULBLANC ultrasound, NEWCHAE SHOT home device, and LUMINO WAVE (coming soon). What would you like to know? Visit /contact for inquiries.";
   }
 
   // Company inquiries (EN + KO)
   if (lowerMessage.includes('fda') || lowerMessage.includes('certification') || lowerMessage.includes('certified') || lowerMessage.includes('인증') || lowerMessage.includes('허가')) {
     return korean
-      ? "BRITZMEDI는 FDA 510(k) 인증 (K212561, TORR RF), ISO 13485:2016, GMP, MFDS 인허가를 보유하고 있습니다. 국제 최고 수준의 인증 기준을 충족합니다. /contact에서 문의해 주세요."
+      ? "BRITZMEDI는 FDA 510(k) 인증 (K212561, TORR RF), ISO 13485:2016, GMP, MFDS 인허가를 보유하고 있습니다. /contact에서 문의해 주세요."
       : "BRITZMEDI holds FDA 510(k) clearance (K212561) for TORR RF, ISO 13485:2016 certification, GMP certification, and MFDS licensing. Our products meet the highest international regulatory standards.";
   }
 
