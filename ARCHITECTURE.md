@@ -126,7 +126,6 @@ public/
 | `/api/subscribers/confirm` | GET | 구독 확인 (토큰) |
 | `/api/subscribers/unsubscribe` | GET | 구독 해지 (토큰) |
 | `/api/blog/approve` | GET | 블로그 승인 (토큰) |
-| `/api/blog-manifest.json` | GET | 블로그 매니페스트 |
 
 ### Blog Pipeline APIs (Admin)
 

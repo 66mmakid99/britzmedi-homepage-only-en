@@ -111,7 +111,6 @@ Test-Url "Products listing" "$base/products/" "Products"
 Test-Url "Resources page" "$base/resources/" "Resources"
 
 # 17. API check (blog manifest)
-Test-Url "Blog manifest API" "$base/api/blog-manifest.json" "posts"
 
 Write-Host ""
 Write-Host "=== QA COMPLETE ==="
