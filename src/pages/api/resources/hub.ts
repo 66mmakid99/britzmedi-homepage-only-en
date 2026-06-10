@@ -1,11 +1,13 @@
 import type { APIRoute } from 'astro';
+import { fetchPublicDocFamilies } from '../../../lib/resources-hub';
 
 export const prerender = false;
 
 /**
  * Public metadata for documents synced from the ops.britzmedi.com document hub.
- * Returns the current published company-profile version per language so the
- * resources page can render live version badges without a rebuild.
+ * - `profile`: current published company-profile version per language.
+ * - `documents`: web_public hub_doc_families with their is_current published
+ *   versions grouped per family (generic versioned documents).
  */
 export const GET: APIRoute = async ({ locals }) => {
   try {
@@ -39,7 +41,32 @@ export const GET: APIRoute = async ({ locals }) => {
       pptxSizeBytes: r.has_pptx ? r.pptx_size_bytes ?? null : null,
     }));
 
-    return new Response(JSON.stringify({ profile: documents }), {
+    // Generic versioned documents (hub_doc_families / hub_doc_versions).
+    // Failure here must not break the profile payload — return an empty list.
+    let hubDocuments: Array<{
+      slug: string;
+      title: string;
+      description: string | null;
+      product: string | null;
+      category: string;
+      gated: boolean;
+      current: Array<{ lang: string; version: string; updatedAt: string | null; sizeBytes: number | null; ext: string }>;
+    }> = [];
+    try {
+      hubDocuments = (await fetchPublicDocFamilies(opsDb)).map((f) => ({
+        slug: f.slug,
+        title: f.title,
+        description: f.description,
+        product: f.product,
+        category: f.category,
+        gated: f.gated,
+        current: f.current,
+      }));
+    } catch (error) {
+      console.error('[Resources Hub] documents metadata error:', error);
+    }
+
+    return new Response(JSON.stringify({ profile: documents, documents: hubDocuments }), {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, max-age=300',

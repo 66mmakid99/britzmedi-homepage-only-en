@@ -1,18 +1,29 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { resources, resourceCategories, resourceProductGroups, getResourcesByGroup } from '../../content/resources';
+import { resources, resourceCategories, resourceProductGroups, type Resource } from '../../content/resources';
 import { products } from '../../content/products';
 import { supportedLanguages, defaultLang, type Language } from '../../i18n/config';
 import { useTranslations } from '../../i18n';
 import { getProductTranslation } from '../../i18n/product-translations';
+import {
+  fetchPublicDocFamilies,
+  fetchProfileBadge,
+  hubProductToGroupId,
+  hubExtToType,
+  hubLangsLabel,
+  pickHubVersion,
+  hubVersionBadge,
+  type HubDocFamily,
+} from '../../lib/resources-hub';
 
-export function getStaticPaths() {
-  return supportedLanguages
-    .filter(lang => lang !== defaultLang)
-    .map(lang => ({ params: { lang } }));
+// SSR: hub-managed documents (ops.britzmedi.com) are queried live from OPS_DB.
+export const prerender = false;
+
+const langParam = String(Astro.params.lang || '');
+if (!(supportedLanguages as string[]).includes(langParam) || langParam === defaultLang) {
+  return Astro.redirect('/404');
 }
-
-const { lang } = Astro.params as { lang: Language };
+const lang = langParam as Language;
 const t = useTranslations(lang);
 
 const pageDescription = t('resources.heroDescription');
@@ -20,10 +31,86 @@ const pageDescription = t('resources.heroDescription');
 // Helper to generate language-aware URLs
 const localizedUrl = (path: string) => `/${lang}${path}`;
 
+// Document-hub language for the profile badge (hub carries en/ko/ja/zh; others fall back to en)
+const hubLang = (['ja', 'zh'] as string[]).includes(lang) ? lang : 'en';
+
+// --- Live hub data (fail-open: any error keeps the static catalog rendering) ---
+let hubFamilies: HubDocFamily[] = [];
+let profileBadge: string | null = null;
+const opsDb = (Astro.locals as any).runtime?.env?.OPS_DB;
+if (opsDb) {
+  try {
+    hubFamilies = await fetchPublicDocFamilies(opsDb);
+  } catch (error) {
+    console.error('[Resources] hub families query failed:', error);
+    hubFamilies = [];
+  }
+  try {
+    profileBadge = await fetchProfileBadge(opsDb, hubLang);
+  } catch (error) {
+    console.error('[Resources] profile badge query failed:', error);
+  }
+}
+
+// Page row shape: static Resource + group assignment + server-rendered hub badge
+type PageResource = Resource & { groupId: string | null; hubBadge?: string | null };
+
+const staticGroupId = (r: Resource): string | null => {
+  if (!r.product) return 'company';
+  return resourceProductGroups.find(g => g.productMatch === r.product)?.id ?? null;
+};
+
+const hubRows: PageResource[] = hubFamilies.map(f => {
+  const v = pickHubVersion(f.current, lang);
+  return {
+    id: f.slug,
+    title: f.title,
+    description: f.description || '',
+    type: hubExtToType(v?.ext || 'pdf'),
+    category: (f.category in
+      { 'product-brochure': 1, 'technical-docs': 1, marketing: 1, certificates: 1, videos: 1 }
+      ? f.category : 'marketing') as Resource['category'],
+    driveUrl: `/api/resources/doc-file/${f.slug}?lang=${lang}`,
+    hub: true,
+    language: hubLangsLabel(f.current),
+    groupId: hubProductToGroupId(f.product),
+    hubBadge: hubVersionBadge(v),
+  };
+});
+
+// Merge: hub rows take precedence over static rows with the same id/slug
+const hubIds = new Set(hubRows.map(r => r.id));
+const mergedResources: PageResource[] = [
+  ...resources
+    .filter(r => !hubIds.has(r.id))
+    .map(r => ({
+      ...r,
+      groupId: staticGroupId(r),
+      hubBadge: r.id === 'company-presentation' ? profileBadge : null,
+    })),
+  ...hubRows,
+];
+
 // Build product sections (only groups that actually have resources)
+const categoryOrder: Record<string, number> = {
+  'product-brochure': 0,
+  'technical-docs': 1,
+  'marketing': 2,
+  'certificates': 3,
+  'videos': 4,
+};
 const sections = resourceProductGroups
-  .map(group => ({ group, items: getResourcesByGroup(group.id) }))
+  .map(group => ({
+    group,
+    items: mergedResources
+      .filter(r => r.groupId === group.id)
+      .sort((a, b) =>
+        ((categoryOrder[a.category] ?? 9) - (categoryOrder[b.category] ?? 9)) || a.title.localeCompare(b.title)
+      ),
+  }))
   .filter(s => s.items.length > 0);
+
+const totalCount = sections.reduce((n, s) => n + s.items.length, 0);
 
 // Product taglines for section subtitles (translated when available)
 const taglineFor = (groupId: string): string => {
@@ -80,8 +167,8 @@ const getCategoryName = (categoryId: string): string => {
 const groupDisplayName = (groupId: string, fallback: string): string =>
   groupId === 'company' ? t('resources.companyWide') : fallback;
 
-// Document-hub language for this locale (hub carries en/ko/ja/zh; others fall back to en)
-const hubLang = (['ja', 'zh'] as string[]).includes(lang) ? lang : 'en';
+// Localized profile-file route for the company-presentation row (hub doc rows
+// already carry their ?lang= query and pass through this unchanged).
 const hubFileUrl = (driveUrl: string) => driveUrl.replace('/profile-file/en/', `/profile-file/${hubLang}/`);
 ---
 
@@ -117,7 +204,7 @@ const hubFileUrl = (driveUrl: string) => driveUrl.replace('/profile-file/en/', `
           aria-pressed="true"
         >
           {t('resources.allProducts')}
-          <span class="tab-count text-xs font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">{resources.length}</span>
+          <span class="tab-count text-xs font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">{totalCount}</span>
         </button>
         {sections.map(({ group, items }) => (
           <button
@@ -248,10 +335,10 @@ const hubFileUrl = (driveUrl: string) => driveUrl.replace('/profile-file/en/', `
                         {t('resources.availableOnRequest')}
                       </span>
                     )}
-                    {resource.hub && (
-                      <span class="hub-meta hidden items-center gap-1.5 px-2 py-0.5 font-semibold text-primary-700 bg-primary-50 rounded-full ring-1 ring-primary-100" data-hub-lang={hubLang}>
+                    {resource.hub && resource.hubBadge && (
+                      <span class="hub-meta inline-flex items-center gap-1.5 px-2 py-0.5 font-semibold text-primary-700 bg-primary-50 rounded-full ring-1 ring-primary-100">
                         <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
-                        <span class="hub-version"></span>
+                        <span class="hub-version">{resource.hubBadge}</span>
                       </span>
                     )}
                   </div>
@@ -416,29 +503,7 @@ const hubFileUrl = (driveUrl: string) => driveUrl.replace('/profile-file/en/', `
   const firstChip = typeChips[0];
   if (firstChip) setActive(typeChips, firstChip, ['bg-slate-900', 'text-white'], ['text-slate-500']);
 
-  // Live version metadata for hub-synced resources (ops.britzmedi.com document hub)
-  const hubBadges = document.querySelectorAll<HTMLElement>('.hub-meta');
-  if (hubBadges.length) {
-    fetch('/api/resources/hub')
-      .then(r => (r.ok ? r.json() : null))
-      .then((data: { profile?: Array<{ lang: string; version: string; updatedAt: string | null; pdfSizeBytes: number | null }> } | null) => {
-        const docs = data?.profile;
-        if (!docs?.length) return;
-        hubBadges.forEach(el => {
-          const lang = el.dataset.hubLang || 'en';
-          const doc = docs.find(d => d.lang === lang) || docs.find(d => d.lang === 'en');
-          if (!doc) return;
-          const parts = [`v${doc.version}`];
-          if (doc.updatedAt) parts.push(doc.updatedAt);
-          if (doc.pdfSizeBytes) parts.push(`${(doc.pdfSizeBytes / 1048576).toFixed(1)} MB`);
-          const label = el.querySelector('.hub-version');
-          if (label) label.textContent = parts.join(' · ');
-          el.classList.remove('hidden');
-          el.classList.add('inline-flex');
-        });
-      })
-      .catch(() => {});
-  }
+  // Hub version badges are now server-rendered (SSR) — no client hydration needed.
 
   // Download tracking - fire-and-forget (direct downloads on localized pages)
   document.querySelectorAll('.resource-download-btn').forEach(btn => {

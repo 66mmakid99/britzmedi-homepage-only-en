@@ -8,6 +8,8 @@ export const prerender = false;
 
 interface Env {
   DB: D1Database;
+  /** Read-only binding to the ops.britzmedi.com document hub D1 (hub_doc_families) */
+  OPS_DB?: D1Database;
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
 }
@@ -44,24 +46,59 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Get resource to find download URL
-    const resource = getResourceById(resource_id);
-    if (!resource) {
-      return new Response(JSON.stringify({ error: 'Resource not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    const runtime = (locals as any).runtime;
+    const env = runtime?.env as Env | undefined;
+
+    // Resolve the resource: hub-managed documents (ops.britzmedi.com hub_doc_families)
+    // take precedence when the static catalog misses or marks the entry as hub-backed.
+    // Note: 'company-presentation' is hub:true but lives in the profile system (not
+    // hub_doc_families), so its lookup misses here and it keeps the static
+    // /api/resources/profile-file/en/pdf path.
+    const staticResource = getResourceById(resource_id);
+
+    let resolved: { title: string; category: string; downloadUrl: string } | null = null;
+
+    if ((!staticResource || staticResource.hub) && env?.OPS_DB) {
+      try {
+        const family = await env.OPS_DB.prepare(
+          `SELECT slug, title, category FROM hub_doc_families WHERE slug = ? AND web_public = 1`
+        ).bind(resource_id).first<{ slug: string; title: string; category: string }>();
+        if (family) {
+          resolved = {
+            title: family.title,
+            category: family.category,
+            downloadUrl: `/api/resources/doc-file/${family.slug}`,
+          };
+        }
+      } catch (err) {
+        console.error('[Resource Download API] hub lookup failed:', err);
+      }
     }
 
-    // Resources without a real file yet (available: false) must not hand out placeholder links
-    if (resource.available === false) {
-      return new Response(JSON.stringify({
-        error: 'This resource is available on request. Please contact us via the contact form.',
-        requestUrl: `/contact?resource=${resource.id}`,
-      }), {
-        status: 410,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!resolved) {
+      if (!staticResource) {
+        return new Response(JSON.stringify({ error: 'Resource not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Resources without a real file yet (available: false) must not hand out placeholder links
+      if (staticResource.available === false) {
+        return new Response(JSON.stringify({
+          error: 'This resource is available on request. Please contact us via the contact form.',
+          requestUrl: `/contact?resource=${staticResource.id}`,
+        }), {
+          status: 410,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      resolved = {
+        title: staticResource.title,
+        category: staticResource.category,
+        downloadUrl: staticResource.driveUrl,
+      };
     }
 
     // Collect server-side data (same as api/resources/track.ts)
@@ -82,8 +119,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
     const grade = score >= 30 ? 'C' : 'D';
 
-    const runtime = (locals as any).runtime;
-    const env = runtime?.env as Env | undefined;
     const db = env?.DB;
 
     if (db) {
@@ -129,8 +164,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         resource_id,
-        resource_title || resource.title,
-        resource.category,
+        resource_title || resolved.title,
+        resolved.category,
         email,
         ip,
         userAgent,
@@ -148,7 +183,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       name,
       email,
       country: country || undefined,
-      message: `Resource download: ${resource_title || resource.title}`,
+      message: `Resource download: ${resource_title || resolved.title}`,
       source_url: referer || undefined,
       lead_score: score,
       lead_grade: grade,
@@ -164,7 +199,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         interestedProducts: [],
         leadScore: score,
         leadGrade: grade,
-        message: `Resource download: ${resource_title || resource.title}`,
+        message: `Resource download: ${resource_title || resolved.title}`,
       }, env.SLACK_WEBHOOK_URL).catch(err =>
         console.error('[Resource Download API] Slack notification failed:', err)
       );
@@ -172,7 +207,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     return new Response(JSON.stringify({
       success: true,
-      downloadUrl: resource.driveUrl,
+      downloadUrl: resolved.downloadUrl,
     }), {
       headers: { 'Content-Type': 'application/json' },
     });

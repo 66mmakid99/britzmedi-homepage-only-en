@@ -17,8 +17,8 @@ export default defineConfig({
     keystatic(),
     sitemap({
       filter: (page) => !page.includes('/keystatic'),
-      // Localized homepages are SSR (prerender=false) so the sitemap integration
-      // can't discover them automatically — list them explicitly.
+      // Localized homepages and the resources pages are SSR (prerender=false) so
+      // the sitemap integration can't discover them automatically — list them explicitly.
       customPages: [
         'https://britzmedi.com/ja/',
         'https://britzmedi.com/zh/',
@@ -28,6 +28,15 @@ export default defineConfig({
         'https://britzmedi.com/fr/',
         'https://britzmedi.com/ru/',
         'https://britzmedi.com/ar/',
+        'https://britzmedi.com/resources/',
+        'https://britzmedi.com/ja/resources/',
+        'https://britzmedi.com/zh/resources/',
+        'https://britzmedi.com/th/resources/',
+        'https://britzmedi.com/vi/resources/',
+        'https://britzmedi.com/es/resources/',
+        'https://britzmedi.com/fr/resources/',
+        'https://britzmedi.com/ru/resources/',
+        'https://britzmedi.com/ar/resources/',
       ],
       changefreq: 'weekly',
       priority: 0.7,
