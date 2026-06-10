@@ -17,7 +17,7 @@ export const company = {
   contact: {
     phone: "+82-70-4348-7244",
     email: "sh.lee@britzmedi.com",
-    website: "www.britzmedi.co.kr",
+    website: "www.britzmedi.com",
   },
 
   businessType: "Manufacturer of Medical Devices, R&D, Wholesale & Retail",
