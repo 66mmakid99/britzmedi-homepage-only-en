@@ -1,6 +1,8 @@
 // Automated company research via Claude API + web search
 // Called asynchronously via waitUntil after lead submission
 
+import { CLAUDE_MODEL } from './ai-models';
+
 export interface CompanyResearch {
   company_overview?: {
     full_name: string;
@@ -100,7 +102,7 @@ If you cannot find information about this company, say so honestly. Do NOT fabri
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: 2048,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: prompt }],

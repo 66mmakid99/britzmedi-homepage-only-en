@@ -16,19 +16,28 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const { keyword, search_intent, priority, target_word_count, scheduled_at, category } = await request.json();
-
-    if (!keyword) {
-      return new Response(JSON.stringify({ error: 'keyword required' }), {
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const normalizedCategory = (category || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const { keyword, search_intent, priority, target_word_count, scheduled_at, category } = body || {};
+
+    if (typeof keyword !== 'string' || !keyword.trim()) {
+      return new Response(JSON.stringify({ error: 'keyword required (non-empty string)' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const normalizedCategory = String(category || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const result = await db.prepare(
       'INSERT INTO content_queue (keyword, search_intent, priority, target_word_count, scheduled_at, category) VALUES (?, ?, ?, ?, ?, ?)'
     ).bind(
-      keyword,
+      keyword.trim(),
       search_intent || null,
       priority || 5,
       target_word_count || 2000,
@@ -37,8 +46,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     ).run();
 
     return new Response(JSON.stringify({
-      id: result.meta.last_row_id,
-      keyword,
+      id: result.meta!.last_row_id,
+      keyword: keyword.trim(),
       status: 'queued',
     }), {
       status: 201,

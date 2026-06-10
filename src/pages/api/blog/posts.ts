@@ -17,7 +17,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const db = (runtime?.env as Env | undefined)?.DB;
 
     if (!db) {
-      return new Response(JSON.stringify({ posts: getSamplePosts(), total: 1 }), {
+      return new Response(JSON.stringify({ error: 'database unavailable' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -76,21 +77,3 @@ export const GET: APIRoute = async ({ request, locals }) => {
     });
   }
 };
-
-function getSamplePosts(): Partial<BlogPost>[] {
-  return [
-    {
-      id: 'post-001',
-      job_id: 'sample-001',
-      title: 'Understanding RF Technology in Modern Aesthetics',
-      slug: 'understanding-rf-technology-modern-aesthetics',
-      content: '<p>Sample blog post content...</p>',
-      excerpt: 'An in-depth look at how RF technology is transforming the aesthetics industry.',
-      status: 'draft',
-      category: 'medical-devices',
-      youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ];
-}

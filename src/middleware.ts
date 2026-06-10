@@ -16,6 +16,37 @@ function getSessionKV(context: any): KVNamespace | undefined {
   return context.locals?.runtime?.env?.SESSION;
 }
 
+// Constant-time string comparison via HMAC (same approach as api/admin/login.ts).
+// Direct === comparison leaks length/prefix timing information.
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode('timing-safe-comparison-key');
+  const key = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const macA = await crypto.subtle.sign('HMAC', key, encoder.encode(a));
+  const macB = await crypto.subtle.sign('HMAC', key, encoder.encode(b));
+  const viewA = new Uint8Array(macA);
+  const viewB = new Uint8Array(macB);
+  if (viewA.length !== viewB.length) return false;
+  let diff = 0;
+  for (let i = 0; i < viewA.length; i++) diff |= viewA[i] ^ viewB[i];
+  return diff === 0;
+}
+
+// Cron pipeline auth: 'Authorization: Bearer {CRON_SECRET}' is accepted as admin
+// auth for /api/blog/** so the internal orchestrator (cron blog pipeline) can
+// drive job steps in production, where the static admin_session cookie fallback
+// is dev-only. Compared timing-safe against env CRON_SECRET.
+async function isValidCronBearer(context: any): Promise<boolean> {
+  const authHeader = context.request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
+  const token = authHeader.slice('Bearer '.length);
+  const cronSecret = getEnv(context, 'CRON_SECRET');
+  if (!cronSecret || !token) return false;
+  return await timingSafeEqual(token, cronSecret);
+}
+
 // Validate session token against KV or static secret
 async function isValidSession(context: any, sessionToken: string): Promise<boolean> {
   // Try KV first (production with random tokens)
@@ -57,6 +88,9 @@ function requiresAdminAuth(pathname: string, method: string): boolean {
   if (pathname === '/api/subscribers/export') return true;
   if (pathname === '/api/subscribers/notify') return true;
 
+  // Resource download analytics expose lead/visitor data — admin only.
+  if (pathname === '/api/resources/stats') return true;
+
   // Translate + YouTube channel fetch are admin tooling (AI / external cost).
   if (pathname === '/api/translate') return true;
   if (pathname === '/api/youtube/channel') return true;
@@ -74,8 +108,34 @@ function requiresAdminAuth(pathname: string, method: string): boolean {
   return false;
 }
 
+// Security headers for SSR responses. public/_headers only covers static assets
+// on Cloudflare Pages, so SSR pages/APIs must set these here (values mirror
+// public/_headers). CSP intentionally omitted — too risky without testing.
+function applySecurityHeaders(response: Response): Response {
+  try {
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    return response;
+  } catch {
+    // Immutable headers (e.g. some passthrough responses) — clone and retry.
+    const cloned = new Response(response.body, response);
+    cloned.headers.set('X-Frame-Options', 'DENY');
+    cloned.headers.set('X-Content-Type-Options', 'nosniff');
+    cloned.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    cloned.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    return cloned;
+  }
+}
+
 // Admin authentication middleware
 export const onRequest: MiddlewareHandler = async (context, next) => {
+  const response = await handleRequest(context, next);
+  return applySecurityHeaders(response);
+};
+
+const handleRequest: MiddlewareHandler = async (context, next) => {
   const url = new URL(context.request.url);
   const pathname = url.pathname;
 
@@ -127,6 +187,13 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   // Protected non-admin API routes - sensitive data / AI cost / publishing.
   // Same cookie-session check as /api/admin/, method-aware allowlist above.
   if (pathname.startsWith('/api/') && requiresAdminAuth(pathname, context.request.method)) {
+    // Blog pipeline routes additionally accept the cron Bearer token so the
+    // production cron orchestrator (lib/youtube-to-blog/orchestrator.ts) can
+    // run internal step fetches without a KV-backed cookie session.
+    if (pathname.startsWith('/api/blog/') && (await isValidCronBearer(context))) {
+      return next();
+    }
+
     const sessionToken = context.cookies.get('admin_session')?.value;
 
     if (!sessionToken || !(await isValidSession(context, sessionToken))) {

@@ -23,7 +23,8 @@ export const GET: APIRoute = async ({ locals }) => {
     const db = (runtime?.env as Env | undefined)?.DB;
 
     if (!db) {
-      return new Response(JSON.stringify({ jobs: getSampleJobs() }), {
+      return new Response(JSON.stringify({ error: 'database unavailable' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -73,20 +74,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const db = (runtime?.env as Env | undefined)?.DB;
 
     if (!db) {
-      const job: Partial<BlogJob> = {
-        id,
-        youtube_url: data.youtube_url,
-        youtube_id: youtubeId,
-        status: 'pending',
-        progress: 0,
-        target_lang: data.target_lang || 'en',
-        tone: data.tone || 'professional',
-        word_count: data.word_count || 1500,
-        created_at: new Date().toISOString(),
-      };
-      console.log('[Blog Queue API] Would create job:', job);
-      return new Response(JSON.stringify({ success: true, job }), {
-        status: 201,
+      return new Response(JSON.stringify({ error: 'database unavailable' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -133,23 +122,3 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
-
-function getSampleJobs(): Partial<BlogJob>[] {
-  return [
-    {
-      id: 'sample-001',
-      youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      youtube_id: 'dQw4w9WgXcQ',
-      video_title: 'Sample Video - RF Technology Overview',
-      channel_name: 'Medical Devices Channel',
-      status: 'completed',
-      progress: 100,
-      target_lang: 'en',
-      tone: 'professional',
-      word_count: 1500,
-      blog_post_id: 'post-001',
-      created_at: new Date().toISOString(),
-      completed_at: new Date().toISOString(),
-    },
-  ];
-}

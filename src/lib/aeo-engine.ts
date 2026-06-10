@@ -14,6 +14,7 @@
 
 import { processKeyword, pipelineStep1_research, pipelineStep2_generate, pipelineStep3_postprocess } from './content-pipeline';
 import { sendEmail } from './youtube-to-blog/email';
+import { CLAUDE_MODEL } from './ai-models';
 
 interface Env {
   DB: D1Database;
@@ -68,7 +69,7 @@ export async function diagnose(env: Env): Promise<AEODiagnosisResult> {
             'anthropic-version': '2023-06-01'
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: CLAUDE_MODEL,
             max_tokens: 1024,
             tools: [{ type: 'web_search_20250305', name: 'web_search' }],
             messages: [{ role: 'user', content: query }]
@@ -179,7 +180,7 @@ Plan max 5 content pieces per cycle.`;
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: CLAUDE_MODEL,
       max_tokens: 2048,
       messages: [{ role: 'user', content: planPrompt }]
     })
@@ -215,8 +216,8 @@ Plan max 5 content pieces per cycle.`;
 // ==========================================
 
 /**
- * Step-based produce: processes ONE step per call.
- * Each step fits within CF Workers 100s wall-time limit.
+ * Step-based produce: processes ONE step per queue item, up to maxItems items per call.
+ * Each step fits within CF Workers 100s wall-time limit — keep maxItems small.
  * Priority order: postprocess > generate > research (finish in-progress items first)
  * Call 3 times per keyword to complete the full pipeline.
  */
@@ -224,55 +225,65 @@ export async function produce(env: Env, maxItems: number = 1): Promise<{
   processed: number;
   results: { id: number; keyword: string; step: string; status: string }[];
 }> {
-  // Find the next item to process (prioritize items further in the pipeline)
-  const item = await env.DB.prepare(
-    `SELECT id, keyword, search_intent, status FROM content_queue
-     WHERE status IN ('queued', 'research_done', 'generated')
-     ORDER BY
-       CASE status
-         WHEN 'generated' THEN 1
-         WHEN 'research_done' THEN 2
-         WHEN 'queued' THEN 3
-       END,
-       priority ASC, created_at ASC
-     LIMIT 1`
-  ).first<any>();
+  const results: { id: number; keyword: string; step: string; status: string }[] = [];
+  const attempted = new Set<string>();
 
-  if (!item) {
-    await env.DB.prepare(
-      `INSERT INTO aeo_cycles (phase, status, data, created_at) VALUES ('produce', 'completed', ?, datetime('now'))`
-    ).bind(JSON.stringify({ processed: 0, message: 'No items to process' })).run();
-    return { processed: 0, results: [] };
-  }
+  for (let i = 0; i < maxItems; i++) {
+    // Find the next item to process (prioritize items further in the pipeline)
+    const item = await env.DB.prepare(
+      `SELECT id, keyword, search_intent, status FROM content_queue
+       WHERE status IN ('queued', 'research_done', 'generated')
+       ORDER BY
+         CASE status
+           WHEN 'generated' THEN 1
+           WHEN 'research_done' THEN 2
+           WHEN 'queued' THEN 3
+         END,
+         priority ASC, created_at ASC
+       LIMIT 1`
+    ).first<any>();
 
-  let step = '';
-  let newStatus = '';
-  try {
-    switch (item.status) {
-      case 'queued':
-        step = 'research';
-        newStatus = await pipelineStep1_research(item.id, env);
-        break;
-      case 'research_done':
-        step = 'generate';
-        newStatus = await pipelineStep2_generate(item.id, env);
-        break;
-      case 'generated':
-        step = 'postprocess';
-        newStatus = await pipelineStep3_postprocess(item.id, env);
-        break;
+    if (!item) break;
+
+    // A failed step leaves the item's status unchanged, so it would be
+    // re-selected immediately — don't retry the same item+step this run.
+    const attemptKey = `${item.id}:${item.status}`;
+    if (attempted.has(attemptKey)) break;
+    attempted.add(attemptKey);
+
+    let step = '';
+    let newStatus = '';
+    try {
+      switch (item.status) {
+        case 'queued':
+          step = 'research';
+          newStatus = await pipelineStep1_research(item.id, env);
+          break;
+        case 'research_done':
+          step = 'generate';
+          newStatus = await pipelineStep2_generate(item.id, env);
+          break;
+        case 'generated':
+          step = 'postprocess';
+          newStatus = await pipelineStep3_postprocess(item.id, env);
+          break;
+      }
+    } catch (e: any) {
+      newStatus = 'error: ' + e.message;
     }
-  } catch (e: any) {
-    newStatus = 'error: ' + e.message;
-  }
 
-  const result = { id: item.id, keyword: item.keyword, step, status: newStatus };
+    results.push({ id: item.id, keyword: item.keyword, step, status: newStatus });
+  }
 
   await env.DB.prepare(
     `INSERT INTO aeo_cycles (phase, status, data, created_at) VALUES ('produce', 'completed', ?, datetime('now'))`
-  ).bind(JSON.stringify({ processed: 1, results: [result] })).run();
+  ).bind(JSON.stringify(
+    results.length === 0
+      ? { processed: 0, message: 'No items to process' }
+      : { processed: results.length, results }
+  )).run();
 
-  return { processed: 1, results: [result] };
+  return { processed: results.length, results };
 }
 
 
@@ -339,7 +350,7 @@ ${content.substring(0, 3000)}`;
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       messages: [{ role: 'user', content: evalPrompt }]
     })
@@ -460,7 +471,7 @@ Return JSON: { "recommendations": ["Specific recommendation 1", ...] }`;
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: 512,
         messages: [{ role: 'user', content: analysisPrompt }]
       })

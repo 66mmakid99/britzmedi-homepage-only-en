@@ -41,7 +41,7 @@ nul
 .bkit/
 
 # scratch DB output
-db/
+/db/
 
 # large local media (hero videos live in R2)
 public/videos/

@@ -26,6 +26,7 @@ const ALLOWED_EXTRA_COLUMNS = new Set([
   'transcript_text', 'transcript_lang', 'translated_text',
   'video_title', 'channel_name', 'channel_id',
   'blog_post_id', 'error_message', 'current_step',
+  'detected_names', // Korean names found in translate step (column added in migration 0022)
 ]);
 
 /**

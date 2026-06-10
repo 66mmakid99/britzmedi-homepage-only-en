@@ -7,8 +7,9 @@
 // blog_post to be created.
 //
 // All internal fetches use an absolute URL (origin from the cron request) and
-// carry the admin_session cookie set to ADMIN_SESSION_SECRET, which middleware
-// accepts as a valid static session token.
+// carry 'Authorization: Bearer {CRON_SECRET}', which middleware accepts as
+// admin auth for /api/blog/** routes (the static admin_session cookie is only
+// accepted in local dev, so it cannot authenticate the production cron).
 
 import type { BlogJob } from './schemas';
 
@@ -30,8 +31,9 @@ export interface RunJobResult {
 function authHeaders(env: any): Record<string, string> {
   return {
     'Content-Type': 'application/json',
-    // Middleware isValidSession accepts the static ADMIN_SESSION_SECRET token.
-    'Cookie': `admin_session=${env.ADMIN_SESSION_SECRET}`,
+    // Middleware accepts 'Bearer {CRON_SECRET}' as admin auth on /api/blog/**.
+    // The calling cron route has already verified CRON_SECRET is configured.
+    'Authorization': `Bearer ${env.CRON_SECRET}`,
   };
 }
 

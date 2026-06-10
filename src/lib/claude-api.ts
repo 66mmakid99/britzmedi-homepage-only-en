@@ -1,5 +1,7 @@
 // Shared Claude API helper for content analysis, rewriting, and generation
 
+import { CLAUDE_MODEL } from './ai-models';
+
 export interface ClaudeCallOptions {
   apiKey: string;
   model?: string;
@@ -16,7 +18,7 @@ export interface ClaudeCallOptions {
 export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
   const {
     apiKey,
-    model = 'claude-sonnet-4-20250514',
+    model = CLAUDE_MODEL,
     maxTokens = 4000,
     system,
     userMessage,
@@ -105,7 +107,7 @@ export async function callClaude(opts: ClaudeCallOptions): Promise<string> {
 export async function callClaudeWithWebSearch(opts: ClaudeCallOptions): Promise<any> {
   const {
     apiKey,
-    model = 'claude-sonnet-4-20250514',
+    model = CLAUDE_MODEL,
     maxTokens = 4000,
     system,
     userMessage,

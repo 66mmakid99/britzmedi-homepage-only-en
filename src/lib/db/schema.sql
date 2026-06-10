@@ -6,6 +6,18 @@
 -- a reference snapshot and is NOT executed at runtime. It is kept in sync with the live
 -- `PRAGMA table_info` so new environments / debugging match production.
 -- Last reconciled against production: 2026-05-24.
+--
+-- ⚠️ KNOWN COLUMN DRIFT — columns that exist on PROD via manual ALTERs but are
+-- NOT in any migrations/*.sql file (a fresh replay of migrations will lack them):
+--   leads.is_free_email      (INTEGER DEFAULT 0 — lead-scoring free-email flag)
+--   leads.score_breakdown    (TEXT JSON — lead-scoring.ts detail)
+--   leads.research_status    (TEXT DEFAULT 'pending' — pending|done|failed)
+--   leads.company_research   (TEXT JSON — lead-research.ts output)
+--   blog_jobs.doctor_profile / doctor_name / doctor_name_korean
+--                            (written by api/blog/queue/[id]/step/research.ts)
+-- blog_jobs.detected_names was in the same situation until migration
+-- 0022_aeo_tables.sql added it. When adding migrations, reconcile against a live
+-- `PRAGMA table_info` dump first (see 0023_prod_drift_sync.sql for the procedure).
 
 -- Leads table — reflects live production schema (0001 + 0013 + manual ALTERs).
 CREATE TABLE IF NOT EXISTS leads (

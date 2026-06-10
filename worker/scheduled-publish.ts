@@ -7,6 +7,9 @@ export interface Env {
   DB: D1Database;
   GITHUB_TOKEN: string;
   GITHUB_REPO: string; // format: "owner/repo"
+  // Required to authorize the manual /trigger route. Set via:
+  //   npx wrangler secret put CRON_SECRET --name <this-worker-name>
+  CRON_SECRET: string;
 }
 
 export default {
@@ -101,7 +104,18 @@ export default {
     }
 
     if (url.pathname === '/trigger') {
-      // Manual trigger - run the same logic
+      // Manual trigger - requires Authorization: Bearer {CRON_SECRET}.
+      // The secret must be configured on this worker via `wrangler secret put CRON_SECRET`;
+      // if it is not set, the route is disabled rather than left open.
+      const authHeader = request.headers.get('Authorization');
+      if (!env.CRON_SECRET || authHeader !== `Bearer ${env.CRON_SECRET}`) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Run the same logic as the cron schedule
       await this.scheduled({} as ScheduledController, env, {} as ExecutionContext);
       return new Response(JSON.stringify({ status: 'triggered' }), {
         headers: { 'Content-Type': 'application/json' },

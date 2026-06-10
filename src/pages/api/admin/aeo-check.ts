@@ -4,6 +4,7 @@
 
 export const prerender = false;
 import type { APIRoute } from 'astro';
+import { CLAUDE_MODEL } from '../../../lib/ai-models';
 
 const AEO_CHECK_QUERIES = [
   'What are the best radiofrequency devices for aesthetic clinics?',
@@ -31,59 +32,79 @@ export const POST: APIRoute = async ({ locals }) => {
       });
     }
 
-    const results = [];
+    const results: { query: string; mentioned: boolean; mentionContext?: string; error?: string }[] = [];
 
-    for (const query of AEO_CHECK_QUERIES) {
-      try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': apiKey,
-            'content-type': 'application/json',
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 2048,
-            tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
-            messages: [{ role: 'user', content: query }],
-          }),
-        });
+    // Run a single AEO query against Claude web_search and return the parsed outcome.
+    const checkQuery = async (query: string) => {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'content-type': 'application/json',
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: 2048,
+          tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
+          messages: [{ role: 'user', content: query }],
+        }),
+      });
 
-        if (!res.ok) {
-          const errText = await res.text().catch(() => '');
-          results.push({ query, mentioned: false, error: `Claude API ${res.status}: ${errText.slice(0, 200)}` });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(`Claude API ${res.status}: ${errText.slice(0, 200)}`);
+      }
+
+      const data = await res.json();
+      const fullText = (data.content || [])
+        .filter((b: any) => b.type === 'text')
+        .map((b: any) => b.text)
+        .join(' ');
+
+      const mentioned = /britzmedi|BRITZMEDI|torr\s*rf|TORR\s*RF/i.test(fullText);
+
+      let mentionContext = '';
+      if (mentioned) {
+        const regex = /.{0,100}(britzmedi|BRITZMEDI|torr\s*rf|TORR\s*RF).{0,100}/gi;
+        const matches = fullText.match(regex);
+        mentionContext = matches ? matches.slice(0, 3).join(' ... ') : '';
+      }
+
+      return { query, fullText, mentioned, mentionContext };
+    };
+
+    // Process in parallel batches of 5 to stay within the CF wall-time limit
+    // (each web_search call takes 10-20s; 10 sequential calls would exceed 100s).
+    // Same batching pattern as diagnose() in src/lib/aeo-engine.ts.
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < AEO_CHECK_QUERIES.length; i += BATCH_SIZE) {
+      const batch = AEO_CHECK_QUERIES.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.allSettled(batch.map(checkQuery));
+
+      for (let j = 0; j < batchResults.length; j++) {
+        const r = batchResults[j];
+        if (r.status !== 'fulfilled') {
+          results.push({ query: batch[j], mentioned: false, error: r.reason?.message || 'unknown error' });
           continue;
         }
 
-        const data = await res.json();
-        const fullText = (data.content || [])
-          .filter((b: any) => b.type === 'text')
-          .map((b: any) => b.text)
-          .join(' ');
+        const { query, fullText, mentioned, mentionContext } = r.value;
+        try {
+          await db.prepare(
+            'INSERT INTO aeo_checks (query, ai_engine, response_text, mentioned, mention_context) VALUES (?, ?, ?, ?, ?)'
+          ).bind(
+            query,
+            'claude',
+            fullText.substring(0, 5000),
+            mentioned ? 1 : 0,
+            mentionContext.substring(0, 1000),
+          ).run();
 
-        const mentioned = /britzmedi|BRITZMEDI|torr\s*rf|TORR\s*RF/i.test(fullText);
-
-        let mentionContext = '';
-        if (mentioned) {
-          const regex = /.{0,100}(britzmedi|BRITZMEDI|torr\s*rf|TORR\s*RF).{0,100}/gi;
-          const matches = fullText.match(regex);
-          mentionContext = matches ? matches.slice(0, 3).join(' ... ') : '';
+          results.push({ query, mentioned, mentionContext: mentionContext.substring(0, 200) });
+        } catch (e: any) {
+          results.push({ query, mentioned, error: e.message });
         }
-
-        await db.prepare(
-          'INSERT INTO aeo_checks (query, ai_engine, response_text, mentioned, mention_context) VALUES (?, ?, ?, ?, ?)'
-        ).bind(
-          query,
-          'claude',
-          fullText.substring(0, 5000),
-          mentioned ? 1 : 0,
-          mentionContext.substring(0, 1000),
-        ).run();
-
-        results.push({ query, mentioned, mentionContext: mentionContext.substring(0, 200) });
-      } catch (e: any) {
-        results.push({ query, mentioned: false, error: e.message });
       }
     }
 
@@ -118,7 +139,7 @@ export const GET: APIRoute = async ({ locals }) => {
     }
 
     // Check if table has any data
-    const count = await db.prepare('SELECT COUNT(*) as cnt FROM aeo_checks').first<any>();
+    const count = (await db.prepare('SELECT COUNT(*) as cnt FROM aeo_checks').first()) as any;
     if (!count || count.cnt === 0) {
       return new Response(JSON.stringify({
         total: 0,

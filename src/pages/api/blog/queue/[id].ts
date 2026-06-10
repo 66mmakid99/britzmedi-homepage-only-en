@@ -27,7 +27,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const db = (runtime?.env as Env | undefined)?.DB;
 
     if (!db) {
-      return new Response(JSON.stringify({ job: { id, status: 'pending', progress: 0 } }), {
+      return new Response(JSON.stringify({ error: 'database unavailable' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -69,7 +70,8 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     const db = (runtime?.env as Env | undefined)?.DB;
 
     if (!db) {
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ error: 'database unavailable' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -126,7 +128,8 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const db = (runtime?.env as Env | undefined)?.DB;
 
     if (!db) {
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ error: 'database unavailable' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       });
     }

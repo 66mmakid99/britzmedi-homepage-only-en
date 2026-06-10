@@ -14,9 +14,11 @@ interface CheckResult {
 const ENV_KEYS = [
   'ANTHROPIC_API_KEY', 'GEMINI_API_KEY', 'GITHUB_TOKEN', 'GITHUB_REPO',
   'RESEND_API_KEY', 'SLACK_WEBHOOK_URL',
-  'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN', 'TWITTER_ACCESS_SECRET',
+  'CRON_SECRET',
+  'GMAIL_CLIENT_ID', 'GMAIL_CLIENT_SECRET', 'GMAIL_REFRESH_TOKEN',
+  'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN', 'TWITTER_ACCESS_TOKEN_SECRET',
   'LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET',
-  'INSTAGRAM_ACCESS_TOKEN', 'INSTAGRAM_USER_ID',
+  'INSTAGRAM_ACCESS_TOKEN',
 ];
 
 const REQUIRED_TABLES = [
@@ -24,6 +26,7 @@ const REQUIRED_TABLES = [
   'blog_jobs', 'blog_posts', 'youtube_channels', 'youtube_videos',
   'name_mappings', 'subscribers', 'notification_log',
   'social_accounts', 'social_posts', 'activity_log',
+  'aeo_checks', 'aeo_cycles',
 ];
 
 export const POST: APIRoute = async ({ request, locals }) => {

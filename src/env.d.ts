@@ -95,17 +95,23 @@ interface R2Objects {
 // Cloudflare Runtime Environment
 interface CloudflareEnv {
   DB: D1Database;
-  KV: KVNamespace;
   SESSION: KVNamespace;
   BLOG_IMAGES: R2Bucket;
   ANTHROPIC_API_KEY?: string;
   GEMINI_API_KEY?: string;
+  DEEPL_API_KEY?: string;
   ADMIN_PASSWORD?: string;
+  ADMIN_SESSION_SECRET?: string;
+  CRON_SECRET?: string;
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
   ADMIN_EMAIL?: string;
   GITHUB_TOKEN?: string;
   GITHUB_REPO?: string;
+  SEO_WORKERS_URL?: string;
+  GMAIL_CLIENT_ID?: string;
+  GMAIL_CLIENT_SECRET?: string;
+  GMAIL_REFRESH_TOKEN?: string;
   TWITTER_API_KEY?: string;
   TWITTER_API_SECRET?: string;
   TWITTER_ACCESS_TOKEN?: string;

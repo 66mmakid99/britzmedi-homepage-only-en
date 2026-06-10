@@ -2,6 +2,7 @@
 // Orchestrates PubMed research, Claude AI generation, quality analysis, and gate decisions
 
 import { callClaude, callClaudeWithWebSearch, extractJson, countWords } from './claude-api';
+import { CLAUDE_MODEL } from './ai-models';
 import { getProductContext } from './britzmedi-products';
 import { evaluateBrand, QUALITY_THRESHOLDS } from './aeo-engine';
 import { triggerAutoPost } from './social/auto-post';
@@ -180,7 +181,7 @@ async function claudeGenerate(apiKey: string, keyword: string, research: Researc
 
   const response = await callClaude({
     apiKey,
-    model: 'claude-sonnet-4-20250514',
+    model: CLAUDE_MODEL,
     maxTokens: 6000,
     system: `You are a medical content writer for BRITZMEDI. Write evidence-based, high-quality content. Return ONLY valid JSON.\n\n${productContext}`,
     userMessage: `Write a comprehensive blog article for BRITZMEDI's website.
