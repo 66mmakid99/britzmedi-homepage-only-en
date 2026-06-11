@@ -21,8 +21,8 @@
 - **TEL:** +82-70-4348-7244
 
 ### Certifications & Quality
-- **ISO 13485:2016** - Certified (Certificate No. MK000197)
-- **GMP** - Certified by Korea MFDS
+- **ISO 13485:2016** - Certified (Certificate No. MI000128, valid until November 17, 2028)
+- **GMP** - Certified by Korea MFDS (Certificate No. KTR-ADBAA-27070, valid until June 12, 2027)
 - **FDA Contract Manufacturer** - Registered (Owner/Operator Number: 10088936)
 - **Venture Enterprise** - Certified (R&D Type, valid until June 2028)
 

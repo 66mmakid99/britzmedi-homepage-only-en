@@ -29,8 +29,8 @@ export const certifications: Certification[] = [
     region: "International",
     description: "Certified for the design, development, manufacture, and sales of active medical devices (Electrosurgical unit).",
     products: ["All Medical Devices"],
-    certificateNo: "MK000197",
-    validUntil: "November 17, 2025",
+    certificateNo: "MI000128",
+    validUntil: "November 17, 2028",
   },
   {
     name: "GMP",
@@ -38,7 +38,9 @@ export const certifications: Certification[] = [
     status: "certified",
     region: "Korea",
     description: "Manufacturing facilities certified by the Ministry of Food and Drug Safety (MFDS), Korea for medical device production.",
-    products: ["All Devices"],
+    products: ["Surgical Operation System (수술용 장치)"],
+    certificateNo: "KTR-ADBAA-27070",
+    validUntil: "June 12, 2027",
   },
   {
     name: "MFDS License",
