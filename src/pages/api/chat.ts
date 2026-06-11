@@ -811,7 +811,7 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   // Product inquiries (EN + KO)
   if (lowerMessage.includes('torr') || lowerMessage.includes('rf') || lowerMessage.includes('토르') || lowerMessage.includes('고주파')) {
     return korean
-      ? "TORR RF (MTX-C1)는 FDA 510(k) 인증을 받은 멀티웨이브 RF 시스템입니다. Auto Circular Motion 기술로 고주파 에너지를 균일하게 분배하도록 설계되었으며, 실시간 온도 제어와 Vibro-Comfort 시스템으로 시술 시 편의를 돕습니다. 자세한 내용은 /contact 페이지에서 문의해 주세요."
+      ? "TORR RF (MTX-C1)는 FDA 510(k) 인증을 받은 멀티웨이브 RF 시스템입니다. Auto Circular Motion 기술(특허 제10-2507843호)로 고주파 에너지를 균일하게 분배하도록 설계되었으며, 실시간 온도 제어와 Vibro-Comfort 시스템으로 시술 시 편의를 돕습니다. 자세한 내용은 /contact 페이지에서 문의해 주세요."
       : "TORR RF (MTX-C1) is our flagship FDA 510(k) cleared Multi-Wave RF system. It features patented Auto Circular Motion technology for even energy distribution, real-time temperature control, and the Vibro-Comfort system for patient comfort. Would you like to learn more about its specifications or discuss partnership opportunities?";
   }
 

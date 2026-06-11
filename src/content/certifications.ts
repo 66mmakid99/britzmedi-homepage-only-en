@@ -122,7 +122,7 @@ export const regulatoryRoadmap = [
     products: [
       { name: "All Medical Devices", status: "In Preparation" },
     ],
-    note: "Transitioning from MDD to MDR",
+    note: "Preparing for CE MDR certification",
   },
   {
     region: "Brazil (ANVISA)",
