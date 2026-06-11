@@ -71,14 +71,17 @@ export async function commitFileToGitHub(
 }
 
 /**
- * Delete a file via GitHub API
+ * Delete a file via GitHub API.
+ * A missing file (404) is a no-op success ({ deleted: false }) — legacy items may
+ * never have had a committed file. Any other failure (auth, rate limit, network)
+ * throws so callers can refuse to flip state while the file is still live.
  */
 export async function deleteFileFromGitHub(
   token: string,
   repo: string,
   filePath: string,
   commitMessage: string
-): Promise<void> {
+): Promise<{ deleted: boolean }> {
   const apiUrl = `https://api.github.com/repos/${repo}/contents/${filePath}`;
 
   // Get current sha
@@ -90,8 +93,12 @@ export async function deleteFileFromGitHub(
     },
   });
 
+  if (checkRes.status === 404) {
+    return { deleted: false };
+  }
   if (!checkRes.ok) {
-    throw new Error('File not found on GitHub');
+    const errText = await checkRes.text();
+    throw new Error(`GitHub delete check error (${checkRes.status}): ${errText}`);
   }
 
   const data = await checkRes.json();
@@ -115,6 +122,8 @@ export async function deleteFileFromGitHub(
     const errText = await res.text();
     throw new Error(`GitHub delete error (${res.status}): ${errText}`);
   }
+
+  return { deleted: true };
 }
 
 /**

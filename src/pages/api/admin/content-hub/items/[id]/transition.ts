@@ -126,12 +126,8 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       }
 
       try {
+        // publishContentItem records the 'blog_published' activity itself
         const result = await publishContentItem(db, githubToken, githubRepo, item, body._changed_by || 'admin');
-
-        logActivity(db, {
-          type: 'content_transition',
-          detail: `"${item.title}" ${previousStatus} -> published (publish)`,
-        }).catch(() => {});
 
         return new Response(JSON.stringify({
           success: true,
@@ -147,7 +143,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       } catch (pubErr: any) {
         console.error('[Content Hub Transition] Publish failed:', pubErr);
         return new Response(JSON.stringify({
-          error: 'Publishing failed — item remains in "approved" status',
+          error: 'Publishing did not complete — item status was not updated. Retry publish (a re-run is safe).',
           details: pubErr?.message,
         }), {
           status: 502,
@@ -156,17 +152,32 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       }
     }
 
-    // When unpublishing or archiving from published, delete GitHub file
+    // When unpublishing or archiving from published, delete the GitHub file FIRST.
+    // The UI promises "removed from the live site" — if the delete genuinely fails
+    // (a missing file is fine), refuse to flip D1, mirroring the publish invariant.
     if ((action === 'unpublish' || action === 'archive') && item.slug) {
       const githubToken = env?.GITHUB_TOKEN;
       const githubRepo = env?.GITHUB_REPO;
-      if (githubToken && githubRepo) {
-        try {
-          const filePath = `src/content/blog/${item.slug}.json`;
-          await deleteFileFromGitHub(githubToken, githubRepo, filePath, `chore: ${action} "${item.title}"`);
-        } catch (ghErr: any) {
-          console.warn(`[Transition] GitHub delete failed (may not exist): ${ghErr.message}`);
-        }
+      if (!githubToken || !githubRepo) {
+        return new Response(JSON.stringify({
+          error: 'GitHub credentials not configured (GITHUB_TOKEN, GITHUB_REPO) — the live blog file could not be removed',
+        }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      try {
+        const filePath = `src/content/blog/${item.slug}.json`;
+        await deleteFileFromGitHub(githubToken, githubRepo, filePath, `chore: ${action} "${item.title}"`);
+      } catch (ghErr: any) {
+        console.error(`[Transition] GitHub delete failed: ${ghErr.message}`);
+        return new Response(JSON.stringify({
+          error: `Could not remove the blog file from GitHub — item remains "${item.status}"`,
+          details: ghErr?.message,
+        }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
     }
 

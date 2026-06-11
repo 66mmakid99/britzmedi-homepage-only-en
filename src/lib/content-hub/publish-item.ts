@@ -8,6 +8,9 @@ import { marked } from 'marked';
 import { commitFileToGitHub } from '../youtube-to-blog/github';
 import { logActivity } from '../activity-log';
 import { isHtml } from '../html-to-markdown';
+import { countWords } from '../claude-api';
+
+export { countWords };
 
 export interface PublishItemResult {
   commitSha: string;
@@ -16,8 +19,16 @@ export interface PublishItemResult {
   filePath: string;
 }
 
-export function countWords(text: string): number {
-  return text ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+// Slugs become GitHub API path segments — '#', '?', '/' etc. would make the
+// commit "succeed" at a wrong path the blog globs never pick up (silent ghost).
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
+
+// D1 datetime('now') rows look like '2026-02-21 06:44:35' (UTC, no zone).
+function normalizeIso(raw: unknown, fallback: string): string {
+  if (!raw) return fallback;
+  const s = String(raw);
+  const d = new Date(s.includes(' ') && !s.includes('T') ? s.replace(' ', 'T') + 'Z' : s);
+  return isNaN(d.getTime()) ? fallback : d.toISOString();
 }
 
 export async function publishContentItem(
@@ -29,8 +40,13 @@ export async function publishContentItem(
 ): Promise<PublishItemResult> {
   if (!item?.content) throw new Error('Content item has no content to publish');
   if (!item?.slug) throw new Error('Content item has no slug');
+  if (!SLUG_RE.test(item.slug)) {
+    throw new Error(`Invalid slug "${item.slug}" — only lowercase letters, digits and hyphens are allowed`);
+  }
 
   const now = new Date().toISOString();
+  // Re-publishing must not churn the public publication date (SEO datePublished / index sort)
+  const publishedAt = normalizeIso(item.published_at, now);
 
   // Parse JSON fields safely
   let tags: string[] = [];
@@ -74,7 +90,7 @@ export async function publishContentItem(
     youtubeEmbedUrl: null,
     youtubeUrl: item.source_url || null,
     author: item.author || 'BRITZMEDI Research Team',
-    publishedAt: now,
+    publishedAt,
     updatedAt: now,
     doctor: null,
     schemaJsonLd: item.schema_type ? {
@@ -83,7 +99,7 @@ export async function publishContentItem(
       headline: item.title,
       description: item.excerpt || '',
       keywords: keywords.join(', '),
-      datePublished: now,
+      datePublished: publishedAt,
       dateModified: now,
       author: {
         '@type': 'Organization',
@@ -110,9 +126,9 @@ export async function publishContentItem(
     `feat: publish content "${item.title}"`,
   );
 
-  // Update status to published in D1
+  // Update status to published in D1 (keep the original publish date on re-publish)
   await db.prepare(
-    `UPDATE content_items SET status = 'published', published_at = ?, updated_at = ? WHERE id = ?`
+    `UPDATE content_items SET status = 'published', published_at = COALESCE(published_at, ?), updated_at = ? WHERE id = ?`
   ).bind(now, now, item.id).run();
 
   // Save revision for the publish event

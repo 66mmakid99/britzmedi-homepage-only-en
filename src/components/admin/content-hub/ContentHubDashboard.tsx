@@ -464,7 +464,9 @@ export default function ContentHubDashboard() {
           body: JSON.stringify({ action: 'unpublish' }),
         })
       );
-      await Promise.allSettled(promises);
+      const results = await Promise.allSettled(promises);
+      const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.ok)).length;
+      if (failed > 0) showToast(`${failed} item(s) could not be unpublished (may not be published, or the GitHub removal failed).`);
       setSelectedIds(new Set());
       setSelectedItem(null);
       fetchItems();
