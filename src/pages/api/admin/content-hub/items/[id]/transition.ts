@@ -1,12 +1,17 @@
 // Content Hub Item State Transition API
 // POST /api/admin/content-hub/items/:id/transition
 // Body: { action: 'start_generate' | 'complete_generate' | 'submit_review' | 'approve' | 'reject' | 'publish' | 'archive' }
+//
+// The 'publish' action performs a REAL publish (GitHub JSON commit + D1 update)
+// via the shared lib/content-hub/publish-item.ts — a D1-only status flip here
+// caused "ghost published" items that never appeared on the live site.
 
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { logActivity } from '../../../../../../lib/activity-log';
-import { deleteFileFromGitHub, commitFileToGitHub } from '../../../../../../lib/youtube-to-blog/github';
+import { deleteFileFromGitHub } from '../../../../../../lib/youtube-to-blog/github';
+import { publishContentItem, countWords } from '../../../../../../lib/content-hub/publish-item';
 
 interface Env {
   DB: D1Database;
@@ -64,9 +69,9 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       });
     }
 
-    // Fetch current item
+    // Fetch current item (full row — publish and revision snapshots need content)
     const item = await db.prepare(
-      'SELECT id, title, slug, status FROM content_items WHERE id = ?'
+      'SELECT * FROM content_items WHERE id = ?'
     ).bind(id).first<any>();
 
     if (!item) {
@@ -96,6 +101,61 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
     const env = runtime?.env as Env | undefined;
 
+    // 'publish' delegates to the shared real-publish path (GitHub commit + D1 + revision).
+    // If the commit fails, the item stays 'approved' — never a D1-only "published".
+    if (action === 'publish') {
+      const githubToken = env?.GITHUB_TOKEN;
+      const githubRepo = env?.GITHUB_REPO;
+
+      if (!githubToken || !githubRepo) {
+        return new Response(JSON.stringify({
+          error: 'GitHub credentials not configured (GITHUB_TOKEN, GITHUB_REPO) — publishing would not reach the live site',
+        }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!item.content || !item.slug) {
+        return new Response(JSON.stringify({
+          error: `Content item is missing ${!item.content ? 'content' : 'slug'} — cannot publish`,
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      try {
+        const result = await publishContentItem(db, githubToken, githubRepo, item, body._changed_by || 'admin');
+
+        logActivity(db, {
+          type: 'content_transition',
+          detail: `"${item.title}" ${previousStatus} -> published (publish)`,
+        }).catch(() => {});
+
+        return new Response(JSON.stringify({
+          success: true,
+          previousStatus,
+          newStatus: 'published',
+          action,
+          commitSha: result.commitSha,
+          htmlUrl: result.htmlUrl,
+          message: `Content item published to ${result.filePath}`,
+        }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (pubErr: any) {
+        console.error('[Content Hub Transition] Publish failed:', pubErr);
+        return new Response(JSON.stringify({
+          error: 'Publishing failed — item remains in "approved" status',
+          details: pubErr?.message,
+        }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     // When unpublishing or archiving from published, delete GitHub file
     if ((action === 'unpublish' || action === 'archive') && item.slug) {
       const githubToken = env?.GITHUB_TOKEN;
@@ -110,35 +170,36 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       }
     }
 
-    // Build update query
-    const updateFields: string[] = ['status = ?', 'updated_at = ?'];
-    const updateValues: (string | number | null)[] = [newStatus, now];
-
-    // Set published_at when publishing
-    if (action === 'publish') {
-      updateFields.push('published_at = ?');
-      updateValues.push(now);
-    }
-
-    updateValues.push(id!);
-
     await db.prepare(
-      `UPDATE content_items SET ${updateFields.join(', ')} WHERE id = ?`
-    ).bind(...updateValues).run();
+      `UPDATE content_items SET status = ?, updated_at = ? WHERE id = ?`
+    ).bind(newStatus, now, id).run();
 
     // Save a revision to track the transition
     try {
+      const latestVer = await db.prepare(
+        'SELECT MAX(version) as max_ver FROM content_revisions WHERE content_id = ?'
+      ).bind(item.id).first<any>();
+      const nextVersion = (latestVer?.max_ver || 0) + 1;
+
+      let score: number | null = null;
+      if (item.analysis_data) {
+        try { score = JSON.parse(item.analysis_data).overall_score || null; } catch {}
+      }
+
       await db.prepare(
-        `INSERT INTO content_revisions (
-          content_id, title, content, excerpt, status, changed_by, change_note, created_at
-        ) VALUES (?, ?, NULL, NULL, ?, ?, ?, ?)`
+        `INSERT INTO content_revisions (content_id, version, content, title, meta_description, faqs, change_summary, word_count, score, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         item.id,
+        nextVersion,
+        item.content || '',
         item.title,
-        newStatus,
-        body._changed_by || 'admin',
+        item.excerpt || null,
+        item.faq || null,
         `Status transition: ${previousStatus} -> ${newStatus} (action: ${action})`,
-        now,
+        countWords(item.content || ''),
+        score,
+        body._changed_by || 'admin',
       ).run();
     } catch (revErr: any) {
       console.warn('[Content Hub Transition] Failed to save revision:', revErr.message);

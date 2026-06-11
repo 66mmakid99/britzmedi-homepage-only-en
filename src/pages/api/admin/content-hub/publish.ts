@@ -1,13 +1,12 @@
 // Content Hub Publish API - Publish content item to GitHub (Keystatic blog)
 // POST /api/admin/content-hub/publish
+// Actual publish logic lives in lib/content-hub/publish-item.ts (shared with the
+// kanban transition 'publish' action).
 
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { marked } from 'marked';
-import { commitFileToGitHub } from '../../../../lib/youtube-to-blog/github';
-import { logActivity } from '../../../../lib/activity-log';
-import { isHtml } from '../../../../lib/html-to-markdown';
+import { publishContentItem } from '../../../../lib/content-hub/publish-item';
 
 interface Env {
   DB: D1Database;
@@ -84,115 +83,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const now = new Date().toISOString();
-
-    // Parse JSON fields safely
-    let tags: string[] = [];
-    let keywords: string[] = [];
-    let faqData: any = null;
-
-    try {
-      tags = item.tags ? JSON.parse(item.tags) : [];
-    } catch { tags = []; }
-
-    try {
-      keywords = item.seo_secondary_keywords ? JSON.parse(item.seo_secondary_keywords) : [];
-    } catch { keywords = []; }
-
-    // Include the primary keyword
-    if (item.seo_keyword && !keywords.includes(item.seo_keyword)) {
-      keywords.unshift(item.seo_keyword);
-    }
-
-    try {
-      faqData = item.faq ? JSON.parse(item.faq) : null;
-    } catch { faqData = null; }
-
-    // Convert markdown to HTML for blog rendering (blog pages use set:html)
-    // Strip first H1 heading — the title is shown separately in the hero area
-    const rawHtml = isHtml(item.content) ? item.content : await marked(item.content);
-    const htmlContent = rawHtml.replace(/<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
-
-    // Build blog post JSON (compatible with existing blog system)
-    const blogPostJson = JSON.stringify({
-      title: item.title,
-      slug: item.slug,
-      status: 'published',
-      content: htmlContent,
-      excerpt: item.excerpt || '',
-      metaDescription: item.excerpt || '',
-      keywords,
-      tags: Array.isArray(tags) ? tags : [],
-      category: (item.category || 'medical-devices').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      featuredImage: item.featured_image || null,
-      youtubeEmbedUrl: null,
-      youtubeUrl: item.source_url || null,
-      author: item.author || 'BRITZMEDI Research Team',
-      publishedAt: now,
-      updatedAt: now,
-      doctor: null,
-      schemaJsonLd: item.schema_type ? {
-        '@context': 'https://schema.org',
-        '@type': item.schema_type || 'Article',
-        headline: item.title,
-        description: item.excerpt || '',
-        keywords: keywords.join(', '),
-        datePublished: now,
-        dateModified: now,
-        author: {
-          '@type': 'Organization',
-          name: item.author || 'BRITZMEDI Research Team',
-        },
-        publisher: {
-          '@type': 'Organization',
-          name: 'BRITZMEDI',
-          url: 'https://britzmedi.com',
-        },
-      } : null,
-      faqs: faqData || [],
-      sourceType: item.source_type,
-      seoKeyword: item.seo_keyword,
-    }, null, 2);
-
-    // Commit to GitHub
-    const filePath = `src/content/blog/${item.slug}.json`;
-    const commitMessage = `feat: publish content "${item.title}"`;
-
-    const commitResult = await commitFileToGitHub(
-      githubToken,
-      githubRepo,
-      filePath,
-      blogPostJson,
-      commitMessage,
-    );
-
-    // Update status to published in D1
-    await db.prepare(
-      `UPDATE content_items SET status = 'published', published_at = ?, updated_at = ? WHERE id = ?`
-    ).bind(now, now, content_id).run();
-
-    // Save revision for the publish event
-    try {
-      await db.prepare(
-        `INSERT INTO content_revisions (
-          content_id, title, content, excerpt, status, changed_by, change_note, created_at
-        ) VALUES (?, ?, NULL, NULL, 'published', 'admin', 'Published to GitHub', ?)`
-      ).bind(content_id, item.title, now).run();
-    } catch (revErr: any) {
-      console.warn('[Content Hub Publish] Failed to save revision:', revErr.message);
-    }
-
-    logActivity(db, {
-      type: 'blog_published',
-      detail: `Content Hub: "${item.title}" published to GitHub (${item.slug})`,
-    }).catch(() => {});
+    const result = await publishContentItem(db, githubToken, githubRepo, item, body._changed_by || 'admin');
 
     return new Response(JSON.stringify({
       success: true,
-      commitSha: commitResult.sha,
-      htmlUrl: commitResult.html_url,
-      slug: item.slug,
-      message: `Content published successfully to ${filePath}`,
+      commitSha: result.commitSha,
+      htmlUrl: result.htmlUrl,
+      slug: result.slug,
+      message: `Content published successfully to ${result.filePath}`,
     }), {
       headers: { 'Content-Type': 'application/json' },
     });
