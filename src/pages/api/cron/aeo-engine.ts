@@ -7,7 +7,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { diagnose, plan, produce, analyze, track, runFullCycle } from '../../../lib/aeo-engine';
+import { diagnose, plan, produce, analyze, track, runFullCycle, isAEOEngineEnabled, AEO_DISABLED_MESSAGE } from '../../../lib/aeo-engine';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const runtime = (locals as any).runtime;
@@ -27,6 +27,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Kill switch (WO-2026-08-01-aeo-engine-stop) — 인증 통과 후, 어떤 작업보다 먼저.
+  // 외부 cron(cron-job.org)이 재시도/알람을 띄우지 않도록 200 으로 응답한다.
+  if (!isAEOEngineEnabled(env)) {
+    console.log(`[Cron AEO] ${AEO_DISABLED_MESSAGE}`);
+    return new Response(JSON.stringify({
+      success: true,
+      skipped: true,
+      message: AEO_DISABLED_MESSAGE,
+    }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   }

@@ -107,6 +107,8 @@ interface CloudflareEnv {
   ADMIN_PASSWORD?: string;
   ADMIN_SESSION_SECRET?: string;
   CRON_SECRET?: string;
+  /** AEO Growth Engine kill switch. 'true' 일 때만 엔진 동작. 미설정 = 정지 (WO-2026-08-01-aeo-engine-stop) */
+  AEO_ENGINE_ENABLED?: string;
   SLACK_WEBHOOK_URL?: string;
   RESEND_API_KEY?: string;
   ADMIN_EMAIL?: string;

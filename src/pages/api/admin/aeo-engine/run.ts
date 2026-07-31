@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { diagnose, plan, produce, analyze, track, runFullCycle } from '../../../../lib/aeo-engine';
+import { diagnose, plan, produce, analyze, track, runFullCycle, isAEOEngineEnabled, AEO_DISABLED_MESSAGE } from '../../../../lib/aeo-engine';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const runtime = (locals as any).runtime;
@@ -11,6 +11,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!env?.DB || !env?.ANTHROPIC_API_KEY) {
     return new Response(JSON.stringify({ error: 'Missing required env vars' }), {
       status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Kill switch (WO-2026-08-01-aeo-engine-stop) — 대시보드 수동 실행도 동일하게 차단.
+  if (!isAEOEngineEnabled(env)) {
+    console.log(`[Admin AEO] ${AEO_DISABLED_MESSAGE}`);
+    return new Response(JSON.stringify({
+      success: true,
+      skipped: true,
+      message: AEO_DISABLED_MESSAGE,
+    }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   }

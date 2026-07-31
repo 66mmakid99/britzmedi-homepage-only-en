@@ -20,6 +20,24 @@ interface Env {
   DB: D1Database;
   ANTHROPIC_API_KEY: string;
   RESEND_API_KEY?: string;
+  AEO_ENGINE_ENABLED?: string;
+}
+
+// ==========================================
+// KILL SWITCH — WO-2026-08-01-aeo-engine-stop
+// ==========================================
+// 엔진은 AEO_ENGINE_ENABLED === 'true' 일 때만 동작한다.
+// 미설정(unset) 또는 다른 값 = 정지. 즉 기본값이 "정지"다.
+// 정지 이유: 일일 full cycle 의 diagnose() 가 web_search 5건을
+// 매일 태우는데 실제 콘텐츠 발행으로 이어지지 않았다(WO-2026-08-01-chatbot-key-audit).
+//
+// 재가동: Cloudflare Pages 환경변수 AEO_ENGINE_ENABLED = 'true' 설정 후 재배포.
+// 로직은 지우지 않았으므로 플래그만 켜면 그대로 되살아난다.
+
+export const AEO_DISABLED_MESSAGE = 'AEO engine disabled, skipped';
+
+export function isAEOEngineEnabled(env: { AEO_ENGINE_ENABLED?: string } | null | undefined): boolean {
+  return env?.AEO_ENGINE_ENABLED === 'true';
 }
 
 // ==========================================
@@ -508,6 +526,13 @@ Return JSON: { "recommendations": ["Specific recommendation 1", ...] }`;
 // ==========================================
 
 export async function runFullCycle(env: Env): Promise<any> {
+  // Kill switch — 어떤 경로로 들어와도 Claude/web_search 호출 전에 멈춘다.
+  // (API 엔드포인트에도 같은 가드가 있으나, 라이브러리 단에서도 한 번 더 막는다.)
+  if (!isAEOEngineEnabled(env)) {
+    console.log(`[AEO] ${AEO_DISABLED_MESSAGE} (runFullCycle)`);
+    return { skipped: true, reason: AEO_DISABLED_MESSAGE };
+  }
+
   const cycleStart = Date.now();
   const results: Record<string, any> = {};
 
