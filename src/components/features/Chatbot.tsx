@@ -1,11 +1,18 @@
 // BRITZMEDI AI Chatbot Component
 import { useState, useRef, useEffect, useCallback } from 'react';
+import ChatMessageBody from './ChatMessageBody';
+import ChatLeadForm from './ChatLeadForm';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
 }
+
+// Keywords that mark a conversation as a distributor enquiry rather than a general
+// product question. Distribution/partnership is the single biggest topic in the
+// chat log (9 of 20 conversations), so the lead is tagged accordingly.
+const DISTRIBUTOR_HINT = /(distribut|dealer|reseller|partner|agent|oem|odm|총판|대리점|유통|파트너|distribuidor|distributeur)/i;
 
 interface ChatbotProps {
   productContext?: string;
@@ -29,6 +36,8 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [chatSessionId, setChatSessionId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [leadCaptured, setLeadCaptured] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -103,10 +112,12 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
       timestamp: new Date()
     };
 
-    if (!messageOverride) {
-      setMessages(prev => [...prev, userMessage]);
-      setInputValue('');
-    }
+    // Always show the visitor's own question, including quick-action and suggestion
+    // clicks. Skipping it (the old `if (!messageOverride)` guard) meant the answer
+    // appeared with no question above it, AND the question never entered `messages`
+    // — so it was also missing from the history sent to Claude on the next turn.
+    setMessages(prev => [...prev, userMessage]);
+    if (!messageOverride) setInputValue('');
     setIsLoading(true);
 
     try {
@@ -175,6 +186,11 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
 
       setMessages(prev => [...prev, assistantMessage]);
 
+      // Server flags commercial intent → offer the inline lead form (once).
+      if (data.showLeadForm && !leadCaptured) {
+        setShowLeadForm(true);
+      }
+
       if (data.suggestions && Array.isArray(data.suggestions)) {
         setSuggestions(data.suggestions);
       } else {
@@ -200,19 +216,49 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   }, [pendingMessage]);
 
-  // Detect clicks on /contact links in messages → mark as lead converted
-  const handleMessageClick = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'A' && target.getAttribute('href')?.includes('/contact')) {
-      if (conversationId) {
-        fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: '_lead_converted', sessionId: chatSessionId, conversationId, leadConverted: true })
-        }).catch(() => {});
-      }
-    }
+  // Mark the conversation as converted.
+  //
+  // This replaces a handler that listened for clicks on `<a href*="/contact">` but
+  // was never bound to any element — and could not have worked anyway, because
+  // messages were rendered as plain text so no anchor ever existed. That is why
+  // lead_converted was 0 for all 20 stored conversations: the signal was
+  // unreachable, not absent.
+  const markConverted = useCallback(() => {
+    if (!conversationId) return;
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '_lead_converted', sessionId: chatSessionId, conversationId, leadConverted: true })
+    }).catch(() => {});
   }, [conversationId, chatSessionId]);
+
+  // Fired by ChatMessageBody for any link inside a bot answer.
+  const handleLinkClick = useCallback((href: string) => {
+    if (href.includes('/contact') || href.startsWith('mailto:')) markConverted();
+  }, [markConverted]);
+
+  const handleLeadSubmitted = useCallback(() => {
+    setLeadCaptured(true);
+    setShowLeadForm(false);
+    markConverted();
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: "Thanks — your details are with our team now. Someone will get back to you by email, usually within 1-2 business days. Anything else I can help with in the meantime?",
+      timestamp: new Date(),
+    }]);
+  }, [markConverted]);
+
+  // Last few turns, attached to the lead so sales sees what was actually asked.
+  const buildTranscript = useCallback(() => {
+    return messages
+      .slice(-8)
+      .map(m => `${m.role === 'user' ? 'Visitor' : 'Assistant'}: ${m.content}`)
+      .join('\n\n');
+  }, [messages]);
+
+  const inquiryType: 'distributor' | 'product_info' = messages.some(
+    m => m.role === 'user' && DISTRIBUTOR_HINT.test(m.content)
+  ) ? 'distributor' : 'product_info';
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -335,13 +381,27 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
                         : 'bg-slate-100 text-slate-800 rounded-bl-md'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <ChatMessageBody content={message.content} onLinkClick={handleLinkClick} />
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    )}
                     <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-white/60' : 'text-slate-400'}`}>
                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
               ))}
+
+              {/* Inline lead capture — appears when the visitor shows buying intent */}
+              {showLeadForm && !leadCaptured && !isLoading && (
+                <ChatLeadForm
+                  transcript={buildTranscript()}
+                  inquiryType={inquiryType}
+                  onSubmitted={handleLeadSubmitted}
+                  onDismiss={() => setShowLeadForm(false)}
+                />
+              )}
 
               {isLoading && (
                 <div className="flex justify-start">

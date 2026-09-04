@@ -7,7 +7,8 @@ import type { APIRoute } from 'astro';
 // Import knowledge base at build time (fs.readFileSync doesn't work on Cloudflare Workers)
 import knowledgeBaseContent from '../../data/chatbot-knowledge.md?raw';
 import { notifyNewLead } from '../../lib/email-notifications';
-import { CLAUDE_MODEL } from '../../lib/ai-models';
+import { CHATBOT_MODEL } from '../../lib/ai-models';
+import { stripProhibitedClaims } from '../../lib/prohibited-claims';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
@@ -83,6 +84,14 @@ function sanitizeHistory(history: unknown): ChatMessage[] {
     totalChars += recent[i].content.length;
     if (totalChars > HISTORY_LIMITS.maxTotalChars) break;
     kept.unshift(recent[i]);
+  }
+
+  // The Messages API requires the first message to be `user`. The client seeds the
+  // widget with a canned assistant greeting, so an unfiltered history can start with
+  // an assistant turn (and after a trim, can even be assistant-only). Drop any
+  // leading assistant turns — they carry no information the model needs.
+  while (kept.length > 0 && kept[0].role === 'assistant') {
+    kept.shift();
   }
 
   return kept;
@@ -339,6 +348,8 @@ function buildSystemPrompt(context?: { product?: string; page?: string }): strin
 10. When uncertain about ANY detail, direct users to /contact. Never guess.
 11. 질문에 대한 정확한 정보가 없으면, 솔직하게 "죄송합니다, 해당 정보는 제가 안내드리기 어렵습니다. 자세한 내용은 /contact 페이지를 통해 직접 문의해 주세요."라고 답변하세요. 절대로 모르는 정보를 추측하거나 관련 없는 답변으로 대체하지 마세요.
 12. Examples of questions you CANNOT answer (must redirect to /contact): employee count, revenue, specific client names, internal processes, salary, org structure, investor info, financial details.
+13. You CAN capture a visitor's contact details. A secure form appears directly inside this chat window whenever someone shows buying or partnership intent. NEVER say "I'm just a chatbot and can't collect your details" or "I'm not able to store or forward your email" — that is false and it has already cost us real leads. If someone offers their email or phone number, or asks how to reach the team, thank them and tell them a short form is right there in the chat (and that /contact works too).
+14. Do NOT offer OEM/ODM or contract-manufacturing partnerships. BRITZMEDI works through country-level distribution partners only. You may still state the factual FDA Contract Manufacturer registration when asked about credentials — just don't pitch OEM/ODM services or invite OEM proposals.
 
 ## YOUR KNOWLEDGE BASE
 The following document is your ONLY source of truth. Everything you say must come from this document.
@@ -391,23 +402,52 @@ Detect the user's language from their message and respond in the SAME language.
 You must sound like a real person, not an AI chatbot.
 
 NEVER do this:
-- Don't use **bold** or *italics* excessively
-- Don't make bullet point lists for every answer
 - Don't start with "Great question!" or "Absolutely!" or "I'd be happy to..."
-- Don't use numbered lists unless specifically asked
-- Don't over-structure your responses with headers
+- Don't over-structure your responses with headers (#, ##)
+- Don't wrap an answer in bold just to look organized
 
 ALWAYS do this:
 - Write in natural, flowing sentences
 - Keep it conversational - like you're talking to a colleague
 - Be direct and concise (2-4 sentences for simple questions)
-- Use plain text, minimal formatting
-- Only use formatting when genuinely needed (like technical specs)
+- Only expand when the question genuinely needs detail
 
-For pricing, partnerships, or detailed inquiries, guide them to the contact form at /contact page.
-When mentioning the contact form, say something like "You can reach us through our contact form at /contact" or "Feel free to submit an inquiry at /contact".`;
+## FORMATTING THE CHAT WIDGET SUPPORTS
+This is a narrow chat bubble (roughly 320px wide on a phone). It renders a small
+subset of Markdown, so use only what is listed here:
+- **bold** and \`inline code\` — fine, used sparingly
+- "- " bullet lists and "1. " numbered lists — fine for specs or steps, keep items to one line
+- Site paths like /contact, /products, /faq become clickable links automatically — always write them as bare paths, never as [text](url) Markdown links
+- Do NOT use Markdown tables. They do not fit and they read as broken pipes. Give specs as short bullets instead.
+- Do NOT use headers (#, ##, ###) or horizontal rules.
+
+For pricing, partnerships, or detailed inquiries, invite them to leave their details.
+A short form appears in this chat automatically when someone shows buying intent, so
+phrase it as "leave your details right here and our team will get back to you" — and
+you can add that /contact works too.`;
 
   return systemPrompt;
+}
+
+// --- Lead capture trigger (P0-1) ---
+//
+// Until now the bot's only call to action was the literal string "/contact", which
+// the widget rendered as plain text. On 2026-08-18 an Ecuadorian visitor offered his
+// email, was refused twice, asked "How do I do that?" and left. Commercial intent now
+// surfaces an inline form inside the chat instead.
+const LEAD_INTENT_PATTERNS: RegExp[] = [
+  /\b(distributor|distribution|distribut\w*|dealer|reseller|partner(ship)?|agent)\b/i,
+  /\b(price|pricing|cost|quote|quotation|invoice|moq|discount)\b/i,
+  /\b(buy|purchase|order|import|bring .{0,20}(machine|device|unit)s?)\b/i,
+  /\b(demo|sample|trial|catalog(ue)?|brochure|price list)\b/i,
+  /\b(contact|email|phone|whatsapp|reach (you|us|me)|get in touch|call me)\b/i,
+  /(총판|대리점|유통|파트너|가격|견적|구매|주문|수입|문의)/,
+  /(distribuidor|distribuci[oó]n|precio|cotizaci[oó]n|comprar)/i,
+  /(distributeur|distribution|prix|devis|acheter)/i,
+];
+
+function hasLeadIntent(userMessage: string): boolean {
+  return LEAD_INTENT_PATTERNS.some((p) => p.test(userMessage));
 }
 
 // --- D1 Conversation Persistence ---
@@ -618,6 +658,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return new Response(JSON.stringify({
         message: fallbackMessage,
         suggestions,
+        showLeadForm: hasLeadIntent(body.message),
         fallback: true,
         sessionId,
         conversationId,
@@ -645,8 +686,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 2048,
+        model: CHATBOT_MODEL,
+        // Opus 5 runs adaptive thinking by default and thinking tokens draw on
+        // max_tokens, so the old 2048 ceiling could truncate the visible answer.
+        max_tokens: 4096,
+        // Chat is latency-sensitive and these are short factual answers — low effort
+        // keeps response time close to the previous model.
+        output_config: { effort: 'low' },
         system: buildSystemPrompt(body.context),
         messages
       })
@@ -662,6 +708,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return new Response(JSON.stringify({
         message: fallbackMessage,
         suggestions,
+        showLeadForm: hasLeadIntent(body.message),
         fallback: true,
         error: `API error: ${response.status}`
       }), {
@@ -670,14 +717,47 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const data = await response.json();
-    const assistantMessage = data.content?.[0]?.text || 'I apologize, but I encountered an issue. Please try again.';
+    const data = await response.json() as {
+      content?: { type?: string; text?: string }[];
+      stop_reason?: string;
+      usage?: { input_tokens?: number; output_tokens?: number };
+    };
 
     // Log API usage for cost monitoring
     const inputTokens = data.usage?.input_tokens || 0;
     const outputTokens = data.usage?.output_tokens || 0;
     if (data.usage) {
       logRequestUsage(inputTokens, outputTokens);
+    }
+
+    // Opus 5 emits thinking blocks, so content[0] is not necessarily the answer —
+    // take the first *text* block. Also honour a policy refusal (HTTP 200 with
+    // stop_reason "refusal" and no usable text) by serving the deterministic
+    // local fallback rather than an empty bubble.
+    const textBlock = data.content?.find((b) => b?.type === 'text' && typeof b.text === 'string');
+    let assistantMessage = textBlock?.text?.trim() || '';
+
+    if (data.stop_reason === 'refusal' || !assistantMessage) {
+      if (data.stop_reason === 'refusal') {
+        console.warn('[CHAT] Claude returned stop_reason=refusal — serving local fallback');
+      } else {
+        console.warn('[CHAT] Claude returned no text block — serving local fallback');
+      }
+      assistantMessage = getFallbackResponse(body.message, body.context);
+    }
+
+    // P0-4: strip banned regulatory claims (CE-MDR etc.) before anything is shown,
+    // stored, or echoed back as history. Instructions alone have failed before.
+    const claimCheck = stripProhibitedClaims(assistantMessage);
+    assistantMessage = claimCheck.text;
+    if (claimCheck.removed.length > 0) {
+      console.error(`[CHAT PROHIBITED CLAIM] session=${sessionId.slice(0, 20)} removed=${JSON.stringify(claimCheck.removed)}`);
+      notifyNewLead(env, {
+        type: 'chatbot',
+        message: `⚠️ Chatbot produced a banned claim and it was auto-removed: ${claimCheck.removed.join(' | ')}`.substring(0, 500),
+        country: visitorCountry || 'Unknown',
+        source_url: request.headers.get('referer') || 'https://britzmedi.com',
+      }).catch(() => {});
     }
 
     // Save conversation to D1 (non-blocking, don't fail the response)
@@ -709,6 +789,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(JSON.stringify({
       message: assistantMessage,
       suggestions,
+      // P0-1: surface the inline lead form when the visitor shows commercial intent.
+      showLeadForm: hasLeadIntent(body.message),
       fallback: false,
       sessionId,
       conversationId,
@@ -762,7 +844,11 @@ function generateFollowUpSuggestions(
     suggestions.push('Which products are FDA cleared?');
     suggestions.push('Do you have ISO certification?');
     suggestions.push('What markets can you export to?');
-  } else if (lowerMessage.includes('distributor') || lowerMessage.includes('partner') || lowerResponse.includes('distributor')) {
+  } else if (
+    lowerMessage.includes('distributor') || lowerMessage.includes('partner') ||
+    lowerMessage.includes('oem') || lowerMessage.includes('odm') ||
+    lowerResponse.includes('distributor')
+  ) {
     suggestions.push('What regions need distributors?');
     suggestions.push('What support do you offer partners?');
     suggestions.push('What are the partnership requirements?');
@@ -770,11 +856,11 @@ function generateFollowUpSuggestions(
     suggestions.push('Do you offer volume discounts?');
     suggestions.push('What payment terms are available?');
     suggestions.push('Can I request a demo unit?');
-  } else if (lowerMessage.includes('oem') || lowerMessage.includes('odm') || lowerResponse.includes('oem')) {
-    suggestions.push('How do I become a country distributor?');
-    suggestions.push('Which products are available for distribution?');
-    suggestions.push('What are the minimum order quantities?');
   }
+  // NOTE: the OEM/ODM branch was removed on 2026-09-05. BRITZMEDI pivoted to
+  // distributor-only B2B on 2026-06-10 (commit a7d77e1), but this branch kept
+  // steering OEM enquiries — and on 2026-05-20 the bot pitched OEM/ODM to a
+  // European prospect. OEM wording now routes through the distributor branch above.
   // General conversation suggestions
   else if (lowerMessage.includes('hello') || lowerMessage.includes('hi ') || lowerMessage.length < 20) {
     suggestions.push('Tell me about your products');
@@ -830,7 +916,11 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   if (lowerMessage.includes('lumino') || lowerMessage.includes('led') || lowerMessage.includes('루미노') || lowerMessage.includes('엘이디')) {
     return korean
       ? "LUMINO WAVE는 초음파와 레이저를 결합한 융복합(Convergence) 방식의 디바이스로, 2026년 하반기 출시를 목표로 현재 국내 인허가 절차를 진행 중입니다. 자세한 내용은 /contact에서 문의해 주세요."
-      : "LUMINO WAVE is a professional LED phototherapy device with multiple wavelengths, designed for aesthetic clinics and medical spas. For details, visit /contact.";
+      // Corrected 2026-09-05: this said "LED phototherapy device with multiple
+      // wavelengths", which contradicts the knowledge base (LUMINO WAVE / LSR-10 is
+      // an ultrasound + laser convergence device). The Korean branch was already
+      // correct. This path now also serves policy refusals, so it must be accurate.
+      : "LUMINO WAVE (LSR-10) is our next-generation device combining ultrasound and laser in a convergence approach — ultrasound-induced microbubbles let the laser penetrate deeper at lower power. It's under MFDS review, with launch expected in H2 2026. For details, visit /contact.";
   }
 
   // CEO / representative (KO + EN)

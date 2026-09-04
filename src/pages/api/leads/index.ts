@@ -217,6 +217,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       required = ['email', 'contact_name', 'company_name'];
     } else if (source === 'newsletter') {
       required = ['email'];
+    } else if (source === 'chatbot') {
+      // Inline form inside the chat widget. Deliberately lighter than the website
+      // form — a visitor mid-conversation will not fill six fields, and until now
+      // they filled zero (chatbot lead conversion was 0/20 over six months).
+      // Country stays required because it is what the sales team needs first on a
+      // distributor enquiry; company/job title are optional and enrich the score.
+      required = ['email', 'contact_name', 'country'];
     } else {
       required = ['company_name', 'contact_name', 'job_title', 'email', 'country', 'interested_products'];
     }
