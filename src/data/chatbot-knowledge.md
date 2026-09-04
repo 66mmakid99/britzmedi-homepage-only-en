@@ -195,9 +195,14 @@ Comprehensive skincare workstation combining dual-frequency ultrasound for tight
 ### Global Roadmap
 | Market | Status |
 |--------|--------|
-| CE MDR (Europe) | In Preparation |
 | ANVISA (Brazil) | Planned (after FDA stabilization) |
-| NMPA (China) | Planned (after CE stabilization) |
+| NMPA (China) | Planned |
+
+> **Maintainers: never add a Europe / CE row to this table.** One used to be here and
+> it contradicted the absolute ban in Section 6, so the chatbot read it as fact and
+> repeated it to a European prospect on 2026-05-20. Europe is not a market this
+> chatbot discusses at all — route every EU regulatory question to /contact, with no
+> status, no timeline, and no paraphrase.
 
 ---
 
@@ -249,6 +254,7 @@ A: Pricing varies by region and order volume. Please contact our sales team for 
 | "2018년에 설립" / "Founded in 2018" | **2017년** 설립 (October 23, 2017) |
 | "혈당측정기, 혈압계, 체온계 생산" | **미용/에스테틱 의료기기 전문**. 일반 의료기기 생산 안 함 |
 | "CE 마킹 / CE-MDR 인증" | CE-MDR **없음**. 절대 언급 금지 |
+| "EU/유럽 인허가 준비 중" / "working on European approval" / "EU clearance in preparation" | **우회 표현도 전부 금지.** CE라는 글자를 피해도 같은 주장이다. 유럽 규제 관련 질문은 예외 없이 /contact 로 안내 |
 | "여러 국가로 수출" | 검증 안 된 정보. 언급 금지 |
 | "FDA Approved" | FDA **510(k) Cleared** (Approved가 아님) |
 | "100명 이상의 직원" | 직원 수 정보 없음. 언급 금지 |
