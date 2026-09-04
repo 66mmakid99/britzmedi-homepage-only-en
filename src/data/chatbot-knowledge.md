@@ -236,9 +236,36 @@ A: Depending on the handpiece - Large: 3.5-10mm (body), Small: 2.5-6mm (face), M
 **Q: Is TORR RF safe?**
 A: Yes. It features real-time temperature monitoring with automatic cutoff (30-50°C range) to prevent burns. It complies with IEC 60601-1 safety standards.
 
-### Distribution
-**Q: Do you offer distribution partnerships?**
-A: Yes, we welcome distribution partnerships. Please contact us through the inquiry form for details.
+### Distribution & Partnership
+> Source: these answers are already published on britzmedi.com/faq. They are safe to
+> give in full — the site says the same thing to anyone who reads it.
+
+**Q: How can I become a BRITZMEDI distributor?**
+A: We welcome partnership inquiries from qualified distributors worldwide. Send us your company information, the territory you're interested in, and your relevant experience in medical device distribution. We review each application and then arrange a consultation.
+
+**Q: What are the partnership requirements?**
+A: The three things we ask for up front are company information, territory of interest, and relevant experience in medical device distribution. Partners also need to be able to handle medical device distribution under their own market's regulations. Anything beyond that — volumes, terms, exclusivity — is decided case by case with our sales team.
+
+**Q: What are the minimum order quantities?**
+A: MOQ varies by product and market. We offer flexible arrangements for qualified distributors and can discuss sample units for evaluation. Exact numbers come from our sales team for your specific territory.
+
+**Q: Do you ship internationally?**
+A: Yes. We ship to distributors and partners worldwide from our GMP-certified facility in Korea, following international medical device shipping standards. Shipping terms and logistics are agreed during partnership negotiations.
+
+**Q: Do you have a distributor in [country]? / Which regions still need distributors?**
+A: **This is NOT in this document — do not guess.** Territory availability changes and is not something you can confirm. Say you don't have that information and send them to /contact with their country named, or invite them to leave their details in the chat so the team can answer directly.
+
+### Support & Service
+> Source: also published on britzmedi.com/faq.
+
+**Q: What support do you offer partners? / Do you provide training?**
+A: Yes — we run training programs for all our devices, covering device operation, treatment protocols, safety procedures and maintenance. Training can be done on-site, at our facility in Korea, or through our digital training platform.
+
+**Q: How can I get technical support?**
+A: Three routes: through your local authorized distributor, by email at sh.lee@britzmedi.com, or by phone at +82-70-4348-7244 during business hours (9:00 AM – 6:00 PM KST, Monday–Friday). We aim to respond to all inquiries within 1–2 business days.
+
+**Q: What is your warranty policy?**
+A: Our products come with a standard manufacturer warranty covering manufacturing defects, and it includes technical support. Extended warranty options are available. Terms and coverage vary by product and region, so the specifics come from the purchase documentation or our support team.
 
 ### Pricing
 **Q: What are the product prices?**
@@ -364,5 +391,18 @@ Display names according to each language's naming convention:
 
 ---
 
-*Last Updated: December 2025*
-*Version: 1.1*
+*Last Updated: 2026-09-05*
+*Version: 1.3*
+
+**Changelog**
+- v1.3 (2026-09-05) — Ported the six distribution/support answers already published on
+  britzmedi.com/faq (becoming a distributor, partnership requirements, MOQ,
+  international shipping, training, technical support, warranty). Distribution was the
+  single biggest topic in the chat log — 9 of 20 conversations — and this document had
+  four lines on it, so the bot answered "I don't have that information" to questions
+  the website was already answering in public.
+- v1.2 (2026-09-05) — Removed the Europe/CE row from the Global Roadmap. It
+  contradicted the absolute ban in Section 6 and the bot repeated it to a European
+  prospect on 2026-05-20. Added the paraphrase ban.
+- Keep this changelog when editing. Do not use relative dates ("next year", "coming
+  soon") anywhere in this document — they turn into false statements on their own.

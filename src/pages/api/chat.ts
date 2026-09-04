@@ -837,25 +837,36 @@ function generateFollowUpSuggestions(
   } else if (lowerMessage.includes('lumino') || lowerResponse.includes('lumino')) {
     suggestions.push('When will LUMINO WAVE be released?');
     suggestions.push('What makes LUMINO WAVE unique?');
-    suggestions.push('Can I get updates on LUMINO WAVE?');
+    // Was "Can I get updates on LUMINO WAVE?" — there is no notification mechanism
+    // documented, so the bot had nothing to offer.
+    suggestions.push('What is the regulatory status of LUMINO WAVE?');
   }
   // Topic-specific suggestions
   else if (lowerMessage.includes('fda') || lowerMessage.includes('certification') || lowerResponse.includes('fda')) {
     suggestions.push('Which products are FDA cleared?');
     suggestions.push('Do you have ISO certification?');
-    suggestions.push('What markets can you export to?');
+    // Was "What markets can you export to?" — the knowledge base explicitly forbids
+    // naming export countries, so the chip asked for an answer the bot must refuse.
+    suggestions.push('Is your facility GMP certified?');
   } else if (
     lowerMessage.includes('distributor') || lowerMessage.includes('partner') ||
     lowerMessage.includes('oem') || lowerMessage.includes('odm') ||
     lowerResponse.includes('distributor')
   ) {
-    suggestions.push('What regions need distributors?');
-    suggestions.push('What support do you offer partners?');
+    // "What regions need distributors?" was dropped on 2026-09-05. Territory
+    // availability is not in the knowledge base, so it produced "I don't have that
+    // information" every time — in conversations #5, #11, #14 and #19 the visitor
+    // clicked these chips and got three refusals in a row. The two below are now
+    // answerable from the FAQ content ported into the knowledge base.
     suggestions.push('What are the partnership requirements?');
+    suggestions.push('What support do you offer partners?');
+    suggestions.push('What are the minimum order quantities?');
   } else if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerResponse.includes('pricing')) {
-    suggestions.push('Do you offer volume discounts?');
-    suggestions.push('What payment terms are available?');
-    suggestions.push('Can I request a demo unit?');
+    // Volume discounts / payment terms / demo units are not documented anywhere.
+    // These three are.
+    suggestions.push('What are the minimum order quantities?');
+    suggestions.push('Do you ship internationally?');
+    suggestions.push('How can I become a distributor?');
   }
   // NOTE: the OEM/ODM branch was removed on 2026-09-05. BRITZMEDI pivoted to
   // distributor-only B2B on 2026-06-10 (commit a7d77e1), but this branch kept
@@ -871,8 +882,10 @@ function generateFollowUpSuggestions(
   else {
     if (context?.product) {
       suggestions.push(`What are the specifications?`);
-      suggestions.push(`Is this product FDA approved?`);
-      suggestions.push(`How can I order this product?`);
+      // "FDA approved" is the exact wording the knowledge base bans (it is 510(k)
+      // *cleared*), so the chip was teaching visitors the wrong term.
+      suggestions.push(`Is this product FDA cleared?`);
+      suggestions.push(`How can I become a distributor?`);
     } else {
       suggestions.push('Tell me about TORR RF');
       suggestions.push('What certifications do you have?');
