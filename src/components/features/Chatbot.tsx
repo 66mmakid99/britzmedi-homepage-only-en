@@ -458,8 +458,14 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
               </div>
             )}
 
-            {/* Follow-up Suggestions */}
-            {suggestions.length > 0 && messages.length > 1 && !isLoading && !requireVerification && (
+            {/* Follow-up Suggestions.
+                Hidden while the lead form is up: the form is the conversion action and
+                the chips compete with it for a ~320px column. It matters most exactly
+                when the form shows — the distributor chips ("What regions need
+                distributors?", "What support do you offer partners?", "What are the
+                partnership requirements?") have no answer in the knowledge base, so
+                they walk a ready-to-convert visitor into three "I don't know" replies. */}
+            {suggestions.length > 0 && messages.length > 1 && !isLoading && !requireVerification && !(showLeadForm && !leadCaptured) && (
               <div className="px-4 pb-2 shrink-0">
                 <p className="text-xs text-slate-500 mb-2">You might also ask:</p>
                 <div className="flex flex-col gap-1.5">
