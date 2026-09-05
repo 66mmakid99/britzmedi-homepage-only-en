@@ -38,6 +38,9 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [leadCaptured, setLeadCaptured] = useState(false);
+  // Taller/wider panel. Long answers (TORR RF specs run ~15 lines) and the lead form
+  // both overflow the default 384x512 desktop panel.
+  const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -68,13 +71,15 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     const mobile = window.innerWidth < 640;
 
     if (isOpen && !isMinimized && mobile) {
-      // Capture height ONCE — store in ref, apply directly to DOM
+      // Capture the VIEWPORT height ONCE. Mobile browsers change innerHeight when the
+      // URL bar hides/shows, and reading it on every render made the panel jitter.
+      // Both sizes are derived from this one frozen value, so toggling expand does
+      // not re-introduce that.
       if (capturedHeightRef.current === 0) {
-        capturedHeightRef.current = Math.round(window.innerHeight * 0.8);
+        capturedHeightRef.current = window.innerHeight;
       }
-      // Apply height directly to DOM element — no state, no re-render
       if (chatContainerRef.current) {
-        const h = capturedHeightRef.current + 'px';
+        const h = Math.round(capturedHeightRef.current * (isExpanded ? 0.96 : 0.8)) + 'px';
         chatContainerRef.current.style.height = h;
         chatContainerRef.current.style.maxHeight = h;
       }
@@ -88,7 +93,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     return () => {
       if (!isOpen) lockBodyScroll(false);
     };
-  }, [isOpen, isMinimized, lockBodyScroll]);
+  }, [isOpen, isMinimized, isExpanded, lockBodyScroll]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -248,12 +253,19 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }]);
   }, [markConverted]);
 
-  // Last few turns, attached to the lead so sales sees what was actually asked.
-  const buildTranscript = useCallback(() => {
-    return messages
-      .slice(-8)
-      .map(m => `${m.role === 'user' ? 'Visitor' : 'Assistant'}: ${m.content}`)
-      .join('\n\n');
+  // What the visitor asked in the chat, attached to the lead as context.
+  //
+  // This used to include the assistant's turns too, so the lead email's Message field
+  // was filled with the bot's own greeting and boilerplate instead of anything the
+  // visitor wrote — and that text also fed lead scoring. Visitor turns only now, and
+  // it is appended under a label so it can never be mistaken for what they typed.
+  const buildAskedInChat = useCallback(() => {
+    const asked = messages
+      .filter((m) => m.role === 'user')
+      .map((m) => m.content.trim())
+      .filter(Boolean)
+      .slice(-6);
+    return asked.length ? asked.map((q) => `- ${q}`).join('\n') : '';
   }, [messages]);
 
   const inquiryType: 'distributor' | 'product_info' = messages.some(
@@ -267,10 +279,16 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
     }
   };
 
+  // Always-visible anchor topics, ordered by what visitors actually asked in the
+  // stored chat log (chat_messages, 55 visitor turns): distribution 16, product
+  // specs/treatments 10, product overview 7, contact 5, pricing 3.
+  // Every one of these is answerable from the knowledge base.
   const quickActions = [
-    { label: 'Products', message: 'Tell me about your products' },
-    { label: 'FDA Status', message: 'What FDA certifications do you have?' },
     { label: 'Distributor', message: 'How can I become a distributor?' },
+    { label: 'Products', message: 'Tell me about your products' },
+    { label: 'TORR RF', message: 'What are TORR RF specifications?' },
+    { label: 'Certifications', message: 'What certifications do you have?' },
+    { label: 'Pricing', message: 'How is pricing determined?' },
     { label: 'Contact', message: 'How can I contact your sales team?' }
   ];
 
@@ -313,7 +331,12 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
             ? 'bottom-6 right-6 w-80 h-16 rounded-2xl shadow-2xl border border-slate-200'
             : [
                 'inset-x-0 bottom-0 rounded-t-2xl shadow-2xl',
-                'sm:inset-auto sm:bottom-6 sm:right-6 sm:w-96 sm:h-[32rem] sm:rounded-2xl sm:border sm:border-slate-200'
+                'sm:inset-auto sm:bottom-6 sm:right-6 sm:rounded-2xl sm:border sm:border-slate-200',
+                // Mobile height is driven by the ref (see the effect above); these
+                // only apply from the sm breakpoint up.
+                isExpanded
+                  ? 'sm:w-[30rem] sm:h-[min(46rem,calc(100vh-3rem))]'
+                  : 'sm:w-96 sm:h-[32rem]'
               ].join(' ')
         }`}
       >
@@ -331,6 +354,26 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            {!isMinimized && (
+              <button
+                onClick={() => setIsExpanded((v) => !v)}
+                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                aria-label={isExpanded ? 'Shrink chat window' : 'Enlarge chat window'}
+                title={isExpanded ? 'Shrink' : 'Enlarge'}
+              >
+                {isExpanded ? (
+                  // arrows pointing in
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9L4 4m0 0v5m0-5h5m6 6l5 5m0 0v-5m0 5h-5M9 15l-5 5m0 0h5m-5 0v-5m11-6l5-5m0 0h-5m5 0v5" />
+                  </svg>
+                ) : (
+                  // arrows pointing out
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-5v4m0-4h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                  </svg>
+                )}
+              </button>
+            )}
             {!isMinimized && (
               <button
                 onClick={() => setIsMinimized(true)}
@@ -396,7 +439,7 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
               {/* Inline lead capture — appears when the visitor shows buying intent */}
               {showLeadForm && !leadCaptured && !isLoading && (
                 <ChatLeadForm
-                  transcript={buildTranscript()}
+                  askedInChat={buildAskedInChat()}
                   inquiryType={inquiryType}
                   onSubmitted={handleLeadSubmitted}
                   onDismiss={() => setShowLeadForm(false)}
@@ -440,16 +483,19 @@ export default function Chatbot({ productContext, pageContext }: ChatbotProps) {
               </div>
             )}
 
-            {/* Quick Actions */}
-            {messages.length === 1 && (
-              <div className="px-4 pb-2 shrink-0">
-                <p className="text-xs text-slate-500 mb-2">Quick questions:</p>
-                <div className="flex flex-wrap gap-2">
+            {/* Quick Actions — always available, not just on the first message.
+                A single horizontally scrollable strip so it costs ~36px of height
+                whatever the panel size. Hidden while the lead form is up so it does
+                not compete with the conversion action. */}
+            {!requireVerification && !(showLeadForm && !leadCaptured) && (
+              <div className="shrink-0 border-t border-slate-100 px-3 py-2">
+                <div className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {quickActions.map((action, index) => (
                     <button
                       key={index}
                       onClick={() => sendMessage(action.message)}
-                      className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
+                      disabled={isLoading}
+                      className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50"
                     >
                       {action.label}
                     </button>

@@ -13,8 +13,14 @@
 import { useState } from 'react';
 
 export interface ChatLeadFormProps {
-  /** Recent conversation text, attached to the lead so sales has the context. */
-  transcript: string;
+  /**
+   * The visitor's own questions from this chat, one per line, already prefixed with
+   * "- ". Appended under a label so it is never confused with what they typed here.
+   * Assistant turns are deliberately excluded — an earlier version sent the whole
+   * transcript and the lead email's Message field ended up full of the bot's own
+   * greeting, which also skewed lead scoring.
+   */
+  askedInChat: string;
   /** 'distributor' when the visitor asked about distribution/partnership. */
   inquiryType: 'distributor' | 'product_info';
   onSubmitted: () => void;
@@ -31,14 +37,23 @@ const PRODUCTS = [
 const inputClass =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400';
 
-export default function ChatLeadForm({ transcript, inquiryType, onSubmitted, onDismiss }: ChatLeadFormProps) {
+export default function ChatLeadForm({ askedInChat, inquiryType, onSubmitted, onDismiss }: ChatLeadFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [country, setCountry] = useState('');
   const [company, setCompany] = useState('');
   const [product, setProduct] = useState('');
+  const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // The visitor's own words first; their chat questions after, clearly labelled.
+  const buildMessage = () => {
+    const parts: string[] = [];
+    if (note.trim()) parts.push(note.trim());
+    if (askedInChat) parts.push(`[Asked in chat]\n${askedInChat}`);
+    return parts.join('\n\n');
+  };
 
   const canSubmit = name.trim() && email.trim() && country.trim() && !submitting;
 
@@ -60,7 +75,7 @@ export default function ChatLeadForm({ transcript, inquiryType, onSubmitted, onD
           company_name: company.trim() || undefined,
           interested_products: product ? [product] : [],
           inquiry_type: inquiryType,
-          message: transcript.slice(0, 2000),
+          message: buildMessage().slice(0, 2000) || undefined,
         }),
       });
 
@@ -143,6 +158,22 @@ export default function ChatLeadForm({ transcript, inquiryType, onSubmitted, onD
           <option key={p.value} value={p.value}>{p.label}</option>
         ))}
       </select>
+
+      <textarea
+        className={`${inputClass} resize-none`}
+        rows={3}
+        maxLength={1000}
+        placeholder="Anything you'd like to add? (optional)"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        aria-label="Your message"
+      />
+
+      {askedInChat && (
+        <p className="text-[11px] leading-snug text-slate-500">
+          We'll include what you asked in this chat so the team has the context.
+        </p>
+      )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 
