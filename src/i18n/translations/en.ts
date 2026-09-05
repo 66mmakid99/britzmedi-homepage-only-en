@@ -434,7 +434,7 @@ export const en = {
       },
       'technical-support': {
         question: 'How can I get technical support?',
-        answer: 'Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at sh.lee@britzmedi.com, 3) Call us at +82-70-4348-7244 during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days.',
+        answer: 'Technical support is available through multiple channels: 1) Contact your local authorized distributor, 2) Email our support team at sh.lee@britzmedi.com, 3) Call us at +82-70-4348-7244 (WhatsApp: +82 10-6525-9442) during business hours (9:00 AM - 6:00 PM KST, Monday-Friday). We aim to respond to all inquiries within 1-2 business days.',
       },
       'iso-certification': {
         question: 'Is BRITZMEDI ISO certified?',

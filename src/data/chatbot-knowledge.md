@@ -19,6 +19,7 @@
 - **Business Type:** Manufacturer of Medical Devices, R&D, Wholesale & Retail
 - **Website:** www.britzmedi.com
 - **TEL:** +82-70-4348-7244
+- **WhatsApp:** +82 10-6525-9442 (link: https://wa.me/821065259442)
 
 ### Certifications & Quality
 - **ISO 13485:2016** - Certified (Certificate No. MI000128, valid until November 17, 2028)
@@ -221,7 +222,7 @@ Comprehensive skincare workstation combining dual-frequency ultrasound for tight
 A: Our headquarters is at 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea. 
 
 **Q: How can I contact BRITZMEDI?**
-A: You can reach us at +82-70-4348-7244 or visit our website at www.britzmedi.com.
+A: Phone +82-70-4348-7244, WhatsApp +82 10-6525-9442, email sh.lee@britzmedi.com, or the contact form at /contact. Our website is www.britzmedi.com.
 
 **Q: Is BRITZMEDI FDA registered?**
 A: Yes, we are registered as an FDA Contract Manufacturer (Owner/Operator Number: 10088936), and our TORR RF device is FDA 510(k) cleared (K212561).
@@ -262,7 +263,7 @@ A: **This is NOT in this document — do not guess.** Territory availability cha
 A: Yes — we run training programs for all our devices, covering device operation, treatment protocols, safety procedures and maintenance. Training can be done on-site, at our facility in Korea, or through our digital training platform.
 
 **Q: How can I get technical support?**
-A: Three routes: through your local authorized distributor, by email at sh.lee@britzmedi.com, or by phone at +82-70-4348-7244 during business hours (9:00 AM – 6:00 PM KST, Monday–Friday). We aim to respond to all inquiries within 1–2 business days.
+A: Through your local authorized distributor, by email at sh.lee@britzmedi.com, by phone at +82-70-4348-7244, or on WhatsApp at +82 10-6525-9442 during business hours (9:00 AM – 6:00 PM KST, Monday–Friday). We aim to respond to all inquiries within 1–2 business days.
 
 **Q: What is your warranty policy?**
 A: Our products come with a standard manufacturer warranty covering manufacturing defects, and it includes technical support. Extended warranty options are available. Terms and coverage vary by product and region, so the specifics come from the purchase documentation or our support team.
@@ -386,6 +387,7 @@ Display names according to each language's naming convention:
 
 - **Website:** www.britzmedi.com
 - **TEL:** +82-70-4348-7244
+- **WhatsApp:** +82 10-6525-9442 (link: https://wa.me/821065259442)
 - **Headquarters:** 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, Republic of Korea
 - **Inquiry:** Use the contact form on the website
 

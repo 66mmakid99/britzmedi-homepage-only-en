@@ -436,7 +436,7 @@ export const vi: TranslationKeys = {
       },
       'technical-support': {
         question: 'Làm thế nào để nhận được hỗ trợ kỹ thuật?',
-        answer: 'Hỗ trợ kỹ thuật có sẵn qua nhiều kênh: 1) Liên hệ với nhà phân phối được ủy quyền tại địa phương của bạn, 2) Gửi email cho đội ngũ hỗ trợ của chúng tôi tại sh.lee@britzmedi.com, 3) Gọi cho chúng tôi theo số +82-70-4348-7244 trong giờ làm việc (9:00 SA - 6:00 CH KST, Thứ Hai-Thứ Sáu). Chúng tôi hướng đến phản hồi tất cả các yêu cầu trong vòng 1-2 ngày làm việc.',
+        answer: 'Hỗ trợ kỹ thuật có sẵn qua nhiều kênh: 1) Liên hệ với nhà phân phối được ủy quyền tại địa phương của bạn, 2) Gửi email cho đội ngũ hỗ trợ của chúng tôi tại sh.lee@britzmedi.com, 3) Gọi cho chúng tôi theo số +82-70-4348-7244 (WhatsApp: +82 10-6525-9442) trong giờ làm việc (9:00 SA - 6:00 CH KST, Thứ Hai-Thứ Sáu). Chúng tôi hướng đến phản hồi tất cả các yêu cầu trong vòng 1-2 ngày làm việc.',
       },
       'iso-certification': {
         question: 'BRITZMEDI có được chứng nhận ISO không?',

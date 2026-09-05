@@ -934,8 +934,8 @@ function getFallbackResponse(message: string, context?: { product?: string }): s
   // Location (KO + EN)
   if (lowerMessage.includes('어디') || lowerMessage.includes('위치') || lowerMessage.includes('주소') || lowerMessage.includes('location') || lowerMessage.includes('address') || lowerMessage.includes('where')) {
     return korean
-      ? "BRITZMEDI는 경기도 성남시 중원구 둔촌대로 388, 1211호에 위치하고 있습니다. 전화번호는 070-4348-7244입니다. /contact 페이지에서 문의하실 수 있습니다."
-      : "BRITZMEDI is located at 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, South Korea. You can reach us at +82-70-4348-7244 or through our contact form at /contact.";
+      ? "BRITZMEDI는 경기도 성남시 중원구 둔촌대로 388, 1211호에 위치하고 있습니다. 전화 070-4348-7244, WhatsApp +82 10-6525-9442로 연락하실 수 있고, /contact 페이지에서도 문의하실 수 있습니다."
+      : "BRITZMEDI is located at 1211ho, 388, Dunchon-daero, Jungwon-gu, Seongnam-si, Gyeonggi-do, South Korea. You can reach us at +82-70-4348-7244, on WhatsApp at +82 10-6525-9442, or through our contact form at /contact.";
   }
 
   // Products overview (KO)

@@ -436,7 +436,7 @@ export const ko: TranslationKeys = {
       },
       'technical-support': {
         question: '기술 지원은 어떻게 받을 수 있나요?',
-        answer: '기술 지원은 다음 채널을 통해 받으실 수 있습니다. 1) 현지 공식 총판 문의, 2) 지원팀 이메일 sh.lee@britzmedi.com, 3) 영업시간(한국 시간 기준 평일 오전 9시~오후 6시) 내 전화 +82-70-4348-7244. 모든 문의는 영업일 기준 1~2일 이내 회신을 원칙으로 합니다.',
+        answer: '기술 지원은 다음 채널을 통해 받으실 수 있습니다. 1) 현지 공식 총판 문의, 2) 지원팀 이메일 sh.lee@britzmedi.com, 3) 영업시간(한국 시간 기준 평일 오전 9시~오후 6시) 내 전화 +82-70-4348-7244 (WhatsApp: +82 10-6525-9442). 모든 문의는 영업일 기준 1~2일 이내 회신을 원칙으로 합니다.',
       },
       'iso-certification': {
         question: 'BRITZMEDI는 ISO 인증을 보유하고 있나요?',

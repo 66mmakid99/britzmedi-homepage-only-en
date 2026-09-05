@@ -436,7 +436,7 @@ export const fr: TranslationKeys = {
       },
       'technical-support': {
         question: 'Comment obtenir un support technique ?',
-        answer: 'Le support technique est disponible via plusieurs canaux : 1) Contactez votre distributeur agréé local, 2) Envoyez un e-mail à notre équipe d\'assistance à sh.lee@britzmedi.com, 3) Appelez-nous au +82-70-4348-7244 pendant les heures ouvrables (9h00 - 18h00 KST, du lundi au vendredi). Nous nous efforçons de répondre à toutes les demandes sous 1 à 2 jours ouvrables.',
+        answer: 'Le support technique est disponible via plusieurs canaux : 1) Contactez votre distributeur agréé local, 2) Envoyez un e-mail à notre équipe d\'assistance à sh.lee@britzmedi.com, 3) Appelez-nous au +82-70-4348-7244 (WhatsApp: +82 10-6525-9442) pendant les heures ouvrables (9h00 - 18h00 KST, du lundi au vendredi). Nous nous efforçons de répondre à toutes les demandes sous 1 à 2 jours ouvrables.',
       },
       'iso-certification': {
         question: 'BRITZMEDI est-elle certifiée ISO ?',

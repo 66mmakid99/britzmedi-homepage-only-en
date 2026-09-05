@@ -436,7 +436,7 @@ export const zh: TranslationKeys = {
       },
       'technical-support': {
         question: '如何获得技术支持？',
-        answer: '技术支持通过多种渠道提供：1）联系当地授权经销商，2）发送电子邮件至sh.lee@britzmedi.com联系我们的支持团队，3）在工作时间（周一至周五上午9点至下午6点韩国时间）致电+82-70-4348-7244。我们的目标是在1-2个工作日内回复所有咨询。',
+        answer: '技术支持通过多种渠道提供：1）联系当地授权经销商，2）发送电子邮件至sh.lee@britzmedi.com联系我们的支持团队，3）在工作时间（周一至周五上午9点至下午6点韩国时间）致电+82-70-4348-7244 (WhatsApp: +82 10-6525-9442)。我们的目标是在1-2个工作日内回复所有咨询。',
       },
       'iso-certification': {
         question: 'BRITZMEDI获得ISO认证了吗？',

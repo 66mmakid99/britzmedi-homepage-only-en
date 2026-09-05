@@ -16,6 +16,9 @@ export const company = {
   
   contact: {
     phone: "+82-70-4348-7244",
+    // Displayed as-is; `whatsappLink` is the wa.me form (digits only, no + or dashes).
+    whatsapp: "+82 10-6525-9442",
+    whatsappLink: "https://wa.me/821065259442",
     email: "sh.lee@britzmedi.com",
     website: "www.britzmedi.com",
   },
