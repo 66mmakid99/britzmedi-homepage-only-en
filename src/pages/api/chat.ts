@@ -9,6 +9,7 @@ import knowledgeBaseContent from '../../data/chatbot-knowledge.md?raw';
 import { notifyNewLead } from '../../lib/email-notifications';
 import { CHATBOT_MODEL } from '../../lib/ai-models';
 import { stripProhibitedClaims } from '../../lib/prohibited-claims';
+import { hasLeadIntent } from '../../lib/lead-intent';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
@@ -435,20 +436,7 @@ you can add that /contact works too.`;
 // the widget rendered as plain text. On 2026-08-18 an Ecuadorian visitor offered his
 // email, was refused twice, asked "How do I do that?" and left. Commercial intent now
 // surfaces an inline form inside the chat instead.
-const LEAD_INTENT_PATTERNS: RegExp[] = [
-  /\b(distributor|distribution|distribut\w*|dealer|reseller|partner(ship)?|agent)\b/i,
-  /\b(price|pricing|cost|quote|quotation|invoice|moq|discount)\b/i,
-  /\b(buy|purchase|order|import|bring .{0,20}(machine|device|unit)s?)\b/i,
-  /\b(demo|sample|trial|catalog(ue)?|brochure|price list)\b/i,
-  /\b(contact|email|phone|whatsapp|reach (you|us|me)|get in touch|call me)\b/i,
-  /(총판|대리점|유통|파트너|가격|견적|구매|주문|수입|문의)/,
-  /(distribuidor|distribuci[oó]n|precio|cotizaci[oó]n|comprar)/i,
-  /(distributeur|distribution|prix|devis|acheter)/i,
-];
-
-function hasLeadIntent(userMessage: string): boolean {
-  return LEAD_INTENT_PATTERNS.some((p) => p.test(userMessage));
-}
+// Detection lives in lib/lead-intent.ts so it can be unit-tested.
 
 // --- D1 Conversation Persistence ---
 async function getOrCreateConversation(
